@@ -6,7 +6,7 @@ import colors from '../colors';
 import { Entypo } from '@expo/vector-icons';
 import { auth } from '../config/firebase';
 import { firebase } from "../config/firebase";
-import {Card} from 'react-native-paper';
+// import {Card} from 'react-native-paper';
 //const catImageUrl = "https://i.guim.co.uk/img/media/26392d05302e02f7bf4eb143bb84c8097d09144b/446_167_3683_2210/master/3683.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=49ed3252c0b2ffb49cf8b508892e452d";
 
 const DATA = [
@@ -107,8 +107,7 @@ const Home = () => {
                 data={orderlist}
                 keyExtractor={order => order.id}
                 renderItem={({ item: order }) => (
-                    <Card>
-                        <View>
+                        <View style={styles.cards}>
                             <Text>Order Date: {formatDate(new Date(order.date.toMillis()))}</Text>
                             <FlatList
                             data={order.items}
@@ -122,7 +121,6 @@ const Home = () => {
                             )}
                             />
                         </View>
-                    </Card>
                 )}
             />
         console.log(orderlist);
@@ -199,11 +197,11 @@ const Home = () => {
                     >
                         <Text style={styles.buttonText1}>Sign out</Text>
                     </TouchableOpacity>      
-                    <FlatList
+                    {/* <FlatList
                         data={DATA}
                         renderItem={({item}) => <Item style={styles.items} title={item.title} />}
                         keyExtractor={item => item.id}
-                    />
+                    /> */}
                     {/* <FlatList
                         data={orderlist}
                         renderItem={({item}) => {
@@ -219,12 +217,14 @@ const Home = () => {
                         }}
                         keyExtractor={order => order.id}
                     /> */}
-                    <OrdersList/>
-                    <TouchableOpacity onPress={showOrders} style={styles.button1}>
-                        <Text style={styles.buttonText1}>Show Orders</Text>
-                    </TouchableOpacity>
                 </View>
             }
+            <OrdersList/>
+            <View style={styles.container1}>  
+                <TouchableOpacity onPress={showOrders} style={styles.button1}>
+                    <Text style={styles.buttonText1}>Refresh Orders</Text>
+                </TouchableOpacity>
+            </View>
             <View style={styles.container}>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate("Chat")}
@@ -233,7 +233,6 @@ const Home = () => {
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
             </View>
-            <OrdersList/>
         </View>
     );
     };
@@ -241,6 +240,19 @@ const Home = () => {
     export default Home;
 
     const styles = StyleSheet.create({
+        cards:{
+            backgroundColor: '#fff',
+            marginBottom: 10,
+            marginLeft: '2%',
+            width: '96%',
+            shadowColor: '#000',
+            shadowOpacity: 1,
+            shadowOffset: {
+                width:3,
+                height: 3,
+            }
+
+        },
         container: {
             flex: 1,
             justifyContent: 'flex-end',
