@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useEffect } from "react";
+import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 
 export default function Staff() {
     return (
-        <View>Staff Page Placeholder</View>
+        <View>
+            <Text>Staff Page Placeholder</Text>
+        </View>
     )
 }

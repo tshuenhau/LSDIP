@@ -1,45 +1,28 @@
+import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+  DrawerItem,
+} from '@react-navigation/drawer';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import Chat from './screens/Chat';
 import Home from './screens/Home';
-
-// export default function App() {
-//   return (
-//     <View style={styles.container}>
-//       <Text>Testing on my app!</Text>
-//       <StatusBar style="auto" />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
-
-// import React, { useState, createContext, useContext, useEffect } from 'react';
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createStackNavigator } from '@react-navigation/stack';
-// import { View, ActivityIndicator } from 'react-native';
-// import { onAuthStateChanged } from 'firebase/auth';
-// import { auth } from './config/firebase';
-// import Login from './screens/Login';
-// import Signup from './screens/Signup';
-// import Chat from './screens/Chat';
-// import Home from './screens/Home';
+import Admin from './screens/Admin';
+import Staff from './screens/Staff';
+import Driver from './screens/Driver';
 
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
+
 const AuthenticatedUserContext = createContext({});
 
 const AuthenticatedUserProvider = ({ children }) => {
@@ -51,12 +34,39 @@ const AuthenticatedUserProvider = ({ children }) => {
   );
 };
 
+// function ChatStack() {
+//   return (
+//     <Stack.Navigator defaultScreenOptions={Home}>
+//       <Stack.Screen name='Home' component={Home} />
+//       <Stack.Screen name='Chat' component={Chat} />
+//     </Stack.Navigator>
+//   );
+// }
+
+function CustomDrawerContent(props) {
+  return (
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="Close Drawer"
+        onPress={() => props.navigation.closeDrawer()}
+      />
+    </DrawerContentScrollView>
+  );
+}
+
 function ChatStack() {
   return (
-    <Stack.Navigator defaultScreenOptions={Home}>
-      <Stack.Screen name='Home' component={Home} />
-      <Stack.Screen name='Chat' component={Chat} />
-    </Stack.Navigator>
+    <Drawer.Navigator
+      useLegacyImplementation
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      initialRouteName='Home'>
+      <Drawer.Screen name='Home' component={Home} />
+      <Drawer.Screen name='Admin' component={Admin} />
+      <Drawer.Screen name='Staff' component={Staff} />
+      <Drawer.Screen name='Driver' component={Driver} />
+      <Drawer.Screen name='Chat' component={Chat} />
+    </Drawer.Navigator>
   );
 }
 

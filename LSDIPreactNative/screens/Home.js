@@ -24,19 +24,20 @@ export default function Home({ navigation }) {
     ];
 
     const handleSignOut = () => {
-        auth
-            .signOut()
-            .then(() => {
-                navigation.replace("Login")
-            })
+        auth.signOut()
+            // redundant
+            // .then(() => {
+            //     navigation.replace("Login")
+            // })
             .catch(error => alert(error.message))
     }
 
     useEffect(() => {
         navigation.setOptions({
-            headerLeft: () => (
-                <FontAwesome name="home" size={24} color={colors.gray} style={{ marginLeft: 15 }} />
-            ),
+            // this replaces the hamburger menu
+            // headerLeft: () => (
+            //     <FontAwesome name="home" size={24} color={colors.gray} style={{ marginLeft:  }} />
+            // ),
             headerRight: () => (
                 <Image
                     //source={{ uri: catImageUrl }}
@@ -71,7 +72,7 @@ export default function Home({ navigation }) {
                     </TouchableOpacity>
                 </View>
             }
-            
+
             <OrdersList />
 
             <View style={styles.chatContainer}>
