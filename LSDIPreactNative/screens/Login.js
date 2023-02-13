@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, KeyboardAvoidingView, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, Platform } from "react-native";
+import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, Platform } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 const backImage = require("../assets/backImage.jpg");
@@ -17,7 +17,7 @@ export default function Login({ navigation }) {
     }
   };
 
-  return ( 
+  return (
     <KeyboardAvoidingView style={styles.container}>
       <Image source={backImage} style={styles.backImage} />
       <View style={styles.whiteSheet} />

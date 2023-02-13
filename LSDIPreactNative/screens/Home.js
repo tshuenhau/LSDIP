@@ -71,6 +71,7 @@ export default function Home({ navigation }) {
                     </TouchableOpacity>
                 </View>
             }
+            
             <OrdersList />
 
             <View style={styles.chatContainer}>
