@@ -1,13 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
 import { Entypo } from '@expo/vector-icons';
+import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 
 export default function Home({ navigation }) {
+    const firestore = firebase.firestore;
+    const auth1 = firebase.auth;
 
+    const [user, setUser] = useState(null) // This user
+    //const [users, setUsers] = useState([]) // Other Users
+  
+    useEffect(() => {
+        firestore().collection("users").doc(auth1().currentUser.uid).get()
+            .then(user => {
+                setUser(user.data())
+                console.log(user)
+            })
+        
+    }, [])
+    
     const DATA = [
         {
             id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -53,6 +68,7 @@ export default function Home({ navigation }) {
 
     return (
         <View>
+            <Text style={{ fontSize: 24, fontWeight: "800" }}>Welcome {user?.role}</Text>
             {/* <VegaScrollList
                 distanceBetweenItem={12} // Add distance between item. Need to calculate animated
                 data={DATA}
