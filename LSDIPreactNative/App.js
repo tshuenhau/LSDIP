@@ -44,7 +44,7 @@ const AuthenticatedUserContext = createContext({});
 
 const AuthenticatedUserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-return (
+  return (
     <AuthenticatedUserContext.Provider value={{ user, setUser }}>
       {children}
     </AuthenticatedUserContext.Provider>
@@ -72,7 +72,7 @@ function AuthStack() {
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
   const [isLoading, setIsLoading] = useState(true);
-useEffect(() => {
+  useEffect(() => {
     // onAuthStateChanged returns an unsubscriber
     const unsubscribeAuth = onAuthStateChanged(
       auth,
@@ -81,10 +81,10 @@ useEffect(() => {
         setIsLoading(false);
       }
     );
-// unsubscribe auth listener on unmount
+    // unsubscribe auth listener on unmount
     return unsubscribeAuth;
   }, [user]);
-if (isLoading) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size='large' />
@@ -92,7 +92,7 @@ if (isLoading) {
     );
   }
 
-return (
+  return (
     <NavigationContainer>
       {user ? <ChatStack /> : <AuthStack />}
     </NavigationContainer>

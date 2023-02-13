@@ -16,53 +16,54 @@ export default function Login({ navigation }) {
         .catch((err) => Alert.alert("Login error", err.message));
     }
   };
-  
-  return (
+
+  return ( 
     <KeyboardAvoidingView style={styles.container}>
       <Image source={backImage} style={styles.backImage} />
       <View style={styles.whiteSheet} />
       <SafeAreaView style={styles.form}>
-      {Platform.OS === 'android' &&
-        <Text style={styles.title1}>Log In</Text>
-      }
-      {Platform.OS === 'web' &&
-        <Text style={styles.title}>Log In</Text>
-      }
+        {Platform.OS === 'android' &&
+          <Text style={styles.title1}>Log In</Text>
+        }
+        {Platform.OS === 'web' &&
+          <Text style={styles.title}>Log In</Text>
+        }
         {/* <Text style={styles.title}>Log In</Text> */}
-         <TextInput
-        style={styles.input}
-        placeholder="Enter email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        textContentType="emailAddress"
-        autoFocus={true}
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter password"
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry={true}
-        textContentType="password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-      />
-      <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
-        <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}> Log In</Text>
-      </TouchableOpacity>
-      <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
-        <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={{color: '#0782F9', fontWeight: '600', fontSize: 14}}> Sign Up</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          autoFocus={true}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter password"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry={true}
+          textContentType="password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
+          <Text style={{ fontWeight: 'bold', color: '#fff', fontSize: 18 }}> Log In</Text>
         </TouchableOpacity>
-      </View>
+        <View style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
+          <Text style={{ color: 'gray', fontWeight: '600', fontSize: 14 }}>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+            <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Sign Up</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
     </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     marginTop: 30,
   },
-    title1: {
+  title1: {
     fontSize: 36,
     fontWeight: 'bold',
     color: "#0782F9",
