@@ -114,16 +114,6 @@ import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
-
-const styles = StyleSheet.create({
-    view: {
-        flex: 1,
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center"
-    }
-})
-
 export default function SignUpScreen({ navigation }) {
 
     const firestore = firebase.firestore;
@@ -175,10 +165,19 @@ export default function SignUpScreen({ navigation }) {
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
         <TextBox placeholder="Who are you? (Admin, Staff, Driver or User)" onChangeText={text => handleChange(text, "role")}/>
         <TextBox placeholder="Password" secureTextEntry={true}  onChangeText={text => handleChange(text, "pwd")}/>
-        <TextBox placeholder="Confirme Password" secureTextEntry={true}  onChangeText={text => handleChange(text, "pwd2")}/>
+        <TextBox placeholder="Confirm Password" secureTextEntry={true}  onChangeText={text => handleChange(text, "pwd2")}/>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
             <Btn onClick={() => SignUp()} title="Sign Up" style={{ width: "48%" }} />
             <Btn onClick={() => navigation.replace("Login")} title="Login" style={{ width: "48%", backgroundColor: "#344869" }} />
         </View>
     </View>
 }
+
+const styles = StyleSheet.create({
+  view: {
+      // flex: 1,
+      width: "100%",
+      justifyContent: "center",
+      alignItems: "center"
+  }
+})

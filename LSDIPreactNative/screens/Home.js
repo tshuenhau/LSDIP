@@ -23,29 +23,29 @@ export default function Home({ navigation }) {
         
     }, [])
     
-    const DATA = [
-        {
-            id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-            title: 'First Item',
-        },
-        {
-            id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-            title: 'Second Item',
-        },
-        {
-            id: '58694a0f-3da1-471f-bd96-145571e29d72',
-            title: 'Third Item',
-        },
-    ];
+    // const DATA = [
+    //     {
+    //         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+    //         title: 'First Item',
+    //     },
+    //     {
+    //         id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+    //         title: 'Second Item',
+    //     },
+    //     {
+    //         id: '58694a0f-3da1-471f-bd96-145571e29d72',
+    //         title: 'Third Item',
+    //     },
+    // ];
 
-    const handleSignOut = () => {
-        auth.signOut()
-            // redundant
-            // .then(() => {
-            //     navigation.replace("Login")
-            // })
-            .catch(error => alert(error.message))
-    }
+    // const handleSignOut = () => {
+    //     auth.signOut()
+    //         // redundant
+    //         // .then(() => {
+    //         //     navigation.replace("Login")
+    //         // })
+    //         .catch(error => alert(error.message))
+    // }
 
     useEffect(() => {
         navigation.setOptions({
@@ -76,18 +76,18 @@ export default function Home({ navigation }) {
                 keyExtractor={item => item.id}
                 renderItem={({item}) => <Item title={item.title} />}
             /> */}
-            {!DATA && <Text> No Data found! </Text>}
-            {DATA &&
+            {/* {!DATA && <Text> No Data found! </Text>} */}
+            {/* {DATA && */}
                 <View style={styles.loggedInContainer}>
                     <Text>Email: {auth.currentUser?.email}</Text>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         onPress={handleSignOut}
                         style={styles.signOutContainer}
                     >
                         <Text style={styles.signOutText}>Sign out</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
-            }
+            {/* } */}
 
             <OrdersList />
 
@@ -114,7 +114,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center'
-        //alignItems: "center",
         //alignContent: "center",
     },
     chatButton: {

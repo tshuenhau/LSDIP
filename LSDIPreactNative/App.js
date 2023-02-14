@@ -19,6 +19,7 @@ import Home from './screens/Home';
 import Admin from './screens/Admin';
 import Staff from './screens/Staff';
 import Driver from './screens/Driver';
+import CreateOutlet from './screens/CreateOutlet';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -43,10 +44,23 @@ const AuthenticatedUserProvider = ({ children }) => {
 //   );
 // }
 
+const handleSignOut = () => {
+  auth.signOut()
+    // redundant
+    // .then(() => {
+    //     navigation.replace("Login")
+    // })
+    .catch(error => alert(error.message))
+}
+
 function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
+      <DrawerItem
+        label="Sign Out"
+        onPress={handleSignOut}
+      />
       <DrawerItem
         label="Close Drawer"
         onPress={() => props.navigation.closeDrawer()}
@@ -55,17 +69,22 @@ function CustomDrawerContent(props) {
   );
 }
 
-function ChatStack() {
+function OperationStack() {
   return (
     <Drawer.Navigator
       useLegacyImplementation
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       initialRouteName='Home'>
-      <Drawer.Screen name='Home' component={Home} />
-      <Drawer.Screen name='Admin' component={Admin} />
-      <Drawer.Screen name='Staff' component={Staff} />
-      <Drawer.Screen name='Driver' component={Driver} />
-      <Drawer.Screen name='Chat' component={Chat} />
+      <Drawer.Group>
+        <Drawer.Screen name='Home' component={Home} />
+        <Drawer.Screen name='Staff' component={Staff} />
+        <Drawer.Screen name='Admin' component={Admin} />
+        <Drawer.Screen name='Driver' component={Driver} />
+        <Drawer.Screen name='Chat' component={Chat} />
+      </Drawer.Group>
+      <Drawer.Group screenOptions={{ presentation: 'modal' }}>
+        <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
+      </Drawer.Group>
     </Drawer.Navigator>
   );
 }
@@ -104,7 +123,7 @@ function RootNavigator() {
 
   return (
     <NavigationContainer>
-      {user ? <ChatStack /> : <AuthStack />}
+      {user ? <OperationStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }

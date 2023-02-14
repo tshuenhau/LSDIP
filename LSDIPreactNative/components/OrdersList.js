@@ -71,32 +71,35 @@ export default function OrdersList() {
 
     return (
         <View>
-            <FlatList
-                data={orderlist}
-                keyExtractor={order => order.id}
-                renderItem={({ item: order }) => (
-                    <View style={styles.cards}>
-                        <Text>Order Date: {formatDate(new Date(order.date.toMillis()))}</Text>
-                        <FlatList
-                            data={order.items}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => (
-                                <View>
-                                    <Text>Item Name: {item}</Text>
-                                    {/* <Text>Item Quantity: {item.quantity}</Text>
+            {!(orderlist.length > 0) && <Text> No Data Found! </Text>}
+            <View>
+                <FlatList
+                    data={orderlist}
+                    keyExtractor={order => order.id}
+                    renderItem={({ item: order }) => (
+                        <View style={styles.cards}>
+                            <Text>Order Date: {formatDate(new Date(order.date.toMillis()))}</Text>
+                            <FlatList
+                                data={order.items}
+                                keyExtractor={item => item.id}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <Text>Item Name: {item}</Text>
+                                        {/* <Text>Item Quantity: {item.quantity}</Text>
                                 <Text>Item Price: {item.price}</Text> */}
-                                </View>
-                            )}
-                        />
-                    </View>
-                )}
-            />
-            <View style={styles.refreshContainer}>
-                <TouchableOpacity onPress={showOrders} style={styles.refreshButton}>
-                    <Text style={styles.refreshButtonText}>Refresh Orders</Text>
-                </TouchableOpacity>
-            </View>
-        </View >
+                                    </View>
+                                )}
+                            />
+                        </View>
+                    )}
+                />
+                <View style={styles.refreshContainer}>
+                    <TouchableOpacity onPress={showOrders} style={styles.refreshButton}>
+                        <Text style={styles.refreshButtonText}>Refresh Orders</Text>
+                    </TouchableOpacity>
+                </View>
+            </View >
+        </View>
     )
 }
 
@@ -112,7 +115,6 @@ const styles = StyleSheet.create({
             width: 3,
             height: 3,
         }
-
     },
     refreshContainer: {
         width: '100%',
