@@ -19,7 +19,7 @@ import Home from './screens/Home';
 import Admin from './screens/Admin';
 import Staff from './screens/Staff';
 import Driver from './screens/Driver';
-
+import { firebase } from "./config/firebase";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -60,7 +60,7 @@ function ChatStack() {
     <Drawer.Navigator
       useLegacyImplementation
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      initialRouteName='Home'>
+      >
       <Drawer.Screen name='Home' component={Home} />
       <Drawer.Screen name='Admin' component={Admin} />
       <Drawer.Screen name='Staff' component={Staff} />
@@ -75,25 +75,78 @@ function AuthStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='Login' component={Login} />
       <Stack.Screen name='Signup' component={Signup} />
+      <Stack.Screen name='Admin' component={Admin} />
+      <Stack.Screen name='Staff' component={Staff} />
+      <Stack.Screen name='Driver' component={Driver} />
     </Stack.Navigator>
   );
 }
 
+// function RootNavigator() {
+//   const { user, setUser } = useContext(AuthenticatedUserContext);
+//   const auth1 = firebase.auth;
+//   // const firestore = firebase.firestore;
+//   // const [user1, setUser1] = useState(null)
+//   const [isLoading, setIsLoading] = useState(true);
+//   useEffect(() => {
+//     // onAuthStateChanged returns an unsubscriber
+//     const unsubscribeAuth = onAuthStateChanged(
+//       auth,
+//       async authenticatedUser => {
+//         authenticatedUser ? setUser(authenticatedUser) : setUser(null);
+//         setIsLoading(false);
+//       }
+//     );
+//     // unsubscribe auth listener on unmount
+    
+//     return unsubscribeAuth;
+//   }, [user]);
+//   if (isLoading) {
+//     return (
+//       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+//         <ActivityIndicator size='large' />
+//       </View>
+//     );
+//   }
+//   console.log(user?.metadata?.customClaims);
+
+//   return (
+//     <NavigationContainer>
+//       {/* {user ? <ChatStack /> : <AuthStack />} */}
+//       {user ? <ChatStack /> : <AuthStack />}
+//     </NavigationContainer>
+//   );
+// }
+
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
   const [isLoading, setIsLoading] = useState(true);
+  const auth1 = firebase.auth;
+  const firestore = firebase.firestore;
+  const [user1, setUser1] = useState(null)
   useEffect(() => {
-    // onAuthStateChanged returns an unsubscriber
-    const unsubscribeAuth = onAuthStateChanged(
-      auth,
+    const unsubscribeAuth = auth1().onAuthStateChanged(
       async authenticatedUser => {
-        authenticatedUser ? setUser(authenticatedUser) : setUser(null);
+        if (authenticatedUser) {
+          firestore().collection("users").doc(auth1().currentUser.uid).get()
+            .then(user => {
+                setUser1(user.data());
+                console.log(user);
+                console.log(user1?.role);
+                const userRole = user?.role;
+                setUser({ ...authenticatedUser, role: userRole });
+              })
+          
+        } else {
+          setUser(null);
+        }
         setIsLoading(false);
       }
     );
-    // unsubscribe auth listener on unmount
+    
     return unsubscribeAuth;
-  }, [user]);
+  }, []);
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -101,13 +154,113 @@ function RootNavigator() {
       </View>
     );
   }
-
-  return (
-    <NavigationContainer>
-      {user ? <ChatStack /> : <AuthStack />}
-    </NavigationContainer>
-  );
+  //console.log(user?.metadata?.customClaims);
+  if (user1?.role === "Admin") {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+        <Stack.Screen name='Login' component={Login} />
+        <Stack.Screen name='Signup' component={Signup} />
+        <Stack.Screen name='Admin' component={Admin} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  } else if (user1?.role === "Staff") {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name='Login' component={Login} />
+          <Stack.Screen name='Signup' component={Signup} />
+          <Stack.Screen name="Staff" component={Staff} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  } else{
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name='Login' component={Login} />
+          <Stack.Screen name='Signup' component={Signup} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    )
+  }
+  // return (
+  //   <NavigationContainer>
+  //     {/* {user ? <ChatStack /> : <AuthStack />} */}
+  //     {user ? <ChatStack /> : <AuthStack />}
+  //   </NavigationContainer>
+  // );
 }
+
+
+
+
+
+// function RootNavigator() {
+//   const { user, setUser } = useContext(AuthenticatedUserContext);
+//   const [isLoading, setIsLoading] = useState(true);
+
+//   useEffect(() => {
+//     const unsubscribeAuth = onAuthStateChanged(auth, async authenticatedUser => {
+//       authenticatedUser ? setUser(authenticatedUser) : setUser(null);
+//       setIsLoading(false);
+//     });
+//     return unsubscribeAuth;
+//   }, [user]);
+
+//   if (isLoading) {
+//     return (
+//       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+//         <ActivityIndicator size='large' />
+//       </View>
+//     );
+//   }
+
+//   // Get the user's role from the Firebase user object
+//   const userRole = user?.metadata?.customClaims?.role;
+
+//   // Render different stack navigators based on the user's role
+//   if (userRole === "Admin") {
+//     return (
+//       <NavigationContainer>
+//         <Stack.Navigator>
+//           <Stack.Screen name="Admin" component={Admin} />
+//           <Stack.Screen name="Chat" component={Chat} />
+//         </Stack.Navigator>
+//       </NavigationContainer>
+//     );
+//   } else if (userRole === "Staff") {
+//     return (
+//       <NavigationContainer>
+//         <Stack.Navigator>
+//           <Stack.Screen name="Staff" component={Staff} />
+//           <Stack.Screen name="Chat" component={Chat} />
+//         </Stack.Navigator>
+//       </NavigationContainer>
+//     );
+//   } else if (userRole === "Driver") {
+//     return (
+//       <NavigationContainer>
+//         <Stack.Navigator>
+//           <Stack.Screen name="Driver" component={Driver} />
+//           <Stack.Screen name="Chat" component={Chat} />
+//         </Stack.Navigator>
+//       </NavigationContainer>
+//     );
+//   } else {
+//     // User has no role or an invalid role
+//     return (
+//       <NavigationContainer>
+//         <Stack.Navigator>
+//           <Stack.Screen name="Home" component={Home} />
+//           <Stack.Screen name="Chat" component={Chat} />
+//         </Stack.Navigator>
+//       </NavigationContainer>
+//     );
+//   }
+// }
+
 
 export default function App() {
   return (

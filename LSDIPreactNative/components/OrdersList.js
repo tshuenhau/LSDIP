@@ -1,25 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, TouchableOpacity, Text, StyleSheet, FlatList } from "react-native";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
 
 export default function OrdersList() {
     const [orderlist, setOrderList] = useState([]);
-    const orders = firebase.firestore().collection('orders');
-    orders.onSnapshot(
-        querySnapshot => {
-            const orderlist = []
-            querySnapshot.forEach((doc) => {
-                const { date, items } = doc.data()
-                orderlist.push({
-                    id: doc.id,
-                    date,
-                    items,
-                })
-            })
-            setOrderList(orderlist);
-        }
-    )
+    useEffect(() => {
+        const orders = firebase.firestore().collection('orders');
+        const unsubscribe = orders.onSnapshot(querySnapshot => {
+          const orderlist = [];
+          querySnapshot.forEach(doc => {
+            const { date, items } = doc.data();
+            orderlist.push({
+              id: doc.id,
+              date,
+              items,
+            });
+          });
+          setOrderList(orderlist);
+        });
+        return () => unsubscribe();
+      }, []);
 
     function showOrders() {
         console.log("in method");

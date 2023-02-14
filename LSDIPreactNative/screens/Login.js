@@ -2,16 +2,39 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, Platform } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { firebase } from "../config/firebase";
 const backImage = require("../assets/backImage.jpg");
 
 export default function Login({ navigation }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const auth1 = firebase.auth;
+  const firestore = firebase.firestore;
+  const [user, setUser] = useState(null)
+  // const onHandleLogin = () => {
+  //   if (email !== "" && password !== "") {
+  //     signInWithEmailAndPassword(auth, email, password)
+  //       .then(() => console.log("Login success"))
+  //       .catch((err) => Alert.alert("Login error", err.message));
+  //   }
+  // };
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success"))
+        .then(() => {
+          firestore().collection("users").doc(auth1().currentUser.uid).get()
+            .then(user => {
+              setUser(user.data())
+              console.log(user.data().role)
+              if (user.data().role === "Admin") {
+                navigation.navigate("Staff");
+              } else {
+                console.log(user)
+                navigation.navigate("Home");
+              }
+            })
+          })
         .catch((err) => Alert.alert("Login error", err.message));
     }
   };
