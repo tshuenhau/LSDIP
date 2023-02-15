@@ -19,7 +19,6 @@ import Home from './screens/Home';
 import Admin from './screens/Admin';
 import Staff from './screens/Staff';
 import Driver from './screens/Driver';
-import CreateOutlet from './screens/CreateOutlet';
 import { firebase } from "./config/firebase";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -132,16 +131,16 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
-          <Drawer.Group>
-            <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Staff' component={Staff} />
-            <Drawer.Screen name='Admin' component={Admin} />
-            <Drawer.Screen name='Driver' component={Driver} />
-            <Drawer.Screen name='Chat' component={Chat} />
-          </Drawer.Group>
-          <Drawer.Group screenOptions={{ presentation: 'modal' }}>
+          {/* <Drawer.Group> */}
+          <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='Staff' component={Staff} />
+          <Drawer.Screen name='Admin' component={Admin} />
+          <Drawer.Screen name='Driver' component={Driver} />
+          <Drawer.Screen name='Chat' component={Chat} />
+          {/* </Drawer.Group> */}
+          {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
             <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
-          </Drawer.Group>
+          </Drawer.Group> */}
         </Drawer.Navigator>
       </NavigationContainer >
     );
