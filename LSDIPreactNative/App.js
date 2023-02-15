@@ -74,7 +74,7 @@ function OperationStack() {
     <Drawer.Navigator
       useLegacyImplementation
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      >
+    >
       <Drawer.Group>
         <Drawer.Screen name='Home' component={Home} />
         <Drawer.Screen name='Staff' component={Staff} />
@@ -117,7 +117,7 @@ function AuthStack() {
 //       }
 //     );
 //     // unsubscribe auth listener on unmount
-    
+
 //     return unsubscribeAuth;
 //   }, [user]);
 //   if (isLoading) {
@@ -149,20 +149,20 @@ function RootNavigator() {
         if (authenticatedUser) {
           firestore().collection("users").doc(auth1().currentUser.uid).get()
             .then(user => {
-                setUser1(user.data());
-                console.log(user);
-                console.log(user1?.role);
-                const userRole = user?.role;
-                setUser({ ...authenticatedUser, role: userRole });
-              })
-          
+              setUser1(user.data());
+              console.log(user);
+              console.log(user1?.role);
+              const userRole = user?.role;
+              setUser({ ...authenticatedUser, role: userRole });
+            })
+
         } else {
           setUser(null);
         }
         setIsLoading(false);
       }
     );
-    
+
     return unsubscribeAuth;
   }, []);
 
@@ -176,25 +176,48 @@ function RootNavigator() {
   //console.log(user?.metadata?.customClaims);
   if (user1?.role === "Admin") {
     return (
-      <NavigationContainer>
-        <Stack.Navigator>
-        <Stack.Screen name='Login' component={Login} />
-        <Stack.Screen name='Signup' component={Signup} />
-        <Stack.Screen name='Admin' component={Admin} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <Drawer.Navigator
+        useLegacyImplementation
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+      >
+        <Drawer.Group>
+          <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='Staff' component={Staff} />
+          <Drawer.Screen name='Admin' component={Admin} />
+          <Drawer.Screen name='Driver' component={Driver} />
+          <Drawer.Screen name='Chat' component={Chat} />
+        </Drawer.Group>
+        <Drawer.Group screenOptions={{ presentation: 'modal' }}>
+          <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
+        </Drawer.Group>
+      </Drawer.Navigator>
     );
   } else if (user1?.role === "Staff") {
     return (
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name='Login' component={Login} />
-          <Stack.Screen name='Signup' component={Signup} />
-          <Stack.Screen name="Staff" component={Staff} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <Drawer.Navigator
+        useLegacyImplementation
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+      >
+        <Drawer.Group>
+          <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='Staff' component={Staff} />
+          <Drawer.Screen name='Chat' component={Chat} />
+        </Drawer.Group>
+      </Drawer.Navigator>
     );
-  } else{
+  } else if (user1?.role === "Driver") {
+    <Drawer.Navigator
+      useLegacyImplementation
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
+      <Drawer.Group>
+        <Drawer.Screen name='Home' component={Home} />
+        <Drawer.Screen name='Driver' component={Driver} />
+        <Drawer.Screen name='Chat' component={Chat} />
+      </Drawer.Group>
+    </Drawer.Navigator>
+    );
+  } else {
     return (
       <NavigationContainer>
         <Stack.Navigator>
@@ -211,10 +234,6 @@ function RootNavigator() {
   //   </NavigationContainer>
   // );
 }
-
-
-
-
 
 // function RootNavigator() {
 //   const { user, setUser } = useContext(AuthenticatedUserContext);
