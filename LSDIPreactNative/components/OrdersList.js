@@ -1,81 +1,106 @@
-import React, { useState, useEffect } from 'react'
-import { View, TouchableOpacity, Text, StyleSheet, FlatList } from "react-native";
-import { firebase } from "../config/firebase";
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  FlatList,
+  LayoutAnimation,
+  UIManager,
+  Platform,
+} from 'react-native';
+import { firebase } from '../config/firebase';
 import colors from '../colors';
 
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 export default function OrdersList() {
-  const [orderlist, setOrderList] = useState([]);
-  
+  const [orderList, setOrderList] = useState([]);
   useEffect(() => {
     const orders = firebase.firestore().collection('orders');
-    const unsubscribe = orders.onSnapshot(querySnapshot => {
-      const orderlist = [];
-      querySnapshot.forEach(doc => {
+    const unsubscribe = orders.onSnapshot((querySnapshot) => {
+      const orderList = [];
+      querySnapshot.forEach((doc) => {
         const { date, items } = doc.data();
-        orderlist.push({
+        orderList.push({
           id: doc.id,
           date,
           items,
         });
       });
-      setOrderList(orderlist);
+      setOrderList(orderList);
     });
     return () => unsubscribe();
   }, []);
 
-  function padTo2Digits(num) {
-    return num.toString().padStart(2, '0');
-  }
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
-  function formatDate(date) {
-    return (
-      [
-        padTo2Digits(date.getMonth() + 1),
-        padTo2Digits(date.getDate()),
-        date.getFullYear(),
-      ].join('/') +
-      ' ' +
-      [
-        padTo2Digits(date.getHours()),
-        padTo2Digits(date.getMinutes()),
-        padTo2Digits(date.getSeconds()),
-      ].join(':')
-    );
-  }
+  const toggleExpand = (id) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (expandedOrder === id) {
+      setExpandedOrder(null);
+    } else {
+      setExpandedOrder(id);
+    }
+  };
 
-  return (
-    <View style={styles.container}>
-      {!(orderlist.length > 0) && <Text>No data found!</Text>}
-      <View style={styles.ordersContainer}>
+  const formatOrderNumber = (id) => {
+    return '#' + id.slice(0, 4).toUpperCase();
+  };
+
+  const formatOrderDate = (date) => {
+    return date.toDate().toLocaleString();
+  };
+
+  const renderItem = ({ item: order }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => toggleExpand(order.id)}
+      activeOpacity={0.8}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+        <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
+        <Text style={styles.orderNumber}>{order.status}</Text>
+      </View>
+      {expandedOrder === order.id && (
         <FlatList
-          data={orderlist}
-          keyExtractor={order => order.id}
-          renderItem={({ item: order }) => (
-            <View style={styles.orderCard}>
-              <View style={styles.statusContainer} />
-              <View style={styles.orderDetails}>
-                <Text style={styles.orderDate}>{formatDate(new Date(order.date.toMillis()))}</Text>
-                <FlatList
-                  data={order.items}
-                  keyExtractor={item => item.id}
-                  renderItem={({ item }) => (
-                    <View style={styles.itemContainer}>
-                      <Text style={styles.itemName}>{item.text}</Text>
-                      {/* <Text>Item Quantity: {item.quantity}</Text>
-                      <Text>Item Price: {item.price}</Text> */}
-                    </View>
-                  )}
-                />
-              </View>
+          style={styles.cardBody}
+          data={order.items}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.itemContainer}>
+              <Text style={styles.itemText}>{item}</Text>
+              {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
             </View>
           )}
         />
-        <View style={styles.refreshContainer}>
-          <TouchableOpacity onPress={() => setOrderList([])} style={styles.refreshButton}>
-            <Text style={styles.refreshButtonText}>Refresh Orders</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.container}>
+      {orderList.length > 0 ? (
+        <FlatList
+          style={styles.list}
+          data={orderList}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+        />
+      ) : (
+        <Text style={styles.noDataText}>No Data Found!</Text>
+      )}
+      <TouchableOpacity
+        style={styles.refreshButton}
+        onPress={() => setExpandedOrder(null)}
+        activeOpacity={0.8}>
+        <Text style={styles.refreshButtonText}>Refresh Orders</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -83,96 +108,69 @@ export default function OrdersList() {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
     },
-    header: {
-      height: 50,
-      backgroundColor: colors.primary,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 10,
-    },
-    title: {
-      color: '#fff',
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginLeft: 10,
-    },
-    ordersListContainer: {
+    list: {
       flex: 1,
-      margin: 10,
     },
-    orderCard: {
+    card: {
       backgroundColor: '#fff',
-      marginBottom: 10,
-      marginLeft: '2%',
-      width: '96%',
+      marginVertical: 10,
+      marginHorizontal: 16,
+      borderRadius: 10,
       shadowColor: '#000',
-      shadowOpacity: 1,
+      shadowOpacity: 0.2,
       shadowOffset: {
-        width: 3,
+        width: 0,
         height: 3,
       },
+      elevation: 3,
+    },
+    cardHeader: {
       flexDirection: 'row',
-    },
-    statusContainer: {
-      backgroundColor: colors.primary,
-      height: '100%',
-      width: 10,
-      borderTopLeftRadius: 10,
-      borderBottomLeftRadius: 10,
-    },
-    orderDetails: {
-      padding: 10,
-      flex: 1,
+      justifyContent: 'space-between',
+      padding: 16,
     },
     orderNumber: {
+      fontSize: 20,
       fontWeight: 'bold',
-      fontSize: 16,
-      marginBottom: 10,
     },
     orderDate: {
-      color: '#666',
       fontSize: 14,
-      marginBottom: 10,
+      color: colors.gray,
     },
-    orderItemsContainer: {
+    cardBody: {
+      backgroundColor: colors.lightGray,
+      padding: 16,
+    },
+    itemContainer: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      paddingVertical: 8,
     },
-    orderItem: {
-      backgroundColor: '#eee',
-      padding: 5,
-      margin: 5,
-      borderRadius: 5,
-    },
-    orderItemText: {
-      fontSize: 12,
-    },
-    refreshContainer: {
-      width: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    refreshButton: {
-      backgroundColor: colors.primary,
-      width: '60%',
-      padding: 15,
-      borderRadius: 10,
-      alignItems: 'center',
-      marginTop: 40,
-    },
-    refreshButtonText: {
-      color: 'white',
-      fontWeight: '700',
+    itemText: {
+      flex: 1,
       fontSize: 16,
     },
-    noDataContainer: {
-      flex: 1,
-      justifyContent: 'center',
+    itemPrice: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: colors.darkBlue,
+      marginLeft: 8,
+    },
+    refreshButton: {
+      backgroundColor: colors.blue,
       alignItems: 'center',
+      justifyContent: 'center',
+      padding: 16,
+    },
+    refreshButtonText: {
+      color: '#000',
+      fontSize: 16,
+      fontWeight: 'bold',
     },
     noDataText: {
+      alignSelf: 'center',
+      marginTop: 32,
       fontSize: 18,
       fontWeight: 'bold',
     },

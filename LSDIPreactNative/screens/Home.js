@@ -1,61 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
-import colors from '../colors';
 import { Entypo } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
+import colors from '../colors';
 
 export default function Home({ navigation }) {
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
 
     const [user, setUser] = useState(null) // This user
-    //const [users, setUsers] = useState([]) // Other Users
-  
+
     useEffect(() => {
         firestore().collection("users").doc(auth1().currentUser.uid).get()
             .then(user => {
                 setUser(user.data())
                 console.log(user)
             })
-        
-    }, [])
-    
-    // const DATA = [
-    //     {
-    //         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    //         title: 'First Item',
-    //     },
-    //     {
-    //         id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    //         title: 'Second Item',
-    //     },
-    //     {
-    //         id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    //         title: 'Third Item',
-    //     },
-    // ];
 
-    // const handleSignOut = () => {
-    //     auth.signOut()
-    //         // redundant
-    //         // .then(() => {
-    //         //     navigation.replace("Login")
-    //         // })
-    //         .catch(error => alert(error.message))
-    // }
+    }, [])
 
     useEffect(() => {
         navigation.setOptions({
-            // this replaces the hamburger menu
-            // headerLeft: () => (
-            //     <FontAwesome name="home" size={24} color={colors.gray} style={{ marginLeft:  }} />
-            // ),
             headerRight: () => (
                 <Image
-                    //source={{ uri: catImageUrl }}
                     source={require('../assets/washin.jpg')}
                     style={{
                         width: 40,
@@ -70,24 +40,9 @@ export default function Home({ navigation }) {
     return (
         <View>
             <Text style={{ fontSize: 24, fontWeight: "800" }}>Welcome {user?.role}</Text>
-            {/* <VegaScrollList
-                distanceBetweenItem={12} // Add distance between item. Need to calculate animated
-                data={DATA}
-                keyExtractor={item => item.id}
-                renderItem={({item}) => <Item title={item.title} />}
-            /> */}
-            {/* {!DATA && <Text> No Data found! </Text>} */}
-            {/* {DATA && */}
-                <View style={styles.loggedInContainer}>
-                    <Text>Email: {auth.currentUser?.email}</Text>
-                    {/* <TouchableOpacity
-                        onPress={handleSignOut}
-                        style={styles.signOutContainer}
-                    >
-                        <Text style={styles.signOutText}>Sign out</Text>
-                    </TouchableOpacity> */}
-                </View>
-            {/* } */}
+            <View style={styles.loggedInContainer}>
+                <Text>Email: {auth.currentUser?.email}</Text>
+            </View>
 
             <OrdersList />
 
@@ -104,46 +59,32 @@ export default function Home({ navigation }) {
 };
 
 const styles = StyleSheet.create({
-    chatContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'flex-end',
-        backgroundColor: "#fff",
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
     },
-    loggedInContainer: {
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center'
-        //alignContent: "center",
+    ordersListContainer: {
+      flex: 1,
+      padding: 10,
+    },
+    chatButtonContainer: {
+      position: "absolute",
+      bottom: 20,
+      right: 20,
     },
     chatButton: {
-        backgroundColor: colors.primary,
-        height: 50,
-        width: 50,
-        borderRadius: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: colors.primary,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: .9,
-        shadowRadius: 8,
-        marginRight: 20,
-        marginBottom: 50,
+      backgroundColor: colors.primary,
+      height: 50,
+      width: 50,
+      borderRadius: 25,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.primary,
+      shadowOffset: {
+          width: 0,
+          height: 2,
+      },
+      shadowOpacity: .9,
+      shadowRadius: 8,
     },
-    signOutContainer: {
-        backgroundColor: '#0782F9',
-        width: '60%',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginTop: 40,
-    },
-    signOutText: {
-        color: 'white',
-        fontWeight: '700',
-        fontSize: 16,
-    },
-});
+  });
