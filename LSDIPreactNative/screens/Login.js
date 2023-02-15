@@ -12,7 +12,13 @@ export default function Login({ navigation }) {
   const auth1 = firebase.auth;
   const firestore = firebase.firestore;
   const [user, setUser] = useState(null)
-
+  // const onHandleLogin = () => {
+  //   if (email !== "" && password !== "") {
+  //     signInWithEmailAndPassword(auth, email, password)
+  //       .then(() => console.log("Login success"))
+  //       .catch((err) => Alert.alert("Login error", err.message));
+  //   }
+  // };
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
