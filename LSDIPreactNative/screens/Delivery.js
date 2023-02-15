@@ -16,9 +16,12 @@ const SignUpScreen = ({ navigation }) => {
     const handleTimeSelect = (timing) => {
       setSelectedTime(timing);
       onClose(); // close the modal when a time is selected
+      setIsModalOpen(false);
     };
 
     const handleClose = () => {
+      setSelectedTime(null);
+      setIsModalOpen(false);
       onClose();
     };
 
@@ -53,6 +56,7 @@ const SignUpScreen = ({ navigation }) => {
   };
 
   const CalendarScreen = () => {
+    console.log('CalendarScreen rendered');
     
     const handleDayPress = (day) => {
       setSelectedDate(day.dateString);
@@ -61,10 +65,12 @@ const SignUpScreen = ({ navigation }) => {
 
     const handleClose = () => {
       setIsModalOpen(false);
+      setSelectedDate(null);
     };
 
     const handleTimeSelect = (timing) => {
         setSelectedTime(timing);
+        setSelectedDate(null);
         handleClose();
       };
 
@@ -86,6 +92,7 @@ const SignUpScreen = ({ navigation }) => {
 
   return <CalendarScreen />;
 };
+
 
 export default SignUpScreen;
 

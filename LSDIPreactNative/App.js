@@ -19,6 +19,7 @@ import Home from './screens/Home';
 import Admin from './screens/Admin';
 import Staff from './screens/Staff';
 import Driver from './screens/Driver';
+import Delivery from './screens/Delivery';
 import { firebase } from "./config/firebase";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -36,6 +37,8 @@ const AuthenticatedUserProvider = ({ children }) => {
 
 const handleSignOut = () => {
   auth.signOut()
+    .then(()=>{
+      navigation.navigate('Login')})
     .catch(error => alert(error.message))
 }
 
@@ -135,6 +138,7 @@ function RootNavigator() {
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='Staff' component={Staff} />
           <Drawer.Screen name='Admin' component={Admin} />
+          <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Chat' component={Chat} />
           {/* </Drawer.Group> */}

@@ -13,16 +13,16 @@ export default function Home({ navigation }) {
 
     const [user, setUser] = useState(null) // This user
     //const [users, setUsers] = useState([]) // Other Users
-
+  
     useEffect(() => {
         firestore().collection("users").doc(auth1().currentUser.uid).get()
             .then(user => {
                 setUser(user.data())
                 console.log(user)
             })
-
+        
     }, [])
-
+    
     // const DATA = [
     //     {
     //         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -37,6 +37,15 @@ export default function Home({ navigation }) {
     //         title: 'Third Item',
     //     },
     // ];
+
+    // const handleSignOut = () => {
+    //     auth.signOut()
+    //         // redundant
+    //         // .then(() => {
+    //         //     navigation.replace("Login")
+    //         // })
+    //         .catch(error => alert(error.message))
+    // }
 
     useEffect(() => {
         navigation.setOptions({
@@ -68,15 +77,17 @@ export default function Home({ navigation }) {
                 renderItem={({item}) => <Item title={item.title} />}
             /> */}
             {/* {!DATA && <Text> No Data found! </Text>} */}
-            <View style={styles.loggedInContainer}>
-                <Text>Email: {auth.currentUser?.email}</Text>
-                {/* <TouchableOpacity
+            {/* {DATA && */}
+                <View style={styles.loggedInContainer}>
+                    <Text>Email: {auth.currentUser?.email}</Text>
+                    {/* <TouchableOpacity
                         onPress={handleSignOut}
                         style={styles.signOutContainer}
                     >
                         <Text style={styles.signOutText}>Sign out</Text>
                     </TouchableOpacity> */}
-            </View>
+                </View>
+            {/* } */}
 
             <OrdersList />
 
