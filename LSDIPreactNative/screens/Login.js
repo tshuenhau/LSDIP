@@ -12,13 +12,7 @@ export default function Login({ navigation }) {
   const auth1 = firebase.auth;
   const firestore = firebase.firestore;
   const [user, setUser] = useState(null)
-  // const onHandleLogin = () => {
-  //   if (email !== "" && password !== "") {
-  //     signInWithEmailAndPassword(auth, email, password)
-  //       .then(() => console.log("Login success"))
-  //       .catch((err) => Alert.alert("Login error", err.message));
-  //   }
-  // };
+
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
@@ -28,13 +22,13 @@ export default function Login({ navigation }) {
               setUser(user.data())
               console.log(user.data().role)
               if (user.data().role === "Admin") {
-                navigation.navigate("Staff");
+                navigation.navigate("Admin");
               } else {
                 console.log(user)
                 navigation.navigate("Home");
               }
             })
-          })
+        })
         .catch((err) => Alert.alert("Login error", err.message));
     }
   };
@@ -50,7 +44,7 @@ export default function Login({ navigation }) {
         {Platform.OS === 'web' &&
           <Text style={styles.title}>Log In</Text>
         }
-        {/* <Text style={styles.title}>Log In</Text> */}
+
         <TextInput
           style={styles.input}
           placeholder="Enter email"
