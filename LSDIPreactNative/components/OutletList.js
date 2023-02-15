@@ -1,27 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { firebase } from "../config/firebase";
 
 export default function OutletList() {
 
     const [outletList, setOutletList] = useState([]);
-    const orders = firebase.firestore().collection('outlet');
-    orders.onSnapshot(
-        querySnapshot => {
-            const outletList = []
-            querySnapshot.forEach((doc) => {
-                const { outletAddress, outletEmail, outletName, outletNumber } = doc.data()
+
+    useEffect(() => {
+        const outlets = firebase.firestore().collection('outlet');
+        const unsubscribe = outlets.onSnapshot(querySnapshot => {
+            const outletList = [];
+            querySnapshot.forEach(doc => {
+                const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
                 outletList.push({
                     id: doc.id,
                     outletName,
                     outletAddress,
                     outletNumber,
                     outletEmail
-                })
-            })
+                });
+            });
             setOutletList(outletList);
-        }
-    )
+        });
+        return () => unsubscribe();
+    }, []);
 
     return (
         <View>

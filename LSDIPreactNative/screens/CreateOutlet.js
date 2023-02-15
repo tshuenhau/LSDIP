@@ -2,14 +2,24 @@ import React, { useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
+import { firebase } from "../config/firebase";
 
 export default function CreateOutlet({ navigation }) {
-    const [values, setValues] = useState({
+
+    const firestore = firebase.firestore();
+
+    const initialValues = {
         outletName: "",
         outletAddress: "",
         outletNumber: "",
         outletEmail: ""
-    })
+    };
+
+    const [values, setValues] = useState(initialValues);
+
+    // const clearState = () => {
+    //     setValues({ ...initialValues });
+    // }
 
     function handleChange(text, eventName) {
         setValues(prev => {
@@ -21,7 +31,14 @@ export default function CreateOutlet({ navigation }) {
     }
 
     function createOutlet() {
-        console.log("Function todo")
+        firestore.collection('outlet')
+            .add(values)
+            .then(() => {
+                console.log("Success")
+            }).catch((err) => {
+                console.log(err)
+            })
+
     }
 
     return (

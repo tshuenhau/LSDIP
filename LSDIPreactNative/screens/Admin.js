@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         height: 42,
-        width: "20%",
+        width: "48%",
         borderRadius: 25,
         marginTop: 20,
         backgroundColor: "#0B3270",
