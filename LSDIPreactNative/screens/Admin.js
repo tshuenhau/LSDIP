@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Modal, Alert } from "react-native";
-import OutletList from "../components/OutletList";
+import React, { useState, useEffect } from "react";
+import { View, TouchableOpacity, Text, StyleSheet, Modal, Alert, FlatList, Pressable } from "react-native";
+// import OutletList from "../components/OutletList";
+import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { firebase } from "../config/firebase";
@@ -8,8 +9,27 @@ import { firebase } from "../config/firebase";
 export default function Admin({ navigation }) {
 
     const [modalVisible, setModalVisible] = useState(false);
+    const [outletList, setOutletList] = useState([]);
+    const [values, setValues] = useState(initialValues);
 
-    const firestore = firebase.firestore();
+    useEffect(() => {
+        outlets.onSnapshot(querySnapshot => {
+            const outletList = [];
+            querySnapshot.forEach(doc => {
+                const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
+                outletList.push({
+                    id: doc.id,
+                    outletName,
+                    outletAddress,
+                    outletNumber,
+                    outletEmail
+                });
+            });
+            setOutletList(outletList);
+        });
+    }, []);
+
+    const outlets = firebase.firestore().collection('outlet');
 
     const initialValues = {
         outletName: "",
@@ -17,8 +37,6 @@ export default function Admin({ navigation }) {
         outletNumber: "",
         outletEmail: ""
     };
-
-    const [values, setValues] = useState(initialValues);
 
     const clearState = () => {
         setValues({ ...initialValues });
@@ -34,16 +52,24 @@ export default function Admin({ navigation }) {
     }
 
     function createOutlet() {
-        firestore.collection('outlet')
-            .add(values)
+        outlets.add(values)
             .then(() => {
                 setModalVisible(!modalVisible);
                 clearState;
                 console.log("Success");
             }).catch((err) => {
-                console.log(err)
+                console.log(err);
             })
+    }
 
+    function deleteOutlet(outlet) {
+        outlets.doc(outlet.id)
+            .delete()
+            .then(() => {
+                alert("Deleted Successfully");
+            }).catch((err) => {
+                console.log(err);
+            })
     }
 
     return (
@@ -82,7 +108,32 @@ export default function Admin({ navigation }) {
                 </View>
             </Modal>
 
-            <OutletList />
+            <View>
+                {!(outletList.length > 0) && <Text> No Data Found! </Text>}
+                <View>
+                    <FlatList
+                        data={outletList}
+                        keyExtractor={outlet => outlet.id}
+                        renderItem={({ item }) => (
+                            <Pressable style={styles.outletRecord}>
+                                <View style={styles.cards}>
+                                    <Text>Name: {item.outletName} </Text>
+                                    <Text>Address: {item.outletAddress} </Text>
+                                    <Text>Number: {item.outletNumber} </Text>
+                                    <Text>Email: {item.outletEmail} </Text>
+                                </View>
+                                <FontAwesome
+                                    style={styles.deleteIcon}
+                                    name="trash-o"
+                                    color='red'
+                                    onPress={() => deleteOutlet(item)}
+                                />
+                            </Pressable>
+                        )}
+                    />
+                </View >
+            </View>
+
         </View>
 
     )
@@ -90,16 +141,18 @@ export default function Admin({ navigation }) {
 
 const styles = StyleSheet.create({
     cards: {
-        backgroundColor: '#fff',
         marginBottom: 10,
         marginLeft: '2%',
-        width: '96%',
-        shadowColor: '#000',
-        shadowOpacity: 1,
-        shadowOffset: {
-            width: 3,
-            height: 3,
-        }
+        width: '85%'
+    },
+    outletRecord: {
+        backgroundColor: '#fff',
+        flexDirection: 'row',
+        alignItems: 'center',
+
+    },
+    deleteIcon: {
+        fontSize: 25,
     },
     view: {
         width: "100%",

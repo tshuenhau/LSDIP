@@ -1,3 +1,5 @@
+// depreciated
+
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { firebase } from "../config/firebase";
@@ -5,10 +7,10 @@ import { firebase } from "../config/firebase";
 export default function OutletList() {
 
     const [outletList, setOutletList] = useState([]);
+    const outlets = firebase.firestore().collection('outlet');
 
     useEffect(() => {
-        const outlets = firebase.firestore().collection('outlet');
-        const unsubscribe = outlets.onSnapshot(querySnapshot => {
+        outlets.onSnapshot(querySnapshot => {
             const outletList = [];
             querySnapshot.forEach(doc => {
                 const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
@@ -22,7 +24,6 @@ export default function OutletList() {
             });
             setOutletList(outletList);
         });
-        return () => unsubscribe();
     }, []);
 
     return (
