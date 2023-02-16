@@ -17,6 +17,7 @@ import Signup from './screens/Signup';
 import Chat from './screens/Chat';
 import Home from './screens/Home';
 import Admin from './screens/Admin';
+import AdminTimeslots from './screens/AdminTimeslots';
 import Staff from './screens/Staff';
 import Driver from './screens/Driver';
 import Delivery from './screens/Delivery';
@@ -138,6 +139,7 @@ function RootNavigator() {
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='Staff' component={Staff} />
           <Drawer.Screen name='Admin' component={Admin} />
+          <Drawer.Screen name='AdminTimeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Chat' component={Chat} />
