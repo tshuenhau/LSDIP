@@ -1,16 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Modal, Alert, FlatList, Pressable } from "react-native";
+import {
+    View,
+    TouchableOpacity,
+    Text,
+    StyleSheet,
+    Modal,
+    Alert,
+    FlatList,
+    LayoutAnimation,
+    UIManager,
+    Platform,
+} from "react-native";
 // import OutletList from "../components/OutletList";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
+import colors from '../colors';
 import { firebase } from "../config/firebase";
 
-export default function Admin({ navigation }) {
+if (
+    Platform.OS === 'android' &&
+    UIManager.setLayoutAnimationEnabledExperimental
+) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+export default function Admin() {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [outletList, setOutletList] = useState([]);
     const [values, setValues] = useState(initialValues);
+    const [expandedOutlet, setExpandedOutlet] = useState(null);
+    const outlets = firebase.firestore().collection('outlet');
+
+    const initialValues = {
+        outletName: "",
+        outletAddress: "",
+        outletNumber: "",
+        outletEmail: ""
+    };
 
     useEffect(() => {
         outlets.onSnapshot(querySnapshot => {
@@ -29,14 +57,42 @@ export default function Admin({ navigation }) {
         });
     }, []);
 
-    const outlets = firebase.firestore().collection('outlet');
-
-    const initialValues = {
-        outletName: "",
-        outletAddress: "",
-        outletNumber: "",
-        outletEmail: ""
+    const toggleExpand = (id) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (expandedOutlet === id) {
+            setExpandedOutlet(null);
+        } else {
+            setExpandedOutlet(id);
+        }
     };
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => toggleExpand(item.id)}
+            activeOpacity={0.8}
+        >
+            <View style={styles.cardHeader}>
+                <Text style={styles.outletName}>{item.outletName} </Text>
+            </View>
+            {expandedOutlet === item.id && (
+                <View style={styles.itemContainer}>
+                    <View style={styles.cardBody}>
+                        <Text style={styles.itemText}>Address: {item.outletAddress} </Text>
+                        <Text style={styles.itemText}>Number: {item.outletNumber} </Text>
+                        <Text style={styles.itemText}>Email: {item.outletEmail} </Text>
+                    </View>
+                    <FontAwesome
+                        style={styles.deleteIcon}
+                        name="trash-o"
+                        color='red'
+                        onPress={() => deleteOutlet(item)}
+                    />
+                </View>
+            )}
+
+        </TouchableOpacity>
+    );
 
     const clearState = () => {
         setValues({ ...initialValues });
@@ -114,22 +170,7 @@ export default function Admin({ navigation }) {
                     <FlatList
                         data={outletList}
                         keyExtractor={outlet => outlet.id}
-                        renderItem={({ item }) => (
-                            <Pressable style={styles.outletRecord}>
-                                <View style={styles.cards}>
-                                    <Text>Name: {item.outletName} </Text>
-                                    <Text>Address: {item.outletAddress} </Text>
-                                    <Text>Number: {item.outletNumber} </Text>
-                                    <Text>Email: {item.outletEmail} </Text>
-                                </View>
-                                <FontAwesome
-                                    style={styles.deleteIcon}
-                                    name="trash-o"
-                                    color='red'
-                                    onPress={() => deleteOutlet(item)}
-                                />
-                            </Pressable>
-                        )}
+                        renderItem={renderItem}
                     />
                 </View >
             </View>
@@ -140,16 +181,43 @@ export default function Admin({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    cards: {
-        marginBottom: 10,
-        marginLeft: '2%',
-        width: '85%'
+    cardBody: {
+        padding: 16,
     },
-    outletRecord: {
-        backgroundColor: '#fff',
+    itemContainer: {
+        backgroundColor: colors.lightGray,
+        flex: 1,
         flexDirection: 'row',
-        alignItems: 'center',
-
+        justifyContent: 'space-between',
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingRight: 20,
+    },
+    itemText: {
+        flex: 1,
+        fontSize: 16,
+    },
+    card: {
+        backgroundColor: '#fff',
+        marginVertical: 10,
+        marginHorizontal: 16,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
+    },
+    outletName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 16,
     },
     deleteIcon: {
         fontSize: 25,
@@ -193,4 +261,3 @@ const styles = StyleSheet.create({
         elevation: 5,
     }
 })
-
