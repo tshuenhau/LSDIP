@@ -66,6 +66,57 @@ export default function Admin() {
         }
     };
 
+    const clearState = () => {
+        setValues({ ...initialValues });
+    }
+
+    function handleChange(text, eventName) {
+        setValues(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
+    function createOutlet() {
+        outlets.add(values)
+            .then(() => {
+                setModalVisible(!modalVisible);
+                clearState;
+                console.log("Success");
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
+    // alert only works on ios and android
+    const deleteOutlet = (outlet) => {
+        return Alert.alert(
+            "Confirmation",
+            "Are you sure you want to delete this outlet?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        outlets.doc(outlet.id)
+                            .delete()
+                            .then(() => {
+                                alert("Deleted Successfully");
+                            }).catch((err) => {
+                                console.log(err);
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
@@ -93,40 +144,6 @@ export default function Admin() {
 
         </TouchableOpacity>
     );
-
-    const clearState = () => {
-        setValues({ ...initialValues });
-    }
-
-    function handleChange(text, eventName) {
-        setValues(prev => {
-            return {
-                ...prev,
-                [eventName]: text
-            }
-        })
-    }
-
-    function createOutlet() {
-        outlets.add(values)
-            .then(() => {
-                setModalVisible(!modalVisible);
-                clearState;
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
-    }
-
-    function deleteOutlet(outlet) {
-        outlets.doc(outlet.id)
-            .delete()
-            .then(() => {
-                alert("Deleted Successfully");
-            }).catch((err) => {
-                console.log(err);
-            })
-    }
 
     return (
         <View>
