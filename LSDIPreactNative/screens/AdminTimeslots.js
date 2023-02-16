@@ -33,7 +33,7 @@ const AdminSetTimingsScreen = ({ navigation }) => {
         const getAvailableTimings = useCallback(async () => {
           try {
             const timingsDoc = await db.collection('available_timings').doc(selectedDate).get();
-            const timings = timingsDoc.data()?.timings;
+            const timings = timingsDoc.data()?.available_times;
             // if(timings == null) {
             //     timings = [];
             // }
@@ -128,17 +128,17 @@ const AdminSetTimingsScreen = ({ navigation }) => {
         setSelectedDate(date);
       };
   
-      const handleAddTimings = async (timings) => {
+      const handleAddTimings = async (available_times) => {
         try {
           const timingsRef = db.collection('available_timings').doc(selectedDate);
           const timingsDoc = await timingsRef.get();
           if (timingsDoc.exists) {
-            const updatedTimings = [...selectedTimings, ...timings];
-            await timingsRef.update({ timings: updatedTimings });
+            const updatedTimings = [...selectedTimings, ...available_times];
+            await timingsRef.update({ available_times: updatedTimings });
             setSelectedTimings(updatedTimings);
           } else {
-            await timingsRef.set({ timings });
-            setSelectedTimings(timings);
+            await timingsRef.set({ available_times });
+            setSelectedTimings(available_times);
             setAvailableDates((prevAvailableDates) => {
               const updatedAvailableDates = { ...prevAvailableDates };
               updatedAvailableDates[selectedDate] = true;
@@ -155,6 +155,7 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           console.log('Error adding available timings: ', err);
         }
       };
+      
             
       
   

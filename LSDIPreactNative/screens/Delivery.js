@@ -75,7 +75,8 @@ const getMonthDays = (month, year) => {
       const docRef = db.collection('user_timings').doc(user.uid);
       docRef.onSnapshot((doc) => {
         if (doc.exists) {
-          const selectedTimes = doc.data().selected_times;
+          const selectedTimes = doc.data().selected_times || [];
+          console.log(selectedTimes);
           setSelectedTimesList(selectedTimes);
         } else {
           setSelectedTimesList([]);
