@@ -24,8 +24,16 @@ export default function MyProfile() {
     };
 
     const [userDetails, setUserDetails] = useState(initialValues);
+    const [passwordDetails, setPasswordDetails] = useState(
+        {
+            currentPassword: "",
+            newPassword: "",
+            confirmNewPassword: ""
+        }
+    );
     const [updateModalData, setUpdateModalData] = useState(initialValues);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
+    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
     const users = firebase.firestore().collection('users');
 
     useEffect(() => {
@@ -42,6 +50,15 @@ export default function MyProfile() {
 
     function handleChange(text, eventName) {
         setUpdateModalData(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
+    function handlePasswordChange(text, eventName) {
+        setPasswordDetails(prev => {
             return {
                 ...prev,
                 [eventName]: text
@@ -72,6 +89,44 @@ export default function MyProfile() {
         }
     }
 
+    const reauthenticate = (currentPassword) => {
+        console.log("currentPassword = " + currentPassword)
+        var user = firebase.auth().currentUser;
+        var cred = firebase.auth.EmailAuthProvider.credential(
+            user.email,
+            currentPassword
+        );
+        return user.reauthenticateWithCredential(cred);
+    };
+
+    const changePassword = () => {
+        if (passwordDetails.currentPassword === "" || passwordDetails.newPassword === "") {
+            alert("All the fields are required");
+        } else if (passwordDetails.newPassword.length <= 5) {
+            alert("Password must contains more than 5 characters");
+        } else if (passwordDetails.newPassword != passwordDetails.confirmNewPassword) {
+            alert("Passwords do not match");
+        } else {
+            try {
+                reauthenticate(passwordDetails.currentPassword).then(() => {
+                    var user = firebase.auth().currentUser;
+                    user.updatePassword(passwordDetails.newPassword);
+                    // const response = firebase.database().ref("Users").child(user.uid);
+
+                    setPasswordModalVisible(!passwordModalVisible);
+                    setPasswordDetails({
+                        currentPassword: "",
+                        newPassword: "",
+                        confirmNewPassword: ""
+                    })
+                })
+            } catch (error) {
+                console.log(error);
+                alert(error);
+            }
+        }
+    };
+
     return (
         <View>
             <View style={styles.container}>
@@ -94,18 +149,25 @@ export default function MyProfile() {
                         onPress={() => setUpdateModalVisible(!updateModalVisible)}
                     />
                 </View>
-                <Text style={styles.emailText}>
+                <Text style={styles.roleText}>
+                    {userDetails.role}
+                </Text>
+                <Text style={styles.detailText}>
                     {userDetails.email}
+                </Text>
+                <Text style={styles.detailText}>
+                    {userDetails.number}
                 </Text>
 
                 <View style={styles.view}>
                     <TouchableOpacity
-                        // onPress={() => setCreateModalVisible(!createModalVisible)}
+                        onPress={() => setPasswordModalVisible(!passwordModalVisible)}
                         style={styles.btn}>
                         <Text style={styles.text}>Change Password</Text>
                     </TouchableOpacity>
                 </View>
             </View>
+
             {/* Update Modal */}
             <Modal
                 animationType="slide"
@@ -132,7 +194,32 @@ export default function MyProfile() {
                     </View>
                 </View>
             </Modal>
-        </View>
+
+            {/* Change Password Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={passwordModalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setPasswordModalVisible(!passwordModalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <View style={styles.view}>
+                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Change Password</Text>
+                            <TextBox placeholder="Current Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "currentPassword")} />
+                            <TextBox placeholder="New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "newPassword")} />
+                            <TextBox placeholder="Confirm New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "confirmNewPassword")} />
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                <Btn onClick={() => changePassword()} title="Update" style={{ width: "48%" }} />
+                                <Btn onClick={() => setPasswordModalVisible(!passwordModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </View >
     )
 }
 
@@ -164,13 +251,18 @@ const styles = StyleSheet.create({
         color: 'grey',
         paddingHorizontal: 10,
     },
-    emailText: {
+    roleText: {
         fontSize: 18,
         color: 'black',
         paddingHorizontal: 10,
         marginTop: 10,
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginBottom: 10,
+    },
+    detailText: {
+        fontSize: 18,
+        color: 'black',
+        paddingHorizontal: 10,
     },
     view: {
         width: "100%",
@@ -178,6 +270,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     btn: {
+        // flex: 1,
         padding: 10,
         borderRadius: 25,
         backgroundColor: "#0B3270",
