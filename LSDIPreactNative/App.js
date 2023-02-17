@@ -22,7 +22,9 @@ import Staff from './screens/Staff';
 import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
+import ForgotPassword from './screens/ForgotPassword';
 import { firebase } from "./config/firebase";
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -186,11 +188,14 @@ function RootNavigator() {
   } else {
     return (
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={{
+          headerShown: false,
+        }}>
           <Stack.Screen name='Login' component={Login} />
           <Stack.Screen name='Signup' component={Signup} />
+          <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
         </Stack.Navigator>
-      </NavigationContainer>
+      </NavigationContainer >
     )
   }
 }

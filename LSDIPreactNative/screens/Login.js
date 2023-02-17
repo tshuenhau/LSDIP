@@ -74,6 +74,12 @@ export default function Login({ navigation }) {
             <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Sign Up</Text>
           </TouchableOpacity>
         </View>
+        <View style={{ alignItems: 'center', alignSelf: 'center' }}>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Forgot Password</Text>
+          </TouchableOpacity>
+        </View>
+
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
     </KeyboardAvoidingView>
