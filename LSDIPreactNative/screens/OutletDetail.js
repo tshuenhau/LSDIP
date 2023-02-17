@@ -4,18 +4,13 @@ import {
     Text,
     StyleSheet,
     Modal,
-    Alert,
-    FlatList,
-    LayoutAnimation,
-    UIManager,
-    Platform,
+    Alert
 } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
-import { Header } from '@react-navigation/stack';
 
 export default function OutletDetail({ route, navigation }) {
 

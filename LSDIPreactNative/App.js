@@ -20,6 +20,7 @@ import Admin from './screens/Admin';
 import AdminTimeslots from './screens/AdminTimeslots';
 import Staff from './screens/Staff';
 import Driver from './screens/Driver';
+import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import { firebase } from "./config/firebase";
 const Stack = createStackNavigator();
@@ -38,8 +39,9 @@ const AuthenticatedUserProvider = ({ children }) => {
 
 const handleSignOut = () => {
   auth.signOut()
-    .then(()=>{
-      navigation.navigate('Login')})
+    .then(() => {
+      navigation.navigate('Login')
+    })
     .catch(error => alert(error.message))
 }
 
@@ -137,6 +139,7 @@ function RootNavigator() {
         >
           {/* <Drawer.Group> */}
           <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='My Profile' component={MyProfile} />
           <Drawer.Screen name='Staff' component={Staff} />
           <Drawer.Screen name='Admin' component={Admin} />
           <Drawer.Screen name='AdminTimeslots' component={AdminTimeslots} />
