@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Text, View, StyleSheet } from "react-native"
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
+import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -10,6 +11,14 @@ export default function SignUpScreen({ navigation }) {
 
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
+
+    const roles = [
+        { key: '1', value: 'Admin' },
+        { key: '2', value: 'Staff' },
+        { key: '3', value: 'Driver' }
+    ]
+
+    const [selected, setSelected] = useState("");
 
     const [values, setValues] = useState({
         name: "",
@@ -55,7 +64,19 @@ export default function SignUpScreen({ navigation }) {
         <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Sign Up</Text>
         <TextBox placeholder="Full Name" onChangeText={text => handleChange(text, "name")} />
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
-        <TextBox placeholder="Who are you? (Admin, Staff, Driver or User)" onChangeText={text => handleChange(text, "role")} />
+        {/* <TextBox placeholder="Who are you? (Admin, Staff, Driver or User)" onChangeText={text => handleChange(text, "role")} /> */}
+        <View style={{
+            // height: 42,
+            width: "92%",
+            borderRadius: 25,
+            marginTop: 20
+        }}>
+            <SelectList
+                data={roles}
+                setSelected={(val) => handleChange(val, "role")}
+                save="value"
+            />
+        </View>
         <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleChange(text, "pwd")} />
         <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleChange(text, "pwd2")} />
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
