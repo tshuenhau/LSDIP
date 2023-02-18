@@ -19,7 +19,7 @@ export default function ResetPassword({ navigation }) {
 
     const resetPassword = () => {
         firebase.auth()
-            .sendPasswordResetEmail(email)
+            .sendPasswordResetEmail(email.email)
             .then(() => {
                 console.log("Reset password email sent");
                 navigation.replace("Login");
