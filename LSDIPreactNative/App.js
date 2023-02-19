@@ -14,7 +14,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
-import Chat from './screens/Chat';
+// import Chat from './screens/Chat';
 import Home from './screens/Home';
 import Admin from './screens/Admin';
 import AdminTimeslots from './screens/AdminTimeslots';
@@ -147,7 +147,7 @@ function RootNavigator() {
           <Drawer.Screen name='AdminTimeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
-          <Drawer.Screen name='Chat' component={Chat} />
+          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           {/* </Drawer.Group> */}
           {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
             <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
@@ -165,7 +165,7 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Staff' component={Staff} />
-            <Drawer.Screen name='Chat' component={Chat} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
       </NavigationContainer>
@@ -180,7 +180,7 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Driver' component={Driver} />
-            <Drawer.Screen name='Chat' component={Chat} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
       </NavigationContainer>

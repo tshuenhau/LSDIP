@@ -46,14 +46,14 @@ export default function Home({ navigation }) {
 
             <OrdersList />
 
-            <View style={styles.chatContainer}>
+            {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Chat")}
                     style={styles.chatButton}
                 >
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
-            </View>
+            </View> */}
         </View>
     )
 };
