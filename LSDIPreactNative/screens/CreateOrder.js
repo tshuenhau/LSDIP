@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import Bbtn from "../components/BigButton";
+import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
 import OutletDetail from './OutletDetail';
@@ -23,6 +24,8 @@ export default function CreateOrder() {
         <View>
             <Text>Create Order Page Placeholder</Text>
             <Bbtn>Show Laundry Items</Bbtn>
+            <Bbtn>Show Dry Clean Items</Bbtn>
+            <Bbtn>Show other Items</Bbtn>
         </View>
     )
 }
