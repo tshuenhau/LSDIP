@@ -172,23 +172,19 @@ export default function OutletDetail({ route, navigation }) {
         </TouchableOpacity>
     );
 
-    function RenderList() {
-        return (
-            <View>
-                <FlatList
-                    data={allocatedStaffList}
-                    keyExtractor={item => item.id}
-                    renderItem={renderItem}
-                />
-            </View >
-        )
-    }
-
     function ConditionalRendering() {
         if (!allocatedStaffList.length > 1) {
             return <Text> No Data Found! </Text>
         } else {
-            return <RenderList />;
+            return (
+                <View>
+                    <FlatList
+                        data={allocatedStaffList}
+                        keyExtractor={item => item.id}
+                        renderItem={renderItem}
+                    />
+                </View >
+            )
         }
     }
 

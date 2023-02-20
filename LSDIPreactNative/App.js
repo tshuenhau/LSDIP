@@ -18,7 +18,7 @@ import Signup from './screens/Signup';
 import Home from './screens/Home';
 import Admin from './screens/Admin';
 import AdminTimeslots from './screens/AdminTimeslots';
-import Staff from './screens/Staff';
+import StaffRostering from './screens/StaffRostering';
 import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
@@ -71,7 +71,7 @@ function CustomDrawerContent(props) {
 //     >
 //       <Drawer.Group>
 //         <Drawer.Screen name='Home' component={Home} />
-//         <Drawer.Screen name='Staff' component={Staff} />
+//         <Drawer.Screen name='Staff' component={StaffRostering} />
 //         <Drawer.Screen name='Admin' component={Admin} />
 //         <Drawer.Screen name='Driver' component={Driver} />
 //         <Drawer.Screen name='Chat' component={Chat} />
@@ -89,7 +89,7 @@ function CustomDrawerContent(props) {
 //       <Stack.Screen name='Login' component={Login} />
 //       <Stack.Screen name='Signup' component={Signup} />
 //       <Stack.Screen name='Admin' component={Admin} />
-//       <Stack.Screen name='Staff' component={Staff} />
+//       <Stack.Screen name='Staff' component={StaffRostering} />
 //       <Stack.Screen name='Driver' component={Driver} />
 //     </Stack.Navigator>
 //   );
@@ -139,19 +139,14 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
-          {/* <Drawer.Group> */}
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
-          <Drawer.Screen name='Staff' component={Staff} />
+          <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
           <Drawer.Screen name='Admin' component={Admin} />
           <Drawer.Screen name='AdminTimeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
-          {/* </Drawer.Group> */}
-          {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
-            <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
-          </Drawer.Group> */}
         </Drawer.Navigator>
       </NavigationContainer >
     );
@@ -164,7 +159,7 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Staff' component={Staff} />
+            <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
