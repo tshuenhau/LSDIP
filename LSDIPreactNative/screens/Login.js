@@ -29,7 +29,18 @@ export default function Login({ navigation }) {
               }
             })
         })
-        .catch((err) => Alert.alert("Login error", err.message));
+        .catch((err) => {
+          console.log("Login error")
+          // console.log(err.code)
+          const errorCode = err.code;
+          // errorMessage = err.message;
+          console.log(errorCode);
+          if (errorCode === 'auth/wrong-password') {
+            alert('Wrong Password');
+          } else {
+            alert("Login error", err)
+          }
+        });
     }
   };
 

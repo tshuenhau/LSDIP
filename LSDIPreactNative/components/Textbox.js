@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, TextInput, StyleSheet} from "react-native"
+import { View, TextInput, StyleSheet } from "react-native"
 
 const styles = StyleSheet.create({
     container: {
@@ -18,8 +18,8 @@ const styles = StyleSheet.create({
 
 })
 
-export default function Loginscreen(props){
+export default function TextBox(props) {
     return <View style={styles.container}>
-        <TextInput style={{...styles.container, ...styles.textInput}} {...props} />
+        <TextInput style={{ ...styles.container, ...styles.textInput }} {...props} />
     </View>
 }
