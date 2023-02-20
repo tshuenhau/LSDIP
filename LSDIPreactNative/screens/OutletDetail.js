@@ -7,6 +7,7 @@ import {
     FlatList,
     Alert
 } from 'react-native'
+import alert from '../components/Alert'
 import React, { useState, useEffect } from 'react'
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
@@ -35,7 +36,8 @@ export default function OutletDetail({ route, navigation }) {
                 querySnapshot.forEach(doc => {
                     staffList.push({
                         key: doc.id,
-                        value: doc.data().name
+                        value: doc.data().name,
+                        number: doc.data().number
                     });
                 });
                 setStaffList(staffList);
@@ -45,8 +47,10 @@ export default function OutletDetail({ route, navigation }) {
                         const allocatedStaffList = [];
                         querySnapshot.forEach(doc => {
                             allocatedStaffList.push({
+                                id: doc.id,
                                 staffID: doc.data().staffID,
-                                name: staffList.find(s => s.key === doc.data().staffID).value
+                                name: staffList.find(s => s.key === doc.data().staffID).value,
+                                number: staffList.find(s => s.key === doc.data().staffID).number
                             })
                         })
                         setAllocateStaffList(allocatedStaffList);
@@ -99,28 +103,54 @@ export default function OutletDetail({ route, navigation }) {
             .then(() => {
                 console.log("Allocated Staff");
                 setAllocateModalVisible(!allocateModalVisible);
-                users.where("role", "==", "Staff")
+                outletStaff.where("outletID", "==", updateModalData.id)
                     .get()
                     .then(querySnapshot => {
-                        const staffList = [];
+                        const allocatedStaffList = [];
                         querySnapshot.forEach(doc => {
-                            staffList.push({
-                                key: doc.id,
-                                value: doc.data().name
-                            });
-                        });
-                        setStaffList(staffList);
-
-                    }).catch((err) => {
-                        confirm.log(err);
-                    });
+                            allocatedStaffList.push({
+                                id: doc.id,
+                                staffID: doc.data().staffID,
+                                name: staffList.find(s => s.key === doc.data().staffID).value,
+                                number: staffList.find(s => s.key === doc.data().staffID).number
+                            })
+                        })
+                        setAllocateStaffList(allocatedStaffList);
+                    })
+            }).catch((err) => {
+                console.log(err);
             })
+    }
+
+    const showConfirmDiaglog = (item) => {
+        return alert("Confirmation", "Are you sure you want to remove staff from this outlet?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        outletStaff.doc(item.id)
+                            .delete()
+                            .then(() => {
+                                console.log("Deallocated")
+                                const temp = allocatedStaffList.filter(x => x.id != item.id)
+                                setAllocateStaffList(temp);
+                            }).catch((err) => {
+                                console.log(err)
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => {
+                        console.log("Cancelled");
+                    }
+                }
+            ])
     }
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
-            // onPress={() => toggleExpand(item.id)}
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
@@ -135,7 +165,7 @@ export default function OutletDetail({ route, navigation }) {
                         style={styles.staffIcon}
                         color="red"
                         name="remove"
-                    // onPress={() => navigation.navigate('OutletDetail', { item })}
+                        onPress={() => showConfirmDiaglog(item)}
                     />
                 </View>
             </View>
@@ -147,7 +177,7 @@ export default function OutletDetail({ route, navigation }) {
             <View>
                 <FlatList
                     data={allocatedStaffList}
-                    keyExtractor={item => item.staffID}
+                    keyExtractor={item => item.id}
                     renderItem={renderItem}
                 />
             </View >

@@ -5,7 +5,6 @@ import {
     Text,
     StyleSheet,
     Modal,
-    Alert,
     FlatList,
     LayoutAnimation,
     UIManager,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
+import alert from '../components/Alert'
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
@@ -92,7 +92,7 @@ export default function OutletList({ navigation }) {
 
     // alert only works on ios and android
     const deleteOutlet = (outlet) => {
-        return Alert.alert(
+        return alert(
             "Confirmation",
             "Are you sure you want to delete this outlet?",
             [
@@ -138,7 +138,7 @@ export default function OutletList({ navigation }) {
                             style={styles.outletIcon}
                             color="black"
                             name="edit"
-                            onPress={() => navigation.navigate('OutletDetail', {item})}
+                            onPress={() => navigation.navigate('OutletDetail', { item })}
                         />
                         <FontAwesome
                             style={styles.outletIcon}
