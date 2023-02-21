@@ -5,7 +5,6 @@ import {
     StyleSheet,
     Modal,
     FlatList,
-    Alert
 } from 'react-native'
 import alert from '../components/Alert'
 import React, { useState, useEffect } from 'react'
@@ -72,7 +71,6 @@ export default function OutletDetail({ route, navigation }) {
             updateModalData.outletAddress.length > 0 &&
             updateModalData.outletNumber.length > 0 &&
             updateModalData.outletEmail.length > 0) {
-            // update in DB
             outlets.doc(updateModalData.id)
                 .update({
                     outletName: updateModalData.outletName,
@@ -172,22 +170,6 @@ export default function OutletDetail({ route, navigation }) {
         </TouchableOpacity>
     );
 
-    function ConditionalRendering() {
-        if (!allocatedStaffList.length > 1) {
-            return <Text> No Data Found! </Text>
-        } else {
-            return (
-                <View>
-                    <FlatList
-                        data={allocatedStaffList}
-                        keyExtractor={item => item.id}
-                        renderItem={renderItem}
-                    />
-                </View >
-            )
-        }
-    }
-
     return (
         <View>
             <View style={styles.topButtons}>
@@ -219,18 +201,21 @@ export default function OutletDetail({ route, navigation }) {
             </View>
 
             <View>
-                <ConditionalRendering />
+                <FlatList
+                    data={allocatedStaffList}
+                    keyExtractor={item => item.id}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noStaffText}>No staff allocated</Text>
+                    }
+                />
             </View>
 
             {/* Update Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={updateModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setUpdateModalVisible(!updateModalVisible);
-                }}>
+                visible={updateModalVisible}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
@@ -252,11 +237,7 @@ export default function OutletDetail({ route, navigation }) {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={allocateModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setAllocateModalVisible(!allocateModalVisible);
-                }}>
+                visible={allocateModalVisible}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
@@ -339,6 +320,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flexDirection: "row",
         marginVertical: 10,
+    },
+    noStaffText: {
+        fontSize: 20,
+        fontWeight: "600",
     },
     view: {
         width: "100%",

@@ -16,7 +16,6 @@ import alert from '../components/Alert'
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
-import OutletDetail from './OutletDetail';
 
 if (
     Platform.OS === 'android' &&
@@ -90,7 +89,6 @@ export default function OutletList({ navigation }) {
             })
     }
 
-    // alert only works on ios and android
     const deleteOutlet = (outlet) => {
         return alert(
             "Confirmation",
@@ -155,7 +153,6 @@ export default function OutletList({ navigation }) {
 
     return (
         <View>
-
             <View style={styles.view}>
                 <TouchableOpacity
                     onPress={() => setCreateModalVisible(!createModalVisible)}
@@ -168,11 +165,7 @@ export default function OutletList({ navigation }) {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={createModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setCreateModalVisible(!createModalVisible);
-                }}>
+                visible={createModalVisible}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
@@ -189,25 +182,29 @@ export default function OutletList({ navigation }) {
                     </View>
                 </View>
             </Modal>
+
             <View>
-                {!(outletList.length > 0) && <Text> No Data Found! </Text>}
-                <View>
-                    <FlatList
-                        data={outletList}
-                        keyExtractor={outlet => outlet.id}
-                        renderItem={renderItem}
-                    />
-                </View >
+                <FlatList
+                    data={outletList}
+                    keyExtractor={outlet => outlet.id}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noDataText}>No Data Found!</Text>
+                    }
+                />
             </View>
-
         </View>
-
     )
 }
 
 const styles = StyleSheet.create({
     cardBody: {
         padding: 16,
+    },
+    noDataText: {
+        fontStyle: 'italic',
+        textAlign: 'center',
+        marginVertical: 10,
     },
     itemContainer: {
         backgroundColor: colors.lightGray,

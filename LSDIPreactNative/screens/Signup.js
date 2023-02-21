@@ -4,8 +4,6 @@ import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
 import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from "../config/firebase";
-import { auth } from '../config/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function SignUpScreen({ navigation }) {
 
@@ -17,8 +15,6 @@ export default function SignUpScreen({ navigation }) {
         { key: '2', value: 'Staff' },
         { key: '3', value: 'Driver' }
     ]
-
-    const [selected, setSelected] = useState("");
 
     const [values, setValues] = useState({
         name: "",
@@ -38,9 +34,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     function SignUp() {
-
         const { email, pwd, pwd2, name, role } = values
-
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -53,7 +47,6 @@ export default function SignUpScreen({ navigation }) {
                 })
                 .catch((error) => {
                     alert(error.message)
-                    // ..
                 });
         } else {
             alert("Passwords are different!")
@@ -64,9 +57,7 @@ export default function SignUpScreen({ navigation }) {
         <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Sign Up</Text>
         <TextBox placeholder="Full Name" onChangeText={text => handleChange(text, "name")} />
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
-        {/* <TextBox placeholder="Who are you? (Admin, Staff, Driver or User)" onChangeText={text => handleChange(text, "role")} /> */}
         <View style={{
-            // height: 42,
             width: "92%",
             borderRadius: 25,
             marginTop: 20

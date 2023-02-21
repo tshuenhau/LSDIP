@@ -2,9 +2,7 @@ import {
     View,
     TouchableOpacity,
     Text,
-    Image,
     StyleSheet,
-    TouchableHighlight,
     FlatList,
     Modal
 } from "react-native";
