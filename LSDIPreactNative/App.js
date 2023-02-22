@@ -16,7 +16,8 @@ import Login from './screens/Login';
 import Signup from './screens/Signup';
 // import Chat from './screens/Chat';
 import Home from './screens/Home';
-import Admin from './screens/Admin';
+import OutletManagement from './screens/OutletManagement';
+import AdminRostering from './screens/AdminRostering';
 import AdminTimeslots from './screens/AdminTimeslots';
 import StaffRostering from './screens/StaffRostering';
 import Driver from './screens/Driver';
@@ -62,38 +63,6 @@ function CustomDrawerContent(props) {
     </DrawerContentScrollView>
   );
 }
-
-// function OperationStack() {
-//   return (
-//     <Drawer.Navigator
-//       useLegacyImplementation
-//       drawerContent={(props) => <CustomDrawerContent {...props} />}
-//     >
-//       <Drawer.Group>
-//         <Drawer.Screen name='Home' component={Home} />
-//         <Drawer.Screen name='Staff' component={StaffRostering} />
-//         <Drawer.Screen name='Admin' component={Admin} />
-//         <Drawer.Screen name='Driver' component={Driver} />
-//         <Drawer.Screen name='Chat' component={Chat} />
-//       </Drawer.Group>
-//       <Drawer.Group screenOptions={{ presentation: 'modal' }}>
-//         <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
-//       </Drawer.Group>
-//     </Drawer.Navigator>
-//   );
-// }
-
-// function AuthStack() {
-//   return (
-//     <Stack.Navigator screenOptions={{ headerShown: false }}>
-//       <Stack.Screen name='Login' component={Login} />
-//       <Stack.Screen name='Signup' component={Signup} />
-//       <Stack.Screen name='Admin' component={Admin} />
-//       <Stack.Screen name='Staff' component={StaffRostering} />
-//       <Stack.Screen name='Driver' component={Driver} />
-//     </Stack.Navigator>
-//   );
-// }
 
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
@@ -141,9 +110,9 @@ function RootNavigator() {
         >
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
-          <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
-          <Drawer.Screen name='Admin' component={Admin} />
-          <Drawer.Screen name='AdminTimeslots' component={AdminTimeslots} />
+          <Drawer.Screen name='Outlet Management' component={OutletManagement} />
+          <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
+          <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
