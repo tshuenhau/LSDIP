@@ -79,7 +79,7 @@ export default function SignUpScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     view: {
-        // flex: 1,
+        flex: 1,
         width: "100%",
         justifyContent: "center",
         alignItems: "center"
