@@ -1,68 +1,100 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, KeyboardAvoidingView, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, Platform } from "react-native";
+import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, Platform } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { firebase } from "../config/firebase";
 const backImage = require("../assets/backImage.jpg");
 
 export default function Login({ navigation }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const auth1 = firebase.auth;
+  const firestore = firebase.firestore;
+  const [user, setUser] = useState(null)
 
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success"))
-        .catch((err) => Alert.alert("Login error", err.message));
+        .then(() => {
+          firestore().collection("users").doc(auth1().currentUser.uid).get()
+            .then(user => {
+              setUser(user.data())
+              console.log(user.data().role)
+              if (user.data().role === "Admin") {
+                navigation.navigate("Admin");
+              } else {
+                console.log(user)
+                navigation.navigate("Home");
+              }
+            })
+        })
+        .catch((err) => {
+          console.log("Login error")
+          const errorCode = err.code;
+          console.log(errorCode);
+          if (errorCode === 'auth/wrong-password') {
+            alert('Wrong Password');
+          } else {
+            alert("Login error", err)
+          }
+        });
     }
   };
-  
+
   return (
     <KeyboardAvoidingView style={styles.container}>
       <Image source={backImage} style={styles.backImage} />
       <View style={styles.whiteSheet} />
       <SafeAreaView style={styles.form}>
-      {Platform.OS === 'android' &&
-        <Text style={styles.title1}>Log In</Text>
-      }
-      {Platform.OS === 'web' &&
-        <Text style={styles.title}>Log In</Text>
-      }
-        {/* <Text style={styles.title}>Log In</Text> */}
-         <TextInput
-        style={styles.input}
-        placeholder="Enter email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        textContentType="emailAddress"
-        autoFocus={true}
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter password"
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry={true}
-        textContentType="password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-      />
-      <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
-        <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}> Log In</Text>
-      </TouchableOpacity>
-      <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
-        <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={{color: '#0782F9', fontWeight: '600', fontSize: 14}}> Sign Up</Text>
+        {Platform.OS === 'android' &&
+          <Text style={styles.title1}>Log In</Text>
+        }
+        {Platform.OS === 'web' &&
+          <Text style={styles.title}>Log In</Text>
+        }
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          autoFocus={true}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter password"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry={true}
+          textContentType="password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
+          <Text style={{ fontWeight: 'bold', color: '#fff', fontSize: 18 }}> Log In</Text>
         </TouchableOpacity>
-      </View>
+        <View style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
+          <Text style={{ color: 'gray', fontWeight: '600', fontSize: 14 }}>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+            <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ alignItems: 'center', alignSelf: 'center' }}>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Forgot Password</Text>
+          </TouchableOpacity>
+        </View>
+
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
     </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -77,7 +109,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     marginTop: 30,
   },
-    title1: {
+  title1: {
     fontSize: 36,
     fontWeight: 'bold',
     color: "#0782F9",
