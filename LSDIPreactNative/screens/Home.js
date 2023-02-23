@@ -233,6 +233,11 @@ const Home = () => {
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
             </View>
+            <View style={styles.container1}>  
+                <TouchableOpacity onPress={() => navigation.navigate("VehicleModule")} style={styles.button1}>
+                    <Text style={styles.buttonText1}>To Vehicle Module</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
     };

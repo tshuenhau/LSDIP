@@ -9,6 +9,7 @@ import Login from './screens/Login';
 import Signup from './screens/Signup';
 import Chat from './screens/Chat';
 import Home from './screens/Home';
+import VehicleModule from './screens/VehicleModule';
 
 // export default function App() {
 //   return (
@@ -56,6 +57,7 @@ function ChatStack() {
     <Stack.Navigator defaultScreenOptions={Home}>
       <Stack.Screen name='Home' component={Home} />
       <Stack.Screen name='Chat' component={Chat} />
+      <Stack.Screen name='VehicleModule' component={VehicleModule} />  
     </Stack.Navigator>
   );
 }
@@ -67,6 +69,14 @@ function AuthStack() {
       <Stack.Screen name='Signup' component={Signup} />
     </Stack.Navigator>
   );
+}
+
+function VehicleStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='VehicleModule' component={VehicleModule} />
+    </Stack.Navigator>
+  )
 }
 
 function RootNavigator() {
