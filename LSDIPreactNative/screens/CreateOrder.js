@@ -161,6 +161,7 @@ export default function CreateOrder() {
 
     return (
         <View>
+            <Text>Outlet Name: </Text>
             <button style={styles.button} onClick={() => showLI()}>Show Laundry Items</button>
             <div id="laundrylineitems" style={styles.div}>
                 <div id="laundrylist"></div>
