@@ -12,96 +12,177 @@ import alert from '../components/Alert';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
-import { firebase, auth } from '../config/firebase';
+import { firebase } from '../config/firebase';
 import moment from "moment";
 
 export default function StaffAvailability() {
 
     const today = moment().format("YYYY-MM-DD");
-    const [availabilityModalVisible, setAvailabilityModalVisible] = useState(false);
+    const [weekdayModalVisible, setWeekdayModalVisible] = useState(false);
+    const [weekendModalVisible, setWeekendModalVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-    const [selectedAvailability, setSelectedAvailability] = useState("");
+    const [selectedAvailability, setSelectedAvailability] = useState({});
     const [shiftTimings, setShiftTimings] = useState([]);
+    const [outlets, setOutlets] = useState([{}]);
     const [indicatedAvailabilities, setIndicatedAvailabilities] = useState([]);
     const auth1 = firebase.auth;
     const currUser = auth1().currentUser.uid;
 
-    const staff_indicated_availability = firebase.firestore().collection('staff_indicated_availability');
+    const staff_schedule = firebase.firestore().collection('staff_schedule');
     const shift_timings = firebase.firestore().collection('shift_timings');
+    const outlet_staff = firebase.firestore().collection('outlet_staff');
+    const outlet = firebase.firestore().collection('outlet');
 
     useEffect(() => {
-        shift_timings
+
+        // gets all outlets
+        outlet
             .get()
             .then(querySnapshot => {
-                const shiftTimings = [];
+                const temp = [];
                 querySnapshot.forEach(doc => {
-                    const { name, hours, description, type } = doc.data();
-                    shiftTimings.push({
-                        key: doc.id,
-                        value: name,
-                        hours: hours,
-                        description: description,
-                        type: type
+                    const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
+                    temp.push({
+                        outletID: doc.id,
+                        outletAddress: outletAddress,
+                        outletName: outletName,
+                        outletEmail: outletEmail,
+                        outletNumber: outletNumber
                     });
                 });
-                setShiftTimings(shiftTimings);
 
-                staff_indicated_availability
-                    .where("userID", "==", currUser)
+                // only outlets that curUser is assigned to
+                outlet_staff
+                    .where("staffID", "==", currUser)
                     .get()
                     .then(querySnapshot => {
-                        const indicatedAvailabilities = [];
+                        const outlets = [];
                         querySnapshot.forEach(doc => {
-                            const { date, shiftID, userID } = doc.data();
-                            const curShift = shiftTimings.find(s => s.key === shiftID);
-                            indicatedAvailabilities.push({
-                                id: doc.id,
-                                date: date,
-                                shiftID: shiftID,
-                                name: curShift.value,
-                                hours: curShift.hours,
-                                description: curShift.description,
-                                userID: userID
+                            const { outletID, outletAddress, outletEmail, outletName, outletNumber } = temp.find(o => o.outletID === doc.data().outletID);
+                            outlets.push({
+                                key: outletID,
+                                value: outletName,
+                                outletAddress: outletAddress,
+                                outletEmail: outletEmail,
+                                outletNumber: outletNumber
                             });
                         });
-                        setIndicatedAvailabilities(indicatedAvailabilities);
+                        setOutlets(outlets);
                     });
 
-            });
+                // get all shift timings
+                shift_timings
+                    .get()
+                    .then(querySnapshot => {
+                        const shiftTimings = [];
+                        querySnapshot.forEach(doc => {
+                            const { name, hours, description, type } = doc.data();
+                            shiftTimings.push({
+                                key: doc.id,
+                                value: name,
+                                hours: hours,
+                                description: description,
+                                type: type
+                            });
+                        });
+                        setShiftTimings(shiftTimings);
 
+                        // get shift timings of curUser
+                        staff_schedule
+                            .where("userID", "==", currUser)
+                            .get()
+                            .then(querySnapshot => {
+                                const indicatedAvailabilities = [];
+                                querySnapshot.forEach(doc => {
+                                    const { date, shiftID, userID, outletID } = doc.data();
+                                    const curShift = shiftTimings.find(s => s.key === shiftID);
+                                    const curOutlet = temp.find(o => o.outletID === outletID);
+                                    indicatedAvailabilities.push({
+                                        id: doc.id,
+                                        date: date,
+                                        shiftID: shiftID,
+                                        name: curShift.value,
+                                        hours: curShift.hours,
+                                        description: curShift.description,
+                                        userID: userID,
+                                        outletName: curOutlet.outletName
+                                    });
+                                });
+                                setIndicatedAvailabilities(indicatedAvailabilities);
+                            });
+                    });
+            });
     }, [])
 
     const onDayPress = (day) => {
         const date = day.dateString;
-        setAvailabilityModalVisible(!availabilityModalVisible);
+        const converted = new Date(date);
+        const dayOfWeek = converted.getDay();
+        if (dayOfWeek === 6 || dayOfWeek === 0) {
+            setWeekendModalVisible(!weekendModalVisible);
+        } else {
+            setWeekdayModalVisible(!weekdayModalVisible);
+        }
         setSelectedDate(date);
     };
 
-    // might need to add outlet id
+    function handleChange(text, eventName) {
+        setSelectedAvailability(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
     const indicateAvailability = () => {
-        const newAvailability = {
-            shiftID: selectedAvailability,
-            userID: currUser,
-            date: selectedDate
+        if (selectedAvailability.shiftID && selectedAvailability.outletID) {
+            const newAvailability = {
+                shiftID: selectedAvailability.shiftID,
+                outletID: selectedAvailability.outletID,
+                userID: currUser,
+                date: selectedDate,
+                completed: false,
+                confirmed: false,
+            }
+            console.log("NA", newAvailability);
+            staff_schedule
+                .add(newAvailability)
+                .then((doc) => {
+                    const newIndicatedAvailability = {
+                        id: doc.id,
+                        ...shiftTimings.find(s => s.key === selectedAvailability.shiftID),
+                        date: selectedDate,
+                        outletName: outlets.find(o => o.key === selectedAvailability.outletID).value,
+                    };
+                    indicatedAvailabilities.push(newIndicatedAvailability);
+                    setWeekdayModalVisible(false);
+                    setWeekendModalVisible(false);
+                    console.log("Success");
+                }).catch((err) => {
+                    console.log(err);
+                })
+        } else {
+            alert("Confirmation", "Please select outlet and shift",
+                [
+                    {
+                        text: "Ok",
+                        onPress: () => {
+                            console.log(selectedAvailability.shiftID);
+                            console.log(selectedAvailability.outletID);
+                        }
+                    }
+                ])
         }
-        staff_indicated_availability
-            .add(newAvailability)
-            .then(() => {
-                setAvailabilityModalVisible(!availabilityModalVisible);
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
     }
 
     const deleteAvailability = (item) => {
-        console.log(item);
         return alert("Confirmation", "Are you sure you want to remove indicated availability?",
             [
                 {
                     text: "Yes",
                     onPress: () => {
-                        staff_indicated_availability.doc(item.id)
+                        staff_schedule.doc(item.id)
                             .delete()
                             .then(() => {
                                 console.log("Deleted Availability")
@@ -122,10 +203,10 @@ export default function StaffAvailability() {
     }
 
     const renderItem = ({ item }) => (
-        // <TouchableOpacity style={styles.card}>
         <View style={styles.itemContainer}>
             <View style={styles.cardBody}>
                 <Text style={styles.availabilityDate}>{item.date} </Text>
+                <Text style={styles.itemText}>{item.outletName} </Text>
                 <Text style={styles.itemText}>{item.description} </Text>
                 <Text style={styles.itemText}>Hours: {item.hours} </Text>
             </View>
@@ -138,37 +219,57 @@ export default function StaffAvailability() {
                 />
             </View>
         </View>
-        // </TouchableOpacity >
     );
 
     return (
         <View>
             <View style={styles.container}>
+                <View style={styles.topSelectList}>
+                    <SelectList
+                        data={outlets}
+                        setSelected={(val) => handleChange(val, "outletID")}
+                        save="key"
+                        search={false}
+                    />
+                </View>
                 <View style={styles.calendarContainer}>
                     <Calendar
                         onDayPress={onDayPress}
-                        // markedDates={markedDates}
                         minDate={today}
                         markingType="simple"
                     />
                 </View>
+
+                <View style={styles.timingsContainer}>
+                    <Text style={styles.timingsTitle}>Indicated Timings</Text>
+                    <FlatList
+                        data={indicatedAvailabilities}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDatesText}>No available timings</Text>
+                        }
+                    />
+                </View>
             </View>
 
-            <Modal visible={availabilityModalVisible} animationType="slide" transparent={true}>
+            {/* weekday modal */}
+            <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
                 <View style={styles.modalBackdrop}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>{selectedDate}</Text>
 
                         <SelectList
-                            data={shiftTimings}
-                            setSelected={(val) => setSelectedAvailability(val)}
+                            data={shiftTimings.filter(x => x.type === "weekday")}
+                            setSelected={(val) => handleChange(val, "shiftID")}
                             save="key"
+                            search={false}
                         />
                         <View style={styles.modalButtons}>
                             <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
                                 <Text style={styles.indicateButtonText}>Indicate</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setAvailabilityModalVisible(!availabilityModalVisible)}>
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setWeekdayModalVisible(!weekdayModalVisible)}>
                                 <Text style={styles.closeButtonText}>Close</Text>
                             </TouchableOpacity>
                         </View>
@@ -176,23 +277,39 @@ export default function StaffAvailability() {
                 </View>
             </Modal >
 
-            <View style={styles.timingsContainer}>
-                <Text style={styles.timingsTitle}>Indicated Timings</Text>
-                <FlatList
-                    data={indicatedAvailabilities}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDatesText}>No available timings</Text>
-                    }
-                />
-            </View>
+            {/* weekend modal */}
+            <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
+                <View style={styles.modalBackdrop}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{selectedDate}</Text>
+
+                        <SelectList
+                            data={shiftTimings.filter(x => x.type === "weekend")}
+                            setSelected={(val) => handleChange(val, "shiftID")}
+                            save="key"
+                            search={false}
+                        />
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
+                                <Text style={styles.indicateButtonText}>Indicate</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setWeekendModalVisible(!weekendModalVisible)}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal >
+
 
         </View >
     )
 }
 
 const styles = StyleSheet.create({
+    topSelectList: {
+        marginBottom: 20,
+    },
     availabilityDate: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -212,10 +329,6 @@ const styles = StyleSheet.create({
     cardBody: {
         padding: 16,
     },
-    // card: {
-    //     backgroundColor: '#fff',
-
-    // },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -257,6 +370,8 @@ const styles = StyleSheet.create({
     timingsTitle: {
         fontSize: 20,
         fontWeight: 'bold',
+        // alignItems: 'center',
+        // justifyContent: 'center',
         marginBottom: 10,
     },
     dateButton: {
