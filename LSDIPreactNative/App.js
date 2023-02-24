@@ -23,6 +23,8 @@ import StaffRostering from './screens/StaffRostering';
 import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
+import CreateOrder from './screens/CreateOrder';
+import OrderDetailsPage from './screens/OrderDetailsPage';
 import ForgotPassword from './screens/ForgotPassword';
 import { firebase } from "./config/firebase";
 
@@ -115,7 +117,13 @@ function RootNavigator() {
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
-          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
+          <Drawer.Screen name='Chat' component={Chat} />
+          <Drawer.Screen name='Create Order' component={CreateOrder} />
+          <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
+          {/* </Drawer.Group> */}
+          {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
+            <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
+          </Drawer.Group> */}
         </Drawer.Navigator>
       </NavigationContainer >
     );
