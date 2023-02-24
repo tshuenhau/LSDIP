@@ -26,11 +26,22 @@ export default function OrdersList() {
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
-        const { date, items } = doc.data();
+        const { customerPrimaryKey,
+          date,
+          description,
+          orderItems,
+          outletId,
+          orderStatus,
+          totalPrice } = doc.data();
         orderList.push({
           id: doc.id,
+          customerPrimaryKey,
           date,
-          items,
+          description,
+          orderItems,
+          outletId,
+          orderStatus,
+          totalPrice,
         });
       });
       setOrderList(orderList);
@@ -65,12 +76,19 @@ export default function OrdersList() {
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
         <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
-        <Text style={styles.orderNumber}>{order.status}</Text>
+        <Text style={styles.orderNumber}>{order.orderStatus}</Text>
+
+        
       </View>
       {expandedOrder === order.id && (
+        <View style={styles.cardBody}>
+        <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
+        <Text style={styles.orderNumber}>Description: {order.description}</Text>
+        <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+        <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
         <FlatList
           style={styles.cardBody}
-          data={order.items}
+          data={order.orderItems}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.itemContainer}>
@@ -79,6 +97,7 @@ export default function OrdersList() {
             </View>
           )}
         />
+        </View>
       )}
     </TouchableOpacity>
   );
