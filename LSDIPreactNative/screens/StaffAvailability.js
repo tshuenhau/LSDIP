@@ -12,7 +12,7 @@ import alert from '../components/Alert';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
-import { firebase, auth } from '../config/firebase';
+import { firebase } from '../config/firebase';
 import moment from "moment";
 
 export default function StaffAvailability() {
@@ -148,11 +148,12 @@ export default function StaffAvailability() {
             console.log("NA", newAvailability);
             staff_schedule
                 .add(newAvailability)
-                .then(() => {
+                .then((doc) => {
                     const newIndicatedAvailability = {
+                        id: doc.id,
                         ...shiftTimings.find(s => s.key === selectedAvailability.shiftID),
                         date: selectedDate,
-                        // outletName: outlets.find(o => o.key === selectedAvailability.outletID)
+                        outletName: outlets.find(o => o.key === selectedAvailability.outletID).value,
                     };
                     indicatedAvailabilities.push(newIndicatedAvailability);
                     setWeekdayModalVisible(false);
@@ -202,7 +203,6 @@ export default function StaffAvailability() {
     }
 
     const renderItem = ({ item }) => (
-        // <TouchableOpacity style={styles.card}>
         <View style={styles.itemContainer}>
             <View style={styles.cardBody}>
                 <Text style={styles.availabilityDate}>{item.date} </Text>
@@ -219,7 +219,6 @@ export default function StaffAvailability() {
                 />
             </View>
         </View>
-        // </TouchableOpacity >
     );
 
     return (
@@ -278,7 +277,7 @@ export default function StaffAvailability() {
                 </View>
             </Modal >
 
-            {/* weekday modal */}
+            {/* weekend modal */}
             <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
                 <View style={styles.modalBackdrop}>
                     <View style={styles.modalContent}>
@@ -286,8 +285,9 @@ export default function StaffAvailability() {
 
                         <SelectList
                             data={shiftTimings.filter(x => x.type === "weekend")}
-                            setSelected={(val) => setSelectedAvailability(val)}
+                            setSelected={(val) => handleChange(val, "shiftID")}
                             save="key"
+                            search={false}
                         />
                         <View style={styles.modalButtons}>
                             <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
