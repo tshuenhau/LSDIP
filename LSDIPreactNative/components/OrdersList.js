@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { firebase } from '../config/firebase';
+import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 
 if (
@@ -28,7 +29,6 @@ export default function OrdersList() {
       querySnapshot.forEach((doc) => {
         const { customerPrimaryKey,
           date,
-          description,
           orderItems,
           outletId,
           orderStatus,
@@ -37,7 +37,6 @@ export default function OrdersList() {
           id: doc.id,
           customerPrimaryKey,
           date,
-          description,
           orderItems,
           outletId,
           orderStatus,
@@ -48,6 +47,7 @@ export default function OrdersList() {
     });
     return () => unsubscribe();
   }, []);
+
 
   const [expandedOrder, setExpandedOrder] = useState(null);
 
@@ -83,20 +83,20 @@ export default function OrdersList() {
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
         <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
-        <Text style={styles.orderNumber}>Description: {order.description}</Text>
         <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
         <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
-        <FlatList
-          style={styles.cardBody}
-          data={order.orderItems}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Text style={styles.itemText}>{item}</Text>
+        <OrderDetails data={order.id}></OrderDetails>
+        {/* <FlatList */}
+          {/* style={styles.cardBody} */}
+          {/* data={order.orderItems} */}
+          {/* keyExtractor={(item) => item.id} */}
+          {/* renderItem={({ item }) => ( */}
+            {/* <View style={styles.itemContainer}> */}
+              {/* <Text style={styles.itemText}>{item}</Text> */}
               {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
-            </View>
-          )}
-        />
+            {/* </View> */}
+          {/* )} */}
+        {/* /> */}
         </View>
       )}
     </TouchableOpacity>
