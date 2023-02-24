@@ -153,37 +153,39 @@ const getMonthDays = (month, year) => {
       <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Available Timings on {date}</Text>
-          {availableTimings.length > 0 ? (
-            availableTimings.map((timing) => {
-              const isDisabled =
-                selectedTime !== null && selectedTime !== timing;
-              return (
-                <TouchableOpacity
-                  key={timing}
-                  style={[
-                    styles.timingButton,
-                    selectedTime === timing && styles.selectedTimingButton,
-                    isDisabled && styles.disabledTimingButton,
-                  ]}
-                  onPress={() => handleTimeSelect(timing)}
-                  disabled={isDisabled}
-                >
-                  <Text
+          <ScrollView>
+            {availableTimings.length > 0 ? (
+              availableTimings.map((timing) => {
+                const isDisabled =
+                  selectedTime !== null && selectedTime !== timing;
+                return (
+                  <TouchableOpacity
+                    key={timing}
                     style={[
-                      styles.timingText,
-                      isDisabled && styles.disabledTimingText,
+                      styles.timingButton,
+                      selectedTime === timing && styles.selectedTimingButton,
+                      isDisabled && styles.disabledTimingButton,
                     ]}
+                    onPress={() => handleTimeSelect(timing)}
+                    disabled={isDisabled}
                   >
-                    {timing}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })
-          ) : (
-            <Text style={styles.noTimingsText}>
-              No available timings for selected
-            </Text>
-          )}
+                    <Text
+                      style={[
+                        styles.timingText,
+                        isDisabled && styles.disabledTimingText,
+                      ]}
+                    >
+                      {timing}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              <Text style={styles.noTimingsText}>
+                No available timings for selected
+              </Text>
+            )}
+          </ScrollView>
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={styles.closeButton}
@@ -495,7 +497,7 @@ const styles = StyleSheet.create({
     selectedTimesContainer: {
       marginTop: 20,
       marginBottom: 20,
-      height: 500,
+      height: 400,
     },
     selectedTimesList: {
       flex: 1,
