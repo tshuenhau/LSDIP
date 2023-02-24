@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import OutletList from './OutletList';
 import OutletDetail from './OutletDetail';
 
-export default function Admin() {
+export default function OutletManagement() {
 
     const Stack = createStackNavigator();
 

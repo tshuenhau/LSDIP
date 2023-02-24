@@ -10,7 +10,8 @@ import { auth } from './config/firebase';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import Home from './screens/Home';
-import Admin from './screens/Admin';
+import OutletManagement from './screens/OutletManagement';
+import AdminRostering from './screens/AdminRostering';
 import AdminTimeslots from './screens/AdminTimeslots';
 import StaffRostering from './screens/StaffRostering';
 import Driver from './screens/Driver';
@@ -77,69 +78,19 @@ const SideMenu = ({ navigation, user }) => {
   };
   
   return (
-    <View style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1 }}>
-        {isCollapsed ? (
-          <CollapsibleButton onPress={handleCollapsibleButtonPress} />
-        ) : (
-          <View style={{ height: '100%', overflow: 'scroll' }}>
-            <CollapsibleButton onPress={handleCollapsibleButtonPress} />
-            <TouchableOpacity
-              style={styles.sideMenuItem}
-              onPress={() => {
-                navigation.navigate('Home');
-              }}>
-              <Text style={styles.sideMenuItemText}>Home</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.sideMenuItem}
-              onPress={() => {
-                navigation.navigate('Admin');
-              }}>
-              <Text style={styles.sideMenuItemText}>Admin</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.sideMenuItem}
-              onPress={() => {
-                navigation.navigate('Delivery');
-              }}>
-              <Text style={styles.sideMenuItemText}>Delivery</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.sideMenuItem}
-              onPress={() => {
-                navigation.navigate('AdminTimeslots');
-              }}>
-              <Text style={styles.sideMenuItemText}>Admin Timeslots</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.sideMenuItem}
-              onPress={() => {
-                navigation.navigate('Driver');
-              }}>
-              <Text style={styles.sideMenuItemText}>Driver</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.sideMenuItem}
-              onPress={() => {
-                navigation.navigate('MyProfile');
-              }}>
-              <Text style={styles.sideMenuItemText}>My Profile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.sideMenuItem, { paddingBottom: 20 }]} // add paddingBottom to last item to create space between last item and bottom of ScrollView
-              onPress={handleSignOut}>
-              <Text style={styles.sideMenuItemText}>Sign Out</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </SafeAreaView>
-    </View>
-  );  
-};
-
-
-
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="Sign Out"
+        onPress={handleSignOut}
+      />
+      <DrawerItem
+        label="Close Drawer"
+        onPress={() => props.navigation.closeDrawer()}
+      />
+    </DrawerContentScrollView>
+  );
+}
 
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
@@ -180,18 +131,66 @@ function RootNavigator() {
       </View>
     );
   }
-  if(user1?.role === undefined){
-    isEnabled = false;
-    return(
-      <AuthenticatedUserProvider>
-        <NavigationContainer ref={navigationRef}>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name='Login' component={Login} />
-            <Stack.Screen name='Signup' component={Signup} />
-            <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
-          </Stack.Navigator>
-        </NavigationContainer >
-      </AuthenticatedUserProvider>
+  //console.log(user?.metadata?.customClaims);
+  if (user1?.role === "Admin") {
+    return (
+      <NavigationContainer>
+        <Drawer.Navigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='My Profile' component={MyProfile} />
+          <Drawer.Screen name='Outlet Management' component={OutletManagement} />
+          <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
+          <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
+          <Drawer.Screen name='Delivery' component={Delivery} />
+          <Drawer.Screen name='Driver' component={Driver} />
+          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
+        </Drawer.Navigator>
+      </NavigationContainer >
+    );
+  } else if (user1?.role === "Staff") {
+    return (
+      <NavigationContainer>
+        <Drawer.Navigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Group>
+            <Drawer.Screen name='Home' component={Home} />
+            <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
+          </Drawer.Group>
+        </Drawer.Navigator>
+      </NavigationContainer>
+    );
+  } else if (user1?.role === "Driver") {
+    return (
+      <NavigationContainer>
+        <Drawer.Navigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Group>
+            <Drawer.Screen name='Home' component={Home} />
+            <Drawer.Screen name='Driver' component={Driver} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
+          </Drawer.Group>
+        </Drawer.Navigator>
+      </NavigationContainer>
+    );
+  } else {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{
+          headerShown: false,
+        }}>
+          <Stack.Screen name='Login' component={Login} />
+          <Stack.Screen name='Signup' component={Signup} />
+          <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
+        </Stack.Navigator>
+      </NavigationContainer >
     )
   } else {
     isEnabled = true;
