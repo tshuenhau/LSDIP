@@ -117,7 +117,7 @@ function RootNavigator() {
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
-          <Drawer.Screen name='Chat' component={Chat} />
+          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
           {/* </Drawer.Group> */}
