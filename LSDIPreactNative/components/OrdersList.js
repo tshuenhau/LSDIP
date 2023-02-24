@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { firebase } from '../config/firebase';
+import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 
 if (
@@ -26,17 +27,27 @@ export default function OrdersList() {
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
-        const { date, items } = doc.data();
+        const { customerPrimaryKey,
+          date,
+          orderItems,
+          outletId,
+          orderStatus,
+          totalPrice } = doc.data();
         orderList.push({
           id: doc.id,
+          customerPrimaryKey,
           date,
-          items,
+          orderItems,
+          outletId,
+          orderStatus,
+          totalPrice,
         });
       });
       setOrderList(orderList);
     });
     return () => unsubscribe();
   }, []);
+
 
   const [expandedOrder, setExpandedOrder] = useState(null);
 
@@ -65,20 +76,28 @@ export default function OrdersList() {
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
         <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
-        <Text style={styles.orderNumber}>{order.status}</Text>
+        <Text style={styles.orderNumber}>{order.orderStatus}</Text>
+
+        
       </View>
       {expandedOrder === order.id && (
-        <FlatList
-          style={styles.cardBody}
-          data={order.items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Text style={styles.itemText}>{item}</Text>
+        <View style={styles.cardBody}>
+        <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
+        <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+        <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+        <OrderDetails data={order.id}></OrderDetails>
+        {/* <FlatList */}
+          {/* style={styles.cardBody} */}
+          {/* data={order.orderItems} */}
+          {/* keyExtractor={(item) => item.id} */}
+          {/* renderItem={({ item }) => ( */}
+            {/* <View style={styles.itemContainer}> */}
+              {/* <Text style={styles.itemText}>{item}</Text> */}
               {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
-            </View>
-          )}
-        />
+            {/* </View> */}
+          {/* )} */}
+        {/* /> */}
+        </View>
       )}
     </TouchableOpacity>
   );
