@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback  } from 'react';
-import { View, Text, TouchableOpacity, TouchableHighlight, Modal, StyleSheet, Alert, FlatList, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, TouchableHighlight, Modal, StyleSheet, Alert, FlatList, TextInput, ScrollView } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 import { firebase } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
@@ -97,14 +97,15 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           const timingsRef = db.collection('available_timings').doc(selectedDate);
           const timingsDoc = await timingsRef.get();
           const availableTimings = timingsDoc.data()?.available_times || [];
-          const updatedTimings = availableTimings.filter((timing) => !selectedTimings.includes(timing));
+          const updatedTimings = availableTimings?.filter((timing) => !selectedTimings.includes(timing)) || [];
           await timingsRef.update({ available_times: updatedTimings });
-          setSelectedTimings(updatedTimings);
+          setSelectedTimings(prevSelectedTimings => prevSelectedTimings.filter(timing => !updatedTimings.includes(timing)));
           setTimingsModalVisible(false);
+          updatedTimings =[];
         } catch (err) {
           console.log('Error deleting available timings: ', err);
         }
-      };
+      };      
       
       
     
@@ -113,7 +114,7 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           <View style={styles.modalBackdrop}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{selectedDate}</Text>
-              <View style={styles.timingsContainer}>{availableTimings}</View>
+              <ScrollView style={styles.timingsContainer}>{availableTimings}</ScrollView>
     
               <TextInput
                 style={styles.timingsInput}
@@ -182,8 +183,6 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           console.log('Error adding available timings: ', err);
         }
       };
-      
-            
       
   
     const handleDeleteDate = async () => {
