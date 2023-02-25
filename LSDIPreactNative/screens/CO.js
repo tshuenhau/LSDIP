@@ -12,11 +12,11 @@ import {
     Platform,
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
-import OutletDetail from './OutletDetail';
 
 if (
     Platform.OS === 'android' &&
@@ -30,8 +30,7 @@ export default function CO() {
     const initialValues = {
         laundryItemName: "",
         typeofServices: "",
-        upperPricing: "",
-        lowerPricing: "",
+        price: "",
         pricingMethod: ""
     };
 
@@ -49,13 +48,12 @@ export default function CO() {
         allItems.onSnapshot(querySnapshot => {
             const itemList = [];
             querySnapshot.forEach(doc => {
-                const { laundryItemName, typeOfServices, upperPricing, lowerPricing, pricingMethod } = doc.data();
+                const { laundryItemName, typeOfServices, price, pricingMethod } = doc.data();
                 itemList.push({
                     id: doc.id,
                     laundryItemName,
                     typeOfServices,
-                    upperPricing,
-                    lowerPricing,
+                    price,
                     pricingMethod
                 });
             });
@@ -84,6 +82,8 @@ export default function CO() {
             }
         })
     }
+
+    
 
     /*
     function createOutlet() {
@@ -131,7 +131,7 @@ export default function CO() {
         console.log("getlaundrylist function");
         console.log(itemList);
         if (itemList === undefined || itemList.length === 0) {
-            return <ul>No Items</ul>;
+            return null;
         }
         const data = itemList.filter(element => element.typeOfServices == 'Wet Wash');
         /*
@@ -154,7 +154,7 @@ export default function CO() {
     function getDrycleanlist(itemList) {    
         console.log("getdrycleanlist function");
         if (itemList === undefined || itemList.length === 0) {
-            return <ul>No Items</ul>;
+            return null;
         }
         return itemList.filter(element => element.typeOfServices == 'Dry Clean');
     }
@@ -163,7 +163,7 @@ export default function CO() {
         console.log("getotherlist function");
         console.log(itemList);
         if (itemList === undefined || itemList.length === 0) {
-            return <ul>No Items</ul>;
+            return null;
         }
         return itemList.filter(element => element.typeOfServices != 'Wet Wash' && 
             element.typeOfServices != 'Dry Clean');
@@ -182,15 +182,14 @@ export default function CO() {
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
                         <Text style={styles.itemText}>Pricing Method: {item.pricingMethod} </Text>
-                        <Text style={styles.itemText}>Upper Pricing: {item.upperPricing} </Text>
-                        <Text style={styles.itemText}>Lower Pricing: {item.lowerPricing} </Text>
+                        <Text style={styles.itemText}>Price: {item.price} </Text>
                     </View>
                     <View style={styles.cardButtons}>
-                        <FontAwesome
-                            style={styles.outletIcon}
-                            color="black"
-                            name="add"
-                            onPress={() => addItem(item)}
+                        <Ionicons 
+                            style={styles.addIcon}
+                            name="add-circle" 
+                            color="#0B3270" 
+                            onPress={() => addOrderitem(item)}
                         />
                     </View>
                 </View>
@@ -316,7 +315,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         padding: 16,
     },
-    outletIcon: {
+    addIcon: {
         fontSize: 25,
         margin: 10,
     },
