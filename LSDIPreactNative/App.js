@@ -23,6 +23,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import CO from './screens/CO';
 import { firebase } from "./config/firebase";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -148,6 +149,7 @@ function RootNavigator() {
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Chat' component={Chat} />
           <Drawer.Screen name='Create Order' component={CreateOrder} />
+          <Drawer.Screen name='CO' component={CO} />
           {/* </Drawer.Group> */}
           {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
             <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />

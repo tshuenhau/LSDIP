@@ -16,7 +16,7 @@ import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
 import OutletDetail from './OutletDetail';
-import { color } from "react-native-reanimated";
+import { color, greaterThan } from "react-native-reanimated";
 import { where, query, collection, QuerySnapshot } from "firebase/firestore";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
@@ -29,6 +29,7 @@ export default function CreateOrder() {
     const order = useState("");
     const cart = useState("");
     const [itemList, setItemList] = useState([]);
+    const [expandedItem, setExpandedItem] = useState(null);
     const allItems = db.collection('laundryItem');
     
     //showthelist(allItems);
@@ -60,10 +61,40 @@ export default function CreateOrder() {
         return items;
     }
 
-    const otherItems = db.collection('laundryItem');
-
     function showLI() {
-        document.getElementById("laundrylist").innerHTML = getLaundrylist(itemList);
+        //document.getElementById("laundrylist").innerHTML = getLaundrylist(itemList);
+        const styles = StyleSheet.create({       
+            card: {
+                backgroundColor: '#fff',
+                marginVertical: 10,
+                borderRadius: 10,
+                shadowColor: '#000',
+                shadowOpacity: 0.2,
+                shadowOffset: {
+                    width: 0,
+                    height: 3,
+                },
+                elevation: 3,
+                height: 40,
+                marginLeft: "auto",
+                marginRight: "auto"
+            },
+        })
+        document.getElementById("laundrylist").innerHTML = "<View id='ll'><Text>Hi</Text></View>";
+        document.getElementById("ll").styles = {styles};
+        /*
+        document.getElementById("ll").style.backgroundColor = '#fff';
+        document.getElementById("ll").style.marginVertical = 10;
+        document.getElementById("ll").style.borderRadius = 10;
+        document.getElementById("ll").style.shadowColor = '#000';
+        document.getElementById("ll").style.shadowOpacity = 0.2;
+        document.getElementById("ll").style.shadowOffset = {width: 0, height: 3,};
+        document.getElementById("ll").style.elevation = 3;
+        document.getElementById("ll").style.marginLeft = 'auto';
+        document.getElementById("ll").style.marginRight = 'auto';
+        document.getElementById("ll").style.height = 40;
+        */
+        
         document.getElementById("laundrylineitems").style.display = "block"; 
     }
 
@@ -73,21 +104,22 @@ export default function CreateOrder() {
         if (itemList === undefined || itemList.length === 0) {
             return <ul>No Items</ul>;
         }
-
+/*
         const data = itemList.filter(element => element.typeOfServices == 'Wet Wash');
-        let result = "<ul>";
+        let result = "";
         if (data.length === 0) {
-            result += "No Items</ul>";
+            result += "<ul>No Items</ul>";
             return result;
         }
         data.forEach(element => {
-            result += "<li>";
+            result += "<View style={styles.card}><Text style={styles.itemText}>";
             result += element.laundryItemName;
-            result += "</li>";
+            result += "</Text></View>";
         });
-        result += "</ul>";
         console.log(data);
         return result;
+        */
+        return "<card>test  </card>";
     }
 
     function hideLI() {
@@ -109,7 +141,7 @@ export default function CreateOrder() {
         const data = itemList.filter(element => element.typeOfServices == 'Dry Clean');
         let result = "<ul>";
         data.forEach(element => {
-            result += "<li>";
+            result += "<li style='color:red;'>";
             result += element.laundryItemName;
             result += "</li>";
         });
@@ -127,7 +159,7 @@ export default function CreateOrder() {
     }
 
     function showOI() {
-        document.getElementById("otherlist").innerHTML = getOtherList();
+        //document.getElementById("otherlist").innerHTML = getOtherList();
         document.getElementById("otherlineitems").style.display = "block";
     }
 
@@ -159,6 +191,33 @@ export default function CreateOrder() {
         document.getElementById("otherlineitems").style.display = "none";
     }
 
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => toggleExpand(item.id)}
+            activeOpacity={0.8}
+        >
+            <View style={styles.cardHeader}>
+                <Text>render item text</Text>
+            </View>
+            {expandedItem === item.id && (
+                <View style={styles.itemContainer}>
+                    <View style={styles.cardBody}>
+                        <Text style={styles.itemText}>Name: {item.laundryItemName} </Text>
+                    </View>
+                    <View style={styles.cardButtons}>
+                        <FontAwesome
+                            color="black"
+                            name="edit"
+                            onPress={() => navigation.navigate()}
+                        />
+                    </View>
+                </View>
+            )}
+
+        </TouchableOpacity>
+    );
+
     return (
         <View>
             <Text>Outlet Name: </Text>
@@ -174,9 +233,20 @@ export default function CreateOrder() {
             </div>
             <button style={styles.button} onClick={() => showOI()}>Show Other Items</button>
             <div id="otherlineitems" class="dropdown-items" style={styles.div}> 
-                <div id="otherlist"></div>
+                <div id="otherlist">
+                    <View style={styles.card}>
+                        Name:  
+                    </View>
+                    <View style={styles.card}>item1</View>
+                </div>
                 <button onClick={() => hideOI()}>Hide Other Items</button>
             </div>
+            <div>
+            <View style={styles.card}>
+                Name:  
+            </View>
+            </div>
+            
         </View>
     )
 }
@@ -198,6 +268,52 @@ const styles = StyleSheet.create({
         marginLeft: "auto",
         marginRight: "auto",
         display: "none"
+    },
+
+    cardButtons: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+    },
+
+    card: {
+        backgroundColor: '#fff',
+        marginVertical: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
+        height: 40,
+        marginLeft: "auto",
+        marginRight: "auto"
+    },
+
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 16,
+    },
+
+    itemContainer: {
+        backgroundColor: colors.lightGray,
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingRight: 20,
+    },
+
+    itemText: {
+        flex: 1,
+        fontSize: 16,
+    },
+
+    text: {
+        color: "#0B3270"
     }
 })
 
