@@ -28,6 +28,7 @@ import OrderDetailsPage from './screens/OrderDetailsPage';
 import ForgotPassword from './screens/ForgotPassword';
 import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
+import CO from './screens/CO';
 import { firebase } from "./config/firebase";
 
 const Stack = createStackNavigator();
@@ -124,6 +125,7 @@ function RootNavigator() {
           <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
+          <Drawer.Screen name='CO' component={CO} />
           {/* </Drawer.Group> */}
           {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
             <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
