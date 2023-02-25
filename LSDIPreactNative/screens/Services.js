@@ -5,6 +5,7 @@ import {
     Text,
     StyleSheet,
     Modal,
+    Alert,
     FlatList,
     LayoutAnimation,
     UIManager,
@@ -12,10 +13,12 @@ import {
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
-import alert from '../components/Alert'
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import alert from '../components/Alert'
+import { SelectList } from 'react-native-dropdown-select-list'
+
 
 if (
     Platform.OS === 'android' &&
@@ -24,53 +27,53 @@ if (
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function OutletList({ navigation }) {
+export default function Services({navigation}) {
 
-    const initialValues = {
-        outletName: "",
-        outletAddress: "",
-        outletNumber: "",
-        outletEmail: ""
+    const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false);
+    const laundryCItem = firebase.firestore().collection('laundryCategory');
+    const [cvalues, setCValues] = useState(initialCategoryValues);
+    const [serviceList, setServiceList] = useState('');
+    const [expandedService, setExpandedService] = useState(null);
+
+    //for services
+    const initialCategoryValues = {
+        serviceName: "",
+
     };
 
-    const [createModalVisible, setCreateModalVisible] = useState(false);
-    const [outletList, setOutletList] = useState([]);
-    const [values, setValues] = useState(initialValues);
-    const [expandedOutlet, setExpandedOutlet] = useState(null);
-    const outlets = firebase.firestore().collection('outlet');
-
+    //for services list
     useEffect(() => {
-        outlets.onSnapshot(querySnapshot => {
-            const outletList = [];
+        laundryCItem.onSnapshot(querySnapshot => {
+            const serviceList = [];
             querySnapshot.forEach(doc => {
-                const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
-                outletList.push({
+                const { serviceName } = doc.data();
+                serviceList.push({
                     id: doc.id,
-                    outletName,
-                    outletAddress,
-                    outletNumber,
-                    outletEmail
+                    serviceName,
                 });
             });
-            setOutletList(outletList);
+            setServiceList(serviceList);
         });
     }, []);
 
     const toggleExpand = (id) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        if (expandedOutlet === id) {
-            setExpandedOutlet(null);
+        if (expandedService === id) {
+            setExpandedService(null);
         } else {
-            setExpandedOutlet(id);
+            setExpandedService(id);
         }
     };
 
-    const clearState = () => {
-        setValues({ ...initialValues });
+    //for services
+    const clearCState = () => {
+        setCValues({ ...initialCategoryValues });
     }
 
-    function handleChange(text, eventName) {
-        setValues(prev => {
+    //for services
+    function handleChangeCategory(text, eventName) {
+        setCValues(prev => {
             return {
                 ...prev,
                 [eventName]: text
@@ -78,26 +81,15 @@ export default function OutletList({ navigation }) {
         })
     }
 
-    function createOutlet() {
-        outlets.add(values)
-            .then(() => {
-                setCreateModalVisible(!createModalVisible);
-                clearState;
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
-    }
-
-    const deleteOutlet = (outlet) => {
+    const deleteService = (service) => {
         return alert(
             "Confirmation",
-            "Are you sure you want to delete this outlet?",
+            "Are you sure you want to delete this Laundry Item?",
             [
                 {
                     text: "Yes",
                     onPress: () => {
-                        outlets.doc(outlet.id)
+                        laundryCItem.doc(service.id)
                             .delete()
                             .then(() => {
                                 alert("Deleted Successfully");
@@ -115,6 +107,17 @@ export default function OutletList({ navigation }) {
         );
     }
 
+    function createLaundryCategory() {
+        laundryCItem.add(cvalues)
+            .then(() => {
+                setModalVisible2(!modalVisible2);
+                clearCState;
+                console.log("Success");
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
@@ -122,89 +125,86 @@ export default function OutletList({ navigation }) {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <Text style={styles.outletName}>{item.outletName} </Text>
+                <Text style={styles.outletName}>{item.serviceName} </Text>
+                <View style={styles.cardHeaderIcon}>
+                    <FontAwesome
+                        style={styles.outletIcon}
+                        name="trash-o"
+                        color='red'
+                        onPress={() => deleteService(item)}
+                    />
+                </View>
             </View>
-            {expandedOutlet === item.id && (
+            {expandedService === item.id && (
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
-                        <Text style={styles.itemText}>Address: {item.outletAddress} </Text>
-                        <Text style={styles.itemText}>Number: {item.outletNumber} </Text>
-                        <Text style={styles.itemText}>Email: {item.outletEmail} </Text>
+                        <Text style={styles.itemText}>Service Name: {item.serviceName} </Text>
                     </View>
                     <View style={styles.cardButtons}>
-                        <FontAwesome
-                            style={styles.outletIcon}
-                            color="black"
-                            name="edit"
-                            onPress={() => navigation.navigate('OutletDetail', { item })}
-                        />
-                        <FontAwesome
-                            style={styles.outletIcon}
-                            name="trash-o"
-                            color='red'
-                            onPress={() => deleteOutlet(item)}
-                        />
+
+
                     </View>
                 </View>
             )}
-
         </TouchableOpacity>
     );
 
     return (
         <View>
-            <View style={styles.view}>
-                <TouchableOpacity
-                    onPress={() => setCreateModalVisible(!createModalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Create Outlet</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Create Modal */}
+            {/*for create services */}
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={createModalVisible}>
+                visible={modalVisible2}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalVisible2(!modalVisible2);
+                }}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
-                            <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
-                            <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
-                            <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
-                            <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
+                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
+                            <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
+
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
+                                <Btn onClick={() => setModalVisible2(!modalVisible2)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                             </View>
                         </View>
                     </View>
                 </View>
-            </Modal>
-
+            </Modal >
+            {/*to view service list */}   
+            <View style={styles.view2}>
+                <TouchableOpacity
+                    onPress={() => setModalVisible2(!modalVisible2)}
+                    style={styles.btn2}>
+                    <Text style={styles.text}>Create Service</Text>
+                </TouchableOpacity>
+            </View>
             <View>
+                <Text style={styles.listtext}>Service List </Text>
+
                 <FlatList
-                    data={outletList}
-                    keyExtractor={outlet => outlet.id}
+                    data={serviceList}
+                    keyExtractor={service => service.id}
                     renderItem={renderItem}
                     ListEmptyComponent={
                         <Text style={styles.noDataText}>No Data Found!</Text>
                     }
                 />
             </View>
+
         </View>
+
     )
+
 }
+
 
 const styles = StyleSheet.create({
     cardBody: {
         padding: 16,
-    },
-    noDataText: {
-        fontStyle: 'italic',
-        textAlign: 'center',
-        marginVertical: 10,
     },
     itemContainer: {
         backgroundColor: colors.lightGray,
@@ -218,10 +218,6 @@ const styles = StyleSheet.create({
     itemText: {
         flex: 1,
         fontSize: 16,
-    },
-    cardButtons: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
     },
     card: {
         backgroundColor: '#fff',
@@ -239,20 +235,33 @@ const styles = StyleSheet.create({
     outletName: {
         fontSize: 20,
         fontWeight: 'bold',
+        padding:20
+    },
+    outletIcon: {
+        fontSize: 25,
+        margin: 10,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 16,
     },
-    outletIcon: {
+    deleteIcon: {
         fontSize: 25,
-        margin: 10,
     },
     view: {
         width: "100%",
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        padding: 20
+    },
+    view2: {
+        width: "40%",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
     btn: {
         padding: 10,
@@ -261,10 +270,26 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    btn2: {
+        padding: 5,
+        height: 100,
+        width: 250,
+        borderRadius: 25,
+        backgroundColor: "#0B3270",
+        justifyContent: "center",
+        alignItems: "center",
+    },
     text: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#fff"
+        color: "#fff",
+        padding: 10
+    },
+    listtext: {
+        paddingLeft: 20,
+        fontSize: 20,
+        fontWeight: "600",
+        color: "black"
     },
     centeredView: {
         flex: 1,
@@ -286,5 +311,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    }
+    },
+    cardHeaderIcon: {
+        flexDirection: 'row',
+        padding: 16,
+    },
 })

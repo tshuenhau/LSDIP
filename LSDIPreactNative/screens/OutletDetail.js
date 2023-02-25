@@ -4,19 +4,58 @@ import {
     Text,
     StyleSheet,
     Modal,
-    Alert
+    FlatList,
 } from 'react-native'
-import React, { useState } from 'react'
+import alert from '../components/Alert'
+import React, { useState, useEffect } from 'react'
+import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import { MultipleSelectList } from 'react-native-dropdown-select-list';
 
 export default function OutletDetail({ route, navigation }) {
 
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
+    const [allocateModalVisible, setAllocateModalVisible] = useState(false);
     const [updateModalData, setUpdateModalData] = useState(route.params.item);
+    const [selectedStaff, setSelectedStaff] = useState([]);
+    const [staffList, setStaffList] = useState([]);
+    const [allocatedStaffList, setAllocateStaffList] = useState([]);
     const outlets = firebase.firestore().collection('outlet');
+    const users = firebase.firestore().collection('users');
+    const outletStaff = firebase.firestore().collection('outlet_staff');
+
+    useEffect(() => {
+        users.where("role", "==", "Staff")
+            .get()
+            .then(querySnapshot => {
+                const staffList = [];
+                querySnapshot.forEach(doc => {
+                    staffList.push({
+                        key: doc.id,
+                        value: doc.data().name,
+                        number: doc.data().number
+                    });
+                });
+                setStaffList(staffList);
+                outletStaff.where("outletID", "==", updateModalData.id)
+                    .get()
+                    .then(querySnapshot => {
+                        const allocatedStaffList = [];
+                        querySnapshot.forEach(doc => {
+                            allocatedStaffList.push({
+                                id: doc.id,
+                                staffID: doc.data().staffID,
+                                name: staffList.find(s => s.key === doc.data().staffID).value,
+                                number: staffList.find(s => s.key === doc.data().staffID).number
+                            })
+                        })
+                        setAllocateStaffList(allocatedStaffList);
+                    })
+            });
+    }, []);
 
     function handleChange(text, eventName) {
         setUpdateModalData(prev => {
@@ -32,7 +71,6 @@ export default function OutletDetail({ route, navigation }) {
             updateModalData.outletAddress.length > 0 &&
             updateModalData.outletNumber.length > 0 &&
             updateModalData.outletEmail.length > 0) {
-            // update in DB
             outlets.doc(updateModalData.id)
                 .update({
                     outletName: updateModalData.outletName,
@@ -47,6 +85,90 @@ export default function OutletDetail({ route, navigation }) {
                 })
         }
     }
+
+    const allocateStaff = () => {
+        let allocateArr = [];
+        for (let i = 0; i < selectedStaff.length; i++) {
+            allocateArr.push({ outletID: updateModalData.id, staffID: selectedStaff[i] });
+        }
+        console.log(allocateArr);
+        const batch = firebase.firestore().batch();
+        allocateArr.forEach((doc) => {
+            const newDocRef = outletStaff.doc();
+            batch.set(newDocRef, doc);
+        })
+        batch.commit()
+            .then(() => {
+                console.log("Allocated Staff");
+                setAllocateModalVisible(!allocateModalVisible);
+                outletStaff.where("outletID", "==", updateModalData.id)
+                    .get()
+                    .then(querySnapshot => {
+                        const allocatedStaffList = [];
+                        querySnapshot.forEach(doc => {
+                            allocatedStaffList.push({
+                                id: doc.id,
+                                staffID: doc.data().staffID,
+                                name: staffList.find(s => s.key === doc.data().staffID).value,
+                                number: staffList.find(s => s.key === doc.data().staffID).number
+                            })
+                        })
+                        setAllocateStaffList(allocatedStaffList);
+                    })
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
+    const showConfirmDiaglog = (item) => {
+        return alert("Confirmation", "Are you sure you want to remove staff from this outlet?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        outletStaff.doc(item.id)
+                            .delete()
+                            .then(() => {
+                                console.log("Deallocated")
+                                const temp = allocatedStaffList.filter(x => x.id != item.id)
+                                setAllocateStaffList(temp);
+                            }).catch((err) => {
+                                console.log(err)
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => {
+                        console.log("Cancelled");
+                    }
+                }
+            ])
+    }
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.8}
+        >
+            <View style={styles.cardHeader}>
+                <Text style={styles.outletName}>{item.name} </Text>
+            </View>
+            <View style={styles.itemContainer}>
+                <View style={styles.cardBody}>
+                    <Text style={styles.itemText}>Number: {item.number} </Text>
+                </View>
+                <View style={styles.cardButtons}>
+                    <FontAwesome
+                        style={styles.staffIcon}
+                        color="red"
+                        name="remove"
+                        onPress={() => showConfirmDiaglog(item)}
+                    />
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
 
     return (
         <View>
@@ -70,16 +192,30 @@ export default function OutletDetail({ route, navigation }) {
                     <Text style={styles.itemText}>Email: {updateModalData.outletEmail} </Text>
                 </View>
             </View>
+            <View style={styles.btmButtons}>
+                <TouchableOpacity
+                    onPress={() => setAllocateModalVisible(!allocateModalVisible)}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Allocate Staff</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View>
+                <FlatList
+                    data={allocatedStaffList}
+                    keyExtractor={item => item.id}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noStaffText}>No staff allocated</Text>
+                    }
+                />
+            </View>
 
             {/* Update Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={updateModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setUpdateModalVisible(!updateModalVisible);
-                }}>
+                visible={updateModalVisible}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
@@ -91,6 +227,30 @@ export default function OutletDetail({ route, navigation }) {
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
                                 <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Allocate Staff Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={allocateModalVisible}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <View style={styles.view}>
+                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
+                            <MultipleSelectList
+                                setSelected={(val) => setSelectedStaff(val)}
+                                data={staffList}
+                                save="key"
+                                label='Staff'
+                            />
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                                <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                             </View>
                         </View>
                     </View>
@@ -143,7 +303,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         padding: 16,
     },
-    outletIcon: {
+    staffIcon: {
         fontSize: 25,
         margin: 10,
     },
@@ -151,7 +311,19 @@ const styles = StyleSheet.create({
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        flexDirection: "row"
+        flexDirection: "row",
+        marginVertical: 10,
+    },
+    btmButtons: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+        marginVertical: 10,
+    },
+    noStaffText: {
+        fontSize: 20,
+        fontWeight: "600",
     },
     view: {
         width: "100%",

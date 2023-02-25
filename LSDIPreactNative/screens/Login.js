@@ -29,7 +29,16 @@ export default function Login({ navigation }) {
               }
             })
         })
-        .catch((err) => Alert.alert("Login error", err.message));
+        .catch((err) => {
+          console.log("Login error")
+          const errorCode = err.code;
+          console.log(errorCode);
+          if (errorCode === 'auth/wrong-password') {
+            alert('Wrong Password');
+          } else {
+            alert("Login error", err)
+          }
+        });
     }
   };
 
@@ -74,6 +83,12 @@ export default function Login({ navigation }) {
             <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Sign Up</Text>
           </TouchableOpacity>
         </View>
+        <View style={{ alignItems: 'center', alignSelf: 'center' }}>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={{ color: '#0782F9', fontWeight: '600', fontSize: 14 }}> Forgot Password</Text>
+          </TouchableOpacity>
+        </View>
+
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
     </KeyboardAvoidingView>

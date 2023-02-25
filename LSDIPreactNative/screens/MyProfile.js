@@ -10,11 +10,18 @@ import {
 import React, { useState, useEffect } from 'react'
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
+import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from '../config/firebase'
 import { FontAwesome } from '@expo/vector-icons'
+import alert from '../components/Alert'
 
 export default function MyProfile() {
-    const auth = firebase.auth;
+
+    const roles = [
+        { key: '1', value: 'Admin' },
+        { key: '2', value: 'Staff' },
+        { key: '3', value: 'Driver' }
+    ]
 
     const initialValues = {
         email: "",
@@ -22,19 +29,19 @@ export default function MyProfile() {
         number: "",
         role: "",
     };
+    const initialPassword = {
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: ""
+    }
 
     const [userDetails, setUserDetails] = useState(initialValues);
-    const [passwordDetails, setPasswordDetails] = useState(
-        {
-            currentPassword: "",
-            newPassword: "",
-            confirmNewPassword: ""
-        }
-    );
+    const [passwordDetails, setPasswordDetails] = useState(initialPassword);
     const [updateModalData, setUpdateModalData] = useState(initialValues);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
     const users = firebase.firestore().collection('users');
+    const auth = firebase.auth;
 
     useEffect(() => {
         users.doc(auth().currentUser.uid)
@@ -67,14 +74,10 @@ export default function MyProfile() {
     }
 
     const updateDetails = () => {
-        if (updateModalData.email.length > 0 &&
-            updateModalData.name.length > 0 &&
-            updateModalData.number.length &&
-            updateModalData.role.length > 0) {
-            console.log(updateModalData.email)
-            console.log(updateModalData.name)
-            console.log(updateModalData.number)
-            // update in DB
+        if (updateModalData.email &&
+            updateModalData.name &&
+            updateModalData.number &&
+            updateModalData.role) {
             users.doc(updateModalData.uid)
                 .update({
                     email: updateModalData.email,
@@ -86,6 +89,16 @@ export default function MyProfile() {
                 }).catch((err) => {
                     console.log(err)
                 })
+        } else {
+            alert(
+                "Information", "All the fields are required",
+                [
+                    {
+                        text: "Yes",
+                        onPress: () => { }
+                    }
+                ]
+            )
         }
     }
 
@@ -100,25 +113,32 @@ export default function MyProfile() {
     };
 
     const changePassword = () => {
+        let alertMsg = "";
         if (passwordDetails.currentPassword === "" || passwordDetails.newPassword === "") {
-            alert("All the fields are required");
+            alertMsg = "All the fields are required";
         } else if (passwordDetails.newPassword.length <= 5) {
-            alert("Password must contains more than 5 characters");
+            alertMsg = "Password must contains more than 5 characters";
         } else if (passwordDetails.newPassword != passwordDetails.confirmNewPassword) {
-            alert("Passwords do not match");
+            alertMsg = "Passwords do not match";
+        }
+        if (alertMsg.length > 0) {
+            alert(
+                "Information", alertMsg,
+                [
+                    {
+                        text: "Yes",
+                        onPress: () => { }
+                    }
+                ]
+            )
         } else {
             try {
                 reauthenticate(passwordDetails.currentPassword).then(() => {
                     var user = firebase.auth().currentUser;
                     user.updatePassword(passwordDetails.newPassword);
-                    // const response = firebase.database().ref("Users").child(user.uid);
 
                     setPasswordModalVisible(!passwordModalVisible);
-                    setPasswordDetails({
-                        currentPassword: "",
-                        newPassword: "",
-                        confirmNewPassword: ""
-                    })
+                    setPasswordDetails(initialPassword);
                 })
             } catch (error) {
                 console.log(error);
@@ -135,12 +155,8 @@ export default function MyProfile() {
                         source={require('../assets/defaultProfilePicture.png')}
                     />
                     <View>
-                        <Text style={styles.mainText}>
-                            {userDetails.name}
-                        </Text>
-                        <Text style={styles.textLabel}>
-                            Name
-                        </Text>
+                        <Text style={styles.mainText}>{userDetails.name}</Text>
+                        <Text style={styles.textLabel}>Name</Text>
                     </View>
                     <FontAwesome
                         style={styles.editIcon}
@@ -149,21 +165,14 @@ export default function MyProfile() {
                         onPress={() => setUpdateModalVisible(!updateModalVisible)}
                     />
                 </View>
-                <Text style={styles.roleText}>
-                    {userDetails.role}
-                </Text>
-                <Text style={styles.detailText}>
-                    {userDetails.email}
-                </Text>
-                <Text style={styles.detailText}>
-                    {userDetails.number}
-                </Text>
-
+                <Text style={styles.roleText}>{userDetails.role}</Text>
+                <Text style={styles.detailText}>{userDetails.email}</Text>
+                <Text style={styles.detailText}>{userDetails.number}</Text>
                 <View style={styles.view}>
                     <TouchableOpacity
                         onPress={() => setPasswordModalVisible(!passwordModalVisible)}
                         style={styles.btn}>
-                        <Text style={styles.text}>Change Password</Text>
+                        <Text style={styles.password}>Change Password</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -181,11 +190,20 @@ export default function MyProfile() {
                     <View style={styles.modalView}>
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Edit Profile</Text>
-                            {/* <Text>{updateModalData.uid}</Text> */}
                             <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={userDetails.name} />
                             <TextBox placeholder="laundry@email.com" onChangeText={text => handleChange(text, "email")} defaultValue={userDetails.email} />
                             <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} defaultValue={userDetails.number} />
-                            <TextBox placeholder="Admin, Driver, Staff" onChangeText={text => handleChange(text, "role")} defaultValue={userDetails.role} />
+                            <View style={{
+                                width: "92%",
+                                borderRadius: 25,
+                                marginTop: 20
+                            }}>
+                                <SelectList
+                                    data={roles}
+                                    setSelected={(val) => handleChange(val, "role")}
+                                    save="value"
+                                />
+                            </View>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => updateDetails()} title="Update" style={{ width: "48%" }} />
                                 <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -199,11 +217,7 @@ export default function MyProfile() {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={passwordModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setPasswordModalVisible(!passwordModalVisible);
-                }}>
+                visible={passwordModalVisible}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
@@ -270,14 +284,14 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     btn: {
-        // flex: 1,
         padding: 10,
         borderRadius: 25,
         backgroundColor: "#0B3270",
         justifyContent: "center",
         alignItems: "center",
+        margin: 25,
     },
-    text: {
+    password: {
         fontSize: 20,
         fontWeight: "600",
         color: "#fff"
@@ -285,7 +299,6 @@ const styles = StyleSheet.create({
     editIcon: {
         fontSize: 25,
         margin: 10,
-        // alignSelf: 'flex-end',
     },
     centeredView: {
         flex: 1,

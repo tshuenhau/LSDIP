@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback  } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView } from 'react-native';
+import { CalendarList } from 'react-native-calendars';
 import { firebase } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,14 +11,11 @@ const DeliveryScreen = ({ navigation }) => {
   const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(null);
   const [selectedTimesList, setSelectedTimesList] = useState([]);
   const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
 
 const getMonthDays = (month, year) => {
-  console.log("month:", month + 1);
-  console.log("year:", year);
 
   const date = moment(`${year}-${month + 1}-01`);
   const days = [];
@@ -28,18 +25,12 @@ const getMonthDays = (month, year) => {
     date.add(1, 'day');
   }
 
-  console.log("days:", days);
   return days;
 };
   
-  
-  
-  
   const today = new Date();
-  const minDate = today.toISOString().split('T')[0];
   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1);
   const lastDay = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
-  const maxDate = lastDay.toISOString().split('T')[0];
   
   const handleMonthChange = useCallback(({ year, month }) => {
     setDisplayMonth(`${Number(year)}-${Number(month)}`);
@@ -48,25 +39,8 @@ const getMonthDays = (month, year) => {
   useEffect(() => {
     //const days = getMonthDays(moment(displayMonth).year(), moment(displayMonth).month());
     const days = getMonthDays(moment(displayMonth).month(), moment(displayMonth).year());
-
-    console.log('Current month days:', days);
     setCurrentMonthDays(days);
   }, [displayMonth]);
-
-  const handleNextMonth = useCallback(() => {
-    const nextMonth = moment(displayMonth).add(1, 'month').format('YYYY-MM');
-    console.log('Next month:', nextMonth);
-  
-    setDisplayMonth(nextMonth);
-  }, [displayMonth]);
-
-  const currentMonth = moment().format('MMMM yyyy');
-  useEffect(() => {
-    if (duplicateMessage) {
-      console.log("alert no prob");
-      Alert.alert('Duplicate Entry', duplicateMessage);
-    }
-  }, [duplicateMessage]);
 
   useEffect(() => {
     const db = firebase.firestore();
@@ -84,26 +58,6 @@ const getMonthDays = (month, year) => {
       });
     }
   }, [handleMonthChange]);
-
-  const handlePrevMonth = () => {
-    setDisplayMonth(
-      moment(displayMonth)
-        .subtract(1, 'month')
-        .toISOString()
-        .slice(0, 7)
-    );
-  };
-
-  // useEffect(() => {
-  //   setNextMonthDays(
-  //     getMonthDays(
-  //       moment(displayMonth).add(1, 'month').startOf('month').format('MM'),
-  //       moment(displayMonth).add(1, 'month').endOf('month').format('YYYY')
-  //     )
-  //   );
-  // }, [displayMonth]);
-  
-  
 
   const AvailableTimingsModal = ({ date, onClose }) => {
     const [availableTimings, setAvailableTimings] = useState([]);
@@ -199,37 +153,39 @@ const getMonthDays = (month, year) => {
       <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Available Timings on {date}</Text>
-          {availableTimings.length > 0 ? (
-            availableTimings.map((timing) => {
-              const isDisabled =
-                selectedTime !== null && selectedTime !== timing;
-              return (
-                <TouchableOpacity
-                  key={timing}
-                  style={[
-                    styles.timingButton,
-                    selectedTime === timing && styles.selectedTimingButton,
-                    isDisabled && styles.disabledTimingButton,
-                  ]}
-                  onPress={() => handleTimeSelect(timing)}
-                  disabled={isDisabled}
-                >
-                  <Text
+          <ScrollView>
+            {availableTimings.length > 0 ? (
+              availableTimings.map((timing) => {
+                const isDisabled =
+                  selectedTime !== null && selectedTime !== timing;
+                return (
+                  <TouchableOpacity
+                    key={timing}
                     style={[
-                      styles.timingText,
-                      isDisabled && styles.disabledTimingText,
+                      styles.timingButton,
+                      selectedTime === timing && styles.selectedTimingButton,
+                      isDisabled && styles.disabledTimingButton,
                     ]}
+                    onPress={() => handleTimeSelect(timing)}
+                    disabled={isDisabled}
                   >
-                    {timing}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })
-          ) : (
-            <Text style={styles.noTimingsText}>
-              No available timings for selected
-            </Text>
-          )}
+                    <Text
+                      style={[
+                        styles.timingText,
+                        isDisabled && styles.disabledTimingText,
+                      ]}
+                    >
+                      {timing}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              <Text style={styles.noTimingsText}>
+                No available timings for selected
+              </Text>
+            )}
+          </ScrollView>
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={styles.closeButton}
@@ -283,76 +239,9 @@ const getMonthDays = (month, year) => {
     setSelectedDate(day.dateString);
   };
   
-  
-  const handleConfirm = () => {
-    if (selectedTime) {
-      const existingTime = selectedTimesList.find(
-        (item) => item.date === date && item.time === selectedTime
-      );
-  
-      if (existingTime) {
-        setDuplicateMessage(
-          `The selected time ${selectedTime} is already added for ${date}`
-        );
-        setIsDuplicateOpen(true);
-        setIsModalOpen(false);
-      } else {
-        const db = firebase.firestore();
-        const user = firebase.auth().currentUser;
-        if (user) {
-          const docRef = db.collection('user_timings').doc(user.uid);
-          docRef
-            .get()
-            .then((doc) => {
-              let selectedTimes = [];
-              if (doc.exists) {
-                selectedTimes = doc.data().selected_times;
-              }
-              selectedTimes.push({
-                date: date,
-                time: selectedTime,
-              });
-              return docRef.set({
-                selected_times: selectedTimes,
-              });
-            })
-            .then(() => {
-              console.log('Selected time added for user with UID: ', user.uid);
-              const newSelectedTimesList = [
-                ...selectedTimesList,
-                {
-                  date: date,
-                  time: selectedTime,
-                },
-              ];
-              setSelectedTimesList(newSelectedTimesList);
-              setSelectedTime(null);
-              setIsModalOpen(false); // <-- Set isModalOpen to false
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        }
-      }
-    }
-  };
-  
   return (
     <View style={styles.container}>
-      <View style={styles.calendarHeader}>
-        <View style={styles.arrowContainer}>
-          <TouchableOpacity onPress={handlePrevMonth} style={styles.arrowButton}>
-            <MaterialCommunityIcons name="chevron-left" size={28} />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.calendarHeaderText}>{currentMonth}</Text>
-        <View style={styles.arrowContainer}>
-          <TouchableOpacity onPress={handleNextMonth} style={styles.arrowButton}>
-            <MaterialCommunityIcons name="chevron-right" size={28} />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <Calendar
+      <CalendarList
         onDayPress={handleDayPress}
         markedDates={{
           ...(selectedDate && {
@@ -365,24 +254,13 @@ const getMonthDays = (month, year) => {
             {}
           ),
         }}
-        monthFormat={'MMMM yyyy'}
-        onMonthChange={({ year, month }) => {
-          console.log('Month changed to:', month, year);
-          handleMonthChange({ year, month });
-        }}
-        hideArrows={true}
-        disableMonthChange={true}
-        renderArrow={(direction) => (
-          <View style={styles.arrowButton}>
-            <MaterialCommunityIcons
-              name={`chevron-${direction}`}
-              size={28}
-              color={'white'}
-            />
-          </View>
-        )}
-        minDate={minDate}
-        maxDate={maxDate}
+        pastScrollRange={0}
+        futureScrollRange={3}
+        scrollEnabled={true}
+        horizontal={true}
+        pagingEnabled={true}
+        calendarWidth={350}
+        calendarHeight={350}
         theme={{
           selectedDayBackgroundColor: '#007aff',
           selectedDayTextColor: '#ffffff',
@@ -391,6 +269,8 @@ const getMonthDays = (month, year) => {
           arrowColor: 'gray',
         }}
       />
+      <Text style={styles.scrollMessage}>Scroll right to see more dates</Text>
+
 
       {selectedDate && (
         <View style={styles.selectedDateContent}>
@@ -406,22 +286,25 @@ const getMonthDays = (month, year) => {
         </View>
       )}
       {selectedTimesList.length > 0 && (
-        <View style={styles.selectedTimesContent}>
+        <View style={styles.selectedTimesContainer}>
           <Text style={styles.selectedTimesTitle}>Selected Times</Text>
-          {selectedTimesList.map((item) => (
-            <View style={styles.selectedTimeCard}>
-              <Text style={styles.selectedTimeText}>
-                {item.date} - {item.time}
-              </Text>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDelete(item)}
-              >
-                <Text style={styles.deleteButtonText}>X</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+          <ScrollView style={styles.selectedTimesList}>
+            {selectedTimesList.map((item) => (
+              <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                <Text style={styles.selectedTimeText}>
+                  {item.date} - {item.time}
+                </Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDelete(item)}
+                >
+                  <Text style={styles.deleteButtonText}>X</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
         </View>
+
       )}
       <AvailableTimingsModal
         date={selectedDate}
@@ -598,6 +481,26 @@ const styles = StyleSheet.create({
       fontSize: 20,
       textAlign: 'center',
       width: '80%',
+    },
+    scrollMessage: {
+      backgroundColor: '#f1f1f1',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderWidth: 1,
+      borderColor: 'gray',
+      borderRadius: 5,
+      marginTop: 10,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    selectedTimesContainer: {
+      marginTop: 20,
+      marginBottom: 20,
+      height: 400,
+    },
+    selectedTimesList: {
+      flex: 1,
     },
   
 });

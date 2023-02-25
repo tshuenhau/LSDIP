@@ -7,7 +7,7 @@ import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import colors from '../colors';
 
-export default function Home({ navigation }) {
+export default function OrderDetailsPage({ navigation }) {
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
 
@@ -46,14 +46,14 @@ export default function Home({ navigation }) {
 
             <OrdersList />
 
-            {/* <View style={styles.chatContainer}>
+            <View style={styles.chatContainer}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Chat")}
                     style={styles.chatButton}
                 >
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
-            </View> */}
+            </View>
         </View>
     )
 };
