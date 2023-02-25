@@ -14,17 +14,23 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
-import Chat from './screens/Chat';
+// import Chat from './screens/Chat';
 import Home from './screens/Home';
-import Admin from './screens/Admin';
+import OutletManagement from './screens/OutletManagement';
+import AdminRostering from './screens/AdminRostering';
 import AdminTimeslots from './screens/AdminTimeslots';
-import Staff from './screens/Staff';
+import StaffRostering from './screens/StaffRostering';
 import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import OrderDetailsPage from './screens/OrderDetailsPage';
+import ForgotPassword from './screens/ForgotPassword';
+import LaundryItems from './screens/LaundryItem';
+import Service from './screens/Services'
 import CO from './screens/CO';
 import { firebase } from "./config/firebase";
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -62,38 +68,6 @@ function CustomDrawerContent(props) {
     </DrawerContentScrollView>
   );
 }
-
-// function OperationStack() {
-//   return (
-//     <Drawer.Navigator
-//       useLegacyImplementation
-//       drawerContent={(props) => <CustomDrawerContent {...props} />}
-//     >
-//       <Drawer.Group>
-//         <Drawer.Screen name='Home' component={Home} />
-//         <Drawer.Screen name='Staff' component={Staff} />
-//         <Drawer.Screen name='Admin' component={Admin} />
-//         <Drawer.Screen name='Driver' component={Driver} />
-//         <Drawer.Screen name='Chat' component={Chat} />
-//       </Drawer.Group>
-//       <Drawer.Group screenOptions={{ presentation: 'modal' }}>
-//         <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
-//       </Drawer.Group>
-//     </Drawer.Navigator>
-//   );
-// }
-
-// function AuthStack() {
-//   return (
-//     <Stack.Navigator screenOptions={{ headerShown: false }}>
-//       <Stack.Screen name='Login' component={Login} />
-//       <Stack.Screen name='Signup' component={Signup} />
-//       <Stack.Screen name='Admin' component={Admin} />
-//       <Stack.Screen name='Staff' component={Staff} />
-//       <Stack.Screen name='Driver' component={Driver} />
-//     </Stack.Navigator>
-//   );
-// }
 
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
@@ -139,16 +113,18 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
-          {/* <Drawer.Group> */}
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
-          <Drawer.Screen name='Staff' component={Staff} />
-          <Drawer.Screen name='Admin' component={Admin} />
-          <Drawer.Screen name='AdminTimeslots' component={AdminTimeslots} />
+          <Drawer.Screen name='Outlet Management' component={OutletManagement} />
+          <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
+          <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
-          <Drawer.Screen name='Chat' component={Chat} />
+          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Create Order' component={CreateOrder} />
+          <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
+          <Drawer.Screen name='Laundry Item' component={LaundryItems} />
+          <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='CO' component={CO} />
           {/* </Drawer.Group> */}
           {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
@@ -166,8 +142,8 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Staff' component={Staff} />
-            <Drawer.Screen name='Chat' component={Chat} />
+            <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
       </NavigationContainer>
@@ -182,7 +158,7 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Driver' component={Driver} />
-            <Drawer.Screen name='Chat' component={Chat} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
       </NavigationContainer>
@@ -190,78 +166,17 @@ function RootNavigator() {
   } else {
     return (
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={{
+          headerShown: false,
+        }}>
           <Stack.Screen name='Login' component={Login} />
           <Stack.Screen name='Signup' component={Signup} />
+          <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
         </Stack.Navigator>
-      </NavigationContainer>
+      </NavigationContainer >
     )
   }
 }
-
-// function RootNavigator() {
-//   const {user, setUser} = useContext(AuthenticatedUserContext);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   useEffect(() => {
-//     const unsubscribeAuth = onAuthStateChanged(auth, async authenticatedUser => {
-//       authenticatedUser ? setUser(authenticatedUser) : setUser(null);
-//       setIsLoading(false);
-//     });
-//     return unsubscribeAuth;
-//   }, [user]);
-
-//   if (isLoading) {
-//     return (
-//       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-//         <ActivityIndicator size='large' />
-//       </View>
-//     );
-//   }
-
-//   // Get the user's role from the Firebase user object
-//   const userRole = user?.metadata?.customClaims?.role;
-
-//   // Render different stack navigators based on the user's role
-//   if (userRole === "Admin") {
-//     return (
-//       <NavigationContainer>
-//         <Stack.Navigator>
-//           <Stack.Screen name="Admin" component={Admin} />
-//           <Stack.Screen name="Chat" component={Chat} />
-//         </Stack.Navigator>
-//       </NavigationContainer>
-//     );
-//   } else if (userRole === "Staff") {
-//     return (
-//       <NavigationContainer>
-//         <Stack.Navigator>
-//           <Stack.Screen name="Staff" component={Staff} />
-//           <Stack.Screen name="Chat" component={Chat} />
-//         </Stack.Navigator>
-//       </NavigationContainer>
-//     );
-//   } else if (userRole === "Driver") {
-//     return (
-//       <NavigationContainer>
-//         <Stack.Navigator>
-//           <Stack.Screen name="Driver" component={Driver} />
-//           <Stack.Screen name="Chat" component={Chat} />
-//         </Stack.Navigator>
-//       </NavigationContainer>
-//     );
-//   } else {
-//     // User has no role or an invalid role
-//     return (
-//       <NavigationContainer>
-//         <Stack.Navigator>
-//           <Stack.Screen name="Home" component={Home} />
-//           <Stack.Screen name="Chat" component={Chat} />
-//         </Stack.Navigator>
-//       </NavigationContainer>
-//     );
-//   }
-// }
 
 
 export default function App() {
