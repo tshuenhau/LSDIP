@@ -14,12 +14,16 @@ import React, { useState, useEffect } from "react";
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import colors from '../colors';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import moment from "moment";
 
 export default function CreateOrder() {
+    const initialOrderValues = {
+        orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
+    }
 
     const [index, setIndex] = React.useState(0);
     const [expandedItem, setExpandedItem] = useState(null);
@@ -28,6 +32,11 @@ export default function CreateOrder() {
     const [createModalData, setCreateModalData] = useState(false);
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const today = moment().format("YYYY-MM-DD");
+    const orderItems = firebase.firestore().collection('orderItem');
+    const orders = firebase.firestore().collection("orders");
+    const [orderValues, setOrderValues] = useState(initialOrderValues);
+    const [cart, setCart] = useState([]);
+    let orderId = "";
 
     useEffect(() => {
         laundry_item
@@ -57,6 +66,10 @@ export default function CreateOrder() {
         })
     }
 
+    const clearState = () => {
+        setCart([]);
+    }
+
     const toggleExpand = (id) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         if (expandedItem === id) {
@@ -68,7 +81,19 @@ export default function CreateOrder() {
 
     const addToCart = () => {
         // TODO addToCart
-        console.log(today);
+        if(cart.length == 0) {
+            console.log("cart is empty");
+            orders.add(orderValues)
+            .then(function(docRef) {
+                orderId = docRef.id;
+                cart.push(orderId);
+                console.log("new order id: ", orderId)
+                console.log(cart.toString);
+            }).catch((err) => {
+                console.log(err);
+            })
+        }
+        console.log(orderId);
         console.log(createModalData);
         console.log("added item");
     }
@@ -95,10 +120,10 @@ export default function CreateOrder() {
                         <Text style={styles.itemText}>Pricing: {item.price} </Text>
                     </View>
                     <View style={styles.cardButtons}>
-                        <FontAwesome
+                        <Ionicons 
                             style={styles.outletIcon}
-                            color="black"
-                            name="add"
+                            name="add-circle" 
+                            color="#0B3270" 
                             onPress={() => openModal(item)}
                         />
                     </View>
@@ -176,12 +201,14 @@ export default function CreateOrder() {
                     <View style={styles.modalView}>
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
-                            <Text style={styles.itemText}>Address: {createModalData.laundryItemName} </Text>
-                            <Text style={styles.itemText}>Address: {createModalData.typeOfServices} </Text>
-                            <Text style={styles.itemText}>Address: {createModalData.pricingMethod} </Text>
+                            <Text style={styles.itemText}>Laundry Item Name: {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
+                            <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
+                            <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
+                            <Text style={styles.itemText}>Input price: </Text>
                             <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => addToCart()} title="Create" style={{ width: "48%" }} />
+                                <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
                                 <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                             </View>
                         </View>
