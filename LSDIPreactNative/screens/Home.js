@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Text, Image, StyleSheet, Button } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
@@ -44,7 +44,14 @@ export default function Home({ navigation }) {
                 <Text>Email: {auth.currentUser?.email}</Text>
             </View>
 
-            <OrdersList />
+            <OrdersList navigation={navigation} />
+
+            <View style={styles.createOrderContainer}>
+                <Button
+                    title="Create Order"
+                    //onPress={() => navigation.navigate("CO", { staffEmail: auth.currentUser?.email })}
+                />
+            </View>
 
             {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
@@ -87,4 +94,9 @@ const styles = StyleSheet.create({
       shadowOpacity: .9,
       shadowRadius: 8,
     },
+    createOrderContainer: {
+        position: "absolute",
+        bottom: 20,
+        alignSelf: "center",
+      },
   });

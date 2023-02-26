@@ -12,6 +12,7 @@ import {
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
+import OrderPage from '../screens/OrderPage';
 
 if (
   Platform.OS === 'android' &&
@@ -20,7 +21,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function OrdersList() {
+export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
   useEffect(() => {
     const orders = firebase.firestore().collection('orders');
@@ -65,7 +66,8 @@ export default function OrdersList() {
   };
 
   const formatOrderDate = (date) => {
-    return date.toDate().toLocaleString();
+    //return date.toDate().toLocaleString();
+    return date;
   };
 
   const renderItem = ({ item: order }) => (
@@ -77,8 +79,12 @@ export default function OrdersList() {
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
         <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
-
-        
+        <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
+      >
+        <Text style={styles.editButtonText}>Edit</Text>
+      </TouchableOpacity>
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
@@ -101,6 +107,7 @@ export default function OrdersList() {
       )}
     </TouchableOpacity>
   );
+
 
   return (
     <View style={styles.container}>

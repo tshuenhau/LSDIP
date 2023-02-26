@@ -25,8 +25,8 @@ if (
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function CO() {
-
+export default function CO(route) {
+    const { staffEmail } = route.params;
     const initialValues = {
         laundryItemName: "",
         typeofServices: "",
@@ -204,6 +204,9 @@ export default function CO() {
 
             <View style={styles.view}>
                 <Text>Outlet Name: </Text>
+            </View>
+            <View style={styles.view}>
+                <Text>Staff Email: {staffEmail}</Text>
             </View>
 
             {/* Create Modal */}

@@ -24,6 +24,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import OrderPage from './screens/OrderPage';
 import OrderDetailsPage from './screens/OrderDetailsPage';
 import ForgotPassword from './screens/ForgotPassword';
 import LaundryItems from './screens/LaundryItem';
@@ -125,6 +126,7 @@ function RootNavigator() {
           <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
+          <Drawer.Screen name='OrderPage' component={OrderPage} />
           <Drawer.Screen name='CO' component={CO} />
           {/* </Drawer.Group> */}
           {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
