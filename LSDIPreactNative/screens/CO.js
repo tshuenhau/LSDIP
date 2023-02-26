@@ -16,7 +16,6 @@ import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
-import OutletDetail from './OutletDetail';
 
 if (
     Platform.OS === 'android' &&
@@ -85,48 +84,6 @@ export default function CO() {
         })
     }
 
-    /*
-    function createOutlet() {
-        outlets.add(values)
-            .then(() => {
-                setCreateModalVisible(!createModalVisible);
-                clearState;
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
-    }
-    */
-
-    // alert only works on ios and android
-    /*
-    const deleteOutlet = (outlet) => {
-        return Alert.alert(
-            "Confirmation",
-            "Are you sure you want to delete this outlet?",
-            [
-                {
-                    text: "Yes",
-                    onPress: () => {
-                        outlets.doc(outlet.id)
-                            .delete()
-                            .then(() => {
-                                alert("Deleted Successfully");
-                            }).catch((err) => {
-                                console.log(err);
-                            })
-                    }
-                },
-                {
-                    text: "Cancel",
-                    onPress: () => console.log("Cancelled`"),
-                    style: "cancel"
-                }
-            ]
-        );
-    }
-    */
-
     function getLaundrylist(itemList) {
         console.log("getlaundrylist function");
         console.log(itemList);
@@ -134,18 +91,6 @@ export default function CO() {
             return <ul>No Items</ul>;
         }
         const data = itemList.filter(element => element.typeOfServices == 'Wet Wash');
-        /*
-        let result = "";
-        if (data.length === 0) {
-            result += "<ul>No Items</ul>";
-            return result;
-        }
-        data.forEach(element => {
-            result += "<View style={styles.card}><Text style={styles.itemText}>";
-            result += element.laundryItemName;
-            result += "</Text></View>";
-        });
-        */
         console.log(data);
         return data;
         //return result;
