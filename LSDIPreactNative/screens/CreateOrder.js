@@ -22,7 +22,8 @@ import moment from "moment";
 
 export default function CreateOrder() {
     const initialOrderValues = {
-        orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
+        //orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
+        orderDate: firebase.firestore.FieldValue.serverTimestamp()
     }
 
     const [index, setIndex] = React.useState(0);
