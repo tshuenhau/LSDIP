@@ -11,10 +11,13 @@ import {
     Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import TextBox from "../components/TextBox";
+import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
+import moment from "moment";
 
 export default function CreateOrder() {
 
@@ -22,6 +25,9 @@ export default function CreateOrder() {
     const [expandedItem, setExpandedItem] = useState(null);
     const [laundryItems, setLaundryItems] = useState([]);
     const laundry_item = firebase.firestore().collection('laundryItem');
+    const [createModalData, setCreateModalData] = useState(false);
+    const [createModalVisible, setCreateModalVisible] = useState(false);
+    const today = moment().format("YYYY-MM-DD");
 
     useEffect(() => {
         laundry_item
@@ -42,6 +48,15 @@ export default function CreateOrder() {
             })
     }, [])
 
+    function handleChange(text, eventName) {
+        setCreateModalData(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
     const toggleExpand = (id) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         if (expandedItem === id) {
@@ -50,6 +65,19 @@ export default function CreateOrder() {
             setExpandedItem(id);
         }
     };
+
+    const addToCart = () => {
+        // TODO addToCart
+        console.log(today);
+        console.log(createModalData);
+        console.log("added item");
+    }
+
+    const openModal = (laundryItem) => {
+        console.log(laundryItem);
+        setCreateModalData(laundryItem);
+        setCreateModalVisible(true);
+    }
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -64,14 +92,14 @@ export default function CreateOrder() {
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
                         <Text style={styles.itemText}>Pricing Method: {item.pricingMethod} </Text>
-                        <Text style={styles.itemText}>Upper Pricing: {item.price} </Text>
+                        <Text style={styles.itemText}>Pricing: {item.price} </Text>
                     </View>
                     <View style={styles.cardButtons}>
                         <FontAwesome
                             style={styles.outletIcon}
                             color="black"
                             name="add"
-                            onPress={() => addItem(item)}
+                            onPress={() => openModal(item)}
                         />
                     </View>
                 </View>
@@ -126,13 +154,42 @@ export default function CreateOrder() {
     ]);
 
     return (
-        <TabView
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-        />
-    );
+        <View>
+            <TabView
+                navigationState={{ index, routes }}
+                renderScene={renderScene}
+                onIndexChange={setIndex}
+            />
+            <Text>This is the placeholder for the summary</Text>
 
+
+            {/* Create Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={createModalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setCreateModalVisible(!createModalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <View style={styles.view}>
+                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
+                            <Text style={styles.itemText}>Address: {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}>Address: {createModalData.typeOfServices} </Text>
+                            <Text style={styles.itemText}>Address: {createModalData.pricingMethod} </Text>
+                            <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                <Btn onClick={() => addToCart()} title="Create" style={{ width: "48%" }} />
+                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
