@@ -67,7 +67,8 @@ export default function CreateOrder() {
     }
 
     const clearState = () => {
-        setCart([]);
+        cart.length = 0;
+        console.log(cart.length);
     }
 
     const toggleExpand = (id) => {
@@ -185,7 +186,7 @@ export default function CreateOrder() {
                 renderScene={renderScene}
                 onIndexChange={setIndex}
             />
-            <Text>This is the placeholder for the summary</Text>
+            <Text><Btn onClick={() => clearState()} title="Summary" style={styles.button} /></Text>
 
 
             {/* Create Modal */}
@@ -222,7 +223,7 @@ export default function CreateOrder() {
 const styles = StyleSheet.create({
     button: {
         height: 60,
-        width: "80%",
+        width: "40%",
         backgroundColor: "#0B3270",
         color: "#fff",
         fontSize: 20,
