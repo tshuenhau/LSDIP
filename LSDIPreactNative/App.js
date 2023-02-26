@@ -31,6 +31,7 @@ import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
 import CO from './screens/CO';
 import { firebase } from "./config/firebase";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -53,6 +54,14 @@ const handleSignOut = () => {
     })
     .catch(error => alert(error.message))
 }
+
+const setUserId = async (id) => {
+  try {
+    await AsyncStorage.setItem('userId', id.toString());
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 function CustomDrawerContent(props) {
   return (
@@ -86,6 +95,7 @@ function RootNavigator() {
               console.log(user);
               console.log(user1?.role);
               const userRole = user?.role;
+              setUserId(auth1().currentUser.uid);
               setUser({ ...authenticatedUser, role: userRole });
             })
 

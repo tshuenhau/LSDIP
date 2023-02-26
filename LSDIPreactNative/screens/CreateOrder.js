@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import {
     View,
     TouchableOpacity,
@@ -10,185 +9,95 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView,
 } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
+import React, { useState, useEffect } from "react";
+import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
+import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import colors from '../colors';
+import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
-import OutletDetail from './OutletDetail';
-import { color, greaterThan } from "react-native-reanimated";
-import { where, query, collection, QuerySnapshot } from "firebase/firestore";
-import { getDatabase, ref, onValue } from "firebase/database";
-import { DrawerContentScrollView } from "@react-navigation/drawer";
-//import { SlideFromRightIOS } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets";
-
+import moment from "moment";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateOrder() {
-    const db = firebase.firestore();
-    const customer = useState("");
-    const order = useState("");
-    const cart = useState("");
-    const [itemList, setItemList] = useState([]);
+    const [index, setIndex] = React.useState(0);
     const [expandedItem, setExpandedItem] = useState(null);
-    const allItems = db.collection('laundryItem');
-    
-    //showthelist(allItems);
-
+    const [laundryItems, setLaundryItems] = useState([]);
+    const laundry_item = firebase.firestore().collection("laundryItem");
+    const [createModalData, setCreateModalData] = useState(false);
+    const [createModalVisible, setCreateModalVisible] = useState(false);
+    const today = moment().format("YYYY-MM-DD");
+    const orderItems = firebase.firestore().collection("orderItem");
+    const orders = firebase.firestore().collection("orders");
+    const [customerName, setCustomerName] = useState('');
+    const [orderValues, setOrderValues] = useState(initialOrderValues);
+    const [cart, setCart] = useState([]);
     useEffect(() => {
-        allItems.onSnapshot(querySnapshot => {
-            querySnapshot.forEach(doc => {
-                const { laundryItemName, typeOfServices, upperPricing, lowerPricing, pricingMethod } = doc.data();
-                itemList.push({
-                    id: doc.id,
-                    laundryItemName,
-                    typeOfServices,
-                    upperPricing,
-                    lowerPricing,
-                    pricingMethod
-                });
-            });
-            setItemList(itemList);
-        });
-       }, []);
+        laundry_item
+            .get()
+            .then(querySnapshot => {
+                const laundryItems = [];
+                querySnapshot.forEach(doc => {
+                    const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
+                    laundryItems.push({
+                        id: doc.id,
+                        laundryItemName,
+                        typeOfServices,
+                        price,
+                        pricingMethod
+                    })
+                })
+                setLaundryItems(laundryItems)
+            })
+    }, [])
 
-    function showthelist(allItems) {
-        const items = allItems.get().then(QuerySnapshot => {
-            QuerySnapshot.docs.map(doc => {
-                console.log(doc.data());
-                return doc.data();
-            });
-        });
-        return items;
-    }
-
-    function showLI() {
-        //document.getElementById("laundrylist").innerHTML = getLaundrylist(itemList);
-        const styles = StyleSheet.create({       
-            card: {
-                backgroundColor: '#fff',
-                marginVertical: 10,
-                borderRadius: 10,
-                shadowColor: '#000',
-                shadowOpacity: 0.2,
-                shadowOffset: {
-                    width: 0,
-                    height: 3,
-                },
-                elevation: 3,
-                height: 40,
-                marginLeft: "auto",
-                marginRight: "auto"
-            },
+    function handleChange(text, eventName) {
+        setCreateModalData(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
         })
-        document.getElementById("laundrylist").innerHTML = "<View id='ll'><Text>Hi</Text></View>";
-        document.getElementById("ll").styles = {styles};
-        /*
-        document.getElementById("ll").style.backgroundColor = '#fff';
-        document.getElementById("ll").style.marginVertical = 10;
-        document.getElementById("ll").style.borderRadius = 10;
-        document.getElementById("ll").style.shadowColor = '#000';
-        document.getElementById("ll").style.shadowOpacity = 0.2;
-        document.getElementById("ll").style.shadowOffset = {width: 0, height: 3,};
-        document.getElementById("ll").style.elevation = 3;
-        document.getElementById("ll").style.marginLeft = 'auto';
-        document.getElementById("ll").style.marginRight = 'auto';
-        document.getElementById("ll").style.height = 40;
-        */
-        
-        document.getElementById("laundrylineitems").style.display = "block"; 
     }
 
-    function getLaundrylist(itemList) {
-        console.log("getlaundrylist function");
-        console.log(itemList);
-        if (itemList === undefined || itemList.length === 0) {
-            return <ul>No Items</ul>;
+    const getUserId = async () => {
+        try {
+          const id = await AsyncStorage.getItem('userId');
+          if (id !== null) {
+            return id;
+          }
+        } catch (e) {
+          console.log(e);
         }
-/*
-        const data = itemList.filter(element => element.typeOfServices == 'Wet Wash');
-        let result = "";
-        if (data.length === 0) {
-            result += "<ul>No Items</ul>";
-            return result;
+      };
+    const clearState = () => {
+        cart.length = 0;
+        console.log(cart.length);
+    }
+
+    const toggleExpand = (id) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (expandedItem === id) {
+            setExpandedItem(null);
+        } else {
+            setExpandedItem(id);
         }
-        data.forEach(element => {
-            result += "<View style={styles.card}><Text style={styles.itemText}>";
-            result += element.laundryItemName;
-            result += "</Text></View>";
-        });
-        console.log(data);
-        return result;
-        */
-        return "<card>test  </card>";
+    };
+
+    const addToCart = () => {
+        const { laundryItemName, typeOfServices, pricingMethod, description, price } = createModalData;
+        setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, description, price }]);
+        setCreateModalVisible(false);
+        console.log("added item");
     }
 
-    function hideLI() {
-        document.getElementById("laundrylineitems").style.display = "none";
-    }
-
-    function showDI() {
-        document.getElementById("drycleanlist").innerHTML = getDrycleanList();
-        document.getElementById("drycleanlineitems").style.display = "block";
-    }
-
-    function getDrycleanList() {    
-        console.log("getdrycleanlist function");
-        console.log(itemList);
-        if (itemList === undefined || itemList.length === 0) {
-            return <ul>No Items</ul>;
-        }
-
-        const data = itemList.filter(element => element.typeOfServices == 'Dry Clean');
-        let result = "<ul>";
-        data.forEach(element => {
-            result += "<li style='color:red;'>";
-            result += element.laundryItemName;
-            result += "</li>";
-        });
-        if (data.length === 0) {
-            result += "No Items</ul>";
-            return result;
-        }
-        result += "</ul>";
-        console.log(data);
-        return result;
-    }
-
-    function hideDI() {
-        document.getElementById("drycleanlineitems").style.display = "none";
-    }
-
-    function showOI() {
-        //document.getElementById("otherlist").innerHTML = getOtherList();
-        document.getElementById("otherlineitems").style.display = "block";
-    }
-
-    function getOtherList() {
-        console.log("getotherlist function");
-        console.log(itemList);
-        if (itemList === undefined || itemList.length === 0) {
-            return <ul>No Items</ul>;
-        }
-
-        const data = itemList.filter(element => element.typeOfServices != 'Wet Wash' && 
-            element.typeOfServices != 'Dry Clean');
-        let result = "<ul>";
-        data.forEach(element => {
-            result += "<li>";
-            result += element.laundryItemName;
-            result += "</li>";
-        });
-        if (data.length === 0) {
-            result += "No Items</ul>";
-            return result;
-        }
-        result += "</ul>";
-        console.log(data);
-        return result;
-    }
-
-    function hideOI() {
-        document.getElementById("otherlineitems").style.display = "none";
+    const openModal = (laundryItem) => {
+        console.log(laundryItem);
+        setCreateModalData(laundryItem);
+        setCreateModalVisible(true);
     }
 
     const renderItem = ({ item }) => (
@@ -198,18 +107,20 @@ export default function CreateOrder() {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <Text>render item text</Text>
+                <Text style={styles.itemName}>{item.laundryItemName} </Text>
             </View>
             {expandedItem === item.id && (
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
-                        <Text style={styles.itemText}>Name: {item.laundryItemName} </Text>
+                        <Text style={styles.itemText}>Pricing Method: {item.pricingMethod} </Text>
+                        <Text style={styles.itemText}>Pricing: {item.price} </Text>
                     </View>
                     <View style={styles.cardButtons}>
-                        <FontAwesome
-                            color="black"
-                            name="edit"
-                            onPress={() => navigation.navigate()}
+                        <Ionicons 
+                            style={styles.outletIcon}
+                            name="add-circle" 
+                            color="#0B3270" 
+                            onPress={() => openModal(item)}
                         />
                     </View>
                 </View>
@@ -218,85 +129,249 @@ export default function CreateOrder() {
         </TouchableOpacity>
     );
 
+    const Laundry = () => (
+        <FlatList
+            data={laundryItems.filter(l => l.typeOfServices === "Wet Wash")}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+                <Text style={styles.noDatesText}>No available items</Text>
+            }
+        />
+    );
+
+    const DryClean = () => (
+        <FlatList
+            data={laundryItems.filter(l => l.typeOfServices === "Dry Clean")}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+                <Text style={styles.noDatesText}>No available items</Text>
+            }
+        />
+    );
+
+    const Others = () => (
+        <FlatList
+            data={laundryItems.filter(l => l.typeOfServices === "Alteration")}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+                <Text style={styles.noDatesText}>No available items</Text>
+            }
+        />
+    );
+
+    const renderScene = SceneMap({
+        laundry: Laundry,
+        dryClean: DryClean,
+        others: Others
+    });
+
+    const [routes] = React.useState([
+        { key: 'laundry', title: 'Laundry' },
+        { key: 'dryClean', title: 'Dry Clean' },
+        { key: 'others', title: 'Others' },
+    ]);
+    const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
+    const initialOrderValues = {
+        customerName: "",
+        customerAddress: "",
+        customerPhone: "",
+        pickupDate: "",
+        deliveryDate: "",
+      };
+      const createOrder = async () => {
+        try {
+            const searchStaffByEmail = async (email) => {
+                const querySnapshot = await staffIdCollection.where("email", "==", email).get();
+                const results = [];
+                querySnapshot.forEach((doc) => {
+                  const data = doc.data();
+                  results.push({
+                    id: doc.id,
+                    email: data.email,
+                  });
+                });
+                return results[0];
+              };
+              
+          const orderRef = await orders.add({
+            ...orderValues,
+            customerName: customerName,
+            endDate: null,
+            totalPrice: totalPrice,
+            orderStatus: "pending",
+            receiveFromWasherDate: null,
+            sendFromWasherDate: null,
+            staffID: await getUserId(),
+            outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+            orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+          });
+      
+          const orderId = orderRef.id;
+          const orderItemsPromises = cart.map(item => {
+            const { laundryItemName, typeOfServices, pricingMethod, description, price } = item;
+            const orderItem = {
+              laundryItemName,
+              typeOfServices,
+              pricingMethod,
+              description,
+              price,
+              createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+              orderId,
+            };
+            return orderItems.add(orderItem);
+          });
+          await Promise.all(orderItemsPromises);
+      
+          setCart([]);
+          setOrderValues(initialOrderValues);
+          Alert.alert("Order created successfully");
+        } catch (error) {
+          console.error(error);
+          Alert.alert("Error creating order. Please try again.");
+        }
+      };
+      
+      
+      
+
     return (
         <View>
-            <Text>Outlet Name: </Text>
-            <button style={styles.button} onClick={() => showLI()}>Show Laundry Items</button>
-            <div id="laundrylineitems" style={styles.div}>
-                <div id="laundrylist"></div>
-                <button onClick={() => hideLI()}>Hide Laundry Items</button>
-            </div>
-            <button style={styles.button} onClick={() => showDI()}>Show Dry Clean Items</button>
-            <div id="drycleanlineitems" class="dropdown-items" style={styles.div}> 
-               <div id="drycleanlist"></div>
-                <button onClick={() => hideDI()}>Hide Dry Clean Items</button>
-            </div>
-            <button style={styles.button} onClick={() => showOI()}>Show Other Items</button>
-            <div id="otherlineitems" class="dropdown-items" style={styles.div}> 
-                <div id="otherlist">
-                    <View style={styles.card}>
-                        Name:  
+            <TabView
+                navigationState={{ index, routes }}
+                renderScene={renderScene}
+                onIndexChange={setIndex}
+            />
+            {/* <Text><Btn onClick={() => clearState()} title="Summary" style={styles.button} /></Text> */}
+
+            {/* Create Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={createModalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setCreateModalVisible(!createModalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <View style={styles.view}>
+                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
+                            <Text style={styles.itemText}>Laundry Item Name: {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
+                            <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
+                            <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
+                            <Text style={styles.itemText}>Input price: </Text>
+                            <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
+                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            </View>
+                        </View>
                     </View>
-                    <View style={styles.card}>item1</View>
-                </div>
-                <button onClick={() => hideOI()}>Hide Other Items</button>
-            </div>
-            <div>
-            <View style={styles.card}>
-                Name:  
+                </View>
+            </Modal>
+
+            {/* Cart Table */}
+            <View style={styles.tableContainer}>
+                <View style={styles.tableHeader}>
+                    <Text style={styles.tableHeaderText}>Item Type</Text>
+                    <Text style={styles.tableHeaderText}>Description</Text>
+                    <Text style={styles.tableHeaderText}>Item Name</Text>
+                    <Text style={styles.tableHeaderText}>Price</Text>
+                </View>
+                <ScrollView style={styles.tableBody}>
+                    {cart.map((item, index) => (
+                        <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                        <Text style={styles.tableRowText}>{item.description}</Text>
+                        <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                        <Text style={styles.tableRowText}>{item.price}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
+                <TextBox placeholder="Customer Name" onChangeText={setCustomerName} value={customerName} />            
+                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                    <Text style={styles.checkoutButtonText}>Checkout</Text>
+                </TouchableOpacity>
             </View>
-            </div>
-            
         </View>
     )
 }
-
 const styles = StyleSheet.create({
-    button: {
-       height: 60,
-       width: "80%",
-       backgroundColor: "#0B3270",
-       color: "#fff",
-       fontSize: 20,
-       borderRadius: 25,
-       marginTop: 20,
-       marginLeft: "auto",
-       marginRight: "auto"
-    },
-
-    div: {
+    tableContainer: {
+        marginTop: 20,
+        marginBottom: 20,
         marginLeft: "auto",
         marginRight: "auto",
-        display: "none"
-    },
-
-    cardButtons: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
-    },
-
-    card: {
-        backgroundColor: '#fff',
-        marginVertical: 10,
+        backgroundColor: "#fff",
         borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
+        shadowColor: "#000",
         shadowOffset: {
-            width: 0,
-            height: 3,
+          width: 0,
+          height: 3,
         },
+        shadowOpacity: 0.2,
         elevation: 3,
-        height: 40,
+        width: "80%",
+        maxHeight: 300,
+      },
+      
+    tableHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+      },
+      tableHeaderText: {
+        fontWeight: "bold",
+        fontSize: 16,
+        flex: 1,
+      },      
+    tableBody: {},
+    tableRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+      },
+      tableRowText: {
+        fontSize: 16,
+        flex: 1,
+      },
+      
+    checkoutButton: {
+      backgroundColor: "#0B3270",
+      padding: 16,
+      borderRadius: 10,
+      width: "80%",
+      marginLeft: "auto",
+      marginRight: "auto",
+      marginBottom: 20,
+    },
+    checkoutButtonText: {
+      color: "#fff",
+      textAlign: "center",
+      fontSize: 18,
+    },
+    button: {
+        height: 60,
+        width: "40%",
+        backgroundColor: "#0B3270",
+        color: "#fff",
+        fontSize: 20,
+        borderRadius: 25,
+        marginTop: 20,
         marginLeft: "auto",
         marginRight: "auto"
     },
-
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    cardBody: {
         padding: 16,
     },
-
     itemContainer: {
         backgroundColor: colors.lightGray,
         flex: 1,
@@ -306,15 +381,79 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingRight: 20,
     },
-
     itemText: {
         flex: 1,
         fontSize: 16,
     },
-
+    cardButtons: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+    },
+    card: {
+        backgroundColor: '#fff',
+        width: "60%",
+        marginLeft: "auto",
+        marginRight: "auto",
+        marginVertical: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
+    },
+    itemName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 16,
+    },
+    outletIcon: {
+        fontSize: 25,
+        margin: 10,
+    },
+    view: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    btn: {
+        padding: 10,
+        borderRadius: 25,
+        backgroundColor: "#0B3270",
+        justifyContent: "center",
+        alignItems: "center",
+    },
     text: {
-        color: "#0B3270"
+        fontSize: 20,
+        fontWeight: "600",
+        color: "#fff"
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     }
-})
-
-
+  });
+  
