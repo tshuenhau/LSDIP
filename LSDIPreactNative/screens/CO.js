@@ -34,14 +34,14 @@ export default function CO() {
         pricingMethod: ""
     };
 
-    const initialOrderVales = {
-        orderDate: new Date().getDate()
+    const initialOrderValues = {
+        orderDate: new Date().toDateString() + " at " + new Date().toLocaleTimeString()
     }
 
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [itemList, setItemList] = useState([]);
     const [values, setValues] = useState(initialValues);
-    const [orderValues, setOrderValues] = useState(initialOrderVales);
+    const [orderValues, setOrderValues] = useState(initialOrderValues);
     const [expandedItem, setExpandedItem] = useState(null);
     const [date, setDateTime] = useState('');
     const allItems = firebase.firestore().collection('laundryItem');
@@ -78,7 +78,7 @@ export default function CO() {
 
     const clearState = () => {
         setValues({ ...initialValues });
-        setOrderValues({ ... initialOrderVales });
+        setOrderValues({ ... initialOrderValues });
     }
 
     function handleChange(text, eventName) {
@@ -151,18 +151,6 @@ export default function CO() {
             return null;
         }
         const data = itemList.filter(element => element.typeOfServices == 'Wet Wash');
-        /*
-        let result = "";
-        if (data.length === 0) {
-            result += "<ul>No Items</ul>";
-            return result;
-        }
-        data.forEach(element => {
-            result += "<View style={styles.card}><Text style={styles.itemText}>";
-            result += element.laundryItemName;
-            result += "</Text></View>";
-        });
-        */
         console.log(data);
         return data;
         //return result;
