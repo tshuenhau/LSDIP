@@ -65,7 +65,8 @@ export default function OrdersList() {
   };
 
   const formatOrderDate = (date) => {
-    return date.toDate().toLocaleString();
+    //return date.toDate().toLocaleString();
+    return "";
   };
 
   const renderItem = ({ item: order }) => (

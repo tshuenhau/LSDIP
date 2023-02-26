@@ -34,10 +34,16 @@ export default function CO() {
         pricingMethod: ""
     };
 
+    const initialOrderVales = {
+        orderDate: new Date().getDate()
+    }
+
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [itemList, setItemList] = useState([]);
     const [values, setValues] = useState(initialValues);
+    const [orderValues, setOrderValues] = useState(initialOrderVales);
     const [expandedItem, setExpandedItem] = useState(null);
+    const [date, setDateTime] = useState('');
     const allItems = firebase.firestore().collection('laundryItem');
     const orderItems = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
@@ -72,6 +78,7 @@ export default function CO() {
 
     const clearState = () => {
         setValues({ ...initialValues });
+        setOrderValues({ ... initialOrderVales });
     }
 
     function handleChange(text, eventName) {
@@ -83,7 +90,17 @@ export default function CO() {
         })
     }
 
-    
+    function openOrder() {
+        // temporarily used, remove after toggle from oderlist page
+        orders.add(orderValues)
+            .then(() => {
+                clearState;
+                console.log("date", orderValues);
+                console.log("Success");
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
 
     /*
     function createOutlet() {
@@ -203,6 +220,14 @@ export default function CO() {
 
             <View style={styles.view}>
                 <Text>Outlet Name: </Text>
+            </View>
+
+            <View style={styles.view}>
+                <TouchableOpacity
+                    onPress={() => openOrder()}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Create Order</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Create Modal */}
