@@ -174,6 +174,20 @@ function RootNavigator() {
         </Drawer.Navigator>
       </NavigationContainer>
     );
+  } else if (user1?.role === "Customer") {
+    return (
+      <NavigationContainer>
+        <Drawer.Navigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Group>
+            <Drawer.Screen name='Home' component={Home} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
+          </Drawer.Group>
+        </Drawer.Navigator>
+      </NavigationContainer>
+    );
   } else {
     return (
       <NavigationContainer>

@@ -126,6 +126,8 @@ export default function LaundryItem({ navigation }) {
                             }}>
                                 <SelectList 
                                 data={data} 
+                                placeholder= "Choose service"
+                                searchPlaceholder="Search service"
                                 setSelected={(val) => handleChange(val, "typeOfServices")} 
                                 save = "value"
                                 />
@@ -144,6 +146,8 @@ export default function LaundryItem({ navigation }) {
                             }}>
                                 <SelectList
                                     data={pricingMethods}
+                                    placeholder= "Choose pricing method"
+                                    searchPlaceholder="Search pricing method"
                                     setSelected={(val) => handleChange(val, "pricingMethod")}
                                     save="value"
                                 />

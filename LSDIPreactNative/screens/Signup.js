@@ -13,7 +13,8 @@ export default function SignUpScreen({ navigation }) {
     const roles = [
         { key: '1', value: 'Admin' },
         { key: '2', value: 'Staff' },
-        { key: '3', value: 'Driver' }
+        { key: '3', value: 'Driver' },
+        { key: '4', value: 'Customer' }
     ]
 
     const [values, setValues] = useState({
@@ -48,6 +49,8 @@ export default function SignUpScreen({ navigation }) {
                 .catch((error) => {
                     alert(error.message)
                 });
+                alert("account created") 
+                navigation.navigate("Login")
         } else {
             alert("Passwords are different!")
         }
@@ -64,6 +67,8 @@ export default function SignUpScreen({ navigation }) {
         }}>
             <SelectList
                 data={roles}
+                placeholder="Signing up as?"
+                searchPlaceholder="Search role"
                 setSelected={(val) => handleChange(val, "role")}
                 save="value"
             />
