@@ -29,7 +29,6 @@ import OrderDetailsPage from './screens/OrderDetailsPage';
 import ForgotPassword from './screens/ForgotPassword';
 import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
-import CO from './screens/CO';
 import { firebase } from "./config/firebase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
@@ -137,12 +136,11 @@ function RootNavigator() {
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
-          <Drawer.Screen name='OrderPage' component={OrderPage} />
+          {/* need to change */}
+          <Drawer.Screen name='Order Page' component={OrderPage} />
 
-          {/* duplicate of the home page, delete */}
-          <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
-          {/* not in use, delete
-          <Drawer.Screen name='CO' component={CO} /> */}
+          {/* duplicate of the home page, delete (?) */}
+          {/* <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} /> */}
         </Drawer.Navigator>
       </NavigationContainer >
     );
