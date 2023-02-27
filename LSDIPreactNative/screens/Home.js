@@ -7,6 +7,7 @@ import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import colors from '../colors';
 
+
 export default function Home({ navigation }) {
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
@@ -44,14 +45,16 @@ export default function Home({ navigation }) {
                 <Text>Email: {auth.currentUser?.email}</Text>
             </View>
 
-            <OrdersList navigation={navigation} />
+            <OrdersList navigation={navigation} /> 
+            
 
             <View style={styles.createOrderContainer}>
                 <Button style={styles.button}
                     title="Create Order"
-                    //onPress={() => navigation.navigate("CO", { staffEmail: auth.currentUser?.email })}
+                    onPress={() => navigation.navigate('CreateOrder')}
                 />
             </View>
+            
 
             {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
@@ -62,6 +65,7 @@ export default function Home({ navigation }) {
                 </TouchableOpacity>
             </View> */}
         </View>
+
     )
 };
 
@@ -98,8 +102,6 @@ const styles = StyleSheet.create({
       marginTop: "20"
     },
     createOrderContainer: {
-        position: "absolute",
-        bottom: 20,
         alignSelf: "center",
       },
   });

@@ -117,6 +117,7 @@ export default function OrdersList({ navigation }) {
         activeOpacity={0.8}>
         <Text style={styles.refreshButtonText}>Refresh Orders</Text>
       </TouchableOpacity>
+      
     </View>
   );
 }
