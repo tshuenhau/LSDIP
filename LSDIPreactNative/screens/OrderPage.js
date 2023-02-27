@@ -21,6 +21,24 @@ if (
 }
 
 export default function OrderPage(props) {
+  //import service. 
+  const services = firebase.firestore().collection('laundryCategory');
+  const [service, setService] = useState([]);
+
+  useEffect(() => {
+    services.onSnapshot(querySnapshot => {
+      const service = [];
+      querySnapshot.forEach(doc => {
+        const { serviceName } = doc.service();
+        data.push({
+          key: doc.id,
+          value: serviceName,
+        });
+      });
+      setService(service);
+    });
+  }, []);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   console.log(props);
   const { orderId } = props.route.params;
@@ -47,7 +65,7 @@ export default function OrderPage(props) {
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
-  
+
   const data = orderItemsList.filter((element) => element.orderId == orderId);
 
   const deleteOrder = () => {
@@ -118,147 +136,174 @@ export default function OrderPage(props) {
         transparent={true}
         animationType="slide"
       >
-         <View style={styles.modal}>
-            <Text style={styles.addButtonText}>MODAL</Text>
+        <View style={styles.modal}>
+          <Text style={styles.addButtonText}>MODAL</Text>
+          <View style={{
+            // height: 42,
+            width: "92%",
+            borderRadius: 20,
+            marginTop: 20,
+            fontSize: 16,
+        backgroundColor: 'white',
+          }}>
+            <SelectList
+              data={data}
+              setSelected={(val) => handleChange(val, "typeOfServices")}
+              save="value"
+            />
+            </View>
+            <TextBox style={styles.textBox} placeholder="Laundry Item Name" />
+            <TextBox style={styles.textBox} placeholder="Description" />
+            {/*range is input manually by staff
+               flat is price x qty
+               weight is price/kg */}
+            <TextBox style={styles.textBox} placeholder="Price" />
+
             <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
-        </View>
-     </Modal>
+          </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
+  container: {
+    flex: 1,
+  },
+  list: {
+    flex: 1,
+  },
+  backButton: {
+    fontSize: 16,
+    color: 'blue',
+    marginLeft: 8,
+  },
+  card: {
+    backgroundColor: '#fff',
+    marginVertical: 10,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: {
+      width: 0,
+      height: 3,
     },
-    list: {
-      flex: 1,
-    },
-    backButton: {
-      fontSize: 16,
-      color: 'blue',
-      marginLeft: 8,
-    },
-    card: {
-      backgroundColor: '#fff',
-      marginVertical: 10,
-      marginHorizontal: 16,
-      borderRadius: 10,
-      shadowColor: '#000',
-      shadowOpacity: 0.2,
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-      elevation: 3,
-    },
-    cardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 16,
-    },
-    orderNumber: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    orderDate: {
-      fontSize: 14,
-      color: colors.gray,
-    },
-    cardBody: {
-      backgroundColor: colors.lightGray,
-      padding: 16,
-      flex: 1,
-    },
-    itemContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 8,
-    },
-    itemDetails: {
-      flex: 1,
-      marginRight: 8,
-    },
-    itemName: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 4,
-    },
-    itemDescription: {
-      fontSize: 14,
-      color: colors.gray,
-      marginBottom: 4,
-    },
-    itemPrice: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: colors.darkBlue,
-    },
-    refreshButton: {
-      backgroundColor: colors.blue,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 16,
-    },
-    refreshButtonText: {
-      color: '#000',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    noDataText: {
-      alignSelf: 'center',
-      marginTop: 32,
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-    deleteButton: {
-      backgroundColor: colors.red,
-      borderRadius: 5,
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-      marginLeft: 8,
-    },
-    deleteButtonText: {
-      color: '#344869',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-    addButton: {
-      backgroundColor: colors.blue,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 20,
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-    addButtonText: {
-      color: '#344869',
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    modal: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    closeButton: {
-      backgroundColor: colors.red,
-      borderRadius: 5,
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-      marginTop: 16,
-    },
-    closeButtonText: {
-      color: '#fff',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-    
-  });
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  orderNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  orderDate: {
+    fontSize: 14,
+    color: colors.gray,
+  },
+  cardBody: {
+    backgroundColor: colors.lightGray,
+    padding: 16,
+    flex: 1,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  itemDetails: {
+    flex: 1,
+    marginRight: 8,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  itemDescription: {
+    fontSize: 14,
+    color: colors.gray,
+    marginBottom: 4,
+  },
+  itemPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.darkBlue,
+  },
+  refreshButton: {
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  refreshButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  noDataText: {
+    alignSelf: 'center',
+    marginTop: 32,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    backgroundColor: colors.red,
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginLeft: 8,
+  },
+  deleteButtonText: {
+    color: '#344869',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  addButton: {
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  addButtonText: {
+    color: '#344869',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  closeButton: {
+    backgroundColor: colors.red,
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginTop: 16,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  textBox:{
+    fontSize: 16,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    padding:10,
+  }
+
+});

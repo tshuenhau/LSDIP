@@ -31,6 +31,7 @@ export default function CreateOrder() {
         customerPhone: "",
         pickupDate: "",
         deliveryDate: "",
+        customerNumber: "",
     }
 
     const [index, setIndex] = React.useState(0);
@@ -42,6 +43,10 @@ export default function CreateOrder() {
     const today = moment().format("YYYY-MM-DD");
     const orderItems = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
+    const [customerDetails, setCustomerDetails] = useState({
+        customerName: "",
+        customerNumber: ""
+    });
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const [customerName, setCustomerName] = useState('');
     const [cart, setCart] = useState([]);
@@ -75,18 +80,18 @@ export default function CreateOrder() {
         })
     }
 
-const getUserId = async () => {
-    try {
-      const id = await AsyncStorage.getItem('userId');
-      if (id !== null) {
-        return id;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-      
-const clearState = () => {
+    const getUserId = async () => {
+        try {
+            const id = await AsyncStorage.getItem('userId');
+            if (id !== null) {
+                return id;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const clearState = () => {
         cart.length = 0;
         console.log(cart.length);
     }
@@ -146,10 +151,10 @@ const clearState = () => {
                         <Text style={styles.itemText}>Pricing: {item.price} </Text>
                     </View>
                     <View style={styles.cardButtons}>
-                        <Ionicons 
+                        <Ionicons
                             style={styles.outletIcon}
-                            name="add-circle" 
-                            color="#0B3270" 
+                            name="add-circle"
+                            color="#0B3270"
                             onPress={() => openModal(item)}
                         />
                     </View>
@@ -159,7 +164,7 @@ const clearState = () => {
         </TouchableOpacity>
     );
 
-    const Laundry = () => (
+    const WetWash = () => (
         <FlatList
             data={laundryItems.filter(l => l.typeOfServices === "Wet Wash")}
             keyExtractor={item => item.id}
@@ -193,16 +198,17 @@ const clearState = () => {
     );
 
     const renderScene = SceneMap({
-        laundry: Laundry,
+        wetWash: WetWash,
         dryClean: DryClean,
         others: Others
     });
 
     const [routes] = React.useState([
-        { key: 'laundry', title: 'Laundry' },
+        { key: 'wetWash', title: 'Wet Wash' },
         { key: 'dryClean', title: 'Dry Clean' },
         { key: 'others', title: 'Others' },
     ]);
+
     const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
 
     const createOrder = async () => {
@@ -253,13 +259,10 @@ const clearState = () => {
             setOrderValues(initialOrderValues);
             Alert.alert("Order created successfully");
         } catch (error) {
-          console.error(error);
-          Alert.alert("Error creating order. Please try again.");
+            console.error(error);
+            Alert.alert("Error creating order. Please try again.");
         }
-      };
-      
-      
-      
+    };
 
     return (
         <View>
@@ -277,15 +280,12 @@ const clearState = () => {
                 animationType="slide"
                 transparent={true}
                 visible={createModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setCreateModalVisible(!createModalVisible);
-                }}>
+            >
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
-                            <Text style={styles.itemText}>Laundry Item Name: {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}>Item Name: {createModalData.laundryItemName} </Text>
                             <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
                             <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
                             <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
@@ -311,14 +311,15 @@ const clearState = () => {
                 <ScrollView style={styles.tableBody}>
                     {cart.map((item, index) => (
                         <View key={index} style={styles.tableRow}>
-                        <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
-                        <Text style={styles.tableRowText}>{item.description}</Text>
-                        <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
-                        <Text style={styles.tableRowText}>{item.price}</Text>
+                            <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                            <Text style={styles.tableRowText}>{item.description}</Text>
+                            <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                            <Text style={styles.tableRowText}>{item.price}</Text>
                         </View>
                     ))}
                 </ScrollView>
-                <TextBox placeholder="Customer Name" onChangeText={setCustomerName} value={customerName} />            
+                <TextBox placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
+                <TextBox placeholder="Customer Number" onChangeText={number => setCustomerDetails({ ...customerDetails, customerNumber: number })} value={customerDetails.customerNumber} />
                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                     <Text style={styles.checkoutButtonText}>Checkout</Text>
                 </TouchableOpacity>
@@ -336,27 +337,26 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         shadowColor: "#000",
         shadowOffset: {
-          width: 0,
-          height: 3,
+            width: 0,
+            height: 3,
         },
         shadowOpacity: 0.2,
         elevation: 3,
         width: "80%",
-        maxHeight: 300,
-      },
-      
+    },
+
     tableHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
-      },
-      tableHeaderText: {
+    },
+    tableHeaderText: {
         fontWeight: "bold",
         fontSize: 16,
         flex: 1,
-      },      
+    },
     tableBody: {},
     tableRow: {
         flexDirection: "row",
@@ -364,25 +364,25 @@ const styles = StyleSheet.create({
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
-      },
-      tableRowText: {
+    },
+    tableRowText: {
         fontSize: 16,
         flex: 1,
-      },
-      
+    },
+
     checkoutButton: {
-      backgroundColor: "#0B3270",
-      padding: 16,
-      borderRadius: 10,
-      width: "80%",
-      marginLeft: "auto",
-      marginRight: "auto",
-      marginBottom: 20,
+        backgroundColor: "#0B3270",
+        padding: 16,
+        borderRadius: 10,
+        width: "80%",
+        marginLeft: "auto",
+        marginRight: "auto",
+        marginBottom: 20,
     },
     checkoutButtonText: {
-      color: "#fff",
-      textAlign: "center",
-      fontSize: 18,
+        color: "#fff",
+        textAlign: "center",
+        fontSize: 18,
     },
     button: {
         height: 60,

@@ -7,7 +7,7 @@ import {
   FlatList,
   LayoutAnimation,
   UIManager,
-  Platform,
+  Platform
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
@@ -81,11 +81,11 @@ export default function OrdersList({ navigation }) {
         {/* <Text style={styles.orderDate}>{formatOrderDate(order)}</Text> */}
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
         <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
-      >
-        <Text style={styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
+          style={styles.editButton}
+          onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
+        >
+          <Text style={styles.editButtonText}>Edit</Text>
+        </TouchableOpacity>
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
@@ -93,6 +93,17 @@ export default function OrdersList({ navigation }) {
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
           <OrderDetails data={order.id}></OrderDetails>
+          {/* <FlatList */}
+          {/* style={styles.cardBody} */}
+          {/* data={order.orderItems} */}
+          {/* keyExtractor={(item) => item.id} */}
+          {/* renderItem={({ item }) => ( */}
+          {/* <View style={styles.itemContainer}> */}
+          {/* <Text style={styles.itemText}>{item}</Text> */}
+          {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
+          {/* </View> */}
+          {/* )} */}
+          {/* /> */}
         </View>
       )}
     </TouchableOpacity>
@@ -101,16 +112,15 @@ export default function OrdersList({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {orderList.length > 0 ? (
-        <FlatList
-          style={styles.list}
-          data={orderList}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
-      ) : (
-        <Text style={styles.noDataText}>No Data Found!</Text>
-      )}
+      <FlatList
+        style={styles.list}
+        data={orderList}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListEmptyComponent={
+          <Text style={styles.noDataText}>No Data Found!</Text>
+        }
+      />
       <TouchableOpacity
         style={styles.refreshButton}
         onPress={() => setExpandedOrder(null)}
@@ -123,6 +133,11 @@ export default function OrdersList({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  noDataText: {
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
   container: {
     flex: 1,
   },
