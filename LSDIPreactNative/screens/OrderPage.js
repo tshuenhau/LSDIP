@@ -23,6 +23,27 @@ if (
 }
 
 export default function OrderPage(props) {
+  const [order, setOrder] = useState(null);
+  console.log(props);
+  const { orderId } = props.route.params;
+  console.log(orderId);
+  useEffect(() => {
+    // Fetch the order document using the orderId prop
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    const unsubscribe = orderRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        setOrder({ id: doc.id, ...doc.data() });
+      } else {
+        console.log('No such order document!');
+      }
+    });
+    return () => unsubscribe();
+  }, [orderId]);
+  // useEffect(() => {
+  //   if (order) {
+  //     console.log(order);
+  //   }
+  // }, [order]);
   //import service. 
   const services = firebase.firestore().collection('laundryCategory');
   const [service, setService] = useState([]);
@@ -42,29 +63,30 @@ export default function OrderPage(props) {
   }, []);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  console.log(props);
-  const { orderId } = props.route.params;
-  console.log(orderId);
+
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [laundryItemsData, setLaundryItemsData] = useState([]);
   useEffect(() => {
-    const orderItem = firebase.firestore().collection('orderItem');
-    const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
-      const orderItemsList = [];
-      querySnapshot.forEach((doc) => {
-        const { description, laundryItemName, orderId, price } = doc.data();
-        orderItemsList.push({
-          id: doc.id,
-          description,
-          laundryItemName,
-          orderId,
-          price,
+    if (order) {
+      const orderItem = firebase.firestore().collection('orderItem');
+      const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
+        const orderItemsList = [];
+        querySnapshot.forEach((doc) => {
+          const { description, laundryItemName, price } = doc.data();
+          //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
+          orderItemsList.push({
+            id: doc.id,
+            description,
+            laundryItemName,
+            price,
+            orderId,
+          });
         });
+        setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
       });
-      setOrderItemsList(orderItemsList);
-    });
-    return () => unsubscribe();
-  }, []);
+      return () => unsubscribe();
+    }
+  }, [order]);  
   useEffect(() => {
     const laundryItems = firebase.firestore().collection('laundryItem');
     const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
@@ -87,7 +109,8 @@ export default function OrderPage(props) {
     setIsModalVisible(!isModalVisible);
   };
 
-  const data = orderItemsList.filter((element) => element.orderId == orderId);
+  const data = orderItemsList.filter((item) => order.orderItemIds.includes(item.id));
+
 
   const deleteOrder = () => {
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
@@ -131,7 +154,7 @@ export default function OrderPage(props) {
       // Add the new order item ID to the 'items' array in the order document
       const orderRef = firebase.firestore().collection('orders').doc(orderId);
       orderRef.update({
-        items: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+        orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
       }).then(() => {
         console.log('Order item added to order successfully');
       }).catch((error) => {
@@ -303,17 +326,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.darkBlue,
-  },
-  refreshButton: {
-    backgroundColor: colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  refreshButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   noDataText: {
     alignSelf: 'center',
