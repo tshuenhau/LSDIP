@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import colors from '../colors';
 import moment from "moment";
+import alert from '../components/Alert';
 import React, { useState, useEffect } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { firebase } from '../config/firebase';
@@ -25,7 +26,7 @@ export default function StaffSchedule() {
 
     const today = moment().format("YYYY-MM-DD");
     const [staffSchedule, setStaffSchedule] = useState([]);
-    const [displaySchedule, setDisplaySchedule] = useState({ past: false, upcoming: true });
+    const [displaySchedule, setDisplaySchedule] = useState("");
     const staff_schedule = firebase.firestore().collection('staff_schedule');
     const shift_timings = firebase.firestore().collection('shift_timings');
     const outlet = firebase.firestore().collection('outlet');
@@ -89,16 +90,67 @@ export default function StaffSchedule() {
 
     const toggleExpand = (menu) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        if (menu === "past") {
-            setDisplaySchedule({ past: true, upcoming: false });
+        if (displaySchedule === menu) {
+            setDisplaySchedule(null);
         } else {
-            setDisplaySchedule({ past: false, upcoming: true });
+            setDisplaySchedule(menu);
         }
     };
 
-    const renderItem = ({ item }) => (
+    const completeShift = (item) => {
+        return alert("Confirmation", "Are you sure you want to complete shift?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        staff_schedule.doc(item.id)
+                            .update({
+                                completed: true,
+                            })
+                            .then(() => {
+                                console.log("Complete")
+                                staffSchedule.map(s => {
+                                    if (s.id === item.id) {
+                                        return {
+                                            ...s,
+                                            completed: true,
+                                        };
+                                    }
+                                    return item;
+                                });
+                            }).catch((err) => {
+                                console.log(err)
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => {
+                        console.log("Cancelled");
+                    }
+                }
+            ])
+    }
+
+    const renderPast = ({ item }) => (
         <TouchableOpacity
-            style={styles.card}
+            // onPress={() => toggleExpand(item.id)}
+            activeOpacity={0.8}
+        >
+            <View style={styles.itemContainer}>
+                <View style={styles.cardBody}>
+                    <Text style={styles.availabilityDate}>{item.date} </Text>
+                    <Text style={styles.itemText}>{item.outletName} </Text>
+                    <Text style={styles.itemText}>{item.description} </Text>
+                    <Text style={styles.itemText}>Hours: {item.hours} </Text>
+                </View>
+            </View>
+
+        </TouchableOpacity>
+    );
+
+    const renderUpcoming = ({ item }) => (
+        <TouchableOpacity
             // onPress={() => toggleExpand(item.id)}
             activeOpacity={0.8}
         >
@@ -113,9 +165,9 @@ export default function StaffSchedule() {
                     {/* when staff is not available last min */}
                     <FontAwesome
                         style={styles.deleteAvailability}
-                        name="trash-o"
-                        color='red'
-                    // onPress={() => deleteOutlet(item)}
+                        name="check"
+                        color='green'
+                        onPress={() => completeShift(item)}
                     />
                 </View>
             </View>
@@ -133,11 +185,11 @@ export default function StaffSchedule() {
                 <View style={styles.cardHeader}>
                     <Text style={styles.scheduleHeader}>Past Schedules</Text>
                 </View>
-                {displaySchedule.past && (
+                {displaySchedule === "past" && (
                     <FlatList
                         data={staffSchedule.filter(s => s.completed === true)}
                         keyExtractor={staff => staff.id}
-                        renderItem={renderItem}
+                        renderItem={renderPast}
                         ListEmptyComponent={
                             <Text style={styles.noDataText}>No Data Found!</Text>
                         }
@@ -153,11 +205,11 @@ export default function StaffSchedule() {
                 <View style={styles.cardHeader}>
                     <Text style={styles.scheduleHeader}>Upcoming Schedules</Text>
                 </View>
-                {displaySchedule.past && (
+                {displaySchedule === "upcoming" && (
                     <FlatList
                         data={staffSchedule.filter(s => s.completed === false)}
                         keyExtractor={staff => staff.id}
-                        renderItem={renderItem}
+                        renderItem={renderUpcoming}
                         ListEmptyComponent={
                             <Text style={styles.noDataText}>No Data Found!</Text>
                         }
@@ -193,6 +245,19 @@ const styles = StyleSheet.create({
     availabilityDate: {
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    card: {
+        backgroundColor: '#fff',
+        marginVertical: 10,
+        marginHorizontal: 16,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
     },
     cardBody: {
         padding: 16,
