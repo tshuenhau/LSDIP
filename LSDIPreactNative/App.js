@@ -139,8 +139,8 @@ function RootNavigator() {
           {/* need to change */}
           <Drawer.Screen name='Order Page' component={OrderPage} />
 
-          {/* duplicate of the home page, delete */}
-          <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
+          {/* duplicate of the home page, delete (?) */}
+          {/* <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} /> */}
         </Drawer.Navigator>
       </NavigationContainer >
     );
