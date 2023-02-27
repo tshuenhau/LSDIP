@@ -264,10 +264,10 @@ export default function VehicleModule() {
                 </View>
             </Modal >
             
-            <View style={styles.view2}>
+            <View style={styles.view}>
                 <TouchableOpacity
                     onPress={() => setModalVisible(!modalVisible)}
-                    style={styles.btn2}>
+                    style={styles.btn}>
                     <Text style={styles.text}>Create New Vehicle</Text>
                 </TouchableOpacity>
             </View>
