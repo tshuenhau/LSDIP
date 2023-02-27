@@ -74,7 +74,8 @@ export default function OrdersList({ navigation }) {
     <TouchableOpacity
       style={styles.card}
       onPress={() => toggleExpand(order.id)}
-      activeOpacity={0.8}>
+      activeOpacity={0.8}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
         <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
@@ -91,22 +92,26 @@ export default function OrdersList({ navigation }) {
           <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
-          <OrderDetails data={order.id}></OrderDetails>
-          {/* <FlatList */}
-          {/* style={styles.cardBody} */}
-          {/* data={order.orderItems} */}
-          {/* keyExtractor={(item) => item.id} */}
-          {/* renderItem={({ item }) => ( */}
-          {/* <View style={styles.itemContainer}> */}
-          {/* <Text style={styles.itemText}>{item}</Text> */}
-          {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
-          {/* </View> */}
-          {/* )} */}
-          {/* /> */}
+          {order.orderItemIds && (
+            <FlatList
+              data={order.orderItemIds}
+              keyExtractor={(itemId) => itemId}
+              renderItem={({ item: itemId }) => {
+                const orderItem = order.orderItems.find((item) => item.id === itemId);
+                return (
+                  <View style={styles.itemContainer}>
+                    <Text style={styles.itemText}>{orderItem.name}</Text>
+                    <Text style={styles.itemPrice}>${orderItem.price}</Text>
+                  </View>
+                );
+              }}
+            />
+          )}
         </View>
       )}
     </TouchableOpacity>
   );
+  
 
 
   return (
