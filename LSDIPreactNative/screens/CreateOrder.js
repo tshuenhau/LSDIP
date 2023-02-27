@@ -102,7 +102,7 @@ export default function CreateOrder() {
     };
 
     const addToCart = () => {
-        const { laundryItemName, typeOfServices, pricingMethod, description, price } = createModalData;
+        const { laundryItemName, typeOfServices, pricingMethod, description, price} = createModalData;
         setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, description, price }]);
         setCreateModalVisible(false);
         console.log("added item");
@@ -193,22 +193,21 @@ export default function CreateOrder() {
     const createOrder = async () => {
         console.log(customerDetails);
         try {
-            const searchStaffByEmail = async (email) => {
-                const querySnapshot = await staffIdCollection.where("email", "==", email).get();
-                const results = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    results.push({
-                        id: doc.id,
-                        email: data.email,
-                    });
-                });
-                return results[0];
-            };
-
-            const orderRef = await orders.add({
+            const orderItemRefs = await Promise.all(
+                cart.map(async (item) => {
+                  const orderItemRef = await orderItems.add(item);
+                  return orderItemRef;
+                })
+              );
+          
+              // Get IDs of created order items
+              const orderItemIds = orderItemRefs.map((ref) => ref.id);
+          
+              // Create order
+              const orderRef = await orders.add({
                 ...orderValues,
-                customerName: customerName,
+                customerName: customerDetails.customerName,
+                customerNumber: customerDetails.customerNumber,
                 endDate: null,
                 totalPrice: totalPrice,
                 orderStatus: "pending",
@@ -217,31 +216,16 @@ export default function CreateOrder() {
                 staffID: await getUserId(),
                 outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
                 orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-            });
-
-            const orderId = orderRef.id;
-            const orderItemsPromises = cart.map(item => {
-                const { laundryItemName, typeOfServices, pricingMethod, description, price } = item;
-                const orderItem = {
-                    laundryItemName,
-                    typeOfServices,
-                    pricingMethod,
-                    description,
-                    price,
-                    createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-                    orderId,
-                };
-                return orderItems.add(orderItem);
-            });
-            await Promise.all(orderItemsPromises);
-
-            setCart([]);
-            setOrderValues(initialOrderValues);
-            Alert.alert("Order created successfully");
-        } catch (error) {
-            console.error(error);
-            Alert.alert("Error creating order. Please try again.");
-        }
+                orderItemIds: orderItemIds, // Add order item IDs to order
+              });
+          
+              setCart([]);
+              setOrderValues(initialOrderValues);
+              Alert.alert("Order created successfully");
+            } catch (error) {
+              console.error(error);
+              Alert.alert("Error creating order. Please try again.");
+            }
     };
 
     return (
