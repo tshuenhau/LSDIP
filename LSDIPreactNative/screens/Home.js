@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet, Button } from "react-native";
+import { View, TouchableOpacity, Text, Image, StyleSheet, Button, SafeAreaView,
+    ActivityIndicator } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import colors from '../colors';
-
+import SearchBar from "../components/SearchBar";
 
 export default function Home({ navigation }) {
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
 
     const [user, setUser] = useState(null) // This user
+    //for search bar
+    const [searchPhrase, setSearchPhrase] = useState("");
+    const [clicked, setClicked] = useState(false);
 
     useEffect(() => {
         firestore().collection("users").doc(auth1().currentUser.uid).get()
@@ -45,6 +49,19 @@ export default function Home({ navigation }) {
                 <Text>Email: {auth.currentUser?.email}</Text>
             </View>
 
+{/*
+    <SafeAreaView style={styles.root}>
+                {!clicked }
+                <SearchBar
+                    searchPhrase={searchPhrase}
+                    setSearchPhrase={setSearchPhrase}
+                    clicked={clicked}
+                    setClicked={setClicked}
+                    onChangeText = {(text) => searchOrder(text)}
+                />
+            </SafeAreaView>*/
+}
+            
             <OrdersList navigation={navigation} /> 
             
 

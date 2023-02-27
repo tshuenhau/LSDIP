@@ -7,12 +7,21 @@ import {
   FlatList,
   LayoutAnimation,
   UIManager,
-  Platform
+  Platform,
+  SafeAreaView,
+  ActivityIndicator,
+  Keyboard
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 import OrderPage from '../screens/OrderPage';
+import { FontAwesome } from '@expo/vector-icons';
+//import SearchBar from "react-native-elements";
+import SearchBar from './SearchBar';
+import { TextInput } from 'react-native-gesture-handler';
+import TextBox from './TextBox';
+import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
 if (
   Platform.OS === 'android' &&
@@ -23,6 +32,11 @@ if (
 
 export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
+  const [originalOrders, setOriginalOrders] = useState([]);
+  //for search bar
+  const [searchPhrase, setSearchPhrase] = useState("");
+  const [clicked, setClicked] = useState(false);
+  
   useEffect(() => {
     const orders = firebase.firestore().collection('orders');
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
@@ -43,8 +57,18 @@ export default function OrdersList({ navigation }) {
           orderStatus,
           totalPrice,
         });
+        originalOrders.push({
+          id: doc.id,
+          customerName,
+          date,
+          orderItems,
+          outletId,
+          orderStatus,
+          totalPrice,
+        });
       });
       setOrderList(orderList);
+      setOriginalOrders(originalOrders);
     });
     return () => unsubscribe();
   }, []);
@@ -69,6 +93,15 @@ export default function OrdersList({ navigation }) {
     //return date.toDate().toLocaleString();
     return date;
   };
+
+  function filterOrder(text) {
+    const filteredOrders = originalOrders.filter(l => l.customerName.toUpperCase().includes(text.toUpperCase().trim().replace(/\s/g, "")));
+    console.log("seacrhing");
+    console.log(originalOrders);
+    console.log(filteredOrders);
+    orderList.splice(0, orderList.length, ...filteredOrders);
+    console.log(orderList);
+  }
   
   const renderItem = ({ item: order }) => (
     <TouchableOpacity
@@ -112,6 +145,27 @@ export default function OrdersList({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/*
+        <SafeAreaView style={styles.root}>
+        <SearchBar
+            searchPhrase={searchPhrase}
+            setSearchPhrase={setSearchPhrase}
+            clicked={clicked}
+            setClicked={setClicked}
+            onChangeText = {(text) => searchOrder(text)}
+        />
+        
+  </SafeAreaView> */}
+      <View style = {styles.searchbarContainer}>
+        <View style={styles.searchbar}>
+          <FontAwesome name="search" size={24} color="black" style={{width: 15, height: 15}}/>
+          <TextBox placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 10, width: 150}}
+            onChangeText={text => filterOrder(text)} />
+          <TouchableOpacity onPress={Keyboard.dismiss()}>
+            <Text style={{color: '#0391ff', fontSize: 14}}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       <FlatList
         style={styles.list}
         data={orderList}
@@ -206,4 +260,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  searchbarContainer: {
+    paddingRight: "15",
+    paddingLeft: "15",
+    marginTop: 10
+  },
+  searchbar: {
+    height: 40, 
+    backgroundColor: "#fff", 
+    borderRadius: 10, 
+    paddingLeft: 25, 
+    flexDirection: 'row', 
+    alignItems: 'center'
+  }
 });
