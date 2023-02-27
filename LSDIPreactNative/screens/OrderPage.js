@@ -26,12 +26,12 @@ export default function OrderPage(props) {
   //import service. 
   const services = firebase.firestore().collection('laundryCategory');
   const [service, setService] = useState([]);
-
+  const [modalData, setModalData] = useState({ description: '', price: '' });
   useEffect(() => {
     services.onSnapshot(querySnapshot => {
       const service = [];
       querySnapshot.forEach(doc => {
-        const { serviceName } = doc.service();
+        const { serviceName } = doc.data();
         data.push({
           key: doc.id,
           value: serviceName,
@@ -46,6 +46,7 @@ export default function OrderPage(props) {
   const { orderId } = props.route.params;
   console.log(orderId);
   const [orderItemsList, setOrderItemsList] = useState([]);
+  const [laundryItemsData, setLaundryItemsData] = useState([]);
   useEffect(() => {
     const orderItem = firebase.firestore().collection('orderItem');
     const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
@@ -64,6 +65,24 @@ export default function OrderPage(props) {
     });
     return () => unsubscribe();
   }, []);
+  useEffect(() => {
+    const laundryItems = firebase.firestore().collection('laundryItem');
+    const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
+      const laundryItemsData = [];
+      querySnapshot.forEach(doc => {
+        const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
+          laundryItemsData.push({
+            laundryItemName: laundryItemName,
+            typeOfServices: typeOfServices,
+            pricingMethod: pricingMethod,
+            price: price,
+          });
+      });
+      setLaundryItemsData(laundryItemsData);
+    });
+    return () => unsubscribe();
+  }, []);
+  
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
@@ -87,6 +106,42 @@ export default function OrderPage(props) {
     console.log("here to add item");
     toggleModal();
   };
+
+  function handleChange(text, eventName) {
+    setModalData(prev => {
+        return {
+            ...prev,
+            [eventName]: text
+        }
+    })
+}
+  const addOrderItem1 = () => {
+    const selectedItem = modalData.typeOfServices;
+    // Create a new order item document in the 'orderItem' collection
+    // Get the values of description and price from the state modalData
+    const { description, price } = modalData;
+    firebase.firestore().collection('orderItem').add({
+      laundryItemName: selectedItem.split(' ')[0],
+      typeOfServices: selectedItem.split(' ')[1],
+      description: description,
+      price: price,
+      orderId: orderId,
+    }).then((docRef) => {
+      console.log('Order item created with ID: ', docRef.id);
+      // Add the new order item ID to the 'items' array in the order document
+      const orderRef = firebase.firestore().collection('orders').doc(orderId);
+      orderRef.update({
+        items: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+      }).then(() => {
+        console.log('Order item added to order successfully');
+      }).catch((error) => {
+        console.error('Error adding order item to order: ', error);
+      });
+    }).catch((error) => {
+      console.error('Error creating order item: ', error);
+    });
+    toggleModal();
+  }
 
   return (
     <View style={styles.container}>
@@ -140,32 +195,42 @@ export default function OrderPage(props) {
       >
         <View style={styles.modal}>
           <Text style={styles.addButtonText}>MODAL</Text>
-          <View style={{
-            // height: 42,
-            width: "92%",
-            borderRadius: 20,
-            marginTop: 20,
-            fontSize: 16,
-            backgroundColor: 'white',
-          }}>
+          <View
+            style={{
+              width: '92%',
+              borderRadius: 20,
+              marginTop: 20,
+                  backgroundColor: 'white',
+            }}>
             <SelectList
-              data={data}
-              setSelected={(val) => handleChange(val, "typeOfServices")}
+              data={laundryItemsData.map(
+                (item) => item.laundryItemName + ' ' + item.typeOfServices
+              )}
+              setSelected={(val) => handleChange(val, 'typeOfServices')}
               save="value"
             />
           </View>
-          <TextBox style={styles.textBox} placeholder="Laundry Item Name" />
-          <TextBox style={styles.textBox} placeholder="Description" />
-          {/*range is input manually by staff
-               flat is price x qty
-               weight is price/kg */}
-          <TextBox style={styles.textBox} placeholder="Price" />
-
+          <TextBox
+            style={styles.textBox}
+            placeholder="Description"
+            onChangeText={(text) => handleChange(text, 'description')}
+          />
+          <TextBox
+            style={styles.textBox}
+            placeholder="Price"
+            onChangeText={(text) => handleChange(text, 'price')}
+          />
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => addOrderItem1()}>
+            <Text style={styles.closeButtonText}>Add Item</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
+
     </View>
   );
 }

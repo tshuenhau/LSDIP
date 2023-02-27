@@ -32,7 +32,7 @@ export default function OrdersList({ navigation }) {
       querySnapshot.forEach((doc) => {
         const {
           customerName,
-          customerNumber,
+          customerPhone,
           date,
           orderItems,
           outletId,
@@ -41,7 +41,7 @@ export default function OrdersList({ navigation }) {
         orderList.push({
           id: doc.id,
           customerName,
-          customerNumber,
+          customerPhone,
           date,
           orderItems,
           outletId,
@@ -79,7 +79,8 @@ export default function OrdersList({ navigation }) {
     <TouchableOpacity
       style={styles.card}
       onPress={() => toggleExpand(order.id)}
-      activeOpacity={0.8}>
+      activeOpacity={0.8}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
         {/* date display todo */}
@@ -95,14 +96,29 @@ export default function OrdersList({ navigation }) {
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
           <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
-          <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
+          <Text style={styles.orderNumber}>Number: {order.customerPhone}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
-          <OrderDetails data={order.id}></OrderDetails>
+          {order.orderItemIds && (
+            <FlatList
+              data={order.orderItemIds}
+              keyExtractor={(itemId) => itemId}
+              renderItem={({ item: itemId }) => {
+                const orderItem = order.orderItems.find((item) => item.id === itemId);
+                return (
+                  <View style={styles.itemContainer}>
+                    <Text style={styles.itemText}>{orderItem.name}</Text>
+                    <Text style={styles.itemPrice}>${orderItem.price}</Text>
+                  </View>
+                );
+              }}
+            />
+          )}
         </View>
       )}
     </TouchableOpacity>
   );
+
 
 
   return (

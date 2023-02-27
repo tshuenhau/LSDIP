@@ -46,10 +46,9 @@ export default function CreateOrder() {
     const orders = firebase.firestore().collection("orders");
     const [customerDetails, setCustomerDetails] = useState({
         customerName: "",
-        customerNumber: ""
+        customerPhone: ""
     });
     const [orderValues, setOrderValues] = useState(initialOrderValues);
-    const [customerName, setCustomerName] = useState('');
     const [cart, setCart] = useState([]);
 
     useEffect(() => {
@@ -228,7 +227,7 @@ export default function CreateOrder() {
             const orderRef = await orders.add({
                 ...orderValues,
                 customerName: customerDetails.customerName,
-                customerNumber: customerDetails.customerNumber,
+                customerPhone: customerDetails.customerPhone,
                 endDate: null,
                 totalPrice: totalPrice,
                 orderStatus: "pending",
@@ -242,7 +241,7 @@ export default function CreateOrder() {
 
             setCart([]);
             setOrderValues(initialOrderValues);
-            // here
+            setCustomerDetails({ customerName: "", customerPhone: "" });
             // alert("Order created successfully");
             Toast.show({
                 type: 'success',
@@ -306,7 +305,7 @@ export default function CreateOrder() {
                     ))}
                 </ScrollView>
                 <TextBox placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
-                <TextBox placeholder="Customer Number" onChangeText={number => setCustomerDetails({ ...customerDetails, customerNumber: number })} value={customerDetails.customerNumber} />
+                <TextBox placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerPhone: phone })} value={customerDetails.customerPhone} />
                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                     <Text style={styles.checkoutButtonText}>Checkout</Text>
                 </TouchableOpacity>
