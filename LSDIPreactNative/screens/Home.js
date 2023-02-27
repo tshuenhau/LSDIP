@@ -7,6 +7,7 @@ import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import colors from '../colors';
 
+
 export default function Home({ navigation }) {
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
@@ -64,6 +65,7 @@ export default function Home({ navigation }) {
             </View> */}
             </ScrollView>
         </View>
+
     )
 };
 
@@ -95,6 +97,9 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: .9,
         shadowRadius: 8,
+    },
+    button: {
+      marginTop: "20"
     },
     createOrderContainer: {
         alignSelf: "center",

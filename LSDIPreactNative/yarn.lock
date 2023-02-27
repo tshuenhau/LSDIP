@@ -10511,6 +10511,11 @@
   "resolved" "https://registry.npmjs.org/react-native-lightbox-v2/-/react-native-lightbox-v2-0.9.0.tgz"
   "version" "0.9.0"
 
+"react-native-pager-view@6.0.1":
+  "integrity" "sha512-kOVNu+4JnR3Gpykviy4WbOAnQz8TgP6O2pRvne221oPUDQLYrvEE/FINR0P85TxbMgvKTPlLejGw0ZHQbezK/g=="
+  "resolved" "https://registry.npmjs.org/react-native-pager-view/-/react-native-pager-view-6.0.1.tgz"
+  "version" "6.0.1"
+
 "react-native-parsed-text@0.0.22":
   "integrity" "sha512-hfD83RDXZf9Fvth3DowR7j65fMnlqM9PpxZBGWkzVcUTFtqe6/yPcIoIAgrJbKn6YmtzkivmhWE2MCE4JKBXrQ=="
   "resolved" "https://registry.npmjs.org/react-native-parsed-text/-/react-native-parsed-text-0.0.22.tgz"

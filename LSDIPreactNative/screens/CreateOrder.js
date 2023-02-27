@@ -12,6 +12,7 @@ import {
     ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
@@ -21,24 +22,34 @@ import colors from '../colors';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import moment from "moment";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
 export default function CreateOrder() {
+    const initialOrderValues = {
+        //orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
+        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+        customerName: "",
+        customerAddress: "",
+        customerPhone: "",
+        pickupDate: "",
+        deliveryDate: "",
+    }
+
     const [index, setIndex] = React.useState(0);
     const [expandedItem, setExpandedItem] = useState(null);
     const [laundryItems, setLaundryItems] = useState([]);
-    const laundry_item = firebase.firestore().collection("laundryItem");
+    const laundry_item = firebase.firestore().collection('laundryItem');
     const [createModalData, setCreateModalData] = useState(false);
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const today = moment().format("YYYY-MM-DD");
-    const orderItems = firebase.firestore().collection("orderItem");
+    const orderItems = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const [customerDetails, setCustomerDetails] = useState({
         customerName: "",
         customerNumber: ""
     });
     const [orderValues, setOrderValues] = useState(initialOrderValues);
+    const [customerName, setCustomerName] = useState('');
     const [cart, setCart] = useState([]);
 
     useEffect(() => {
@@ -80,15 +91,6 @@ export default function CreateOrder() {
         }
     };
 
-    const initialOrderValues = {
-        customerName: "",
-        customerNumber: "",
-        customerAddress: "",
-        customerPhone: "",
-        pickupDate: "",
-        deliveryDate: "",
-    };
-
     const clearState = () => {
         cart.length = 0;
         console.log(cart.length);
@@ -104,9 +106,26 @@ export default function CreateOrder() {
     };
 
     const addToCart = () => {
+        // TODO addToCart
+        /*
+        if(cart.length == 0) {
+            console.log("cart is empty");
+            orders.add(orderValues)
+            .then(function(docRef) {
+                orderId = docRef.id;
+                cart.push(orderId);
+                console.log("new order id: ", orderId)
+                console.log(cart.toString);
+            }).catch((err) => {
+                console.log(err);
+            })
+        }     
+        console.log(orderId);
+        */
         const { laundryItemName, typeOfServices, pricingMethod, description, price } = createModalData;
         setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, description, price }]);
         setCreateModalVisible(false);
+        console.log(createModalData);
         console.log("added item");
     }
 
@@ -293,7 +312,7 @@ export default function CreateOrder() {
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }
 const styles = StyleSheet.create({
     tableContainer: {

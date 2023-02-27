@@ -12,7 +12,6 @@ import {
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
-import OrderPage from '../screens/OrderPage';
 
 if (
   Platform.OS === 'android' &&
@@ -22,13 +21,18 @@ if (
 }
 
 export default function OrdersList({ navigation }) {
+
   const [orderList, setOrderList] = useState([]);
+  const orders = firebase.firestore().collection('orders');
+
   useEffect(() => {
-    const orders = firebase.firestore().collection('orders');
+
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
-        const { customerName,
+        const {
+          customerName,
+          customerNumber,
           date,
           orderItems,
           outletId,
@@ -37,6 +41,7 @@ export default function OrdersList({ navigation }) {
         orderList.push({
           id: doc.id,
           customerName,
+          customerNumber,
           date,
           orderItems,
           outletId,
@@ -89,7 +94,8 @@ export default function OrdersList({ navigation }) {
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
-          <Text style={styles.orderNumber}>Customer: {order.customerName}</Text>
+          <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
+          <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
           <OrderDetails data={order.id}></OrderDetails>
