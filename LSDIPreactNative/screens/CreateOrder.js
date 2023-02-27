@@ -16,11 +16,13 @@ import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
+// import alert from '../components/Alert';
 import colors from '../colors';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import moment from "moment";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 export default function CreateOrder() {
     const [index, setIndex] = React.useState(0);
@@ -221,7 +223,12 @@ export default function CreateOrder() {
 
             setCart([]);
             setOrderValues(initialOrderValues);
-            Alert.alert("Order created successfully");
+            // here
+            // alert("Order created successfully");
+            Toast.show({
+                type: 'success',
+                text1: 'Order Created',
+            });
         } catch (error) {
             console.error(error);
             Alert.alert("Error creating order. Please try again.");

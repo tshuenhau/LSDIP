@@ -10,6 +10,8 @@ import {
   Platform,
   Modal,
 } from 'react-native';
+import { SelectList } from 'react-native-dropdown-select-list'
+import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
 import { SelectList } from 'react-native-dropdown-select-list';
@@ -200,7 +202,7 @@ export default function OrderPage(props) {
               width: '92%',
               borderRadius: 20,
               marginTop: 20,
-              backgroundColor: 'white',
+                  backgroundColor: 'white',
             }}>
             <SelectList
               data={laundryItemsData.map(
@@ -366,11 +368,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  textBox:{
+  textBox: {
     fontSize: 16,
     borderRadius: 10,
     backgroundColor: 'white',
-    padding:10,
+    padding: 10,
   }
 
 });

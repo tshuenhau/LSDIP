@@ -7,7 +7,7 @@ import {
   FlatList,
   LayoutAnimation,
   UIManager,
-  Platform
+  Platform,
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
@@ -28,7 +28,7 @@ export default function OrdersList({ navigation }) {
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
-        const { customerPrimaryKey,
+        const { customerName,
           date,
           orderItems,
           outletId,
@@ -36,7 +36,7 @@ export default function OrdersList({ navigation }) {
           totalPrice } = doc.data();
         orderList.push({
           id: doc.id,
-          customerPrimaryKey,
+          customerName,
           date,
           orderItems,
           outletId,
@@ -78,7 +78,8 @@ export default function OrdersList({ navigation }) {
     >
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
-        <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
+        {/* date display todo */}
+        {/* <Text style={styles.orderDate}>{formatOrderDate(order)}</Text> */}
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
         <TouchableOpacity
           style={styles.editButton}
@@ -89,7 +90,7 @@ export default function OrdersList({ navigation }) {
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
-          <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
+          <Text style={styles.orderNumber}>Customer: {order.customerName}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
           {order.orderItemIds && (
@@ -116,31 +117,21 @@ export default function OrdersList({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        style={styles.list}
-        data={orderList}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.noDataText}>No Data Found!</Text>
-        }
-      />
-      <TouchableOpacity
-        style={styles.refreshButton}
-        onPress={() => setExpandedOrder(null)}
-        activeOpacity={0.8}>
-        <Text style={styles.refreshButtonText}>Refresh Orders</Text>
-      </TouchableOpacity>
+      {orderList.length > 0 ? (
+        <FlatList
+          style={styles.list}
+          data={orderList}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+        />
+      ) : (
+        <Text style={styles.noDataText}>No Data Found!</Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  noDataText: {
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
   container: {
     flex: 1,
   },
@@ -191,17 +182,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.darkBlue,
     marginLeft: 8,
-  },
-  refreshButton: {
-    backgroundColor: colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  refreshButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   noDataText: {
     alignSelf: 'center',
