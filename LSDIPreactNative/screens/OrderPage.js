@@ -10,6 +10,8 @@ import {
   Platform,
   Modal,
 } from 'react-native';
+import { SelectList } from 'react-native-dropdown-select-list'
+import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
 
@@ -144,25 +146,25 @@ export default function OrderPage(props) {
             borderRadius: 20,
             marginTop: 20,
             fontSize: 16,
-        backgroundColor: 'white',
+            backgroundColor: 'white',
           }}>
             <SelectList
               data={data}
               setSelected={(val) => handleChange(val, "typeOfServices")}
               save="value"
             />
-            </View>
-            <TextBox style={styles.textBox} placeholder="Laundry Item Name" />
-            <TextBox style={styles.textBox} placeholder="Description" />
-            {/*range is input manually by staff
+          </View>
+          <TextBox style={styles.textBox} placeholder="Laundry Item Name" />
+          <TextBox style={styles.textBox} placeholder="Description" />
+          {/*range is input manually by staff
                flat is price x qty
                weight is price/kg */}
-            <TextBox style={styles.textBox} placeholder="Price" />
+          <TextBox style={styles.textBox} placeholder="Price" />
 
-            <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );
@@ -299,11 +301,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  textBox:{
+  textBox: {
     fontSize: 16,
     borderRadius: 10,
     backgroundColor: 'white',
-    padding:10,
+    padding: 10,
   }
 
 });

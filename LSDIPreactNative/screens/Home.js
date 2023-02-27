@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet, Button } from "react-native";
+import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
@@ -38,22 +38,23 @@ export default function Home({ navigation }) {
     }, [navigation]);
 
     return (
-        <View>
-            <Text style={{ fontSize: 24, fontWeight: "800" }}>Welcome {user?.role}</Text>
-            <View style={styles.loggedInContainer}>
-                <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
+        <View style={{ flex: 1 }}>
+            <ScrollView>
+                <Text style={{ fontSize: 24, fontWeight: "800" }}>Welcome {user?.role}</Text>
+                <View style={styles.loggedInContainer}>
+                    <Text>Email: {auth.currentUser?.email}</Text>
+                </View>
 
-            <OrdersList navigation={navigation} />
+                <View style={styles.createOrderContainer}>
+                    <Button
+                        title="Create Order"
+                        onPress={() => navigation.navigate("Create Order")}
+                    />
+                </View>
 
-            <View style={styles.createOrderContainer}>
-                <Button
-                    title="Create Order"
-                    //onPress={() => navigation.navigate("CO", { staffEmail: auth.currentUser?.email })}
-                />
-            </View>
+                <OrdersList navigation={navigation} />
 
-            {/* <View style={styles.chatContainer}>
+                {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Chat")}
                     style={styles.chatButton}
@@ -61,42 +62,41 @@ export default function Home({ navigation }) {
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
             </View> */}
+            </ScrollView>
         </View>
     )
 };
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: "#fff",
+        flex: 1,
+        backgroundColor: "#fff",
     },
     ordersListContainer: {
-      flex: 1,
-      padding: 10,
+        flex: 1,
+        padding: 10,
     },
     chatButtonContainer: {
-      position: "absolute",
-      bottom: 20,
-      right: 20,
-    },
-    chatButton: {
-      backgroundColor: colors.primary,
-      height: 50,
-      width: 50,
-      borderRadius: 25,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: colors.primary,
-      shadowOffset: {
-          width: 0,
-          height: 2,
-      },
-      shadowOpacity: .9,
-      shadowRadius: 8,
-    },
-    createOrderContainer: {
         position: "absolute",
         bottom: 20,
+        right: 20,
+    },
+    chatButton: {
+        backgroundColor: colors.primary,
+        height: 50,
+        width: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: colors.primary,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: .9,
+        shadowRadius: 8,
+    },
+    createOrderContainer: {
         alignSelf: "center",
-      },
-  });
+    },
+});
