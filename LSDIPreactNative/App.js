@@ -30,9 +30,9 @@ import ForgotPassword from './screens/ForgotPassword';
 import VehicleModule from './screens/VehicleModule';
 import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
-import CO from './screens/CO';
 import { firebase } from "./config/firebase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -44,6 +44,7 @@ const AuthenticatedUserProvider = ({ children }) => {
   return (
     <AuthenticatedUserContext.Provider value={{ user, setUser }}>
       {children}
+      <Toast />
     </AuthenticatedUserContext.Provider>
   );
 };
@@ -143,15 +144,13 @@ function RootNavigator() {
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Create Order' component={CreateOrder} />
-          <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
-          <Drawer.Screen name='OrderPage' component={OrderPage} />
-          <Drawer.Screen name='CO' component={CO} />
-          {/* </Drawer.Group> */}
-          {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
-            <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
-          </Drawer.Group> */}
+          {/* need to change */}
+          <Drawer.Screen name='Order Page' component={OrderPage} />
+
+          {/* duplicate of the home page, delete (?) */}
+          {/* <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} /> */}
         </Drawer.Navigator>
       </NavigationContainer >
     );

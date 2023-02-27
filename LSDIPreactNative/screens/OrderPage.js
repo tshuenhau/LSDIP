@@ -10,6 +10,8 @@ import {
   Platform,
   Modal,
 } from 'react-native';
+import { SelectList } from 'react-native-dropdown-select-list'
+import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
 
@@ -21,15 +23,36 @@ if (
 }
 
 export default function OrderPage(props) {
+  const [order, setOrder] = useState(null);
+  console.log(props);
+  const { orderId } = props.route.params;
+  console.log(orderId);
+  useEffect(() => {
+    // Fetch the order document using the orderId prop
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    const unsubscribe = orderRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        setOrder({ id: doc.id, ...doc.data() });
+      } else {
+        console.log('No such order document!');
+      }
+    });
+    return () => unsubscribe();
+  }, [orderId]);
+  // useEffect(() => {
+  //   if (order) {
+  //     console.log(order);
+  //   }
+  // }, [order]);
   //import service. 
   const services = firebase.firestore().collection('laundryCategory');
   const [service, setService] = useState([]);
-
+  const [modalData, setModalData] = useState({ description: '', price: '' });
   useEffect(() => {
     services.onSnapshot(querySnapshot => {
       const service = [];
       querySnapshot.forEach(doc => {
-        const { serviceName } = doc.service();
+        const { serviceName } = doc.data();
         data.push({
           key: doc.id,
           value: serviceName,
@@ -40,33 +63,54 @@ export default function OrderPage(props) {
   }, []);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  console.log(props);
-  const { orderId } = props.route.params;
-  console.log(orderId);
+
   const [orderItemsList, setOrderItemsList] = useState([]);
+  const [laundryItemsData, setLaundryItemsData] = useState([]);
   useEffect(() => {
-    const orderItem = firebase.firestore().collection('orderItem');
-    const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
-      const orderItemsList = [];
-      querySnapshot.forEach((doc) => {
-        const { description, laundryItemName, orderId, price } = doc.data();
-        orderItemsList.push({
-          id: doc.id,
-          description,
-          laundryItemName,
-          orderId,
-          price,
+    if (order) {
+      const orderItem = firebase.firestore().collection('orderItem');
+      const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
+        const orderItemsList = [];
+        querySnapshot.forEach((doc) => {
+          const { description, laundryItemName, price } = doc.data();
+          //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
+          orderItemsList.push({
+            id: doc.id,
+            description,
+            laundryItemName,
+            price,
+            orderId,
+          });
         });
+        setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
       });
-      setOrderItemsList(orderItemsList);
+      return () => unsubscribe();
+    }
+  }, [order]);  
+  useEffect(() => {
+    const laundryItems = firebase.firestore().collection('laundryItem');
+    const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
+      const laundryItemsData = [];
+      querySnapshot.forEach(doc => {
+        const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
+          laundryItemsData.push({
+            laundryItemName: laundryItemName,
+            typeOfServices: typeOfServices,
+            pricingMethod: pricingMethod,
+            price: price,
+          });
+      });
+      setLaundryItemsData(laundryItemsData);
     });
     return () => unsubscribe();
   }, []);
+  
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
 
-  const data = orderItemsList.filter((element) => element.orderId == orderId);
+  const data = orderItemsList.filter((item) => order.orderItemIds.includes(item.id));
+
 
   const deleteOrder = () => {
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
@@ -85,6 +129,42 @@ export default function OrderPage(props) {
     console.log("here to add item");
     toggleModal();
   };
+
+  function handleChange(text, eventName) {
+    setModalData(prev => {
+        return {
+            ...prev,
+            [eventName]: text
+        }
+    })
+}
+  const addOrderItem1 = () => {
+    const selectedItem = modalData.typeOfServices;
+    // Create a new order item document in the 'orderItem' collection
+    // Get the values of description and price from the state modalData
+    const { description, price } = modalData;
+    firebase.firestore().collection('orderItem').add({
+      laundryItemName: selectedItem.split(' ')[0],
+      typeOfServices: selectedItem.split(' ')[1],
+      description: description,
+      price: price,
+      orderId: orderId,
+    }).then((docRef) => {
+      console.log('Order item created with ID: ', docRef.id);
+      // Add the new order item ID to the 'items' array in the order document
+      const orderRef = firebase.firestore().collection('orders').doc(orderId);
+      orderRef.update({
+        orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+      }).then(() => {
+        console.log('Order item added to order successfully');
+      }).catch((error) => {
+        console.error('Error adding order item to order: ', error);
+      });
+    }).catch((error) => {
+      console.error('Error creating order item: ', error);
+    });
+    toggleModal();
+  }
 
   return (
     <View style={styles.container}>
@@ -138,32 +218,42 @@ export default function OrderPage(props) {
       >
         <View style={styles.modal}>
           <Text style={styles.addButtonText}>MODAL</Text>
-          <View style={{
-            // height: 42,
-            width: "92%",
-            borderRadius: 20,
-            marginTop: 20,
-            fontSize: 16,
-        backgroundColor: 'white',
-          }}>
+          <View
+            style={{
+              width: '92%',
+              borderRadius: 20,
+              marginTop: 20,
+                  backgroundColor: 'white',
+            }}>
             <SelectList
-              data={data}
-              setSelected={(val) => handleChange(val, "typeOfServices")}
+              data={laundryItemsData.map(
+                (item) => item.laundryItemName + ' ' + item.typeOfServices
+              )}
+              setSelected={(val) => handleChange(val, 'typeOfServices')}
               save="value"
             />
-            </View>
-            <TextBox style={styles.textBox} placeholder="Laundry Item Name" />
-            <TextBox style={styles.textBox} placeholder="Description" />
-            {/*range is input manually by staff
-               flat is price x qty
-               weight is price/kg */}
-            <TextBox style={styles.textBox} placeholder="Price" />
-
-            <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
           </View>
+          <TextBox
+            style={styles.textBox}
+            placeholder="Description"
+            onChangeText={(text) => handleChange(text, 'description')}
+          />
+          <TextBox
+            style={styles.textBox}
+            placeholder="Price"
+            onChangeText={(text) => handleChange(text, 'price')}
+          />
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => addOrderItem1()}>
+            <Text style={styles.closeButtonText}>Add Item</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
+
     </View>
   );
 }
@@ -237,17 +327,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.darkBlue,
   },
-  refreshButton: {
-    backgroundColor: colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  refreshButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   noDataText: {
     alignSelf: 'center',
     marginTop: 32,
@@ -299,11 +378,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  textBox:{
+  textBox: {
     fontSize: 16,
     borderRadius: 10,
     backgroundColor: 'white',
-    padding:10,
+    padding: 10,
   }
 
 });

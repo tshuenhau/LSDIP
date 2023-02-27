@@ -12,7 +12,6 @@ import {
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
-import OrderPage from '../screens/OrderPage';
 
 if (
   Platform.OS === 'android' &&
@@ -22,13 +21,18 @@ if (
 }
 
 export default function OrdersList({ navigation }) {
+
   const [orderList, setOrderList] = useState([]);
+  const orders = firebase.firestore().collection('orders');
+
   useEffect(() => {
-    const orders = firebase.firestore().collection('orders');
+
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
-        const { customerPrimaryKey,
+        const {
+          customerName,
+          customerPhone,
           date,
           orderItems,
           outletId,
@@ -36,7 +40,8 @@ export default function OrdersList({ navigation }) {
           totalPrice } = doc.data();
         orderList.push({
           id: doc.id,
-          customerPrimaryKey,
+          customerName,
+          customerPhone,
           date,
           orderItems,
           outletId,
@@ -88,7 +93,8 @@ export default function OrdersList({ navigation }) {
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
-          <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
+          <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
+          <Text style={styles.orderNumber}>Number: {order.customerPhone}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
           <OrderDetails data={order.id}></OrderDetails>
@@ -109,6 +115,7 @@ export default function OrdersList({ navigation }) {
   );
 
 
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -120,12 +127,6 @@ export default function OrdersList({ navigation }) {
           <Text style={styles.noDataText}>No Data Found!</Text>
         }
       />
-      <TouchableOpacity
-        style={styles.refreshButton}
-        onPress={() => setExpandedOrder(null)}
-        activeOpacity={0.8}>
-        <Text style={styles.refreshButtonText}>Refresh Orders</Text>
-      </TouchableOpacity>
     </View>
   );
 }
