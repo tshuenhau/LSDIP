@@ -14,8 +14,6 @@ import { SelectList } from 'react-native-dropdown-select-list'
 import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
-import { SelectList } from 'react-native-dropdown-select-list';
-import TextBox from "../components/TextBox";
 
 if (
   Platform.OS === 'android' &&
