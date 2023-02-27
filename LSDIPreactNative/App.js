@@ -27,6 +27,7 @@ import CreateOrder from './screens/CreateOrder';
 import OrderPage from './screens/OrderPage';
 import OrderDetailsPage from './screens/OrderDetailsPage';
 import ForgotPassword from './screens/ForgotPassword';
+import VehicleModule from './screens/VehicleModule';
 import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
 import { firebase } from "./config/firebase";
@@ -78,6 +79,14 @@ function CustomDrawerContent(props) {
       />
     </DrawerContentScrollView>
   );
+}
+
+function VehicleStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='VehicleModule' component={VehicleModule} />
+    </Stack.Navigator>
+  )
 }
 
 function RootNavigator() {
@@ -132,6 +141,7 @@ function RootNavigator() {
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
+          <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
@@ -169,6 +179,7 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Driver' component={Driver} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>

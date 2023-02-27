@@ -86,7 +86,7 @@ export default function OrdersList({ navigation }) {
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
+          onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
         >
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
