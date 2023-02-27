@@ -14,6 +14,10 @@ import { SelectList } from 'react-native-dropdown-select-list'
 import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
+import Btn from "../components/Button";
+import { FontAwesome } from '@expo/vector-icons';
+
+
 
 if (
   Platform.OS === 'android' &&
@@ -86,25 +90,25 @@ export default function OrderPage(props) {
       });
       return () => unsubscribe();
     }
-  }, [order]);  
+  }, [order]);
   useEffect(() => {
     const laundryItems = firebase.firestore().collection('laundryItem');
     const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
       const laundryItemsData = [];
       querySnapshot.forEach(doc => {
         const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
-          laundryItemsData.push({
-            laundryItemName: laundryItemName,
-            typeOfServices: typeOfServices,
-            pricingMethod: pricingMethod,
-            price: price,
-          });
+        laundryItemsData.push({
+          laundryItemName: laundryItemName,
+          typeOfServices: typeOfServices,
+          pricingMethod: pricingMethod,
+          price: price,
+        });
       });
       setLaundryItemsData(laundryItemsData);
     });
     return () => unsubscribe();
   }, []);
-  
+
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
@@ -132,12 +136,12 @@ export default function OrderPage(props) {
 
   function handleChange(text, eventName) {
     setModalData(prev => {
-        return {
-            ...prev,
-            [eventName]: text
-        }
+      return {
+        ...prev,
+        [eventName]: text
+      }
     })
-}
+  }
   const addOrderItem1 = () => {
     const selectedItem = modalData.typeOfServices;
     // Create a new order item document in the 'orderItem' collection
@@ -166,95 +170,129 @@ export default function OrderPage(props) {
     toggleModal();
   }
 
+  const renderSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 1,
+          width: '100%',
+          backgroundColor: '#CED0CE',
+          alignItems: "center"
+        }}
+      />
+    )
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>Order #{orderId}</Text>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteOrder()}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+        <View style = {{padding:10, flexDirection:'row'}}>
+        <View style={styles.cardHeaderIcon}>
+          <FontAwesome
+            style={styles.outletIcon}
+            name="trash-o"
+            color='red'
+            onPress={() => deleteOrder()}
+          />
+        </View>
+
         <TouchableOpacity onPress={() => props.navigation.goBack()}>
           <Text style={styles.backButton}>Back</Text>
         </TouchableOpacity>
+        </View>
       </View>
       <FlatList
         style={styles.cardBody}
         data={data}
         keyExtractor={(item) => item.id}
+        ItemSeparatorComponent={renderSeparator}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <View style={styles.itemDetails}>
               <Text style={styles.itemName}>{item.laundryItemName}</Text>
               <Text style={styles.itemDescription}>{item.description}</Text>
             </View>
-            <Text style={styles.itemPrice}>{item.price}</Text>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => {
-                const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
-                orderRef.update({
-                  items: firebase.firestore.FieldValue.arrayRemove(item.id),
-                });
-                const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
-                orderItemRef.delete();
-              }}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
+            <Text style={styles.itemPrice}>S$ {item.price}</Text>
+            <View style={styles.cardHeaderIcon}>
+              <FontAwesome
+                style={styles.outletIcon}
+                name="trash-o"
+                color='red'
+                onPress={() => {
+                  const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
+                  orderRef.update({
+                    items: firebase.firestore.FieldValue.arrayRemove(item.id),
+                  });
+                  const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
+                  orderItemRef.delete();
+                }}
+              />
+            </View>
           </View>
         )}
       />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={addOrderItem}>
-        <Text style={styles.addButtonText}>Add Item</Text>
-      </TouchableOpacity>
+      <View style={styles.view}>
+        <TouchableOpacity
+          onPress={addOrderItem}
+          style={styles.btn}>
+          <Text style={styles.text}>Add Item</Text>
+        </TouchableOpacity>
+      </View>
       <Modal
         visible={isModalVisible}
         transparent={true}
         animationType="slide"
       >
-        <View style={styles.modal}>
-          <Text style={styles.addButtonText}>MODAL</Text>
-          <View
-            style={{
-              width: '92%',
-              borderRadius: 20,
-              marginTop: 20,
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={styles.view}>
+
+              <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item</Text>
+              <View
+                style={{
+                  width: '100%',
+                  borderRadius: 20,
+                  marginTop: 20,
                   backgroundColor: 'white',
-            }}>
-            <SelectList
-              data={laundryItemsData.map(
-                (item) => item.laundryItemName + ' ' + item.typeOfServices
-              )}
-              setSelected={(val) => handleChange(val, 'typeOfServices')}
-              save="value"
-            />
+                }}>
+                <SelectList
+                  data={laundryItemsData.map(
+                    (item) => item.laundryItemName + ' ' + item.typeOfServices
+                  )}
+                  setSelected={(val) => handleChange(val, 'typeOfServices')}
+                  save="value"
+                />
+              </View>
+              <TextBox
+                style={styles.textBox}
+                placeholder="Description"
+                onChangeText={(text) => handleChange(text, 'description')}
+              />
+              <TextBox
+                style={styles.textBox}
+                placeholder="Price"
+                onChangeText={(text) => handleChange(text, 'price')}
+              />
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                <Btn
+                  onClick={() => addOrderItem1()}
+                  title="Update"
+                  style={{ width: "48%" }}
+                />
+                <Btn
+                  onClick={() => toggleModal()}
+                  title="Close"
+                  style={{ width: "48%", backgroundColor: "#344869" }}
+                />
+              </View>
+            </View>
           </View>
-          <TextBox
-            style={styles.textBox}
-            placeholder="Description"
-            onChangeText={(text) => handleChange(text, 'description')}
-          />
-          <TextBox
-            style={styles.textBox}
-            placeholder="Price"
-            onChangeText={(text) => handleChange(text, 'price')}
-          />
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => addOrderItem1()}>
-            <Text style={styles.closeButtonText}>Add Item</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
+        </View >
       </Modal>
 
     </View>
+
   );
 }
 
@@ -268,7 +306,8 @@ const styles = StyleSheet.create({
   backButton: {
     fontSize: 16,
     color: 'blue',
-    marginLeft: 8,
+    paddingTop:30,
+    fontWeight:"bold"
   },
   card: {
     backgroundColor: '#fff',
@@ -361,10 +400,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modal: {
-    flex: 1,
-    justifyContent: 'center',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   closeButton: {
     backgroundColor: colors.red,
@@ -379,10 +427,58 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   textBox: {
+    width: "100%",
     fontSize: 16,
-    borderRadius: 10,
-    backgroundColor: 'white',
     padding: 10,
-  }
-
+    borderColor: "#0B3270",
+    borderWidth: 1,
+    borderRadius: 5,
+    height: 800,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  view: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  btn: {
+    borderRadius: 10,
+    backgroundColor: "#0B3270",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    padding: 10
+  },
+  outletIcon: {
+    fontSize: 25,
+    margin: 10,
+  },
+  cardHeaderIcon: {
+    flexDirection: 'row',
+    padding: 16,
+  },
 });
