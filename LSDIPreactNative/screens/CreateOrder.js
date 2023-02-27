@@ -102,7 +102,7 @@ export default function CreateOrder() {
     };
 
     const addToCart = () => {
-        const { laundryItemName, typeOfServices, pricingMethod, description, price} = createModalData;
+        const { laundryItemName, typeOfServices, pricingMethod, description, price } = createModalData;
         setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, description, price }]);
         setCreateModalVisible(false);
         console.log("added item");
@@ -143,7 +143,7 @@ export default function CreateOrder() {
         </TouchableOpacity>
     );
 
-    const Laundry = () => (
+    const WetWash = () => (
         <FlatList
             data={laundryItems.filter(l => l.typeOfServices === "Wet Wash")}
             keyExtractor={item => item.id}
@@ -177,13 +177,13 @@ export default function CreateOrder() {
     );
 
     const renderScene = SceneMap({
-        laundry: Laundry,
+        wetWash: WetWash,
         dryClean: DryClean,
         others: Others
     });
 
     const [routes] = React.useState([
-        { key: 'laundry', title: 'Laundry' },
+        { key: 'wetWash', title: 'Wet Wash' },
         { key: 'dryClean', title: 'Dry Clean' },
         { key: 'others', title: 'Others' },
     ]);
@@ -195,16 +195,16 @@ export default function CreateOrder() {
         try {
             const orderItemRefs = await Promise.all(
                 cart.map(async (item) => {
-                  const orderItemRef = await orderItems.add(item);
-                  return orderItemRef;
+                    const orderItemRef = await orderItems.add(item);
+                    return orderItemRef;
                 })
-              );
-          
-              // Get IDs of created order items
-              const orderItemIds = orderItemRefs.map((ref) => ref.id);
-          
-              // Create order
-              const orderRef = await orders.add({
+            );
+
+            // Get IDs of created order items
+            const orderItemIds = orderItemRefs.map((ref) => ref.id);
+
+            // Create order
+            const orderRef = await orders.add({
                 ...orderValues,
                 customerName: customerDetails.customerName,
                 customerNumber: customerDetails.customerNumber,
@@ -217,15 +217,15 @@ export default function CreateOrder() {
                 outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
                 orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
                 orderItemIds: orderItemIds, // Add order item IDs to order
-              });
-          
-              setCart([]);
-              setOrderValues(initialOrderValues);
-              Alert.alert("Order created successfully");
-            } catch (error) {
-              console.error(error);
-              Alert.alert("Error creating order. Please try again.");
-            }
+            });
+
+            setCart([]);
+            setOrderValues(initialOrderValues);
+            Alert.alert("Order created successfully");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error creating order. Please try again.");
+        }
     };
 
     return (
@@ -241,15 +241,12 @@ export default function CreateOrder() {
                 animationType="slide"
                 transparent={true}
                 visible={createModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setCreateModalVisible(!createModalVisible);
-                }}>
+            >
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
-                            <Text style={styles.itemText}>Laundry Item Name: {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}>Item Name: {createModalData.laundryItemName} </Text>
                             <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
                             <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
                             <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
@@ -307,7 +304,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         elevation: 3,
         width: "80%",
-        maxHeight: 300,
     },
 
     tableHeader: {

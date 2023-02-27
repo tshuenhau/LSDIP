@@ -7,7 +7,7 @@ import {
   FlatList,
   LayoutAnimation,
   UIManager,
-  Platform,
+  Platform
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
@@ -80,29 +80,29 @@ export default function OrdersList({ navigation }) {
         <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
         <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
-      >
-        <Text style={styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
+          style={styles.editButton}
+          onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
+        >
+          <Text style={styles.editButtonText}>Edit</Text>
+        </TouchableOpacity>
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
-        <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
-        <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
-        <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
-        <OrderDetails data={order.id}></OrderDetails>
-        {/* <FlatList */}
+          <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
+          <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+          <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+          <OrderDetails data={order.id}></OrderDetails>
+          {/* <FlatList */}
           {/* style={styles.cardBody} */}
           {/* data={order.orderItems} */}
           {/* keyExtractor={(item) => item.id} */}
           {/* renderItem={({ item }) => ( */}
-            {/* <View style={styles.itemContainer}> */}
-              {/* <Text style={styles.itemText}>{item}</Text> */}
-              {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
-            {/* </View> */}
+          {/* <View style={styles.itemContainer}> */}
+          {/* <Text style={styles.itemText}>{item}</Text> */}
+          {/* <Text style={styles.itemPrice}>${item.price}</Text> */}
+          {/* </View> */}
           {/* )} */}
-        {/* /> */}
+          {/* /> */}
         </View>
       )}
     </TouchableOpacity>
@@ -111,16 +111,15 @@ export default function OrdersList({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {orderList.length > 0 ? (
-        <FlatList
-          style={styles.list}
-          data={orderList}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
-      ) : (
-        <Text style={styles.noDataText}>No Data Found!</Text>
-      )}
+      <FlatList
+        style={styles.list}
+        data={orderList}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        ListEmptyComponent={
+          <Text style={styles.noDataText}>No Data Found!</Text>
+        }
+      />
       <TouchableOpacity
         style={styles.refreshButton}
         onPress={() => setExpandedOrder(null)}
@@ -132,72 +131,77 @@ export default function OrdersList({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
+  noDataText: {
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  container: {
+    flex: 1,
+  },
+  list: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: '#fff',
+    marginVertical: 10,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: {
+      width: 0,
+      height: 3,
     },
-    list: {
-      flex: 1,
-    },
-    card: {
-      backgroundColor: '#fff',
-      marginVertical: 10,
-      marginHorizontal: 16,
-      borderRadius: 10,
-      shadowColor: '#000',
-      shadowOpacity: 0.2,
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-      elevation: 3,
-    },
-    cardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: 16,
-    },
-    orderNumber: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    orderDate: {
-      fontSize: 14,
-      color: colors.gray,
-    },
-    cardBody: {
-      backgroundColor: colors.lightGray,
-      padding: 16,
-    },
-    itemContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingVertical: 8,
-    },
-    itemText: {
-      flex: 1,
-      fontSize: 16,
-    },
-    itemPrice: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: colors.darkBlue,
-      marginLeft: 8,
-    },
-    refreshButton: {
-      backgroundColor: colors.blue,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 16,
-    },
-    refreshButtonText: {
-      color: '#000',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    noDataText: {
-      alignSelf: 'center',
-      marginTop: 32,
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-  });
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  orderNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  orderDate: {
+    fontSize: 14,
+    color: colors.gray,
+  },
+  cardBody: {
+    backgroundColor: colors.lightGray,
+    padding: 16,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  itemText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  itemPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.darkBlue,
+    marginLeft: 8,
+  },
+  refreshButton: {
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  refreshButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  noDataText: {
+    alignSelf: 'center',
+    marginTop: 32,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
