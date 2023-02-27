@@ -24,6 +24,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import ForgotPassword from './screens/ForgotPassword';
+import VehicleModule from './screens/VehicleModule';
 import { firebase } from "./config/firebase";
 
 const Stack = createStackNavigator();
@@ -123,6 +124,7 @@ function RootNavigator() {
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
+          <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
         </Drawer.Navigator>
       </NavigationContainer >
@@ -152,6 +154,7 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Driver' component={Driver} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
