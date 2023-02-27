@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView } from "react-native";
+import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import colors from '../colors';
+import OrderDetails from "../components/OrderDetails";
+
+
+
 
 
 export default function Home({ navigation }) {
@@ -13,6 +17,12 @@ export default function Home({ navigation }) {
     const auth1 = firebase.auth;
 
     const [user, setUser] = useState(null) // This user
+    const orders = firebase.firestore().collection('orders');
+    const users = firebase.firestore().collection('users');
+    const [orderList, setOrderList] = useState([]);
+    const [customer, setCustomer] = useState([]);
+
+
 
     useEffect(() => {
         firestore().collection("users").doc(auth1().currentUser.uid).get()
@@ -22,6 +32,7 @@ export default function Home({ navigation }) {
             })
 
     }, [])
+
 
     useEffect(() => {
         navigation.setOptions({
@@ -38,22 +49,70 @@ export default function Home({ navigation }) {
         });
     }, [navigation]);
 
+    const newList = (user) => {
+        const customer = [];
+        if (user.phone === orders.customerPhone) {
+
+
+
+            setCustomer(customer)
+        }
+    }
+
+
+
     return (
         <View style={{ flex: 1 }}>
             <ScrollView>
-                <Text style={{ fontSize: 24, fontWeight: "800" }}>Welcome {user?.role}</Text>
-                <View style={styles.loggedInContainer}>
-                    <Text>Email: {auth.currentUser?.email}</Text>
-                </View>
+                {user?.role === "Staff" ?
+                    <View>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
+                        <View style={{ paddingLeft: 5 }}>
+                            <Text>Email: {auth.currentUser?.email}</Text>
+                        </View>
+                        <Text>Hi im Staff</Text>
+                    </View>
+                    : null
+                }
+                {user?.role === "Admin" ?
+                    <View>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
+                        <View style={{ paddingLeft: 5 }}>
+                            <Text>Email: {auth.currentUser?.email}</Text>
+                        </View>
+                        <View style={styles.createOrderContainer}>
+                            <Button
+                                title="Create Order"
+                                onPress={() => navigation.navigate("Create Order")}
+                            />
+                        </View>
+                        <OrdersList navigation={navigation} />
+                    </View>
+                    : null
+                }
+                {user?.role === "Customer" ?
+                    <View>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.name}</Text>
+                        <View style={{ paddingLeft: 5 }}>
+                            <Text>Email: {auth.currentUser?.email}</Text>
+                        </View>
+                        <Text>Hi im customer</Text>
+                    </View>
+                    : null
+                }
+                {user?.role === "Driver" ?
+                    <View>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
+                        <View style={{ paddingLeft: 5 }}>
+                            <Text>Email: {auth.currentUser?.email}</Text>
+                        </View>
+                        <Text>Hi im Driver</Text>
+                    </View>
+                    : null
+                }
 
-                <View style={styles.createOrderContainer}>
-                    <Button
-                        title="Create Order"
-                        onPress={() => navigation.navigate("Create Order")}
-                    />
-                </View>
 
-                <OrdersList navigation={navigation} />
+                {/*<OrdersList navigation={navigation} />*/}
 
                 {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
@@ -99,9 +158,42 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
     },
     button: {
-      marginTop: "20"
+        marginTop: "20"
     },
     createOrderContainer: {
         alignSelf: "center",
+    },
+    list: {
+        flex: 1,
+    },
+    card: {
+        backgroundColor: '#fff',
+        marginVertical: 10,
+        marginHorizontal: 16,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
+    },
+    orderNumber: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    orderDate: {
+        fontSize: 14,
+        color: colors.gray,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 16,
+    },
+    cardBody: {
+        backgroundColor: colors.lightGray,
+        padding: 16,
     },
 });
