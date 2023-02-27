@@ -24,8 +24,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
-import OrderPage from './screens/OrderPage';
-import OrderDetailsPage from './screens/OrderDetailsPage';
+import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
 import VehicleModule from './screens/VehicleModule';
 import LaundryItems from './screens/LaundryItem';
@@ -146,11 +145,11 @@ function RootNavigator() {
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
-          {/* need to change */}
-          <Drawer.Screen name='Order Page' component={OrderPage} />
-
-          {/* duplicate of the home page, delete (?) */}
-          {/* <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} /> */}
+          <Drawer.Screen name='Order Page' component={OrderDetail}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
         </Drawer.Navigator>
       </NavigationContainer >
     );
@@ -163,7 +162,13 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
+            <Drawer.Screen name='Create Order' component={CreateOrder} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            <Drawer.Screen name='Order Page' component={OrderDetail}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
+            />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
