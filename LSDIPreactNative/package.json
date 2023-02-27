@@ -36,7 +36,8 @@
     "react-native-screens": "~3.18.0",
     "react-native-tab-view": "^3.5.0",
     "react-native-vega-scroll-list": "^1.0.0",
-    "react-native-web": "~0.18.9"
+    "react-native-web": "~0.18.9",
+    "react-navigation-header-buttons": "^10.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

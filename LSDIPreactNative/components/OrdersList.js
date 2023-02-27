@@ -12,6 +12,7 @@ import {
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
+import OrderPage from '../screens/OrderPage';
 
 if (
   Platform.OS === 'android' &&
@@ -20,14 +21,14 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function OrdersList() {
+export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
   useEffect(() => {
     const orders = firebase.firestore().collection('orders');
     const unsubscribe = orders.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
-        const { customerPrimaryKey,
+        const { customerName,
           date,
           orderItems,
           outletId,
@@ -35,7 +36,7 @@ export default function OrdersList() {
           totalPrice } = doc.data();
         orderList.push({
           id: doc.id,
-          customerPrimaryKey,
+          customerName,
           date,
           orderItems,
           outletId,
@@ -66,7 +67,7 @@ export default function OrdersList() {
 
   const formatOrderDate = (date) => {
     //return date.toDate().toLocaleString();
-    return "";
+    return date;
   };
   
   const renderItem = ({ item: order }) => (
@@ -79,12 +80,16 @@ export default function OrdersList() {
         {/* date display todo */}
         {/* <Text style={styles.orderDate}>{formatOrderDate(order)}</Text> */}
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
-
-
+        <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => navigation.navigate('OrderPage', { orderId: order.id })}
+      >
+        <Text style={styles.editButtonText}>Edit</Text>
+      </TouchableOpacity>
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
-          <Text style={styles.orderNumber}>Customer: {order.customerPrimaryKey}</Text>
+          <Text style={styles.orderNumber}>Customer: {order.customerName}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
           <OrderDetails data={order.id}></OrderDetails>
@@ -92,6 +97,7 @@ export default function OrdersList() {
       )}
     </TouchableOpacity>
   );
+
 
   return (
     <View style={styles.container}>

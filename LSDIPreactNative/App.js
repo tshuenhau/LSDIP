@@ -24,12 +24,13 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import OrderPage from './screens/OrderPage';
 import OrderDetailsPage from './screens/OrderDetailsPage';
 import ForgotPassword from './screens/ForgotPassword';
 import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
-import CO from './screens/CO';
 import { firebase } from "./config/firebase";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -52,6 +53,14 @@ const handleSignOut = () => {
     })
     .catch(error => alert(error.message))
 }
+
+const setUserId = async (id) => {
+  try {
+    await AsyncStorage.setItem('userId', id.toString());
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 function CustomDrawerContent(props) {
   return (
@@ -85,6 +94,7 @@ function RootNavigator() {
               console.log(user);
               console.log(user1?.role);
               const userRole = user?.role;
+              setUserId(auth1().currentUser.uid);
               setUser({ ...authenticatedUser, role: userRole });
             })
 
@@ -125,7 +135,7 @@ function RootNavigator() {
           <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
-          <Drawer.Screen name='CO' component={CO} />
+          <Drawer.Screen name='OrderPage' component={OrderPage} />
           {/* </Drawer.Group> */}
           {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
             <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />

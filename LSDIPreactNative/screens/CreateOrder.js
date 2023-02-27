@@ -9,8 +9,10 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
@@ -23,7 +25,12 @@ import moment from "moment";
 export default function CreateOrder() {
     const initialOrderValues = {
         //orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
-        orderDate: firebase.firestore.FieldValue.serverTimestamp()
+        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+        customerName: "",
+        customerAddress: "",
+        customerPhone: "",
+        pickupDate: "",
+        deliveryDate: "",
     }
 
     const [index, setIndex] = React.useState(0);
@@ -36,6 +43,7 @@ export default function CreateOrder() {
     const orderItems = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const [orderValues, setOrderValues] = useState(initialOrderValues);
+    const [customerName, setCustomerName] = useState('');
     const [cart, setCart] = useState([]);
     let orderId = "";
 
@@ -67,7 +75,18 @@ export default function CreateOrder() {
         })
     }
 
-    const clearState = () => {
+const getUserId = async () => {
+    try {
+      const id = await AsyncStorage.getItem('userId');
+      if (id !== null) {
+        return id;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+      
+const clearState = () => {
         cart.length = 0;
         console.log(cart.length);
     }
@@ -83,6 +102,7 @@ export default function CreateOrder() {
 
     const addToCart = () => {
         // TODO addToCart
+        /*
         if(cart.length == 0) {
             console.log("cart is empty");
             orders.add(orderValues)
@@ -94,8 +114,12 @@ export default function CreateOrder() {
             }).catch((err) => {
                 console.log(err);
             })
-        }
+        }     
         console.log(orderId);
+        */
+        const { laundryItemName, typeOfServices, pricingMethod, description, price } = createModalData;
+        setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, description, price }]);
+        setCreateModalVisible(false);
         console.log(createModalData);
         console.log("added item");
     }
@@ -179,6 +203,63 @@ export default function CreateOrder() {
         { key: 'dryClean', title: 'Dry Clean' },
         { key: 'others', title: 'Others' },
     ]);
+    const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
+
+    const createOrder = async () => {
+    try {
+            const searchStaffByEmail = async (email) => {
+                const querySnapshot = await staffIdCollection.where("email", "==", email).get();
+                const results = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    results.push({
+                    id: doc.id,
+                    email: data.email,
+                    });
+                });
+                return results[0];
+                };
+            
+            const orderRef = await orders.add({
+            ...orderValues,
+            customerName: customerName,
+            endDate: null,
+            totalPrice: totalPrice,
+            orderStatus: "pending",
+            receiveFromWasherDate: null,
+            sendFromWasherDate: null,
+            staffID: await getUserId(),
+            outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+            orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+            });
+      
+            orderId = orderRef.id;
+            const orderItemsPromises = cart.map(item => {
+                const { laundryItemName, typeOfServices, pricingMethod, description, price } = item;
+                const orderItem = {
+                laundryItemName,
+                typeOfServices,
+                pricingMethod,
+                description,
+                price,
+                createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                orderId,
+                };
+                return orderItems.add(orderItem);
+            });
+            await Promise.all(orderItemsPromises);
+      
+            setCart([]);
+            setOrderValues(initialOrderValues);
+            Alert.alert("Order created successfully");
+        } catch (error) {
+          console.error(error);
+          Alert.alert("Error creating order. Please try again.");
+        }
+      };
+      
+      
+      
 
     return (
         <View>
@@ -187,8 +268,9 @@ export default function CreateOrder() {
                 renderScene={renderScene}
                 onIndexChange={setIndex}
             />
-            <Text><Btn onClick={() => clearState()} title="Summary" style={styles.button} /></Text>
+            <Text><Btn title="Summary" style={styles.button} /></Text>
 
+            {/* <Text><Btn onClick={() => clearState()} title="Summary" style={styles.button} /></Text> */}
 
             {/* Create Modal */}
             <Modal
@@ -217,11 +299,91 @@ export default function CreateOrder() {
                     </View>
                 </View>
             </Modal>
+
+            {/* Cart Table */}
+            <View style={styles.tableContainer}>
+                <View style={styles.tableHeader}>
+                    <Text style={styles.tableHeaderText}>Item Type</Text>
+                    <Text style={styles.tableHeaderText}>Description</Text>
+                    <Text style={styles.tableHeaderText}>Item Name</Text>
+                    <Text style={styles.tableHeaderText}>Price</Text>
+                </View>
+                <ScrollView style={styles.tableBody}>
+                    {cart.map((item, index) => (
+                        <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                        <Text style={styles.tableRowText}>{item.description}</Text>
+                        <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                        <Text style={styles.tableRowText}>{item.price}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
+                <TextBox placeholder="Customer Name" onChangeText={setCustomerName} value={customerName} />            
+                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                    <Text style={styles.checkoutButtonText}>Checkout</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
-
 const styles = StyleSheet.create({
+    tableContainer: {
+        marginTop: 20,
+        marginBottom: 20,
+        marginLeft: "auto",
+        marginRight: "auto",
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 3,
+        },
+        shadowOpacity: 0.2,
+        elevation: 3,
+        width: "80%",
+        maxHeight: 300,
+      },
+      
+    tableHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+      },
+      tableHeaderText: {
+        fontWeight: "bold",
+        fontSize: 16,
+        flex: 1,
+      },      
+    tableBody: {},
+    tableRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+      },
+      tableRowText: {
+        fontSize: 16,
+        flex: 1,
+      },
+      
+    checkoutButton: {
+      backgroundColor: "#0B3270",
+      padding: 16,
+      borderRadius: 10,
+      width: "80%",
+      marginLeft: "auto",
+      marginRight: "auto",
+      marginBottom: 20,
+    },
+    checkoutButtonText: {
+      color: "#fff",
+      textAlign: "center",
+      fontSize: 18,
+    },
     button: {
         height: 60,
         width: "40%",
