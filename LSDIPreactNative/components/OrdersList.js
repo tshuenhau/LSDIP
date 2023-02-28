@@ -18,6 +18,8 @@ import Btn from "../components/Button";
 import alert from '../components/Alert'
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
+import { FontAwesome } from '@expo/vector-icons';
+
 
 if (
   Platform.OS === 'android' &&
@@ -115,12 +117,29 @@ export default function OrdersList({ navigation }) {
         <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
         <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
-        <TouchableOpacity
-          onPress={() => handleCheck(order)}>
-          <CheckBox
-            value={order.isSelected}
+
+        <View style={styles.cardButtons}>
+          <TouchableOpacity
+          style={{paddingTop:12, marginRight:15}}
+            onPress={() => handleCheck(order)}>
+            <CheckBox
+              value={order.isSelected}
+            />
+          </TouchableOpacity>
+          <FontAwesome
+            style={styles.outletIcon}
+            name="edit"
+            color='green'
+            onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
           />
-        </TouchableOpacity>
+          <FontAwesome
+            style={styles.outletIcon}
+            name="print"
+            color='black'
+            onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
+          />
+        </View>
+        {/*
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
@@ -132,7 +151,7 @@ export default function OrdersList({ navigation }) {
           onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
         >
           <Text style={styles.editButtonText}>Print</Text>
-        </TouchableOpacity>
+  </TouchableOpacity>*/}
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
@@ -372,4 +391,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  outletIcon: {
+    fontSize: 20,
+    margin: 10,
+  },
+  cardHeaderIcon: {
+    flexDirection: 'row',
+    padding: 16,
+  },
+  cardButtons: {
+    flexDirection: "row",
+    justifyContent: 'space-between',
+},
 });
