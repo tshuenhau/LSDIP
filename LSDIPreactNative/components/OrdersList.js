@@ -97,10 +97,15 @@ export default function OrdersList({ navigation }) {
   function filterOrder(text) {
     const filteredOrders = originalOrders.filter(l => l.customerName.toUpperCase().includes(text.toUpperCase().trim().replace(/\s/g, "")));
     console.log("seacrhing");
-    console.log(originalOrders);
-    console.log(filteredOrders);
+    //console.log(originalOrders);
+    //console.log(filteredOrders);
     orderList.splice(0, orderList.length, ...filteredOrders);
-    console.log(orderList);
+    //console.log(orderList);
+    if (orderList.length === 0) {
+      renderItem;
+    }
+    toggleExpand(orderList[0].id);
+    //renderItem2;
   }
   
   const renderItem = ({ item: order }) => (
@@ -142,6 +147,25 @@ export default function OrdersList({ navigation }) {
     </TouchableOpacity>
   );
 
+  /*
+  const _onChangeText(text) {
+    if (text) {
+      this.setState({inputValue: text});
+      clearTimeout(this.settimeId);
+      this.settimeId = setTimeout(() => {
+        var jsonData = {
+          "sessionId": global.appInfo.sessionId,
+          "merchName": text,
+        };
+        console.log(jsonData);
+        Utils.fetchData('OrdersList', jsonData, this.searchCallback)}, 1000);
+        console.log("id: " + this.settimeId);
+    } else {
+      this.setState({inputValue: ''})
+    }
+  }
+  */
+
 
   return (
     <View style={styles.container}>
@@ -158,13 +182,24 @@ export default function OrdersList({ navigation }) {
   </SafeAreaView> */}
       <View style = {styles.searchbarContainer}>
         <View style={styles.searchbar}>
-          <FontAwesome name="search" size={24} color="black" style={{width: 15, height: 15}}/>
-          <TextBox placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 10, width: 150}}
+          <FontAwesome name="search" size={21} color="black" style={{marginTop: "auto", marginBottom: "auto"}}/>
+          <TextBox placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 20, width: 150}}
             onChangeText={text => filterOrder(text)} />
           <TouchableOpacity onPress={Keyboard.dismiss()}>
             <Text style={{color: '#0391ff', fontSize: 14}}>Cancel</Text>
           </TouchableOpacity>
         </View>
+        {/*<View style={styles.searchbar}>
+          <FontAwesome name="search" size={21} color="black" style={{marginTop: "auto", marginBottom: "auto"}}/>
+          <TextInput placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 20, width: 150}}
+            onChangeText={this._onChangeText.bind(this)} 
+            value = {this.state.inputValue}
+            ref = "keyWordInput"
+            onSubmitEditing={() => {this.refs.keyWordInput.blur()}}/>
+          <TouchableOpacity onPress={Keyboard.dismiss()}>
+            <Text style={{color: '#0391ff', fontSize: 14}}>Cancel</Text>
+          </TouchableOpacity>
+        </View>*/}
       </View>
       <FlatList
         style={styles.list}
@@ -263,7 +298,9 @@ const styles = StyleSheet.create({
   searchbarContainer: {
     paddingRight: "15",
     paddingLeft: "15",
-    marginTop: 10
+    marginTop: 10,
+    marginRight: "20%",
+    width: "80%"
   },
   searchbar: {
     height: 40, 
