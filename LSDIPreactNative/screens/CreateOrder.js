@@ -23,6 +23,7 @@ import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import moment from "moment";
 import Toast from 'react-native-toast-message';
+import * as Print from 'expo-print';
 
 export default function CreateOrder() {
     const initialOrderValues = {
@@ -230,7 +231,7 @@ export default function CreateOrder() {
                 customerPhone: customerDetails.customerPhone,
                 endDate: null,
                 totalPrice: totalPrice,
-                orderStatus: "pending",
+                orderStatus: "Pending Wash",
                 receiveFromWasherDate: null,
                 sendFromWasherDate: null,
                 staffID: await getUserId(),
@@ -247,6 +248,13 @@ export default function CreateOrder() {
                 type: 'success',
                 text1: 'Order Created',
             });
+
+            
+
+            // Print.printAsync({
+            //       html,
+            // });
+            
         } catch (error) {
             console.error(error);
             Alert.alert("Error creating order. Please try again.");
