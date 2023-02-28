@@ -7,6 +7,8 @@ import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import colors from '../colors';
 import OrderDetails from "../components/OrderDetails";
+import { QuerySnapshot } from "firebase/firestore";
+import { set } from "react-native-reanimated";
 
 
 
@@ -20,14 +22,26 @@ export default function Home({ navigation }) {
     const orders = firebase.firestore().collection('orders');
     const users = firebase.firestore().collection('users');
     const [orderList, setOrderList] = useState([]);
-    const [customer, setCustomer] = useState([]);
+    const [expandedOrder, setExpandedOrder] = useState(null);
+    const [customer, setCustomer] = useState(null) // This user
 
 
 
     useEffect(() => {
-        firestore().collection("users").doc(auth1().currentUser.uid).get()
+        firestore().collection("users").doc(auth1().currentUser.uid)
+            .get()
             .then(user => {
                 setUser(user.data())
+                console.log(user)
+            })
+
+    }, [])
+
+    useEffect(() => {
+        firestore().collection("users").doc(auth1().currentUser.uid)
+            .get()
+            .then(user => {
+                setCustomer(user.data())
                 console.log(user)
             })
 
@@ -49,68 +63,145 @@ export default function Home({ navigation }) {
         });
     }, [navigation]);
 
-    const newList = (user) => {
-        const customer = [];
-        if (user.phone === orders.customerPhone) {
+    useEffect(() => {
+        firestore().collection("users").doc(auth1().currentUser.uid)
+            .get()
+            .then(user => {
+                setCustomer(user.data())
+                console.log(user +"entire user")
+                console.log(user.data().phone)
+            
+    orders.where("customerPhone", "==", user.data().phone)
+        .get()
+        .then(querySnapshot => {
+            const orderList = [];
+            querySnapshot.forEach((doc) => {
+                const {
+                    customerName,
+                    customerPhone,
+                    date,
+                    orderItems,
+                    outletId,
+                    orderStatus,
+                    totalPrice } = doc.data();
+                orderList.push({
+                    isSelected: false,
+                    id: doc.id,
+                    customerName,
+                    customerPhone,
+                    date,
+                    orderItems,
+                    outletId,
+                    orderStatus,
+                    totalPrice,
+                });
+            });
+            setOrderList(orderList);
+        });
+    })
 
-
-
-            setCustomer(customer)
-        }
+}, []);
+const toggleExpand = (id) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (expandedOrder === id) {
+        setExpandedOrder(null);
+    } else {
+        setExpandedOrder(id);
     }
+};
+
+const formatOrderNumber = (id) => {
+    return '#' + id.slice(0, 4).toUpperCase();
+};
+
+const formatOrderDate = (date) => {
+    //return date.toDate().toLocaleString();
+    return date;
+};
+
+const renderItem = ({ item: order }) => (
+    <TouchableOpacity
+        style={styles.card}
+        onPress={() => toggleExpand(order.id)}
+        activeOpacity={0.8}>
+        <View style={styles.cardHeader}>
+            <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+            <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
+            <Text style={styles.orderNumber}>{order.orderStatus}</Text>
+        </View>
+        {expandedOrder === order.id && (
+            <View style={styles.cardBody}>
+                <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
+                <Text style={styles.orderNumber}>Number: {order.customerPhone}</Text>
+                <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+                <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+                <OrderDetails data={order.id}></OrderDetails>
+            </View>
+        )}
+    </TouchableOpacity>
+);
 
 
-
-    return (
-        <View style={{ flex: 1 }}>
-            <ScrollView>
-                {user?.role === "Staff" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-                        <Text>Hi im Staff</Text>
+return (
+    <View style={{ flex: 1 }}>
+        <ScrollView>
+            {user?.role === "Staff" ?
+                <View>
+                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
+                    <View style={{ paddingLeft: 5 }}>
+                        <Text>Email: {auth.currentUser?.email}</Text>
                     </View>
-                    : null
-                }
-                {user?.role === "Admin" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-
-                        <OrdersList navigation={navigation} />
-
+                    <Text>Hi im Staff</Text>
+                </View>
+                : null
+            }
+            {user?.role === "Admin" ?
+                <View>
+                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
+                    <View style={{ paddingLeft: 5 }}>
+                        <Text>Email: {auth.currentUser?.email}</Text>
                     </View>
-                    : null
-                }
-                {user?.role === "Customer" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-                        <Text>Hi im customer</Text>
+
+                    <OrdersList navigation={navigation} />
+
+                </View>
+                : null
+            }
+            {user?.role === "Customer" ?
+                <View>
+                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.name}</Text>
+                    <View style={{ paddingLeft: 5 }}>
+                        <Text>Email: {auth.currentUser?.email}</Text>
                     </View>
-                    : null
-                }
-                {user?.role === "Driver" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-                        <Text>Hi im Driver</Text>
+                    <Text> </Text>
+                    <Text style={styles.listtext}>My Orders</Text>
+                    <FlatList
+                        style={styles.list}
+                        data={orderList}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDataText}>No Data Found!</Text>
+                        }
+                    />
+                </View>
+                : null
+            }
+            {user?.role === "Driver" ?
+                <View>
+                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
+                    <View style={{ paddingLeft: 5 }}>
+                        <Text>Email: {auth.currentUser?.email}</Text>
                     </View>
-                    : null
-                }
+                    <Text>Hi im Driver</Text>
+                </View>
+                : null
+            }
 
 
-                {/*<OrdersList navigation={navigation} />*/}
+            {/*<OrdersList navigation={navigation} />*/}
 
-                {/* <View style={styles.chatContainer}>
+            {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Chat")}
                     style={styles.chatButton}
@@ -118,10 +209,10 @@ export default function Home({ navigation }) {
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
             </View> */}
-            </ScrollView>
-        </View>
+        </ScrollView>
+    </View>
 
-    )
+)
 };
 
 const styles = StyleSheet.create({
@@ -191,5 +282,11 @@ const styles = StyleSheet.create({
     cardBody: {
         backgroundColor: colors.lightGray,
         padding: 16,
+    },
+    listtext: {
+        paddingLeft: 20,
+        fontSize: 20,
+        fontWeight: "600",
+        color: "black"
     },
 });
