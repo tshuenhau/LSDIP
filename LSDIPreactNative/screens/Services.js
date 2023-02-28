@@ -175,10 +175,10 @@ export default function Services({navigation}) {
                 </View>
             </Modal >
             {/*to view service list */}   
-            <View style={styles.view2}>
+            <View style={styles.view}>
                 <TouchableOpacity
                     onPress={() => setModalVisible2(!modalVisible2)}
-                    style={styles.btn2}>
+                    style={styles.btn}>
                     <Text style={styles.text}>Create Service</Text>
                 </TouchableOpacity>
             </View>
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        padding: 20
+        padding:10
     },
     view2: {
         width: "40%",
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "600",
         color: "#fff",
-        padding: 10
     },
     listtext: {
         paddingLeft: 20,
