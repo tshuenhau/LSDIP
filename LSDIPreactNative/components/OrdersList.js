@@ -90,6 +90,12 @@ export default function OrdersList({ navigation }) {
         >
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
+        >
+          <Text style={styles.editButtonText}>Print</Text>
+        </TouchableOpacity>
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>

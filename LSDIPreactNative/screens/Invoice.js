@@ -16,6 +16,7 @@ import { firebase } from '../config/firebase';
 import colors from '../colors';
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
+import * as Print from 'expo-print';
 
 
 
@@ -28,15 +29,15 @@ if (
 
 export default function OrderPage(props) {
   const [order, setOrder] = useState(null);
-  console.log(props);
+  // console.log(props);
   const { orderId } = props.route.params;
-  console.log(orderId);
+  // console.log(orderId);
   useEffect(() => {
     // Fetch the order document using the orderId prop
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     const unsubscribe = orderRef.onSnapshot((doc) => {
       if (doc.exists) {
-        setOrder({ id: doc.id, ...doc.data() });
+        setOrder({id: doc.id, ...doc.data()});
       } else {
         console.log('No such order document!');
       }
@@ -88,6 +89,7 @@ export default function OrderPage(props) {
         });
         setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
       });
+      console.log("order:" + order.customerName);
       return () => unsubscribe();
     }
   }, [order]);
@@ -115,25 +117,6 @@ export default function OrderPage(props) {
 
   const data = orderItemsList.filter((item) => order.orderItemIds.includes(item.id));
 
-
-  const deleteOrder = () => {
-    const orderRef = firebase.firestore().collection('orders').doc(orderId);
-    orderRef
-      .delete()
-      .then(() => {
-        console.log('Order successfully deleted!');
-        props.navigation.goBack();
-      })
-      .catch((error) => {
-        console.error('Error deleting order: ', error);
-      });
-  };
-
-  const addOrderItem = () => {
-    console.log("here to add item");
-    toggleModal();
-  };
-
   function handleChange(text, eventName) {
     setModalData(prev => {
       return {
@@ -141,33 +124,6 @@ export default function OrderPage(props) {
         [eventName]: text
       }
     })
-  }
-  const addOrderItem1 = () => {
-    const selectedItem = modalData.typeOfServices;
-    // Create a new order item document in the 'orderItem' collection
-    // Get the values of description and price from the state modalData
-    const { description, price } = modalData;
-    firebase.firestore().collection('orderItem').add({
-      laundryItemName: selectedItem.split(' ')[0],
-      typeOfServices: selectedItem.split(' ')[1],
-      description: description,
-      price: price,
-      orderId: orderId,
-    }).then((docRef) => {
-      console.log('Order item created with ID: ', docRef.id);
-      // Add the new order item ID to the 'items' array in the order document
-      const orderRef = firebase.firestore().collection('orders').doc(orderId);
-      orderRef.update({
-        orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
-      }).then(() => {
-        console.log('Order item added to order successfully');
-      }).catch((error) => {
-        console.error('Error adding order item to order: ', error);
-      });
-    }).catch((error) => {
-      console.error('Error creating order item: ', error);
-    });
-    toggleModal();
   }
 
   const renderSeparator = () => {
@@ -183,25 +139,41 @@ export default function OrderPage(props) {
     )
   }
 
+  const [selectedPrinter, setSelectedPrinter] = React.useState();
+  const html = () => OrderPage(props);
+  const print = async () => {
+    console.log("order:" + order.customerName);
+    // On iOS/android prints the given html. On web prints the HTML from the current page.
+    await Print.printAsync({
+      html,
+      printerUrl: selectedPrinter?.url, // iOS only
+    });
+  };
 
+  const printToFile = async () => {
+    // On iOS/android prints the given html. On web prints the HTML from the current page.
+    const { uri } = await Print.printToFileAsync({ html });
+    console.log('File has been saved to:', uri);
+    await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+  };
+
+  const selectPrinter = async () => {
+    const printer = await Print.selectPrinterAsync(); // iOS only
+    setSelectedPrinter(printer);
+  };
 
   return (
     <View style={styles.container}>
+    <TouchableOpacity title="Print" onPress={print}>
+      <Text style={styles.backButton}>Print</Text>
+    </TouchableOpacity>
+    <TouchableOpacity onPress={() => props.navigation.goBack()}>
+          <Text style={styles.backButton}>Back</Text>
+    </TouchableOpacity>
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>Order #{orderId}</Text>
+        {/* <Text style={styles.orderNumber}>Name: {order.customerName}</Text> */}
         <View style = {{padding:10, flexDirection:'row'}}>
-        <View style={styles.cardHeaderIcon}>
-          <FontAwesome
-            style={styles.outletIcon}
-            name="trash-o"
-            color='red'
-            onPress={() => deleteOrder()}
-          />
-        </View>
-
-        <TouchableOpacity onPress={() => props.navigation.goBack()}>
-          <Text style={styles.backButton}>Back</Text>
-        </TouchableOpacity>
         </View>
       </View>
       <FlatList
@@ -216,31 +188,9 @@ export default function OrderPage(props) {
               <Text style={styles.itemDescription}>{item.description}</Text>
             </View>
             <Text style={styles.itemPrice}>S$ {item.price}</Text>
-            <View style={styles.cardHeaderIcon}>
-              <FontAwesome
-                style={styles.outletIcon}
-                name="trash-o"
-                color='red'
-                onPress={() => {
-                  const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
-                  orderRef.update({
-                    items: firebase.firestore.FieldValue.arrayRemove(item.id),
-                  });
-                  const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
-                  orderItemRef.delete();
-                }}
-              />
-            </View>
           </View>
         )}
       />
-      <View style={styles.view}>
-        <TouchableOpacity
-          onPress={addOrderItem}
-          style={styles.btn}>
-          <Text style={styles.text}>Add Item</Text>
-        </TouchableOpacity>
-      </View>
       <Modal
         visible={isModalVisible}
         transparent={true}
