@@ -80,13 +80,9 @@ export default function Home({ navigation }) {
                         <View style={{ paddingLeft: 5 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
-                        <View style={styles.createOrderContainer}>
-                            <Button
-                                title="Create Order"
-                                onPress={() => navigation.navigate("Create Order")}
-                            />
-                        </View>
+
                         <OrdersList navigation={navigation} />
+
                     </View>
                     : null
                 }
