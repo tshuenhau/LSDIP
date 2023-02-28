@@ -231,7 +231,7 @@ export default function CreateOrder() {
                 customerPhone: customerDetails.customerPhone,
                 endDate: null,
                 totalPrice: totalPrice,
-                orderStatus: "pending",
+                orderStatus: "Pending Wash",
                 receiveFromWasherDate: null,
                 sendFromWasherDate: null,
                 staffID: await getUserId(),

@@ -5,12 +5,9 @@ import { Entypo } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
+import CustomerOrderList from "../components/CustomerOrderList";
 import colors from '../colors';
 import OrderDetails from "../components/OrderDetails";
-
-
-
-
 
 export default function Home({ navigation }) {
     const firestore = firebase.firestore;
@@ -19,20 +16,27 @@ export default function Home({ navigation }) {
     const [user, setUser] = useState(null) // This user
     const orders = firebase.firestore().collection('orders');
     const users = firebase.firestore().collection('users');
-    const [orderList, setOrderList] = useState([]);
-    const [customer, setCustomer] = useState([]);
-
-
+    // const [orderList, setOrderList] = useState([]);
+    const [expandedOrder, setExpandedOrder] = useState(null);
+    // const [customer, setCustomer] = useState(null) // This user
 
     useEffect(() => {
-        firestore().collection("users").doc(auth1().currentUser.uid).get()
+        users.doc(auth1().currentUser.uid)
+            .get()
             .then(user => {
                 setUser(user.data())
                 console.log(user)
             })
-
     }, [])
 
+    // useEffect(() => {
+    //     users.doc(auth1().currentUser.uid)
+    //         .get()
+    //         .then(user => {
+    //             setCustomer(user.data())
+    //             console.log(user)
+    //         })
+    // }, [])
 
     useEffect(() => {
         navigation.setOptions({
@@ -49,17 +53,84 @@ export default function Home({ navigation }) {
         });
     }, [navigation]);
 
-    const newList = (user) => {
-        const customer = [];
-        if (user.phone === orders.customerPhone) {
+    // useEffect(() => {
+    //     users.doc(auth1().currentUser.uid)
+    //         .get()
+    //         .then(user => {
+    //             setUser(user.data())
+    //             console.log(user + "entire user")
+    //             console.log(user.data().phone)
 
+    //             orders.where("customerPhone", "==", user.data().phone)
+    //                 .get()
+    //                 .then(querySnapshot => {
+    //                     const orderList = [];
+    //                     querySnapshot.forEach((doc) => {
+    //                         const {
+    //                             customerName,
+    //                             customerPhone,
+    //                             date,
+    //                             orderItems,
+    //                             outletId,
+    //                             orderStatus,
+    //                             totalPrice } = doc.data();
+    //                         orderList.push({
+    //                             isSelected: false,
+    //                             id: doc.id,
+    //                             customerName,
+    //                             customerPhone,
+    //                             date,
+    //                             orderItems,
+    //                             outletId,
+    //                             orderStatus,
+    //                             totalPrice,
+    //                         });
+    //                     });
+    //                     setOrderList(orderList);
+    //                 });
+    //         })
 
+    // }, []);
 
-            setCustomer(customer)
-        }
-    }
+    // const formatOrderNumber = (id) => {
+    //     return '#' + id.slice(0, 4).toUpperCase();
+    // };
 
+    // const formatOrderDate = (date) => {
+    //     //return date.toDate().toLocaleString();
+    //     return date;
+    // };
 
+    // const toggleExpand = (id) => {
+    //     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    //     if (expandedOrder === id) {
+    //         setExpandedOrder(null);
+    //     } else {
+    //         setExpandedOrder(id);
+    //     }
+    // };
+
+    // const renderItem = ({ item: order }) => (
+    //     <TouchableOpacity
+    //         style={styles.card}
+    //         onPress={() => toggleExpand(order.id)}
+    //         activeOpacity={0.8}>
+    //         <View style={styles.cardHeader}>
+    //             <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+    //             <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
+    //             <Text style={styles.orderNumber}>{order.orderStatus}</Text>
+    //         </View>
+    //         {expandedOrder === order.id && (
+    //             <View style={styles.cardBody}>
+    //                 <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
+    //                 <Text style={styles.orderNumber}>Number: {order.customerPhone}</Text>
+    //                 <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+    //                 <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+    //                 <OrderDetails data={order.id}></OrderDetails>
+    //             </View>
+    //         )}
+    //     </TouchableOpacity>
+    // );
 
     return (
         <View style={{ flex: 1 }}>
@@ -70,7 +141,8 @@ export default function Home({ navigation }) {
                         <View style={{ paddingLeft: 5 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
-                        <Text>Hi im Staff</Text>
+                        <Text>Staff Home</Text>
+                        <OrdersList navigation={navigation} />
                     </View>
                     : null
                 }
@@ -80,13 +152,9 @@ export default function Home({ navigation }) {
                         <View style={{ paddingLeft: 5 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
-                        <View style={styles.createOrderContainer}>
-                            <Button
-                                title="Create Order"
-                                onPress={() => navigation.navigate("Create Order")}
-                            />
-                        </View>
+                        <Text>Admin Home</Text>
                         <OrdersList navigation={navigation} />
+
                     </View>
                     : null
                 }
@@ -96,7 +164,18 @@ export default function Home({ navigation }) {
                         <View style={{ paddingLeft: 5 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
-                        <Text>Hi im customer</Text>
+                        <Text> </Text>
+                        <Text style={styles.listtext}>My Orders</Text>
+                        {/* <FlatList
+                            style={styles.list}
+                            data={orderList}
+                            keyExtractor={(item) => item.id}
+                            renderItem={renderItem}
+                            ListEmptyComponent={
+                                <Text style={styles.noDataText}>No Data Found!</Text>
+                            }
+                        /> */}
+                        <CustomerOrderList curUser={user} />
                     </View>
                     : null
                 }
@@ -111,7 +190,6 @@ export default function Home({ navigation }) {
                     : null
                 }
 
-
                 {/*<OrdersList navigation={navigation} />*/}
 
                 {/* <View style={styles.chatContainer}>
@@ -122,6 +200,7 @@ export default function Home({ navigation }) {
                     <Entypo name="chat" size={24} color={colors.lightGray} />
                 </TouchableOpacity>
             </View> */}
+
             </ScrollView>
         </View>
 
@@ -195,5 +274,11 @@ const styles = StyleSheet.create({
     cardBody: {
         backgroundColor: colors.lightGray,
         padding: 16,
+    },
+    listtext: {
+        paddingLeft: 20,
+        fontSize: 20,
+        fontWeight: "600",
+        color: "black"
     },
 });
