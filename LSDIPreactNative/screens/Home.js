@@ -44,22 +44,20 @@ export default function Home({ navigation }) {
             <ScrollView>
                 {user?.role === "Staff" ?
                     <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.role} {user?.name}</Text>
+                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
-                        <Text>Staff Home</Text>
                         <OrdersList navigation={navigation} />
                     </View>
                     : null
                 }
                 {user?.role === "Admin" ?
                     <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.role} {user?.name}</Text>
+                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
-                        <Text>Admin Home</Text>
                         <OrdersList navigation={navigation} />
 
                     </View>
@@ -67,8 +65,8 @@ export default function Home({ navigation }) {
                 }
                 {user?.role === "Customer" ?
                     <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.name}</Text>
+                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
                         <Text> </Text>
@@ -79,8 +77,8 @@ export default function Home({ navigation }) {
                 }
                 {user?.role === "Driver" ?
                     <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5 }}>
+                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.role} {user?.name}</Text>
+                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
                             <Text>Email: {auth.currentUser?.email}</Text>
                         </View>
                         <Text>Hi im Driver</Text>

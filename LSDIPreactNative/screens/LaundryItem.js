@@ -10,14 +10,17 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView,
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import { doc, addDoc, getFirestore, collection, getDoc, getDocs, QuerySnapshot, deleteDoc, GeoPoint, updateDoc } from "firebase/firestore";
 import { SelectList } from 'react-native-dropdown-select-list'
 import LaundryList from "../components/LaundryItemList";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 if (
@@ -34,7 +37,45 @@ export default function LaundryItem({ navigation }) {
     const laundryItem = firebase.firestore().collection('laundryItem');
     const laundryCItem = firebase.firestore().collection('laundryCategory');
     const [data, setData] = useState([]);
+    const [user, setUser] = useState(false); 
+    const db = firebase.firestore()
 
+
+//for getting user
+    const getUserRole = async () => {
+        try {
+            const role = await AsyncStorage.getItem('role');
+            if (role !== null) {
+                return id;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    useEffect(() => {
+		try {
+            const getUserId = async () => {
+                try {
+                    const id = await AsyncStorage.getItem('userId');
+                    if (id !== null) {
+                        getDoc(doc(db, "users", id)).then(docData => {
+                            if(docData.exists()) {
+                                //console.log(docData.data())
+                                setUser(docData.data())
+                            }
+                        }) 
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+
+            getUserId();
+        } catch (e) {
+            console.log("User Id does not exist in DB")
+        }
+	},[])
 
     const pricingMethods = [
         { key: '1', value: 'Flat' },
@@ -101,6 +142,7 @@ export default function LaundryItem({ navigation }) {
     }
 
     return (
+        <ScrollView>
         <View>
             {/*for create laundry item*/}
             <Modal
@@ -172,11 +214,16 @@ export default function LaundryItem({ navigation }) {
                     style={styles.btn}>
                     <Text style={styles.text}>Create Laundry Item</Text>
                 </TouchableOpacity>
+                {user.role ==="Admin" ?
+                <View>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Service")}
                     style={styles.btn}>
                     <Text style={styles.text}>Services</Text>
                 </TouchableOpacity>
+                </View>
+                :null
+                }
             </View>
 
             <View>
@@ -185,7 +232,7 @@ export default function LaundryItem({ navigation }) {
             </View>
 
         </View >
-
+        </ScrollView>
     )
 }
 

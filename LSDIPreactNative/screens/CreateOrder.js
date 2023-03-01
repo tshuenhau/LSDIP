@@ -292,6 +292,7 @@ export default function CreateOrder() {
     }
 
     return (
+        <ScrollView>
         <View>
             <TabView
                 navigationState={{ index, routes }}
@@ -348,13 +349,16 @@ export default function CreateOrder() {
                         </View>
                     ))}
                 </ScrollView>
-                <TextBox placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
-                <TextBox placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerPhone: phone })} value={customerDetails.customerPhone} />
-                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+            </View>
+            <View style= {{alignItems:"center", marginBottom:"5%", marginLeft:"5%", width:"90%"}}>
+                <TextBox style={styles.textBox} placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
+                <TextBox style={styles.textBox} placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerPhone: phone })} value={customerDetails.customerPhone} />
+                </View>
+            <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                     <Text style={styles.checkoutButtonText}>Checkout</Text>
                 </TouchableOpacity>
-            </View>
         </View>
+        </ScrollView>
     );
 }
 const styles = StyleSheet.create({
@@ -387,15 +391,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         flex: 1,
     },
-    tableBody: {},
+    tableBody: {
+    },
     tableRow: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignContent:"center",
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
+        marginBottom:20
     },
     tableRowText: {
+        marginTop:8,
         fontSize: 16,
         flex: 1,
     },
@@ -510,6 +518,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    }
+    },
+    textBox: {
+        width: "96%",
+        marginLeft:13,
+        fontSize: 16,
+        padding: 10,
+        borderColor: "#0B3270",
+        borderWidth: 1,
+        borderRadius: 8,
+        backgroundColor:"#fff"
+      },
 });
 
