@@ -15,7 +15,7 @@ import colors from '../colors';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
-import alert from '../components/Alert'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 if (
@@ -190,6 +190,17 @@ export default function VehicleModule() {
             })
         }
     }
+
+    const getUserId = async () => {
+        try {
+            const id = await AsyncStorage.getItem('userId');
+            if (id !== null) {
+                return id;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
