@@ -63,7 +63,6 @@ export default function OrdersList({ navigation }) {
         });
       });
       setOrderList(orderList);
-      setOriginalOrders(originalOrders);
     });
     return () => unsubscribe();
   }, []);
@@ -97,7 +96,7 @@ export default function OrdersList({ navigation }) {
     //return date.toDate().toLocaleString();
     return date;
   };
-  
+
   const handleCheck = (order) => {
     const updatedArray = orderList.map((item) => {
       if (item.id === order.id) {
