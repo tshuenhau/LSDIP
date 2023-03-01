@@ -19,7 +19,7 @@ export default function CustomerOrderList({ curUser }) {
     const orders = firebase.firestore().collection('orders');
 
     useEffect(() => {
-        orders.where("customerPhone", "==", curUser.phone)
+        orders.where("customerPhone", "==", curUser.number)
             .get()
             .then(querySnapshot => {
                 const orderList = [];

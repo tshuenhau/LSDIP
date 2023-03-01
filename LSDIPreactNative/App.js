@@ -33,6 +33,7 @@ import { firebase } from "./config/firebase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import Invoice from './screens/Invoice';
+import Account from './screens/AccountManagement'
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -135,6 +136,7 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
@@ -174,6 +176,11 @@ function RootNavigator() {
               options={{
                 drawerItemStyle: { display: "none" }
               }}
+            />
+            <Drawer.Screen name='Invoice' component={Invoice}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
             />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>

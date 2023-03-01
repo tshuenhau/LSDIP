@@ -21,7 +21,7 @@ export default function SignUpScreen({ navigation }) {
         name: "",
         role: "",
         email: "",
-        phone: "",
+        number: "",
         pwd: "",
         pwd2: ""
     })
@@ -36,7 +36,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     function SignUp() {
-        const { email, pwd, pwd2, name, role, phone } = values
+        const { email, pwd, pwd2, name, role, number } = values
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -45,7 +45,7 @@ export default function SignUpScreen({ navigation }) {
                         name,
                         role,
                         email,
-                        phone
+                        number
                     })
                 })
                 .catch((error) => {
@@ -62,7 +62,7 @@ export default function SignUpScreen({ navigation }) {
         <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Sign Up</Text>
         <TextBox placeholder="Full Name" onChangeText={text => handleChange(text, "name")} />
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
-        <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "phone")} />
+        <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} />
         <View style={{
             width: "92%",
             borderRadius: 25,
