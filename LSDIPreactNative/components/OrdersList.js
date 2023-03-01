@@ -19,16 +19,14 @@ import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 import { FontAwesome } from '@expo/vector-icons';
-//import SearchBar from "react-native-elements";
-import SearchBar from './SearchBar';
 import { TextInput } from 'react-native-gesture-handler';
 import TextBox from './TextBox';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
+import Checkbox from "expo-checkbox";
 import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
 import alert from "../components/Alert";
 import QR from "../components/QR";
-
 
 if (
   Platform.OS === "android" &&
@@ -40,9 +38,6 @@ if (
 export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
   const [originalOrders, setOriginalOrders] = useState([]);
-  //for search bar
-  const [text, setText] = useState("");
-  const [clicked, setClicked] = useState(false);
   
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
@@ -73,15 +68,6 @@ export default function OrdersList({ navigation }) {
           orderStatus,
           totalPrice,
         });
-        originalOrders.push({
-          id: doc.id,
-          customerName,
-          date,
-          orderItems,
-          outletId,
-          orderStatus,
-          totalPrice,
-        });
       });
       setOrderList(orderList);
       setOriginalOrders(originalOrders);
@@ -98,6 +84,7 @@ export default function OrdersList({ navigation }) {
     { key: 6, value: "Closed" },
     // for orders with problems
     { key: 7, value: "Case" },
+    { key: 8, value: "Void" },
   ];
 
   const toggleExpand = (id) => {
@@ -117,21 +104,6 @@ export default function OrdersList({ navigation }) {
     //return date.toDate().toLocaleString();
     return date;
   };
-
-  function filterOrder(text) {
-    const filteredOrders = originalOrders.filter(l => l.customerName.toUpperCase().includes(text.toUpperCase().trim().replace(/\s/g, "")));
-    console.log("seacrhing");
-    console.log(text);
-    //console.log(originalOrders);
-    //console.log(filteredOrders);
-    orderList.splice(0, orderList.length, ...filteredOrders);
-    //console.log(orderList);
-    if (orderList.length === 0) {
-      renderItem;
-    }
-    //toggleExpand(orderList[0].id);
-    //renderItem;
-  }
   
   const handleCheck = (order) => {
     const updatedArray = orderList.map((item) => {
@@ -159,13 +131,17 @@ export default function OrdersList({ navigation }) {
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
 
         <View style={styles.cardButtons}>
+
           <TouchableOpacity
-          style={{paddingTop:12, marginRight:15}}
+            style={{ paddingTop: 12, marginRight: 15 }}
             onPress={() => handleCheck(order)}>
-            <CheckBox
+            <Checkbox
+              disabled={false}
               value={order.isSelected}
+              onValueChange={() => handleCheck(order)}
             />
           </TouchableOpacity>
+
           <FontAwesome
             style={styles.outletIcon}
             name="edit"
@@ -238,14 +214,6 @@ export default function OrdersList({ navigation }) {
 
   return (
     <View style={styles.container}>
-    <View style={styles.searchbar}>
-          <FontAwesome name="search" size={21} color="black" style={{marginTop: "auto", marginBottom: "auto"}}/>
-          <TextInput placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 20, width: 150}}
-            onChangeText={text => filterOrder(text)} />
-          <TouchableOpacity onPress={Keyboard.dismiss()}>
-            <Text style={{color: '#0391ff', fontSize: 14}}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
       <View style={styles.createOrderContainer}>
         <TouchableOpacity style={styles.button}>
           <Button
@@ -466,21 +434,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  searchbarContainer: {
-    paddingRight: "15",
-    paddingLeft: "15",
-    marginTop: 10,
-    marginRight: "20%",
-    width: "80%"
-  },
-  searchbar: {
-    height: 40, 
-    backgroundColor: "#fff", 
-    borderRadius: 10, 
-    paddingLeft: 25, 
-    flexDirection: 'row', 
-    alignItems: 'center'
-  },
   outletIcon: {
     fontSize: 20,
     margin: 10,
@@ -492,5 +445,5 @@ const styles = StyleSheet.create({
   cardButtons: {
     flexDirection: "row",
     justifyContent: 'space-between',
-},
+  },
 });

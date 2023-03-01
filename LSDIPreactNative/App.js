@@ -24,6 +24,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import Payment from './screens/Payment';
 import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
 import VehicleModule from './screens/VehicleModule';
@@ -61,6 +62,14 @@ const handleSignOut = () => {
 const setUserId = async (id) => {
   try {
     await AsyncStorage.setItem('userId', id.toString());
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const setUserRole = async (role) => {
+  try {
+    await AsyncStorage.setItem('userRole', role.toString());
   } catch (e) {
     console.log(e);
   }
@@ -107,6 +116,7 @@ function RootNavigator() {
               console.log(user1?.role);
               const userRole = user?.role;
               setUserId(auth1().currentUser.uid);
+              setUserRole(user?.role);
               setUser({ ...authenticatedUser, role: userRole });
             })
 
@@ -148,6 +158,7 @@ function RootNavigator() {
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
+          <Drawer.Screen name='Payment' component={Payment} />
           <Drawer.Screen name='Order Page' component={OrderDetail}
             options={{
               drawerItemStyle: { display: "none" }

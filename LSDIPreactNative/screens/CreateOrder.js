@@ -263,6 +263,34 @@ export default function CreateOrder() {
         }
     };
 
+    const deleteItem = (item) => {
+        /*
+        return alert(
+            "Are you sure you want to delete this item?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        const index = cart.indexOf(item);
+                        console.log(index);
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+        */
+       const cartCopy = cart.map((x) => x);
+       let index = cartCopy.indexOf(item);
+       console.log(index);
+       cartCopy.splice(index, 1);
+       //console.log("cartcopy", cartCopy);
+       setCart(cartCopy);
+    }
+
     return (
         <View>
             <TabView
@@ -311,6 +339,12 @@ export default function CreateOrder() {
                             <Text style={styles.tableRowText}>{item.description}</Text>
                             <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
                             <Text style={styles.tableRowText}>{item.price}</Text>
+                            <FontAwesome
+                                style={styles.outletIcon}
+                                name="trash-o"
+                                color='red'
+                                onPress={() => deleteItem(item)}
+                            />
                         </View>
                     ))}
                 </ScrollView>

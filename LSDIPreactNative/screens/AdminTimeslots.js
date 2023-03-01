@@ -38,59 +38,28 @@ const AdminSetTimingsScreen = ({ navigation }) => {
       selectedTimings,
     }) => {
       const db = firebase.firestore();
-      const [availableTimings, setAvailableTimings] = useState(null);
+      const [availableTimings, setAvailableTimings] = useState([]);
       const [timingsInput, setTimingsInput] = useState('');
     
-      const getAvailableTimings = useCallback(async (timings) => {
+      const getAvailableTimings = useCallback(async () => {
         try {
           const timingsDoc = await db.collection('available_timings').doc(selectedDate).get();
           const availableTimings = timingsDoc.data()?.available_times || [];
-          const timingsButtons = availableTimings.map((timing) => (
-            <TouchableHighlight
-              key={timing}
-              style={[
-                styles.timingButton,
-                timings?.includes(timing) && styles.selectedTimingButton,
-              ]}
-              underlayColor="#DDDDDD"
-              onPress={() => {
-                const index = timings?.indexOf(timing);
-                if (index > -1) {
-                  timings.splice(index, 1);
-                } else {
-                  timings.push(timing);
-                }
-                getAvailableTimings([...timings]);
-              }}
-              disabled={!availableDates[selectedDate]}
-            >
-              <Text
-                style={[              styles.timingText,              !availableDates[selectedDate] && styles.disabledTimingText,
-                ]}
-              >
-                {timing}
-              </Text>
-            </TouchableHighlight>
-          ));
-          setAvailableTimings(timingsButtons);
+          setAvailableTimings(availableTimings);
         } catch (error) {
           console.error(error);
-          setAvailableTimings(null);
+          setAvailableTimings([]);
         }
-      }, [availableDates, db, selectedDate]);
+      }, [db, selectedDate]);
     
       useEffect(() => {
-        getAvailableTimings(selectedTimings);
-      }, [getAvailableTimings, selectedTimings]);
+        getAvailableTimings();
+      }, [getAvailableTimings]);
     
       const handleAddPress = () => {
         onAddTimings(timingsInput.split(","));
         setTimingsInput("");
       };
-
-      // const onDeleteTimings = () => {
-      //   handleDeleteTimings;
-      // };
     
       const handleDeleteTimings = async () => {
         try {
@@ -99,14 +68,11 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           const availableTimings = timingsDoc.data()?.available_times || [];
           const updatedTimings = availableTimings?.filter((timing) => !selectedTimings.includes(timing)) || [];
           await timingsRef.update({ available_times: updatedTimings });
-          setSelectedTimings(prevSelectedTimings => prevSelectedTimings.filter(timing => !updatedTimings.includes(timing)));
-          setTimingsModalVisible(false);
-          updatedTimings =[];
+          setSelectedTimings([]);
         } catch (err) {
           console.log('Error deleting available timings: ', err);
         }
-      };      
-      
+      };
       
     
       return (
@@ -114,7 +80,37 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           <View style={styles.modalBackdrop}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{selectedDate}</Text>
-              <ScrollView style={styles.timingsContainer}>{availableTimings}</ScrollView>
+              <ScrollView style={styles.timingsContainer}>
+                  {availableTimings.length > 0 ? (
+                    availableTimings.map((timing, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.timingButton,
+                          selectedTimings.includes(timing) && styles.selectedTimingButton,
+                        ]}
+                        onPress={() => {
+                          if (selectedTimings.includes(timing)) {
+                            setSelectedTimings(selectedTimings.filter((t) => t !== timing));
+                          } else {
+                            setSelectedTimings([...selectedTimings, timing]);
+                          }
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.timingText,
+                            !availableDates[selectedDate] && styles.disabledTimingText,
+                          ]}
+                        >
+                          {timing}
+                        </Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={styles.noTimingsText}>No available timings</Text>
+                  )}
+                </ScrollView>
     
               <TextInput
                 style={styles.timingsInput}
@@ -224,7 +220,7 @@ const AdminSetTimingsScreen = ({ navigation }) => {
           markedDates={markedDates}
           markingType="simple"
           pastScrollRange={0}
-          futureScrollRange={3}
+          futureScrollRange={1}
           scrollEnabled={true}
           horizontal={true}
           pagingEnabled={true}
