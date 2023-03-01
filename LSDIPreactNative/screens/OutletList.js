@@ -134,7 +134,7 @@ export default function OutletList({ navigation }) {
                     <View style={styles.cardButtons}>
                         <FontAwesome
                             style={styles.outletIcon}
-                            color="black"
+                            color="green"
                             name="edit"
                             onPress={() => navigation.navigate('OutletDetail', { item })}
                         />
