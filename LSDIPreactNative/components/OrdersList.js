@@ -11,16 +11,16 @@ import {
   Platform,
   Modal,
   TextInput
-} from "react-native";
+} from 'react-native';
+import { firebase } from '../config/firebase';
+import OrderDetails from "../components/OrderDetails";
+import colors from '../colors';
+import { FontAwesome } from '@expo/vector-icons';
 import Checkbox from "expo-checkbox";
-import { firebase } from "../config/firebase";
 import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
 import alert from "../components/Alert";
-import OrderDetails from "../components/OrderDetails";
-import colors from "../colors";
 import QR from "../components/QR";
-import { FontAwesome } from '@expo/vector-icons';
 
 if (
   Platform.OS === "android" &&
@@ -63,6 +63,7 @@ export default function OrdersList({ navigation }) {
         });
       });
       setOrderList(orderList);
+      setOriginalOrders(originalOrders);
     });
     return () => unsubscribe();
   }, []);
@@ -96,7 +97,7 @@ export default function OrdersList({ navigation }) {
     //return date.toDate().toLocaleString();
     return date;
   };
-
+  
   const handleCheck = (order) => {
     const updatedArray = orderList.map((item) => {
       if (item.id === order.id) {
