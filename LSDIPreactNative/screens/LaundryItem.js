@@ -10,6 +10,7 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView,
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
@@ -141,6 +142,7 @@ export default function LaundryItem({ navigation }) {
     }
 
     return (
+        <ScrollView>
         <View>
             {/*for create laundry item*/}
             <Modal
@@ -230,7 +232,7 @@ export default function LaundryItem({ navigation }) {
             </View>
 
         </View >
-
+        </ScrollView>
     )
 }
 

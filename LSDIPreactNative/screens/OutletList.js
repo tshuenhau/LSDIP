@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     view: {
+        marginTop:10,
         width: "100%",
         justifyContent: "center",
         alignItems: "center"
