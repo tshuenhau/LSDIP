@@ -126,6 +126,8 @@ export default function LaundryItem({ navigation }) {
                             }}>
                                 <SelectList 
                                 data={data} 
+                                placeholder= "Choose service"
+                                searchPlaceholder="Search service"
                                 setSelected={(val) => handleChange(val, "typeOfServices")} 
                                 save = "value"
                                 />
@@ -144,6 +146,8 @@ export default function LaundryItem({ navigation }) {
                             }}>
                                 <SelectList
                                     data={pricingMethods}
+                                    placeholder= "Choose pricing method"
+                                    searchPlaceholder="Search pricing method"
                                     setSelected={(val) => handleChange(val, "pricingMethod")}
                                     save="value"
                                 />
@@ -165,12 +169,12 @@ export default function LaundryItem({ navigation }) {
             <View style={styles.view2}>
                 <TouchableOpacity
                     onPress={() => setModalVisible(!modalVisible)}
-                    style={styles.btn2}>
+                    style={styles.btn}>
                     <Text style={styles.text}>Create Laundry Item</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Service")}
-                    style={styles.btn2}>
+                    style={styles.btn}>
                     <Text style={styles.text}>Services</Text>
                 </TouchableOpacity>
             </View>
@@ -228,18 +232,17 @@ const styles = StyleSheet.create({
         fontSize: 25,
     },
     view: {
-        width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        padding: 20
-    },
+        padding: 20,
+        },
     view2: {
-        width: "40%",
+        width: "92%",
         justifyContent: "center",
         alignItems: "center",
         padding: 10,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+
     },
     btn: {
         padding: 10,
@@ -247,6 +250,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#0B3270",
         justifyContent: "center",
         alignItems: "center",
+        marginRight:10
     },
     btn2: {
         padding: 5,

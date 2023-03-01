@@ -4,12 +4,13 @@ import {
     Text,
     StyleSheet,
     FlatList,
-    Modal
+    Modal,
+    ScrollView
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SelectList } from 'react-native-dropdown-select-list';
 import alert from '../components/Alert';
-import { Calendar } from 'react-native-calendars';
+import { CalendarList } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
 import { firebase } from '../config/firebase';
@@ -90,6 +91,7 @@ export default function StaffAvailability() {
                         // get shift timings of curUser
                         staff_schedule
                             .where("userID", "==", currUser)
+                            .where("confirmed", "==", false)
                             .get()
                             .then(querySnapshot => {
                                 const indicatedAvailabilities = [];
@@ -145,7 +147,6 @@ export default function StaffAvailability() {
                 completed: false,
                 confirmed: false,
             }
-            console.log("NA", newAvailability);
             staff_schedule
                 .add(newAvailability)
                 .then((doc) => {
@@ -222,85 +223,101 @@ export default function StaffAvailability() {
     );
 
     return (
-        <View>
-            <View style={styles.container}>
-                <View style={styles.topSelectList}>
-                    <SelectList
-                        data={outlets}
-                        setSelected={(val) => handleChange(val, "outletID")}
-                        save="key"
-                        search={false}
-                    />
-                </View>
-                <View style={styles.calendarContainer}>
-                    <Calendar
-                        onDayPress={onDayPress}
-                        minDate={today}
-                        markingType="simple"
-                    />
-                </View>
-
-                <View style={styles.timingsContainer}>
-                    <Text style={styles.timingsTitle}>Indicated Timings</Text>
-                    <FlatList
-                        data={indicatedAvailabilities}
-                        keyExtractor={(item) => item.id}
-                        renderItem={renderItem}
-                        ListEmptyComponent={
-                            <Text style={styles.noDatesText}>No available timings</Text>
-                        }
-                    />
-                </View>
-            </View>
-
-            {/* weekday modal */}
-            <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
-                <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>{selectedDate}</Text>
-
+        <View style={{ flex: 1 }}>
+            <ScrollView>
+                <View style={styles.container}>
+                    <View style={styles.topSelectList}>
                         <SelectList
-                            data={shiftTimings.filter(x => x.type === "weekday")}
-                            setSelected={(val) => handleChange(val, "shiftID")}
+                            data={outlets}
+                            setSelected={(val) => handleChange(val, "outletID")}
                             save="key"
                             search={false}
                         />
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
-                                <Text style={styles.indicateButtonText}>Indicate</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setWeekdayModalVisible(!weekdayModalVisible)}>
-                                <Text style={styles.closeButtonText}>Close</Text>
-                            </TouchableOpacity>
-                        </View>
                     </View>
-                </View>
-            </Modal >
-
-            {/* weekend modal */}
-            <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
-                <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>{selectedDate}</Text>
-
-                        <SelectList
-                            data={shiftTimings.filter(x => x.type === "weekend")}
-                            setSelected={(val) => handleChange(val, "shiftID")}
-                            save="key"
-                            search={false}
+                    <View style={styles.calendarContainer}>
+                        <CalendarList
+                            onDayPress={onDayPress}
+                            minDate={today}
+                            markingType="simple"
+                            pastScrollRange={0}
+                            futureScrollRange={3}
+                            scrollEnabled={true}
+                            horizontal={true}
+                            pagingEnabled={true}
+                            theme={{
+                                selectedDayBackgroundColor: '#007aff',
+                                selectedDayTextColor: '#ffffff',
+                                todayTextColor: '#00adf5',
+                                textDisabledColor: '#d9e1e8',
+                                arrowColor: 'gray',
+                            }}
                         />
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
-                                <Text style={styles.indicateButtonText}>Indicate</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setWeekendModalVisible(!weekendModalVisible)}>
-                                <Text style={styles.closeButtonText}>Close</Text>
-                            </TouchableOpacity>
-                        </View>
+                    </View>
+
+                    <View style={styles.timingsContainer}>
+
+                        <Text style={styles.timingsTitle}>Indicated Timings</Text>
+
+                        <FlatList
+                            data={indicatedAvailabilities}
+                            keyExtractor={(item) => item.id}
+                            renderItem={renderItem}
+                            ListEmptyComponent={
+                                <Text style={styles.noDatesText}>No available timings</Text>
+                            }
+                        />
+
                     </View>
                 </View>
-            </Modal >
 
+                {/* weekday modal */}
+                <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>{selectedDate}</Text>
+
+                            <SelectList
+                                data={shiftTimings.filter(x => x.type === "weekday")}
+                                setSelected={(val) => handleChange(val, "shiftID")}
+                                save="key"
+                                search={false}
+                            />
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
+                                    <Text style={styles.indicateButtonText}>Indicate</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.closeButton} onPress={() => setWeekdayModalVisible(!weekdayModalVisible)}>
+                                    <Text style={styles.closeButtonText}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal >
+
+                {/* weekend modal */}
+                <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>{selectedDate}</Text>
+
+                            <SelectList
+                                data={shiftTimings.filter(x => x.type === "weekend")}
+                                setSelected={(val) => handleChange(val, "shiftID")}
+                                save="key"
+                                search={false}
+                            />
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
+                                    <Text style={styles.indicateButtonText}>Indicate</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.closeButton} onPress={() => setWeekendModalVisible(!weekendModalVisible)}>
+                                    <Text style={styles.closeButtonText}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal >
+            </ScrollView>
 
         </View >
     )

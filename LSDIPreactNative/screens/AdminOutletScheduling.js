@@ -7,7 +7,7 @@ import {
     Modal
 } from "react-native";
 import React, { useState, useEffect } from "react"
-import { Calendar } from 'react-native-calendars'
+import { CalendarList } from 'react-native-calendars'
 import Btn from "../components/Button"
 import { FontAwesome } from '@expo/vector-icons';
 import { SelectList } from 'react-native-dropdown-select-list';
@@ -226,11 +226,6 @@ export default function AdminOutletScheduling({ route, navigation }) {
                         staff_schedule.doc(item.id)
                             .update({
                                 confirmed: true,
-                                completed: false,
-                                date: item.date,
-                                outletID: item.outletID,
-                                shiftID: item.shiftID,
-                                userID: item.userID,
                             })
                             .then(() => {
                                 console.log("Confirmed")
@@ -281,11 +276,16 @@ export default function AdminOutletScheduling({ route, navigation }) {
             </View>
             <View style={styles.calendarContainer}>
                 <Text style={styles.outletName}>{outletDetails.outletName} Schedule</Text>
-                <Calendar
+                <CalendarList
                     onDayPress={onDayPress}
                     markedDates={markedDates}
                     minDate={today}
                     markingType="simple"
+                    pastScrollRange={0}
+                    futureScrollRange={3}
+                    scrollEnabled={true}
+                    horizontal={true}
+                    pagingEnabled={true}
                 />
             </View>
             <View style={styles.timingsContainer}>

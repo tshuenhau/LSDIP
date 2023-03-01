@@ -255,7 +255,7 @@ const getMonthDays = (month, year) => {
           ),
         }}
         pastScrollRange={0}
-        futureScrollRange={3}
+        futureScrollRange={1}
         scrollEnabled={true}
         horizontal={true}
         pagingEnabled={true}
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     selectedTimesContainer: {
       marginTop: 20,
       marginBottom: 20,
-      height: 400,
+      height: 300,
     },
     selectedTimesList: {
       flex: 1,

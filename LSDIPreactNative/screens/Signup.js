@@ -13,13 +13,15 @@ export default function SignUpScreen({ navigation }) {
     const roles = [
         { key: '1', value: 'Admin' },
         { key: '2', value: 'Staff' },
-        { key: '3', value: 'Driver' }
+        { key: '3', value: 'Driver' },
+        { key: '4', value: 'Customer' }
     ]
 
     const [values, setValues] = useState({
         name: "",
         role: "",
         email: "",
+        number: "",
         pwd: "",
         pwd2: ""
     })
@@ -34,7 +36,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     function SignUp() {
-        const { email, pwd, pwd2, name, role } = values
+        const { email, pwd, pwd2, name, role, number } = values
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -42,12 +44,15 @@ export default function SignUpScreen({ navigation }) {
                         uid: auth1().currentUser.uid,
                         name,
                         role,
-                        email
+                        email,
+                        number
                     })
                 })
                 .catch((error) => {
                     alert(error.message)
                 });
+                alert("account created") 
+                navigation.navigate("Login")
         } else {
             alert("Passwords are different!")
         }
@@ -57,6 +62,7 @@ export default function SignUpScreen({ navigation }) {
         <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Sign Up</Text>
         <TextBox placeholder="Full Name" onChangeText={text => handleChange(text, "name")} />
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
+        <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} />
         <View style={{
             width: "92%",
             borderRadius: 25,
@@ -64,6 +70,8 @@ export default function SignUpScreen({ navigation }) {
         }}>
             <SelectList
                 data={roles}
+                placeholder="Signing up as?"
+                searchPlaceholder="Search role"
                 setSelected={(val) => handleChange(val, "role")}
                 save="value"
             />
