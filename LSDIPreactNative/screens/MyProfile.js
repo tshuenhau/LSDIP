@@ -172,9 +172,9 @@ export default function MyProfile() {
                         onPress={() => setUpdateModalVisible(!updateModalVisible)}
                     />
                 </View>
-                <Text style={styles.roleText}>{userDetails.role}</Text>
-                <Text style={styles.detailText}>{userDetails.email}</Text>
-                <Text style={styles.detailText}>{userDetails.number}</Text>
+                <Text style={styles.roleText}>Role: {userDetails.role}</Text>
+                <Text style={styles.detailText}>Email: {userDetails.email}</Text>
+                <Text style={styles.detailText}>Phone Number: {userDetails.number}</Text>
                 <View style={styles.view}>
                     <TouchableOpacity
                         onPress={() => setPasswordModalVisible(!passwordModalVisible)}

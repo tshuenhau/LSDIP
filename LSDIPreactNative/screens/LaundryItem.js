@@ -10,14 +10,17 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView,
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import { doc, addDoc, getFirestore, collection, getDoc, getDocs, QuerySnapshot, deleteDoc, GeoPoint, updateDoc } from "firebase/firestore";
 import { SelectList } from 'react-native-dropdown-select-list'
 import LaundryList from "../components/LaundryItemList";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 if (
@@ -34,7 +37,45 @@ export default function LaundryItem({ navigation }) {
     const laundryItem = firebase.firestore().collection('laundryItem');
     const laundryCItem = firebase.firestore().collection('laundryCategory');
     const [data, setData] = useState([]);
+    const [user, setUser] = useState(false);
+    const db = firebase.firestore()
 
+
+    //for getting user
+    const getUserRole = async () => {
+        try {
+            const role = await AsyncStorage.getItem('role');
+            if (role !== null) {
+                return id;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    useEffect(() => {
+        try {
+            const getUserId = async () => {
+                try {
+                    const id = await AsyncStorage.getItem('userId');
+                    if (id !== null) {
+                        getDoc(doc(db, "users", id)).then(docData => {
+                            if (docData.exists()) {
+                                //console.log(docData.data())
+                                setUser(docData.data())
+                            }
+                        })
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+
+            getUserId();
+        } catch (e) {
+            console.log("User Id does not exist in DB")
+        }
+    }, [])
 
     const pricingMethods = [
         { key: '1', value: 'Flat' },
@@ -101,91 +142,97 @@ export default function LaundryItem({ navigation }) {
     }
 
     return (
-        <View>
-            {/*for create laundry item*/}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setModalVisible(!modalVisible);
-                }}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
+        <ScrollView>
+            <View>
+                {/*for create laundry item*/}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {
+                        Alert.alert('Modal has been closed.');
+                        setModalVisible(!modalVisible);
+                    }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
 
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Laundry Item</Text>
-                            <TextBox placeholder="Laundry Item Name" onChangeText={text => handleChange(text, "laundryItemName")} />
-                            {/*<TextBox placeholder="Laundry Category" onChangeText={text => handleChange(text, "typeOfServices")} />*/}
-                            <View style={{
-                                // height: 42,
-                                width: "92%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
-                                <SelectList 
-                                data={data} 
-                                placeholder= "Choose service"
-                                searchPlaceholder="Search service"
-                                setSelected={(val) => handleChange(val, "typeOfServices")} 
-                                save = "value"
-                                />
-                                {/*<SelectList
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Laundry Item</Text>
+                                <TextBox placeholder="Laundry Item Name" onChangeText={text => handleChange(text, "laundryItemName")} />
+                                {/*<TextBox placeholder="Laundry Category" onChangeText={text => handleChange(text, "typeOfServices")} />*/}
+                                <View style={{
+                                    // height: 42,
+                                    width: "92%",
+                                    borderRadius: 25,
+                                    marginTop: 20
+                                }}>
+                                    <SelectList
+                                        data={data}
+                                        placeholder="Choose service"
+                                        searchPlaceholder="Search service"
+                                        setSelected={(val) => handleChange(val, "typeOfServices")}
+                                        save="value"
+                                    />
+                                    {/*<SelectList
                                     data={initialServices}
                                     setSelected={(val) => handleChange(val, "typeOfServices")}
                                     save="value"
                         />*/}
-                            </View>
-                            {/*<TextBox placeholder="Pricing Method (Flat, Range, Weight)" onChangeText={text => handleChange(text, "pricingMethod")} /> */}
-                            <View style={{
-                                // height: 42,
-                                width: "92%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
-                                <SelectList
-                                    data={pricingMethods}
-                                    placeholder= "Choose pricing method"
-                                    searchPlaceholder="Search pricing method"
-                                    setSelected={(val) => handleChange(val, "pricingMethod")}
-                                    save="value"
-                                />
-                            </View>
-                            <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
+                                </View>
+                                {/*<TextBox placeholder="Pricing Method (Flat, Range, Weight)" onChangeText={text => handleChange(text, "pricingMethod")} /> */}
+                                <View style={{
+                                    // height: 42,
+                                    width: "92%",
+                                    borderRadius: 25,
+                                    marginTop: 20
+                                }}>
+                                    <SelectList
+                                        data={pricingMethods}
+                                        placeholder="Choose pricing method"
+                                        searchPlaceholder="Search pricing method"
+                                        setSelected={(val) => handleChange(val, "pricingMethod")}
+                                        save="value"
+                                    />
+                                </View>
+                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
 
-                            {/*<TextBox placeholder="Lower Price (For Range Only)" onChangeText={text => handleChange(text, "lowerPrice")} />
+                                {/*<TextBox placeholder="Lower Price (For Range Only)" onChangeText={text => handleChange(text, "lowerPrice")} />
                             <TextBox placeholder="Price (Upper for Range Only)" onChangeText={text => handleChange(text, "upperPrice")} />*/}
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
-            </Modal >
+                </Modal >
 
 
-            <View style={styles.view2}>
-                <TouchableOpacity
-                    onPress={() => setModalVisible(!modalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Create Laundry Item</Text>
-                </TouchableOpacity>
+                <View style={styles.view2}>
+                    <TouchableOpacity
+                        onPress={() => setModalVisible(!modalVisible)}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Create Laundry Item</Text>
+                    </TouchableOpacity>
+                    {/* {user.role ==="Admin" ?
+                <View>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Service")}
                     style={styles.btn}>
                     <Text style={styles.text}>Services</Text>
                 </TouchableOpacity>
-            </View>
+                </View>
+                :null
+                } */}
+                </View>
 
-            <View>
-                <Text style={styles.listtext}>Laundry Item List</Text>
-                <LaundryList />
-            </View>
+                <View>
+                    <Text style={styles.listtext}>Laundry Item List</Text>
+                    <LaundryList />
+                </View>
 
-        </View >
-
+            </View >
+        </ScrollView>
     )
 }
 
@@ -235,7 +282,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        },
+    },
     view2: {
         width: "92%",
         justifyContent: "center",
@@ -250,7 +297,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#0B3270",
         justifyContent: "center",
         alignItems: "center",
-        marginRight:10
+        marginRight: 10
     },
     btn2: {
         padding: 5,

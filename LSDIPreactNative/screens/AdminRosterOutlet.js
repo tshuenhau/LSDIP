@@ -50,7 +50,7 @@ export default function AdminRosterOutlet({ navigation }) {
                 <View style={styles.cardButtons}>
                     <FontAwesome
                         style={styles.outletIcon}
-                        color="black"
+                        color="green"
                         name="edit"
                     />
                 </View>

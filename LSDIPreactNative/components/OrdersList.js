@@ -63,7 +63,6 @@ export default function OrdersList({ navigation }) {
         });
       });
       setOrderList(orderList);
-      //setOriginalOrders(originalOrders);
     });
     return () => unsubscribe();
   }, []);
@@ -97,7 +96,7 @@ export default function OrdersList({ navigation }) {
     //return date.toDate().toLocaleString();
     return date;
   };
-  
+
   const handleCheck = (order) => {
     const updatedArray = orderList.map((item) => {
       if (item.id === order.id) {
@@ -205,13 +204,13 @@ export default function OrdersList({ navigation }) {
     }
   };
   const filteredOrderList = orderList.filter((order) =>
-  order.id.toLowerCase().includes(searchQuery.toLowerCase())
-);
+    order.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.createOrderContainer}>
-        <TouchableOpacity style={styles.button}>
+        {/*<TouchableOpacity style={styles.button}>
           <Button
             title="Create Order"
             onPress={() => navigation.navigate("Create Order")}
@@ -222,7 +221,20 @@ export default function OrdersList({ navigation }) {
             title="Update Order"
             onPress={() => setUpdateModalVisible(true)}
           />
-        </TouchableOpacity>
+  </TouchableOpacity>*/}
+
+        <View style={styles.buttonView}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Create Order")}
+            style={styles.btn}>
+            <Text style={styles.text}>Create Order</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setUpdateModalVisible(true)}
+            style={styles.btn}>
+            <Text style={styles.text}>Update Order</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.searchContainer}>
         <TextInput
@@ -359,8 +371,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  buttonView: {
+    width: "92%",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    flexDirection: 'row',
+  },
   button: {
     margin: 10,
+    backgroundColor: "#0B3270",
+  },
+  btn: {
+    borderRadius: 15,
+    backgroundColor: "#0B3270",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10
   },
   createOrderContainer: {
     flexDirection: "row",
@@ -370,6 +397,12 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     marginVertical: 10,
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    padding: 10
   },
   container: {
     flex: 1,
@@ -461,4 +494,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: 'space-between',
   },
+  searchContainer: {
+    justifyContent: "center",
+    alignContent: "center",
+    width: "96%",
+    marginLeft: 15
+  }
 });

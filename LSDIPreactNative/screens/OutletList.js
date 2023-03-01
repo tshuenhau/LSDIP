@@ -134,7 +134,7 @@ export default function OutletList({ navigation }) {
                     <View style={styles.cardButtons}>
                         <FontAwesome
                             style={styles.outletIcon}
-                            color="black"
+                            color="green"
                             name="edit"
                             onPress={() => navigation.navigate('OutletDetail', { item })}
                         />
@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     view: {
+        marginTop:10,
         width: "100%",
         justifyContent: "center",
         alignItems: "center"
