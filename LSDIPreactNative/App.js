@@ -24,6 +24,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import Payment from './screens/Payment';
 import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
 import VehicleModule from './screens/VehicleModule';
@@ -157,6 +158,7 @@ function RootNavigator() {
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
+          <Drawer.Screen name='Payment' component={Payment} />
           <Drawer.Screen name='Order Page' component={OrderDetail}
             options={{
               drawerItemStyle: { display: "none" }
