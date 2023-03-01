@@ -38,8 +38,10 @@ export default function VehicleModule() {
     const [expandedVehicle, setExpandedVehicle] = useState(null);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [upvalues, setUpValues] = useState('');
+    const [user, setUser] = useState(false); 
+    
 
-    //initial vehic values
+    //initial vehicle values
     const initialValues = {
         location: new firebase.firestore.GeoPoint(0,0),
         mileage: 0,
@@ -141,6 +143,47 @@ export default function VehicleModule() {
 			)
 	},[])
 
+    //set user details for conditional rendering
+    useEffect(() => {
+		try {
+            const getUserId = async () => {
+                try {
+                    const id = await AsyncStorage.getItem('userId');
+                    if (id !== null) {
+                        getDoc(doc(db, "users", id)).then(docData => {
+                            if(docData.exists()) {
+                                //console.log(docData.data())
+                                setUser(docData.data())
+                            }
+                        }) 
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+
+            getUserId();
+        } catch (e) {
+            console.log("User Id does not exist in DB")
+        }
+	},[])
+
+    //alt user function 2
+    {/*async function setUserDetails(){
+        try {
+            const user = await getUserId();
+            getDoc(doc(db, "users", user)).then(docData => {
+                if(docData.exists()) {
+                    //console.log(docData.data())
+                    setUser(docData.data())
+                }
+            })
+        } catch (e) {
+            console.log("User Id does not exist in DB")
+        }
+		
+	}*/}
+
     //change values in create vehicle modal
     function handleChange(text, eventName) {
         setValues(prev => {
@@ -191,7 +234,7 @@ export default function VehicleModule() {
         }
     }
 
-    const getUserId = async () => {
+    {/*const getUserId = async () => {
         try {
             const id = await AsyncStorage.getItem('userId');
             if (id !== null) {
@@ -200,7 +243,7 @@ export default function VehicleModule() {
         } catch (e) {
             console.log(e);
         }
-    };
+    };*/}
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -240,7 +283,10 @@ export default function VehicleModule() {
             )}
         </TouchableOpacity>
     );
+    
 
+    //alt user function 2
+    //setUserDetails()
 
 
 	return (
@@ -276,22 +322,35 @@ export default function VehicleModule() {
             </Modal >
             
             <View style={styles.view}>
-                <TouchableOpacity
-                    onPress={() => setModalVisible(!modalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Create New Vehicle</Text>
-                </TouchableOpacity>
+                {user.role === "Admin" ?
+                    <TouchableOpacity
+                        onPress={() => setModalVisible(!modalVisible)}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Create New Vehicle</Text>
+                    </TouchableOpacity>
+                    : null
+                }
+                
             </View>
 
             <View style={styles.container}>
-                {!(vehicles.length > 0) && <Text> No Data Found! </Text>}
-                <View>
-                    <FlatList
-                        data={vehicles}
-                        keyExtractor={item => item.id}
-                        renderItem={renderItem}
-                    />
-                </View >
+                {user.role === "Admin" || "Staff" ?
+                    <View>
+                        {!(vehicles.length > 0) && <Text> No Data Found! </Text>}
+                        <FlatList
+                            data={vehicles}
+                            keyExtractor={item => item.id}
+                            renderItem={renderItem}
+                        />
+                    </View >
+                    :null
+                }
+                {user.role === "Admin" || "Staff" ?
+                    <View>
+                        <Text> No. </Text>
+                    </View >
+                    :null
+                }
             </View>
 
             <Modal
@@ -309,9 +368,7 @@ export default function VehicleModule() {
                         </View>
                     </View>
                 </View>
-            </Modal>
-
-
+            </Modal>              
         </View >
 
 	);
