@@ -219,6 +219,7 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
+            <Drawer.Screen name='Delivery' component={Delivery} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
@@ -232,7 +233,6 @@ function RootNavigator() {
         }}>
           <Stack.Screen name='Login' component={Login} />
           <Stack.Screen name='Signup' component={Signup} />
-          <Drawer.Screen name='Delivery' component={Delivery} />
           <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
         </Stack.Navigator>
       </NavigationContainer >

@@ -166,7 +166,7 @@ export default function OrdersList({ navigation }) {
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
           <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
-          <Text style={styles.orderNumber}>Number: {order.customerPhone}</Text>
+          <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
           <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderNumber}>
             Total Price: {order.totalPrice}

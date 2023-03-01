@@ -48,7 +48,7 @@ export default function CreateOrder() {
     const orders = firebase.firestore().collection("orders");
     const [customerDetails, setCustomerDetails] = useState({
         customerName: "",
-        customerPhone: ""
+        customerNumber: ""
     });
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const [cart, setCart] = useState([]);
@@ -230,7 +230,7 @@ export default function CreateOrder() {
             const orderRef = await orders.add({
                 ...orderValues,
                 customerName: customerDetails.customerName,
-                customerPhone: customerDetails.customerPhone,
+                customerNumber: customerDetails.customerNumber,
                 endDate: null,
                 totalPrice: totalPrice,
                 orderStatus: "Pending Wash",
@@ -244,7 +244,7 @@ export default function CreateOrder() {
 
             setCart([]);
             setOrderValues(initialOrderValues);
-            setCustomerDetails({ customerName: "", customerPhone: "" });
+            setCustomerDetails({ customerName: "", customerNumber: "" });
             // alert("Order created successfully");
             Toast.show({
                 type: 'success',
@@ -352,7 +352,7 @@ export default function CreateOrder() {
             </View>
             <View style= {{alignItems:"center", marginBottom:"5%", marginLeft:"5%", width:"90%"}}>
                 <TextBox style={styles.textBox} placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
-                <TextBox style={styles.textBox} placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerPhone: phone })} value={customerDetails.customerPhone} />
+                <TextBox style={styles.textBox} placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerNumber: phone })} value={customerDetails.customerNumber} />
                 </View>
             <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                     <Text style={styles.checkoutButtonText}>Checkout</Text>

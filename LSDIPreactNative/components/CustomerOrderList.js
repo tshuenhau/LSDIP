@@ -13,6 +13,7 @@ import colors from '../colors';
 import OrderDetails from "./OrderDetails";
 
 export default function CustomerOrderList({ curUser }) {
+    console.log(curUser);
 
     const [expandedOrder, setExpandedOrder] = useState(null);
     const [orderList, setOrderList] = useState([]);
@@ -21,7 +22,7 @@ export default function CustomerOrderList({ curUser }) {
     useEffect(() => {
         if (curUser) {
             orders
-                .where("customerName", "==", curUser.name)
+                .where("customerNumber", "==", curUser.number)
                 .get()
                 .then(querySnapshot => {
                     const orderList = [];
