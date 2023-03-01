@@ -13,13 +13,13 @@ import {
   ActivityIndicator,
   Keyboard,
   CheckBox,
-  Modal
+  Modal,
+  TextInput
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 import { FontAwesome } from '@expo/vector-icons';
-import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 import Checkbox from "expo-checkbox";
 import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
@@ -35,8 +35,7 @@ if (
 
 export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
-  const [originalOrders, setOriginalOrders] = useState([]);
-  
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -209,6 +208,9 @@ export default function OrdersList({ navigation }) {
       setUpdateModalVisible(false);
     }
   };
+  const filteredOrderList = orderList.filter((order) =>
+  order.id.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
   return (
     <View style={styles.container}>
@@ -226,9 +228,18 @@ export default function OrdersList({ navigation }) {
           />
         </TouchableOpacity>
       </View>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by Order ID"
+        />
+      </View>
+
       <FlatList
         style={styles.list}
-        data={orderList}
+        data={filteredOrderList}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
@@ -439,6 +450,16 @@ const styles = StyleSheet.create({
   cardHeaderIcon: {
     flexDirection: 'row',
     padding: 16,
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: colors.gray,
+    paddingHorizontal: 10,
+    fontSize: 18,
+    backgroundColor: colors.white,
+    marginVertical: 10,
   },
   cardButtons: {
     flexDirection: "row",

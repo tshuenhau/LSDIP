@@ -146,8 +146,8 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Screen name='Home' component={Home} />
-          <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
+          <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
@@ -183,15 +183,16 @@ function RootNavigator() {
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Create Order' component={CreateOrder} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule} />
             <Drawer.Screen name='Order Page' component={OrderDetail}
               options={{
                 drawerItemStyle: { display: "none" }
               }}
             />
             <Drawer.Screen name='Invoice' component={Invoice}
-            options={{
-              drawerItemStyle: { display: "none" }
-            }}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
             />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
