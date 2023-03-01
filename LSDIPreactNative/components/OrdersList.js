@@ -41,7 +41,7 @@ export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
   const [originalOrders, setOriginalOrders] = useState([]);
   //for search bar
-  const [searchPhrase, setSearchPhrase] = useState("");
+  const [text, setText] = useState("");
   const [clicked, setClicked] = useState(false);
   
   const [expandedOrder, setExpandedOrder] = useState(null);
@@ -121,6 +121,7 @@ export default function OrdersList({ navigation }) {
   function filterOrder(text) {
     const filteredOrders = originalOrders.filter(l => l.customerName.toUpperCase().includes(text.toUpperCase().trim().replace(/\s/g, "")));
     console.log("seacrhing");
+    console.log(text);
     //console.log(originalOrders);
     //console.log(filteredOrders);
     orderList.splice(0, orderList.length, ...filteredOrders);
@@ -128,8 +129,8 @@ export default function OrdersList({ navigation }) {
     if (orderList.length === 0) {
       renderItem;
     }
-    toggleExpand(orderList[0].id);
-    //renderItem2;
+    //toggleExpand(orderList[0].id);
+    //renderItem;
   }
   
   const handleCheck = (order) => {
@@ -239,7 +240,7 @@ export default function OrdersList({ navigation }) {
     <View style={styles.container}>
     <View style={styles.searchbar}>
           <FontAwesome name="search" size={21} color="black" style={{marginTop: "auto", marginBottom: "auto"}}/>
-          <TextBox placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 20, width: 150}}
+          <TextInput placeholder="Search Order" underlineColorAndroid={"transparent"} style={{marginLeft: 20, width: 150}}
             onChangeText={text => filterOrder(text)} />
           <TouchableOpacity onPress={Keyboard.dismiss()}>
             <Text style={{color: '#0391ff', fontSize: 14}}>Cancel</Text>
