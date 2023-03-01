@@ -10,6 +10,7 @@ import {
   UIManager,
   Platform,
   Modal,
+  TextInput
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import { firebase } from "../config/firebase";
@@ -30,6 +31,7 @@ if (
 
 export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -201,6 +203,9 @@ export default function OrdersList({ navigation }) {
       setUpdateModalVisible(false);
     }
   };
+  const filteredOrderList = orderList.filter((order) =>
+  order.id.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
   return (
     <View style={styles.container}>
@@ -218,9 +223,18 @@ export default function OrdersList({ navigation }) {
           />
         </TouchableOpacity>
       </View>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by Order ID"
+        />
+      </View>
+
       <FlatList
         style={styles.list}
-        data={orderList}
+        data={filteredOrderList}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
@@ -431,6 +445,16 @@ const styles = StyleSheet.create({
   cardHeaderIcon: {
     flexDirection: 'row',
     padding: 16,
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: colors.gray,
+    paddingHorizontal: 10,
+    fontSize: 18,
+    backgroundColor: colors.white,
+    marginVertical: 10,
   },
   cardButtons: {
     flexDirection: "row",

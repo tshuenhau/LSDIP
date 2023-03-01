@@ -51,14 +51,6 @@ const AuthenticatedUserProvider = ({ children }) => {
   );
 };
 
-const handleSignOut = () => {
-  auth.signOut()
-    .then(() => {
-      navigation.navigate('Login')
-    })
-    .catch(error => alert(error.message))
-}
-
 const setUserId = async (id) => {
   try {
     await AsyncStorage.setItem('userId', id.toString());
@@ -74,30 +66,6 @@ const setUserRole = async (role) => {
     console.log(e);
   }
 };
-
-function CustomDrawerContent(props) {
-  return (
-    <DrawerContentScrollView {...props}>
-      <DrawerItemList {...props} />
-      <DrawerItem
-        label="Sign Out"
-        onPress={handleSignOut}
-      />
-      <DrawerItem
-        label="Close Drawer"
-        onPress={() => props.navigation.closeDrawer()}
-      />
-    </DrawerContentScrollView>
-  );
-}
-
-function VehicleStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='VehicleModule' component={VehicleModule} />
-    </Stack.Navigator>
-  )
-}
 
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
@@ -137,6 +105,32 @@ function RootNavigator() {
       </View>
     );
   }
+
+  const handleSignOut = () => {
+    auth.signOut()
+      .then(() => {
+        setUser1({ ...user1, role: "" });
+        // navigation.navigate('Login')
+      })
+      .catch(error => alert(error.message))
+  }
+
+  function CustomDrawerContent(props) {
+    return (
+      <DrawerContentScrollView {...props}>
+        <DrawerItemList {...props} />
+        <DrawerItem
+          label="Sign Out"
+          onPress={handleSignOut}
+        />
+        <DrawerItem
+          label="Close Drawer"
+          onPress={() => props.navigation.closeDrawer()}
+        />
+      </DrawerContentScrollView>
+    );
+  }
+
   //console.log(user?.metadata?.customClaims);
   if (user1?.role === "Admin") {
     return (
@@ -183,6 +177,7 @@ function RootNavigator() {
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Create Order' component={CreateOrder} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule} />
             <Drawer.Screen name='Order Page' component={OrderDetail}
               options={{
                 drawerItemStyle: { display: "none" }
