@@ -20,7 +20,8 @@ export default function MyProfile() {
     const roles = [
         { key: '1', value: 'Admin' },
         { key: '2', value: 'Staff' },
-        { key: '3', value: 'Driver' }
+        { key: '3', value: 'Driver' },
+        { key: '3', value: 'Customer' },
     ]
 
     const initialValues = {
@@ -85,6 +86,12 @@ export default function MyProfile() {
                     number: updateModalData.number,
                 }).then(() => {
                     console.log("Update Success")
+                    setUserDetails({
+                        role: updateModalData.role,
+                        email: updateModalData.email,
+                        number: updateModalData.number,
+                        name: updateModalData.name
+                    })
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
                     console.log(err)

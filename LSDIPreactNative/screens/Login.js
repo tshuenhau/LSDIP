@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { firebase } from "../config/firebase";
 const backImage = require("../assets/backImage.jpg");
+import Toast from 'react-native-toast-message';
 
 export default function Login({ navigation }) {
 
@@ -21,12 +22,19 @@ export default function Login({ navigation }) {
             .then(user => {
               setUser(user.data())
               console.log(user.data().role)
-              if (user.data().role === "Admin") {
-                navigation.navigate("Admin");
-              } else {
-                console.log(user)
-                navigation.navigate("Home");
+              if (user.data().role === "Disabled") {
+                Toast.show({
+                  type: 'info',
+                  text1: 'Account is disabled',
+                });
+                navigation.navigate("Login")
               }
+              // if (user.data().role === "Admin") {
+              //   navigation.navigate("Admin");
+              // } else {
+              //   console.log(user)
+              //   navigation.navigate("Home");
+              // }
             })
         })
         .catch((err) => {
