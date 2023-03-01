@@ -334,7 +334,7 @@ export default function VehicleModule() {
             </View>
 
             <View style={styles.container}>
-                {user.role === "Admin" || "Staff" ?
+                {user.role === "Admin" || user.role === "Staff" ?
                     <View>
                         {!(vehicles.length > 0) && <Text> No Data Found! </Text>}
                         <FlatList
@@ -345,7 +345,7 @@ export default function VehicleModule() {
                     </View >
                     :null
                 }
-                {user.role === "Admin" || "Staff" ?
+                {user.role === "Driver" ?
                     <View>
                         <Text> No. </Text>
                     </View >
