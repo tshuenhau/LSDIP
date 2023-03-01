@@ -63,7 +63,7 @@ export default function OrdersList({ navigation }) {
         });
       });
       setOrderList(orderList);
-      setOriginalOrders(originalOrders);
+      //setOriginalOrders(originalOrders);
     });
     return () => unsubscribe();
   }, []);
