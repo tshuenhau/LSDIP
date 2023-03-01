@@ -29,15 +29,6 @@ export default function Home({ navigation }) {
             })
     }, [])
 
-    // useEffect(() => {
-    //     users.doc(auth1().currentUser.uid)
-    //         .get()
-    //         .then(user => {
-    //             setCustomer(user.data())
-    //             console.log(user)
-    //         })
-    // }, [])
-
     useEffect(() => {
         navigation.setOptions({
             headerRight: () => (

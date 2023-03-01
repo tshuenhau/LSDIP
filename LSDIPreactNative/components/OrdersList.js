@@ -9,9 +9,9 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
-  CheckBox,
   Modal,
 } from "react-native";
+import Checkbox from "expo-checkbox";
 import { firebase } from "../config/firebase";
 import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
@@ -20,7 +20,6 @@ import OrderDetails from "../components/OrderDetails";
 import colors from "../colors";
 import QR from "../components/QR";
 import { FontAwesome } from '@expo/vector-icons';
-
 
 if (
   Platform.OS === "android" &&
@@ -75,6 +74,7 @@ export default function OrdersList({ navigation }) {
     { key: 6, value: "Closed" },
     // for orders with problems
     { key: 7, value: "Case" },
+    { key: 8, value: "Void" },
   ];
 
   const toggleExpand = (id) => {
@@ -121,13 +121,17 @@ export default function OrdersList({ navigation }) {
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
 
         <View style={styles.cardButtons}>
+
           <TouchableOpacity
-          style={{paddingTop:12, marginRight:15}}
+            style={{ paddingTop: 12, marginRight: 15 }}
             onPress={() => handleCheck(order)}>
-            <CheckBox
+            <Checkbox
+              disabled={false}
               value={order.isSelected}
+              onValueChange={() => handleCheck(order)}
             />
           </TouchableOpacity>
+
           <FontAwesome
             style={styles.outletIcon}
             name="edit"
@@ -431,5 +435,5 @@ const styles = StyleSheet.create({
   cardButtons: {
     flexDirection: "row",
     justifyContent: 'space-between',
-},
+  },
 });
