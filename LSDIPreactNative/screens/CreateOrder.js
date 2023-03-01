@@ -17,10 +17,13 @@ import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
+// import alert from '../components/Alert';
 import colors from '../colors';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import moment from "moment";
+import Toast from 'react-native-toast-message';
+import * as Print from 'expo-print';
 
 export default function CreateOrder() {
     const initialOrderValues = {
@@ -45,10 +48,9 @@ export default function CreateOrder() {
     const orders = firebase.firestore().collection("orders");
     const [customerDetails, setCustomerDetails] = useState({
         customerName: "",
-        customerNumber: ""
+        customerPhone: ""
     });
     const [orderValues, setOrderValues] = useState(initialOrderValues);
-    const [customerName, setCustomerName] = useState('');
     const [cart, setCart] = useState([]);
     let orderId = "";
 
@@ -212,52 +214,49 @@ export default function CreateOrder() {
     const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
 
     const createOrder = async () => {
-    try {
-            const searchStaffByEmail = async (email) => {
-                const querySnapshot = await staffIdCollection.where("email", "==", email).get();
-                const results = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    results.push({
-                    id: doc.id,
-                    email: data.email,
-                    });
-                });
-                return results[0];
-                };
-            
+        console.log(customerDetails);
+        try {
+            const orderItemRefs = await Promise.all(
+                cart.map(async (item) => {
+                    const orderItemRef = await orderItems.add(item);
+                    return orderItemRef;
+                })
+            );
+
+            // Get IDs of created order items
+            const orderItemIds = orderItemRefs.map((ref) => ref.id);
+
+            // Create order
             const orderRef = await orders.add({
-            ...orderValues,
-            customerName: customerName,
-            endDate: null,
-            totalPrice: totalPrice,
-            orderStatus: "pending",
-            receiveFromWasherDate: null,
-            sendFromWasherDate: null,
-            staffID: await getUserId(),
-            outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
-            orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+                ...orderValues,
+                customerName: customerDetails.customerName,
+                customerPhone: customerDetails.customerPhone,
+                endDate: null,
+                totalPrice: totalPrice,
+                orderStatus: "Pending Wash",
+                receiveFromWasherDate: null,
+                sendFromWasherDate: null,
+                staffID: await getUserId(),
+                outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+                orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+                orderItemIds: orderItemIds, // Add order item IDs to order
             });
-      
-            orderId = orderRef.id;
-            const orderItemsPromises = cart.map(item => {
-                const { laundryItemName, typeOfServices, pricingMethod, description, price } = item;
-                const orderItem = {
-                laundryItemName,
-                typeOfServices,
-                pricingMethod,
-                description,
-                price,
-                createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-                orderId,
-                };
-                return orderItems.add(orderItem);
-            });
-            await Promise.all(orderItemsPromises);
-      
+
             setCart([]);
             setOrderValues(initialOrderValues);
-            Alert.alert("Order created successfully");
+            setCustomerDetails({ customerName: "", customerPhone: "" });
+            // alert("Order created successfully");
+            Toast.show({
+                type: 'success',
+                text1: 'Order Created',
+            });
+
+            
+
+            // Print.printAsync({
+            //       html,
+            // });
+            
         } catch (error) {
             console.error(error);
             Alert.alert("Error creating order. Please try again.");
@@ -271,9 +270,6 @@ export default function CreateOrder() {
                 renderScene={renderScene}
                 onIndexChange={setIndex}
             />
-            <Text><Btn title="Summary" style={styles.button} /></Text>
-
-            {/* <Text><Btn onClick={() => clearState()} title="Summary" style={styles.button} /></Text> */}
 
             {/* Create Modal */}
             <Modal
@@ -319,7 +315,7 @@ export default function CreateOrder() {
                     ))}
                 </ScrollView>
                 <TextBox placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
-                <TextBox placeholder="Customer Number" onChangeText={number => setCustomerDetails({ ...customerDetails, customerNumber: number })} value={customerDetails.customerNumber} />
+                <TextBox placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerPhone: phone })} value={customerDetails.customerPhone} />
                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                     <Text style={styles.checkoutButtonText}>Checkout</Text>
                 </TouchableOpacity>
@@ -481,4 +477,5 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     }
-})
+});
+

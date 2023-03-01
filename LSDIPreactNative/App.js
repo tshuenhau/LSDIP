@@ -24,13 +24,15 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
-import OrderPage from './screens/OrderPage';
-import OrderDetailsPage from './screens/OrderDetailsPage';
+import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
+import VehicleModule from './screens/VehicleModule';
 import LaundryItems from './screens/LaundryItem';
 import Service from './screens/Services'
 import { firebase } from "./config/firebase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+import Invoice from './screens/Invoice';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -42,6 +44,7 @@ const AuthenticatedUserProvider = ({ children }) => {
   return (
     <AuthenticatedUserContext.Provider value={{ user, setUser }}>
       {children}
+      <Toast />
     </AuthenticatedUserContext.Provider>
   );
 };
@@ -76,6 +79,14 @@ function CustomDrawerContent(props) {
       />
     </DrawerContentScrollView>
   );
+}
+
+function VehicleStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='VehicleModule' component={VehicleModule} />
+    </Stack.Navigator>
+  )
 }
 
 function RootNavigator() {
@@ -130,16 +141,21 @@ function RootNavigator() {
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
           <Drawer.Screen name='Driver' component={Driver} />
+          <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Create Order' component={CreateOrder} />
-          <Drawer.Screen name='Order Details Page' component={OrderDetailsPage} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
-          <Drawer.Screen name='OrderPage' component={OrderPage} />
-          {/* </Drawer.Group> */}
-          {/* <Drawer.Group screenOptions={{ presentation: 'modal' }}>
-            <Drawer.Screen name='CreateOutlet' component={CreateOutlet} />
-          </Drawer.Group> */}
+          <Drawer.Screen name='Order Page' component={OrderDetail}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
+          <Drawer.Screen name='Invoice' component={Invoice}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
         </Drawer.Navigator>
       </NavigationContainer >
     );
@@ -152,7 +168,13 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
+            <Drawer.Screen name='Create Order' component={CreateOrder} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            <Drawer.Screen name='Order Page' component={OrderDetail}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
+            />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
@@ -168,6 +190,21 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Driver' component={Driver} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule} />
+            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
+          </Drawer.Group>
+        </Drawer.Navigator>
+      </NavigationContainer>
+    );
+  } else if (user1?.role === "Customer") {
+    return (
+      <NavigationContainer>
+        <Drawer.Navigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Group>
+            <Drawer.Screen name='Home' component={Home} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
