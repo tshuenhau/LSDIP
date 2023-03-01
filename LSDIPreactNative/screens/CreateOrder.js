@@ -31,7 +31,7 @@ export default function CreateOrder() {
         orderDate: firebase.firestore.FieldValue.serverTimestamp(),
         customerName: "",
         customerAddress: "",
-        customerPhone: "",
+        customerNumber: "",
         pickupDate: "",
         deliveryDate: "",
         customerNumber: "",
@@ -251,12 +251,10 @@ export default function CreateOrder() {
                 text1: 'Order Created',
             });
 
-            
-
             // Print.printAsync({
             //       html,
             // });
-            
+
         } catch (error) {
             console.error(error);
             Alert.alert("Error creating order. Please try again.");
@@ -283,81 +281,81 @@ export default function CreateOrder() {
             ]
         );
         */
-       const cartCopy = cart.map((x) => x);
-       let index = cartCopy.indexOf(item);
-       console.log(index);
-       cartCopy.splice(index, 1);
-       //console.log("cartcopy", cartCopy);
-       setCart(cartCopy);
+        const cartCopy = cart.map((x) => x);
+        let index = cartCopy.indexOf(item);
+        console.log(index);
+        cartCopy.splice(index, 1);
+        //console.log("cartcopy", cartCopy);
+        setCart(cartCopy);
     }
 
     return (
         <ScrollView>
-        <View>
-            <TabView
-                navigationState={{ index, routes }}
-                renderScene={renderScene}
-                onIndexChange={setIndex}
-            />
+            <View>
+                <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    onIndexChange={setIndex}
+                />
 
-            {/* Create Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={createModalVisible}
-            >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
-                            <Text style={styles.itemText}>Item Name: {createModalData.laundryItemName} </Text>
-                            <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
-                            <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
-                            <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
-                            <Text style={styles.itemText}>Input price: </Text>
-                            <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                {/* Create Modal */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={createModalVisible}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
+                                <Text style={styles.itemText}>Item Name: {createModalData.laundryItemName} </Text>
+                                <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
+                                <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
+                                <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
+                                <Text style={styles.itemText}>Input price: </Text>
+                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Cart Table */}
-            <View style={styles.tableContainer}>
-                <View style={styles.tableHeader}>
-                    <Text style={styles.tableHeaderText}>Item Type</Text>
-                    <Text style={styles.tableHeaderText}>Description</Text>
-                    <Text style={styles.tableHeaderText}>Item Name</Text>
-                    <Text style={styles.tableHeaderText}>Price</Text>
+                {/* Cart Table */}
+                <View style={styles.tableContainer}>
+                    <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderText}>Item Type</Text>
+                        <Text style={styles.tableHeaderText}>Description</Text>
+                        <Text style={styles.tableHeaderText}>Item Name</Text>
+                        <Text style={styles.tableHeaderText}>Price</Text>
+                    </View>
+                    <ScrollView style={styles.tableBody}>
+                        {cart.map((item, index) => (
+                            <View key={index} style={styles.tableRow}>
+                                <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                                <Text style={styles.tableRowText}>{item.description}</Text>
+                                <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                                <Text style={styles.tableRowText}>{item.price}</Text>
+                                <FontAwesome
+                                    style={styles.outletIcon}
+                                    name="trash-o"
+                                    color='red'
+                                    onPress={() => deleteItem(item)}
+                                />
+                            </View>
+                        ))}
+                    </ScrollView>
                 </View>
-                <ScrollView style={styles.tableBody}>
-                    {cart.map((item, index) => (
-                        <View key={index} style={styles.tableRow}>
-                            <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
-                            <Text style={styles.tableRowText}>{item.description}</Text>
-                            <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
-                            <Text style={styles.tableRowText}>{item.price}</Text>
-                            <FontAwesome
-                                style={styles.outletIcon}
-                                name="trash-o"
-                                color='red'
-                                onPress={() => deleteItem(item)}
-                            />
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
-            <View style= {{alignItems:"center", marginBottom:"5%", marginLeft:"5%", width:"90%"}}>
-                <TextBox style={styles.textBox} placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
-                <TextBox style={styles.textBox} placeholder="Customer Phone" onChangeText={phone => setCustomerDetails({ ...customerDetails, customerNumber: phone })} value={customerDetails.customerNumber} />
+                <View style={{ alignItems: "center", marginBottom: "5%", marginLeft: "5%", width: "90%" }}>
+                    <TextBox style={styles.textBox} placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
+                    <TextBox style={styles.textBox} placeholder="Customer Number" onChangeText={number => setCustomerDetails({ ...customerDetails, customerNumber: number })} value={customerDetails.customerNumber} />
                 </View>
-            <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                     <Text style={styles.checkoutButtonText}>Checkout</Text>
                 </TouchableOpacity>
-        </View>
+            </View>
         </ScrollView>
     );
 }
@@ -396,14 +394,14 @@ const styles = StyleSheet.create({
     tableRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignContent:"center",
+        alignContent: "center",
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
-        marginBottom:20
+        marginBottom: 20
     },
     tableRowText: {
-        marginTop:8,
+        marginTop: 8,
         fontSize: 16,
         flex: 1,
     },
@@ -521,13 +519,13 @@ const styles = StyleSheet.create({
     },
     textBox: {
         width: "96%",
-        marginLeft:13,
+        marginLeft: 13,
         fontSize: 16,
         padding: 10,
         borderColor: "#0B3270",
         borderWidth: 1,
         borderRadius: 8,
-        backgroundColor:"#fff"
-      },
+        backgroundColor: "#fff"
+    },
 });
 

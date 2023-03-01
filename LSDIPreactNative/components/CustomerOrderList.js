@@ -28,11 +28,11 @@ export default function CustomerOrderList({ curUser }) {
                     const orderList = [];
                     console.log(curUser);
                     querySnapshot.forEach((doc) => {
-                        const { customerName, customerPhone, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+                        const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
                         orderList.push({
                             id: doc.id,
                             customerName,
-                            customerPhone,
+                            customerNumber,
                             date,
                             orderItems,
                             outletId,
@@ -44,7 +44,7 @@ export default function CustomerOrderList({ curUser }) {
                 });
         }
     }, [curUser]);
-    
+
 
     const formatOrderNumber = (id) => {
         return '#' + id.slice(0, 4).toUpperCase();
@@ -77,7 +77,7 @@ export default function CustomerOrderList({ curUser }) {
             {expandedOrder === order.id && (
                 <View style={styles.cardBody}>
                     <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
-                    <Text style={styles.orderNumber}>Number: {order.customerPhone}</Text>
+                    <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
                     <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
                     <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
                     <OrderDetails data={order.id}></OrderDetails>

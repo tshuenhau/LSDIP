@@ -43,7 +43,7 @@ export default function OrdersList({ navigation }) {
       querySnapshot.forEach((doc) => {
         const {
           customerName,
-          customerPhone,
+          customerNumber,
           date,
           orderItems,
           outletId,
@@ -54,7 +54,7 @@ export default function OrdersList({ navigation }) {
           isSelected: false,
           id: doc.id,
           customerName,
-          customerPhone,
+          customerNumber,
           date,
           orderItems,
           outletId,
