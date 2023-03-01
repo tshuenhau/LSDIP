@@ -146,11 +146,11 @@ function RootNavigator() {
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} />
-          {/* <Drawer.Screen name='Driver' component={Driver} /> */}
+          <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Create Order' component={CreateOrder} />
-          <Drawer.Screen name='Laundry Pricing' component={LaundryItems} />
+          <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='Payment' component={Payment} />
           <Drawer.Screen name='Order Page' component={OrderDetail}
@@ -177,8 +177,8 @@ function RootNavigator() {
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Create Order' component={CreateOrder} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
-            <Drawer.Screen name='Laundry Pricing' component={LaundryItems} />
             <Drawer.Screen name='Vehicle' component={VehicleModule} />
+            <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
             <Drawer.Screen name='Order Page' component={OrderDetail}
               options={{
                 drawerItemStyle: { display: "none" }
@@ -203,7 +203,7 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
-            {/* <Drawer.Screen name='Driver' component={Driver} /> */}
+            <Drawer.Screen name='Driver' component={Driver} />
             <Drawer.Screen name='Vehicle' component={VehicleModule} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
@@ -232,6 +232,7 @@ function RootNavigator() {
         }}>
           <Stack.Screen name='Login' component={Login} />
           <Stack.Screen name='Signup' component={Signup} />
+          <Drawer.Screen name='Delivery' component={Delivery} />
           <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
         </Stack.Navigator>
       </NavigationContainer >

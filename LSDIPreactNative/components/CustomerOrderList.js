@@ -19,27 +19,31 @@ export default function CustomerOrderList({ curUser }) {
     const orders = firebase.firestore().collection('orders');
 
     useEffect(() => {
-        orders
-            .where("customerPhone", "==", curUser.phone)
-            .get()
-            .then(querySnapshot => {
-                const orderList = [];
-                querySnapshot.forEach((doc) => {
-                    const { customerName, customerPhone, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
-                    orderList.push({
-                        id: doc.id,
-                        customerName,
-                        customerPhone,
-                        date,
-                        orderItems,
-                        outletId,
-                        orderStatus,
-                        totalPrice,
+        if (curUser) {
+            orders
+                .where("customerName", "==", curUser.name)
+                .get()
+                .then(querySnapshot => {
+                    const orderList = [];
+                    console.log(curUser);
+                    querySnapshot.forEach((doc) => {
+                        const { customerName, customerPhone, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+                        orderList.push({
+                            id: doc.id,
+                            customerName,
+                            customerPhone,
+                            date,
+                            orderItems,
+                            outletId,
+                            orderStatus,
+                            totalPrice,
+                        });
                     });
+                    setOrderList(orderList);
                 });
-                setOrderList(orderList);
-            });
-    }, []);
+        }
+    }, [curUser]);
+    
 
     const formatOrderNumber = (id) => {
         return '#' + id.slice(0, 4).toUpperCase();
