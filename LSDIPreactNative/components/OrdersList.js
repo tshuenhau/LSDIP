@@ -19,8 +19,6 @@ import { firebase } from '../config/firebase';
 import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 import { FontAwesome } from '@expo/vector-icons';
-import { TextInput } from 'react-native-gesture-handler';
-import TextBox from './TextBox';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 import Checkbox from "expo-checkbox";
 import { SelectList } from "react-native-dropdown-select-list";
