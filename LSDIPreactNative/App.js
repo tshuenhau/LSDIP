@@ -65,6 +65,14 @@ const setUserId = async (id) => {
   }
 };
 
+const setUserRole = async (role) => {
+  try {
+    await AsyncStorage.setItem('userRole', role.toString());
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
@@ -106,6 +114,7 @@ function RootNavigator() {
               console.log(user1?.role);
               const userRole = user?.role;
               setUserId(auth1().currentUser.uid);
+              setUserRole(user?.role);
               setUser({ ...authenticatedUser, role: userRole });
             })
 
