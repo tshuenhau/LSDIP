@@ -24,6 +24,7 @@ import Driver from './screens/Driver';
 import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
+import Payment from './screens/Payment';
 import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
 import VehicleModule from './screens/VehicleModule';
@@ -50,14 +51,6 @@ const AuthenticatedUserProvider = ({ children }) => {
   );
 };
 
-const handleSignOut = () => {
-  auth.signOut()
-    .then(() => {
-      navigation.navigate('Login')
-    })
-    .catch(error => alert(error.message))
-}
-
 const setUserId = async (id) => {
   try {
     await AsyncStorage.setItem('userId', id.toString());
@@ -66,29 +59,13 @@ const setUserId = async (id) => {
   }
 };
 
-function CustomDrawerContent(props) {
-  return (
-    <DrawerContentScrollView {...props}>
-      <DrawerItemList {...props} />
-      <DrawerItem
-        label="Sign Out"
-        onPress={handleSignOut}
-      />
-      <DrawerItem
-        label="Close Drawer"
-        onPress={() => props.navigation.closeDrawer()}
-      />
-    </DrawerContentScrollView>
-  );
-}
-
-function VehicleStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='VehicleModule' component={VehicleModule} />
-    </Stack.Navigator>
-  )
-}
+const setUserRole = async (role) => {
+  try {
+    await AsyncStorage.setItem('userRole', role.toString());
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
@@ -107,6 +84,7 @@ function RootNavigator() {
               console.log(user1?.role);
               const userRole = user?.role;
               setUserId(auth1().currentUser.uid);
+              setUserRole(user?.role);
               setUser({ ...authenticatedUser, role: userRole });
             })
 
@@ -127,6 +105,32 @@ function RootNavigator() {
       </View>
     );
   }
+
+  const handleSignOut = () => {
+    auth.signOut()
+      .then(() => {
+        setUser1({ ...user1, role: "" });
+        // navigation.navigate('Login')
+      })
+      .catch(error => alert(error.message))
+  }
+
+  function CustomDrawerContent(props) {
+    return (
+      <DrawerContentScrollView {...props}>
+        <DrawerItemList {...props} />
+        <DrawerItem
+          label="Sign Out"
+          onPress={handleSignOut}
+        />
+        <DrawerItem
+          label="Close Drawer"
+          onPress={() => props.navigation.closeDrawer()}
+        />
+      </DrawerContentScrollView>
+    );
+  }
+
   //console.log(user?.metadata?.customClaims);
   if (user1?.role === "Admin") {
     return (
@@ -136,8 +140,8 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Screen name='Home' component={Home} />
-          <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
+          <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
@@ -148,6 +152,7 @@ function RootNavigator() {
           <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
+          <Drawer.Screen name='Payment' component={Payment} />
           <Drawer.Screen name='Order Page' component={OrderDetail}
             options={{
               drawerItemStyle: { display: "none" }
@@ -172,15 +177,16 @@ function RootNavigator() {
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Create Order' component={CreateOrder} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule} />
             <Drawer.Screen name='Order Page' component={OrderDetail}
               options={{
                 drawerItemStyle: { display: "none" }
               }}
             />
             <Drawer.Screen name='Invoice' component={Invoice}
-            options={{
-              drawerItemStyle: { display: "none" }
-            }}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
             />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>

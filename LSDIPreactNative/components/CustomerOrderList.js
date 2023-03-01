@@ -19,7 +19,8 @@ export default function CustomerOrderList({ curUser }) {
     const orders = firebase.firestore().collection('orders');
 
     useEffect(() => {
-        orders.where("customerPhone", "==", curUser.number)
+        orders
+            .where("customerPhone", "==", curUser.phone)
             .get()
             .then(querySnapshot => {
                 const orderList = [];
@@ -98,6 +99,9 @@ export default function CustomerOrderList({ curUser }) {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     card: {
         backgroundColor: '#fff',
         marginVertical: 10,

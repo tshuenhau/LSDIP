@@ -9,18 +9,18 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
-  CheckBox,
   Modal,
-} from "react-native";
-import { firebase } from "../config/firebase";
+  TextInput
+} from 'react-native';
+import { firebase } from '../config/firebase';
+import OrderDetails from "../components/OrderDetails";
+import colors from '../colors';
+import { FontAwesome } from '@expo/vector-icons';
+import Checkbox from "expo-checkbox";
 import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
 import alert from "../components/Alert";
-import OrderDetails from "../components/OrderDetails";
-import colors from "../colors";
 import QR from "../components/QR";
-import { FontAwesome } from '@expo/vector-icons';
-
 
 if (
   Platform.OS === "android" &&
@@ -31,6 +31,7 @@ if (
 
 export default function OrdersList({ navigation }) {
   const [orderList, setOrderList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -62,6 +63,7 @@ export default function OrdersList({ navigation }) {
         });
       });
       setOrderList(orderList);
+      setOriginalOrders(originalOrders);
     });
     return () => unsubscribe();
   }, []);
@@ -75,6 +77,7 @@ export default function OrdersList({ navigation }) {
     { key: 6, value: "Closed" },
     // for orders with problems
     { key: 7, value: "Case" },
+    { key: 8, value: "Void" },
   ];
 
   const toggleExpand = (id) => {
@@ -94,7 +97,7 @@ export default function OrdersList({ navigation }) {
     //return date.toDate().toLocaleString();
     return date;
   };
-
+  
   const handleCheck = (order) => {
     const updatedArray = orderList.map((item) => {
       if (item.id === order.id) {
@@ -121,13 +124,17 @@ export default function OrdersList({ navigation }) {
         <Text style={styles.orderNumber}>{order.orderStatus}</Text>
 
         <View style={styles.cardButtons}>
+
           <TouchableOpacity
-          style={{paddingTop:12, marginRight:15}}
+            style={{ paddingTop: 12, marginRight: 15 }}
             onPress={() => handleCheck(order)}>
-            <CheckBox
+            <Checkbox
+              disabled={false}
               value={order.isSelected}
+              onValueChange={() => handleCheck(order)}
             />
           </TouchableOpacity>
+
           <FontAwesome
             style={styles.outletIcon}
             name="edit"
@@ -197,6 +204,9 @@ export default function OrdersList({ navigation }) {
       setUpdateModalVisible(false);
     }
   };
+  const filteredOrderList = orderList.filter((order) =>
+  order.id.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
   return (
     <View style={styles.container}>
@@ -214,9 +224,18 @@ export default function OrdersList({ navigation }) {
           />
         </TouchableOpacity>
       </View>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by Order ID"
+        />
+      </View>
+
       <FlatList
         style={styles.list}
-        data={orderList}
+        data={filteredOrderList}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
@@ -428,8 +447,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
   },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: colors.gray,
+    paddingHorizontal: 10,
+    fontSize: 18,
+    backgroundColor: colors.white,
+    marginVertical: 10,
+  },
   cardButtons: {
     flexDirection: "row",
     justifyContent: 'space-between',
-},
+  },
 });
