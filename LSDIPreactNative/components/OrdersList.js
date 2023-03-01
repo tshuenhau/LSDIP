@@ -9,10 +9,6 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
-  SafeAreaView,
-  ActivityIndicator,
-  Keyboard,
-  CheckBox,
   Modal,
   TextInput
 } from 'react-native';
