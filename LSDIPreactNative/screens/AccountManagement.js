@@ -41,8 +41,7 @@ export default function AccountManagement() {
 
     useEffect(() => {
         userDatabase
-            .get()
-            .then(querySnapshot => {
+            .onSnapshot(querySnapshot => {
                 const users = [];
                 querySnapshot.forEach(doc => {
                     const { email, name, number, role } = doc.data();
@@ -108,7 +107,7 @@ export default function AccountManagement() {
             keyExtractor={item => item.id}
             renderItem={renderItem}
             ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
+                <Text style={styles.noDataText}>No available items</Text>
             }
         />
     );
@@ -119,7 +118,7 @@ export default function AccountManagement() {
             keyExtractor={item => item.id}
             renderItem={renderItem}
             ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
+                <Text style={styles.noDataText}>No available items</Text>
             }
         />
     );
@@ -130,7 +129,7 @@ export default function AccountManagement() {
             keyExtractor={item => item.id}
             renderItem={renderItem}
             ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
+                <Text style={styles.noDataText}>No available items</Text>
             }
         />
     );
@@ -141,7 +140,18 @@ export default function AccountManagement() {
             keyExtractor={item => item.id}
             renderItem={renderItem}
             ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
+                <Text style={styles.noDataText}>No available items</Text>
+            }
+        />
+    );
+
+    const Disabled = () => (
+        <FlatList
+            data={users.filter(l => l.role === "Disabled")}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+                <Text style={styles.noDataText}>No available items</Text>
             }
         />
     );
@@ -156,9 +166,7 @@ export default function AccountManagement() {
     }
 
     const updateRole = () => {
-        if (updateModalData.name.length > 0 &&
-            updateModalData.email.length > 0 &&
-            updateModalData.number.length > 0) {
+        if (updateModalData.role.length > 0) {
             userDatabase.doc(updateModalData.id)
                 .update({
                     role: updateModalData.role,
@@ -176,6 +184,7 @@ export default function AccountManagement() {
         staff: Staff,
         driver: Driver,
         customer: Customer,
+        disabled: Disabled,
     });
 
     const [routes] = React.useState([
@@ -183,6 +192,7 @@ export default function AccountManagement() {
         { key: 'staff', title: 'Staff' },
         { key: 'driver', title: 'Driver' },
         { key: 'customer', title: 'Customer' },
+        { key: 'disabled', title: 'Disabled' },
     ]);
 
 
@@ -221,7 +231,7 @@ export default function AccountManagement() {
                                 />
                             </View>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => updateRole()} title="Add" style={{ width: "48%" }} />
+                                <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
                                 <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                             </View>
                         </View>
@@ -234,6 +244,11 @@ export default function AccountManagement() {
     );
 }
 const styles = StyleSheet.create({
+    noDataText: {
+        fontStyle: "italic",
+        textAlign: "center",
+        marginVertical: 10,
+    },
     tableContainer: {
         marginTop: 20,
         marginBottom: 20,
