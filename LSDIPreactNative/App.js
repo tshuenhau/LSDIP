@@ -175,6 +175,11 @@ function RootNavigator() {
                 drawerItemStyle: { display: "none" }
               }}
             />
+            <Drawer.Screen name='Invoice' component={Invoice}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+            />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
