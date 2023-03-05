@@ -14,6 +14,7 @@ import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from '../config/firebase'
 import { FontAwesome } from '@expo/vector-icons'
 import alert from '../components/Alert'
+import Toast from 'react-native-toast-message';
 
 export default function MyProfile() {
 
@@ -92,6 +93,10 @@ export default function MyProfile() {
                         number: updateModalData.number,
                         name: updateModalData.name
                     })
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Profile Updated',
+                    });
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
                     console.log(err)
@@ -143,7 +148,10 @@ export default function MyProfile() {
                 reauthenticate(passwordDetails.currentPassword).then(() => {
                     var user = firebase.auth().currentUser;
                     user.updatePassword(passwordDetails.newPassword);
-
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Password updated',
+                    });
                     setPasswordModalVisible(!passwordModalVisible);
                     setPasswordDetails(initialPassword);
                 })
