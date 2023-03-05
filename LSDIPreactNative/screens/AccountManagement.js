@@ -14,9 +14,10 @@ import React, { useState, useEffect } from "react";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import { SelectList } from 'react-native-dropdown-select-list'
+import Toast from 'react-native-toast-message';
 
 if (
     Platform.OS === "android" &&
@@ -100,7 +101,6 @@ export default function AccountManagement() {
                     </View>
                 </View>
             )}
-
         </TouchableOpacity>
     );
 
@@ -218,6 +218,10 @@ export default function AccountManagement() {
                 .update({
                     role: updateModalData.role,
                 }).then(() => {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'User updated',
+                    });
                     console.log("Update Success")
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
@@ -242,13 +246,13 @@ export default function AccountManagement() {
         { key: 'disabled', title: 'Disabled' },
     ]);
 
-
     return (
         <View>
             <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
                 onIndexChange={setIndex}
+                renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#0B3270' }} />}
             />
 
             {/* Update Modal */}
@@ -286,10 +290,10 @@ export default function AccountManagement() {
                 </View>
             </Modal>
 
-
         </View>
     );
 }
+
 const styles = StyleSheet.create({
     searchInput: {
         height: 40,

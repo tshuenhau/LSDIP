@@ -18,8 +18,6 @@ import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 
-
-
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -28,32 +26,30 @@ if (
 }
 
 export default function OrderPage(props) {
-  const [order, setOrder] = useState(null);
-  // console.log(props);
+
   const { orderId } = props.route.params;
-  // console.log(orderId);
+  const [order, setOrder] = useState(null);
+  const [service, setService] = useState([]);
+  const [modalData, setModalData] = useState({ description: '', price: '' });
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [orderItemsList, setOrderItemsList] = useState([]);
+  const [laundryItemsData, setLaundryItemsData] = useState([]);
+
   useEffect(() => {
     // Fetch the order document using the orderId prop
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     const unsubscribe = orderRef.onSnapshot((doc) => {
       if (doc.exists) {
-        setOrder({id: doc.id, ...doc.data()});
+        setOrder({ id: doc.id, ...doc.data() });
       } else {
         console.log('No such order document!');
       }
     });
     return () => unsubscribe();
   }, [orderId]);
-  // useEffect(() => {
-  //   if (order) {
-  //     console.log(order);
-  //   }
-  // }, [order]);
-  //import service. 
-  const services = firebase.firestore().collection('laundryCategory');
-  const [service, setService] = useState([]);
-  const [modalData, setModalData] = useState({ description: '', price: '' });
+
   useEffect(() => {
+    const services = firebase.firestore().collection('laundryCategory');
     services.onSnapshot(querySnapshot => {
       const service = [];
       querySnapshot.forEach(doc => {
@@ -67,10 +63,6 @@ export default function OrderPage(props) {
     });
   }, []);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const [orderItemsList, setOrderItemsList] = useState([]);
-  const [laundryItemsData, setLaundryItemsData] = useState([]);
   useEffect(() => {
     if (order) {
       const orderItem = firebase.firestore().collection('orderItem');
@@ -93,6 +85,7 @@ export default function OrderPage(props) {
       return () => unsubscribe();
     }
   }, [order]);
+
   useEffect(() => {
     const laundryItems = firebase.firestore().collection('laundryItem');
     const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
@@ -164,16 +157,16 @@ export default function OrderPage(props) {
 
   return (
     <View style={styles.container}>
-    <TouchableOpacity title="Print" onPress={print}>
-      <Text style={styles.backButton}>Print</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={() => props.navigation.goBack()}>
-          <Text style={styles.backButton}>Back</Text>
-    </TouchableOpacity>
+      <TouchableOpacity title="Print" onPress={print}>
+        <Text style={styles.backButton}>Print</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => props.navigation.goBack()}>
+        <Text style={styles.backButton}>Back</Text>
+      </TouchableOpacity>
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>Order #{orderId}</Text>
         {/* <Text style={styles.orderNumber}>Name: {order.customerName}</Text> */}
-        <View style = {{padding:10, flexDirection:'row'}}>
+        <View style={{ padding: 10, flexDirection: 'row' }}>
         </View>
       </View>
       <FlatList
@@ -258,8 +251,8 @@ const styles = StyleSheet.create({
   backButton: {
     fontSize: 16,
     color: 'blue',
-    paddingTop:30,
-    fontWeight:"bold"
+    paddingTop: 30,
+    fontWeight: "bold"
   },
   card: {
     backgroundColor: '#fff',

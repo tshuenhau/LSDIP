@@ -296,6 +296,7 @@ export default function CreateOrder() {
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#0B3270' }} />}
                 />
 
                 {/* Create Modal */}
