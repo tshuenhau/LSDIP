@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Button,
   FlatList,
   LayoutAnimation,
   UIManager,

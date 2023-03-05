@@ -19,7 +19,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 // import alert from '../components/Alert';
 import colors from '../colors';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import moment from "moment";
 import Toast from 'react-native-toast-message';
