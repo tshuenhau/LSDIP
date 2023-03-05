@@ -16,6 +16,7 @@ import alert from '../components/Alert'
 import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import Toast from 'react-native-toast-message';
 
 if (
     Platform.OS === 'android' &&
@@ -83,7 +84,10 @@ export default function OutletList({ navigation }) {
             .then(() => {
                 setCreateModalVisible(!createModalVisible);
                 clearState;
-                console.log("Success");
+                Toast.show({
+                    type: 'success',
+                    text1: 'Outlet Created',
+                });
             }).catch((err) => {
                 console.log(err);
             })
@@ -100,7 +104,10 @@ export default function OutletList({ navigation }) {
                         outlets.doc(outlet.id)
                             .delete()
                             .then(() => {
-                                alert("Deleted Successfully");
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Outlet Deleted',
+                                });
                             }).catch((err) => {
                                 console.log(err);
                             })
@@ -161,6 +168,17 @@ export default function OutletList({ navigation }) {
                 </TouchableOpacity>
             </View>
 
+            <View>
+                <FlatList
+                    data={outletList}
+                    keyExtractor={outlet => outlet.id}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noDataText}>No Data Found!</Text>
+                    }
+                />
+            </View>
+
             {/* Create Modal */}
             <Modal
                 animationType="slide"
@@ -182,17 +200,6 @@ export default function OutletList({ navigation }) {
                     </View>
                 </View>
             </Modal>
-
-            <View>
-                <FlatList
-                    data={outletList}
-                    keyExtractor={outlet => outlet.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDataText}>No Data Found!</Text>
-                    }
-                />
-            </View>
         </View>
     )
 }
@@ -250,7 +257,7 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     view: {
-        marginTop:10,
+        marginTop: 10,
         width: "100%",
         justifyContent: "center",
         alignItems: "center"

@@ -195,7 +195,6 @@ export default function Services({ navigation }) {
     )
 }
 
-
 const styles = StyleSheet.create({
     cardBody: {
         padding: 16,
