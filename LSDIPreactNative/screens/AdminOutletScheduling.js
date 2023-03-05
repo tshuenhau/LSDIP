@@ -286,6 +286,13 @@ export default function AdminOutletScheduling({ route, navigation }) {
                     scrollEnabled={true}
                     horizontal={true}
                     pagingEnabled={true}
+                    theme={{
+                        selectedDayBackgroundColor: '#007aff',
+                        selectedDayTextColor: '#ffffff',
+                        todayTextColor: '#00adf5',
+                        textDisabledColor: '#d9e1e8',
+                        arrowColor: 'gray',
+                    }}
                 />
             </View>
             <View style={styles.timingsContainer}>

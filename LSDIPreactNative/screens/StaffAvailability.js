@@ -22,6 +22,7 @@ export default function StaffAvailability() {
     const [weekdayModalVisible, setWeekdayModalVisible] = useState(false);
     const [weekendModalVisible, setWeekendModalVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
+    const [markedDates, setMarkedDates] = useState({});
     const [selectedAvailability, setSelectedAvailability] = useState({});
     const [shiftTimings, setShiftTimings] = useState([]);
     const [outlets, setOutlets] = useState([{}]);
@@ -92,6 +93,7 @@ export default function StaffAvailability() {
                         staff_schedule
                             .where("userID", "==", currUser)
                             .where("confirmed", "==", false)
+                            .where('date', ">=", today)
                             .get()
                             .then(querySnapshot => {
                                 const indicatedAvailabilities = [];
@@ -109,8 +111,10 @@ export default function StaffAvailability() {
                                         userID: userID,
                                         outletName: curOutlet.outletName
                                     });
+                                    markedDates[date] = { marked: true };
                                 });
                                 setIndicatedAvailabilities(indicatedAvailabilities);
+                                setMarkedDates(markedDates);
                             });
                     });
             });
@@ -157,6 +161,7 @@ export default function StaffAvailability() {
                         outletName: outlets.find(o => o.key === selectedAvailability.outletID).value,
                     };
                     indicatedAvailabilities.push(newIndicatedAvailability);
+                    markedDates[selectedDate] = { marked: true };
                     setWeekdayModalVisible(false);
                     setWeekendModalVisible(false);
                     console.log("Success");
@@ -187,7 +192,9 @@ export default function StaffAvailability() {
                             .delete()
                             .then(() => {
                                 console.log("Deleted Availability")
+                                console.log(item);
                                 const temp = indicatedAvailabilities.filter(x => x.id != item.id)
+                                markedDates[item.date] = { marked: false };
                                 setIndicatedAvailabilities(temp);
                             }).catch((err) => {
                                 console.log(err)
@@ -237,6 +244,7 @@ export default function StaffAvailability() {
                     <View style={styles.calendarContainer}>
                         <CalendarList
                             onDayPress={onDayPress}
+                            markedDates={markedDates}
                             minDate={today}
                             markingType="simple"
                             pastScrollRange={0}
@@ -272,23 +280,24 @@ export default function StaffAvailability() {
 
                 {/* weekday modal */}
                 <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
-                    <View style={styles.modalBackdrop}>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>{selectedDate}</Text>
-
-                            <SelectList
-                                data={shiftTimings.filter(x => x.type === "weekday")}
-                                setSelected={(val) => handleChange(val, "shiftID")}
-                                save="key"
-                                search={false}
-                            />
-                            <View style={styles.modalButtons}>
-                                <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
-                                    <Text style={styles.indicateButtonText}>Indicate</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.closeButton} onPress={() => setWeekdayModalVisible(!weekdayModalVisible)}>
-                                    <Text style={styles.closeButtonText}>Close</Text>
-                                </TouchableOpacity>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={styles.modalTitle}>{selectedDate}</Text>
+                                <SelectList
+                                    data={shiftTimings.filter(x => x.type === "weekday")}
+                                    setSelected={(val) => handleChange(val, "shiftID")}
+                                    save="key"
+                                    search={false}
+                                />
+                                <View style={styles.modalButtons}>
+                                    <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
+                                        <Text style={styles.indicateButtonText}>Indicate</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.closeButton} onPress={() => setWeekdayModalVisible(!weekdayModalVisible)}>
+                                        <Text style={styles.closeButtonText}>Close</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -296,23 +305,25 @@ export default function StaffAvailability() {
 
                 {/* weekend modal */}
                 <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
-                    <View style={styles.modalBackdrop}>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>{selectedDate}</Text>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={styles.modalTitle}>{selectedDate}</Text>
 
-                            <SelectList
-                                data={shiftTimings.filter(x => x.type === "weekend")}
-                                setSelected={(val) => handleChange(val, "shiftID")}
-                                save="key"
-                                search={false}
-                            />
-                            <View style={styles.modalButtons}>
-                                <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
-                                    <Text style={styles.indicateButtonText}>Indicate</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.closeButton} onPress={() => setWeekendModalVisible(!weekendModalVisible)}>
-                                    <Text style={styles.closeButtonText}>Close</Text>
-                                </TouchableOpacity>
+                                <SelectList
+                                    data={shiftTimings.filter(x => x.type === "weekend")}
+                                    setSelected={(val) => handleChange(val, "shiftID")}
+                                    save="key"
+                                    search={false}
+                                />
+                                <View style={styles.modalButtons}>
+                                    <TouchableOpacity style={styles.indicateButton} onPress={() => indicateAvailability()}>
+                                        <Text style={styles.indicateButtonText}>Indicate</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.closeButton} onPress={() => setWeekendModalVisible(!weekendModalVisible)}>
+                                        <Text style={styles.closeButtonText}>Close</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -324,6 +335,33 @@ export default function StaffAvailability() {
 }
 
 const styles = StyleSheet.create({
+    view: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
     topSelectList: {
         marginBottom: 20,
     },
@@ -419,10 +457,9 @@ const styles = StyleSheet.create({
         minWidth: 300,
     },
     modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        textAlign: 'center',
+        fontSize: 34,
+        fontWeight: "800",
+        marginBottom: 20
     },
     timingsContainer: {
         marginBottom: 20,
