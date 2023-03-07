@@ -140,6 +140,7 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
+          <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
           <Drawer.Screen name='Account Management' component={Account} />
@@ -150,7 +151,6 @@ function RootNavigator() {
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
-          <Drawer.Screen name='Create Order' component={CreateOrder} />
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='Payment' component={Payment} />
