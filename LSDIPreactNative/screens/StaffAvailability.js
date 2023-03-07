@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import colors from '../colors';
 import { firebase } from '../config/firebase';
 import moment from "moment";
+import Toast from 'react-native-toast-message';
 
 export default function StaffAvailability() {
 
@@ -129,6 +130,11 @@ export default function StaffAvailability() {
         } else {
             setWeekdayModalVisible(!weekdayModalVisible);
         }
+        setMarkedDates(prevState => ({
+            ...prevState,
+            [selectedDate]: { selected: false },
+            [date]: { selected: true, selectedColor: '#344869' }
+        }));
         setSelectedDate(date);
     };
 
@@ -162,6 +168,10 @@ export default function StaffAvailability() {
                     };
                     indicatedAvailabilities.push(newIndicatedAvailability);
                     markedDates[selectedDate] = { marked: true };
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Successfully indicated',
+                    });
                     setWeekdayModalVisible(false);
                     setWeekendModalVisible(false);
                     console.log("Success");

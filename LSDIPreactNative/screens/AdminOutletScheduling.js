@@ -4,7 +4,8 @@ import {
     Text,
     StyleSheet,
     FlatList,
-    Modal
+    Modal,
+    ScrollView
 } from "react-native";
 import React, { useState, useEffect } from "react"
 import { CalendarList } from 'react-native-calendars'
@@ -15,6 +16,7 @@ import { firebase } from '../config/firebase';
 import colors from '../colors';
 import alert from '../components/Alert';
 import moment from "moment";
+import Toast from 'react-native-toast-message';
 
 export default function AdminOutletScheduling({ route, navigation }) {
 
@@ -23,8 +25,9 @@ export default function AdminOutletScheduling({ route, navigation }) {
     const [outletSchedule, setOutletSchedule] = useState([]);
     const [shiftDetails, setShiftDetails] = useState([]);
     const [staffDetails, setStaffDetails] = useState([]);
-    const [selectedDateSchedule, setSelectedDateSchedule] = useState([]);
+    const [staffAvailableDates, setStaffAvailableDates] = useState([]);
     const [selectedDate, setSelectedDate] = useState("");
+    const [selectedDateSchedule, setSelectedDateSchedule] = useState([]);
     const [markedDates, setMarkedDates] = useState({});
     const [modalData, setModalData] = useState({});
     const [weekdayModalVisible, setWeekdayModalVisible] = useState(false);
@@ -78,6 +81,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 // to be displayed in flatlist contains all indicated shifts for this outlet
                                 staff_schedule
                                     .where("outletID", "==", outletDetails.id)
+                                    .where('date', ">=", today)
                                     .get()
                                     .then(querySnapshot => {
                                         const outletSchedule = [];
@@ -95,8 +99,11 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                                 shiftID: shiftID,
                                                 shiftName: shiftDetails.find(s => s.key === shiftID).value,
                                             });
-                                            markedDates[date] = { marked: true };
+                                            if (confirmed) {
+                                                markedDates[date] = { marked: true };
+                                            }
                                         });
+                                        setStaffAvailableDates(outletSchedule.filter(s => s.confirmed != true));
                                         setOutletSchedule(outletSchedule);
                                         setMarkedDates(markedDates);
                                     });
@@ -116,30 +123,25 @@ export default function AdminOutletScheduling({ route, navigation }) {
 
     const onDayPress = (day) => {
         const date = day.dateString;
+        setMarkedDates(prevState => ({
+            ...prevState,
+            [selectedDate]: { ...prevState[selectedDate], selected: false },
+            [date]: { ...prevState[date], selected: true, selectedColor: '#344869' }
+        }));
         setSelectedDate(date);
-        const selectedDateSchedule = outletSchedule.filter(os => os.date === date);
-        setSelectedDateSchedule(selectedDateSchedule);
+        console.log(outletSchedule);
+        setSelectedDateSchedule(outletSchedule.filter(s => s.date === date && s.confirmed === true));
+        openAllocateModal();
+
     };
 
     const openAllocateModal = () => {
-        if (selectedDate) {
-            const converted = new Date(selectedDate);
-            const dayOfWeek = converted.getDay();
-            if (dayOfWeek === 6 || dayOfWeek === 0) {
-                setWeekendModalVisible(!weekendModalVisible);
-            } else {
-                setWeekdayModalVisible(!weekdayModalVisible);
-            }
+        const converted = new Date(selectedDate);
+        const dayOfWeek = converted.getDay();
+        if (dayOfWeek === 6 || dayOfWeek === 0) {
+            setWeekendModalVisible(!weekendModalVisible);
         } else {
-            alert("Please select a date on the calendar first", "",
-                [
-                    {
-                        text: "Ok",
-                        onPress: () => {
-                            console.log("alert closed");
-                        }
-                    }
-                ])
+            setWeekdayModalVisible(!weekdayModalVisible);
         }
     }
 
@@ -155,8 +157,10 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 console.log("Deleted Availability")
                                 const newOutletSchedule = outletSchedule.filter(x => x.id != item.id);
                                 setOutletSchedule(newOutletSchedule);
-                                const newSelectedDateSchedule = selectedDateSchedule.filter(x => x.id != item.id);
-                                setSelectedDateSchedule(newSelectedDateSchedule);
+
+                                const newSelectedDateSchedule = staffAvailableDates.filter(x => x.id != item.id);
+                                setStaffAvailableDates(newSelectedDateSchedule);
+
                                 if (newSelectedDateSchedule.filter(x => x.date === selectedDate).length === 0) {
                                     markedDates[selectedDate] = { marked: false };
                                     setMarkedDates(markedDates);
@@ -192,19 +196,26 @@ export default function AdminOutletScheduling({ route, navigation }) {
                         date: selectedDate,
                         userName: staffDetails.find(s => s.key === modalData.staffID).value,
                         shiftName: shiftDetails.find(s => s.key === modalData.shiftID).value,
+                        confirmed: true,
                     });
-
+                    console.log(outletSchedule);
                     setOutletSchedule(outletSchedule);
-                    const selectedDateSchedule = outletSchedule.filter(os => os.date === selectedDate);
-                    setSelectedDateSchedule(selectedDateSchedule);
-                    markedDates[selectedDate] = { marked: true };
-                    setMarkedDates(markedDates);
+
+                    setMarkedDates(prevState => ({
+                        ...prevState,
+                        [selectedDate]: { marked: true }
+                    }));
+
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Staff allocated',
+                    });
 
                     setWeekdayModalVisible(false);
                     setWeekendModalVisible(false);
                 });
         } else {
-            alert("Confirmation", "Please select outlet and shift",
+            alert("Confirmation", "Please select staff and shift",
                 [
                     {
                         text: "Ok",
@@ -229,7 +240,30 @@ export default function AdminOutletScheduling({ route, navigation }) {
                             })
                             .then(() => {
                                 console.log("Confirmed")
-                                //needs some visual feedback
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Staff allocated',
+                                });
+
+                                setOutletSchedule(outletSchedule.map(schedule => {
+                                    if (schedule.id === item.id) {
+                                        return {
+                                            ...schedule,
+                                            confirmed: true,
+                                        };
+                                    } else {
+                                        return { ...schedule };
+                                    }
+                                }));
+
+                                const temp = staffAvailableDates.filter(s => s.id != item.id);
+                                setStaffAvailableDates(temp);
+
+                                setMarkedDates(prevState => ({
+                                    ...prevState,
+                                    [item.date]: { marked: true }
+                                }));
+
                             }).catch((err) => {
                                 console.log(err)
                             })
@@ -250,6 +284,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                 <Text style={styles.availabilityDate}>{item.date} </Text>
                 <Text style={styles.itemText}>{item.userName} </Text>
                 <Text style={styles.itemText}>{item.shiftName} </Text>
+                <Text style={styles.itemText}>Staff Available</Text>
             </View>
             <View style={styles.cardButtons}>
                 <FontAwesome
@@ -268,105 +303,136 @@ export default function AdminOutletScheduling({ route, navigation }) {
         </View>
     );
 
+    const renderStaffModal = ({ item }) => (
+        <View style={styles.itemContainer}>
+            <View style={styles.cardBody}>
+                <Text style={styles.itemText}>{item.userName} </Text>
+                <Text style={styles.itemText}>{item.shiftName} </Text>
+                <Text style={styles.itemText}>Staff Confirmed</Text>
+            </View>
+        </View>
+    );
+
     return (
-        <View>
-            <View style={styles.topButtonContainer}>
-                <Btn onClick={() => navigation.goBack()} title="Back" style={styles.topBackButton} />
-                <Btn onClick={openAllocateModal} title="Allocate Staff" style={styles.topAllocateButton} />
-            </View>
-            <View style={styles.calendarContainer}>
-                <Text style={styles.outletName}>{outletDetails.outletName} Schedule</Text>
-                <CalendarList
-                    onDayPress={onDayPress}
-                    markedDates={markedDates}
-                    minDate={today}
-                    markingType="simple"
-                    pastScrollRange={0}
-                    futureScrollRange={3}
-                    scrollEnabled={true}
-                    horizontal={true}
-                    pagingEnabled={true}
-                    theme={{
-                        selectedDayBackgroundColor: '#007aff',
-                        selectedDayTextColor: '#ffffff',
-                        todayTextColor: '#00adf5',
-                        textDisabledColor: '#d9e1e8',
-                        arrowColor: 'gray',
-                    }}
-                />
-            </View>
-            <View style={styles.timingsContainer}>
-                <Text style={styles.timingsTitle}>Indicated Timings</Text>
-                <FlatList
-                    data={selectedDateSchedule}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDatesText}>No availability indicated</Text>
-                    }
-                />
-            </View>
+        <View style={{ flex: 1 }}>
+            <ScrollView>
+                <View style={styles.topButtonContainer}>
+                    <Btn onClick={() => navigation.goBack()} title="Back" style={styles.topBackButton} />
+                    {/* <Btn onClick={openAllocateModal} title="Allocate Staff" style={styles.topAllocateButton} /> */}
+                </View>
+                <View style={styles.calendarContainer}>
+                    <Text style={styles.outletName}>{outletDetails.outletName} Schedule</Text>
+                    <CalendarList
+                        onDayPress={onDayPress}
+                        markedDates={markedDates}
+                        minDate={today}
+                        markingType="simple"
+                        pastScrollRange={0}
+                        futureScrollRange={3}
+                        scrollEnabled={true}
+                        horizontal={true}
+                        pagingEnabled={true}
+                        theme={{
+                            selectedDayBackgroundColor: '#007aff',
+                            selectedDayTextColor: '#ffffff',
+                            todayTextColor: '#00adf5',
+                            textDisabledColor: '#d9e1e8',
+                            arrowColor: 'gray',
+                        }}
+                    />
+                </View>
+                <View style={styles.timingsContainer}>
+                    <Text style={styles.timingsTitle}>Indicated Timings</Text>
+                    <FlatList
+                        data={staffAvailableDates}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDatesText}>No availability indicated</Text>
+                        }
+                    />
+                </View>
 
-            {/* weekday modal */}
-            <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalHeader}>Allocate Staff</Text>
-                        <Text style={styles.modalTitle}>{selectedDate}</Text>
-                        <View style={styles.modalDropdown}>
-                            <SelectList
-                                data={staffDetails}
-                                setSelected={(val) => handleChange(val, "staffID")}
-                                save="key"
-                                search={false}
+                {/* weekday modal */}
+                <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalHeader}>{selectedDate}</Text>
+                            <Text style={styles.modalTitle}>Roster</Text>
+                            <FlatList
+                                data={selectedDateSchedule}
+                                keyExtractor={(item) => item.id}
+                                renderItem={renderStaffModal}
+                                ListEmptyComponent={
+                                    <Text style={styles.noDatesText}>No staff allocated</Text>
+                                }
                             />
-                        </View>
-                        <View style={styles.modalDropdown}>
-                            <SelectList
-                                data={shiftDetails.filter(s => s.type === "weekday")}
-                                setSelected={(val) => handleChange(val, "shiftID")}
-                                save="key"
-                                search={false}
-                            />
-                        </View>
-                        <View style={styles.modalButtons}>
-                            <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                            <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            <Text style={styles.modalTitle}>Allocate Staff</Text>
+                            <View style={styles.modalDropdown}>
+                                <SelectList
+                                    data={staffDetails}
+                                    setSelected={(val) => handleChange(val, "staffID")}
+                                    save="key"
+                                    search={false}
+                                />
+                            </View>
+                            <View style={styles.modalDropdown}>
+                                <SelectList
+                                    data={shiftDetails.filter(s => s.type === "weekday")}
+                                    setSelected={(val) => handleChange(val, "shiftID")}
+                                    save="key"
+                                    search={false}
+                                />
+                            </View>
+                            <View style={styles.modalButtons}>
+                                <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                                <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Modal >
+                </Modal >
 
-            {/* weekend modal */}
-            <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalHeader}>Allocate Staff</Text>
-                        <Text style={styles.modalTitle}>{selectedDate}</Text>
-                        <View style={styles.modalDropdown}>
-                            <SelectList
-                                data={staffDetails}
-                                setSelected={(val) => handleChange(val, "staffID")}
-                                save="key"
-                                search={false}
+                {/* weekend modal */}
+                <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalHeader}>{selectedDate}</Text>
+                            <Text style={styles.modalTitle}>Roster</Text>
+                            <FlatList
+                                data={selectedDateSchedule}
+                                keyExtractor={(item) => item.id}
+                                renderItem={renderStaffModal}
+                                ListEmptyComponent={
+                                    <Text style={styles.noDatesText}>No staff allocated</Text>
+                                }
                             />
-                        </View>
-                        <View style={styles.modalDropdown}>
-                            <SelectList
-                                data={shiftDetails.filter(s => s.type === "weekend")}
-                                setSelected={(val) => handleChange(val, "shiftID")}
-                                save="key"
-                                search={false}
-                            />
-                        </View>
-                        <View style={styles.modalButtons}>
-                            <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                            <Btn onClick={() => setWeekendModalVisible(!weekendModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            <Text style={styles.modalTitle}>Allocate Staff</Text>
+                            <View style={styles.modalDropdown}>
+                                <SelectList
+                                    data={staffDetails}
+                                    setSelected={(val) => handleChange(val, "staffID")}
+                                    save="key"
+                                    search={false}
+                                />
+                            </View>
+                            <View style={styles.modalDropdown}>
+                                <SelectList
+                                    data={shiftDetails.filter(s => s.type === "weekend")}
+                                    setSelected={(val) => handleChange(val, "shiftID")}
+                                    save="key"
+                                    search={false}
+                                />
+                            </View>
+                            <View style={styles.modalButtons}>
+                                <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                                <Btn onClick={() => setWeekendModalVisible(!weekendModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Modal >
+                </Modal >
 
+
+            </ScrollView>
         </View>
     )
 }
@@ -379,7 +445,7 @@ const styles = StyleSheet.create({
     topButtonContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
+        alignSelf: "center",
         width: "92%",
     },
     topBackButton: {
@@ -388,9 +454,10 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     topAllocateButton: {
-        width: "40%",
+        width: "30%",
         backgroundColor: "#344869",
         margin: 10,
+        alignSelf: "flex-end"
     },
     calendarContainer: {
         marginBottom: 20,
@@ -407,6 +474,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
+        marginHorizontal: 10,
     },
     noDatesText: {
         fontStyle: 'italic',
