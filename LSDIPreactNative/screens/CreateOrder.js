@@ -79,6 +79,9 @@ export default function CreateOrder() {
     }
 
     const addToCart = () => {
+        // i think adding to cart can be looping through quantity and adding each qty as a line item 
+        // to help pinpoint a specific piece in the case of order issue
+        // needs a function to calculate the current total to display in the cart segment
         console.log("todo add to cart");
         console.log(createModalData);
     }
