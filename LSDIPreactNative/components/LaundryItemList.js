@@ -6,6 +6,7 @@ import {
     StyleSheet,
     Modal,
     FlatList,
+    TextInput,
     LayoutAnimation,
     UIManager,
     Platform,
@@ -33,7 +34,7 @@ export default function LaundryItemList() {
     const laundryItem = firebase.firestore().collection('laundryItem');
     const laundryCItem = firebase.firestore().collection('laundryCategory');
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
-    const [upvalues, setUpValues] = useState('');
+    const [upvalues, setUpValues] = useState({});
     const [data, setData] = useState([]);
 
     const pricingMethods = [
@@ -46,13 +47,15 @@ export default function LaundryItemList() {
         laundryItem.onSnapshot(querySnapshot => {
             const laundryItemList = [];
             querySnapshot.forEach(doc => {
-                const { typeOfServices, laundryItemName, pricingMethod, price } = doc.data();
+                const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice } = doc.data();
                 laundryItemList.push({
                     id: doc.id,
                     typeOfServices,
                     laundryItemName,
                     pricingMethod,
-                    price
+                    price,
+                    fromPrice,
+                    toPrice,
                 });
             });
             setLaundryItemList(laundryItemList);
@@ -130,22 +133,23 @@ export default function LaundryItemList() {
         if (upvalues.typeOfServices.length > 0 &&
             upvalues.laundryItemName.length > 0 &&
             upvalues.pricingMethod.length > 0) {
-            laundryItem.doc(upvalues.id)
-                .update({
-                    typeOfServices: upvalues.typeOfServices,
-                    laundryItemName: upvalues.laundryItemName,
-                    pricingMethod: upvalues.pricingMethod,
-                    price: upvalues.price,
-                }).then(() => {
-                    console.log("Update Success")
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Laundry updated',
-                    });
-                    setUpdateModalVisible(!updateModalVisible);
-                }).catch((err) => {
-                    console.log(err)
-                })
+            console.log(upvalues);
+            // laundryItem.doc(upvalues.id)
+            //     .update({
+            //         typeOfServices: upvalues.typeOfServices,
+            //         laundryItemName: upvalues.laundryItemName,
+            //         pricingMethod: upvalues.pricingMethod,
+            //         price: upvalues.price,
+            //     }).then(() => {
+            //         console.log("Update Success")
+            //         Toast.show({
+            //             type: 'success',
+            //             text1: 'Laundry updated',
+            //         });
+            //         setUpdateModalVisible(!updateModalVisible);
+            //     }).catch((err) => {
+            //         console.log(err)
+            //     })
         }
     }
 
@@ -181,7 +185,15 @@ export default function LaundryItemList() {
                         <Text style={styles.itemText}>Laundry Item Name: {item.laundryItemName} </Text>
                         <Text style={styles.itemText}>Laundry Category: {item.typeOfServices} </Text>
                         <Text style={styles.itemText}>Pricing Method: {item.pricingMethod} </Text>
-                        <Text style={styles.itemText}>Price: S${item.price} </Text>
+                        {item.pricingMethod === "Range"
+                            ?
+                            <View>
+                                <Text style={styles.itemText}>From Price: S${item.fromPrice} </Text>
+                                <Text style={styles.itemText}>To Price: S${item.toPrice} </Text>
+                            </View>
+                            :
+                            <Text style={styles.itemText}>Price: S${item.price} </Text>
+                        }
                     </View>
 
                 </View>
@@ -229,7 +241,22 @@ export default function LaundryItemList() {
                                     save="value"
                                 />
                             </View>
-                            <TextBox placeholder={upvalues.price} onChangeText={text => handleChange(text, "price")} />
+                            {upvalues != undefined && upvalues.pricingMethod === "Range" &&
+                                <View style={styles.rangeText}>
+                                    <View style={styles.rangeTextContainer}>
+                                        <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} defaultValue={upvalues.fromPrice} />
+                                    </View>
+                                    <View style={styles.rangeTextContainer}>
+                                        <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} defaultValue={upvalues.toPrice} />
+                                    </View>
+                                </View>
+                            }
+                            {upvalues != undefined && upvalues.pricingMethod == "Flat" &&
+                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
+                            }
+                            {upvalues != undefined && upvalues.pricingMethod === "Weight" &&
+                                <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} />
+                            }
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => updateLaundry()} title="Update" style={{ width: "48%" }} />
                                 <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -243,8 +270,26 @@ export default function LaundryItemList() {
 }
 
 const styles = StyleSheet.create({
+    rangeText: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+        alignItems: "center",
+        width: "92%",
+    },
+    rangeTextContainer: {
+        height: 42,
+        width: "48%",
+        borderRadius: 25,
+        marginTop: 20,
+    },
+    rangeTextBox: {
+        height: 42,
+        borderRadius: 25,
+        borderColor: "#0B3270",
+        borderWidth: 1,
+        paddingLeft: 15
+    },
     selectList: {
-        // flex: 1,
         marginTop: 20,
         width: "92%",
     },

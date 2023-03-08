@@ -96,6 +96,7 @@ export default function LaundryItem({ navigation }) {
         laundryItem.add(values)
             .then(() => {
                 setModalVisible(false);
+                setValues({});
                 Toast.show({
                     type: 'success',
                     text1: 'Laundry item created',
