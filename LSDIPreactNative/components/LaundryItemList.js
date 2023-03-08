@@ -48,15 +48,24 @@ export default function LaundryItemList() {
             const laundryItemList = [];
             querySnapshot.forEach(doc => {
                 const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice } = doc.data();
-                laundryItemList.push({
-                    id: doc.id,
-                    typeOfServices,
-                    laundryItemName,
-                    pricingMethod,
-                    price,
-                    fromPrice,
-                    toPrice,
-                });
+                if (pricingMethod === "Range") {
+                    laundryItemList.push({
+                        id: doc.id,
+                        typeOfServices,
+                        laundryItemName,
+                        pricingMethod,
+                        fromPrice,
+                        toPrice,
+                    })
+                } else {
+                    laundryItemList.push({
+                        id: doc.id,
+                        typeOfServices,
+                        laundryItemName,
+                        pricingMethod,
+                        price,
+                    })
+                }
             });
             setLaundryItemList(laundryItemList);
         });
@@ -133,23 +142,44 @@ export default function LaundryItemList() {
         if (upvalues.typeOfServices.length > 0 &&
             upvalues.laundryItemName.length > 0 &&
             upvalues.pricingMethod.length > 0) {
-            console.log(upvalues);
-            // laundryItem.doc(upvalues.id)
-            //     .update({
-            //         typeOfServices: upvalues.typeOfServices,
-            //         laundryItemName: upvalues.laundryItemName,
-            //         pricingMethod: upvalues.pricingMethod,
-            //         price: upvalues.price,
-            //     }).then(() => {
-            //         console.log("Update Success")
-            //         Toast.show({
-            //             type: 'success',
-            //             text1: 'Laundry updated',
-            //         });
-            //         setUpdateModalVisible(!updateModalVisible);
-            //     }).catch((err) => {
-            //         console.log(err)
-            //     })
+            if (upvalues.pricingMethod === "Range") {
+                laundryItem.doc(upvalues.id)
+                    .update({
+                        typeOfServices: upvalues.typeOfServices,
+                        laundryItemName: upvalues.laundryItemName,
+                        pricingMethod: upvalues.pricingMethod,
+                        fromPrice: upvalues.fromPrice,
+                        toPrice: upvalues.toPrice,
+                    }).then(() => {
+                        setUpValues({});
+                        console.log("Update Success")
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Laundry updated',
+                        });
+                        setUpdateModalVisible(false);
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+            } else {
+                laundryItem.doc(upvalues.id)
+                    .update({
+                        typeOfServices: upvalues.typeOfServices,
+                        laundryItemName: upvalues.laundryItemName,
+                        pricingMethod: upvalues.pricingMethod,
+                        price: upvalues.price,
+                    }).then(() => {
+                        setUpValues({});
+                        console.log("Update Success")
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Laundry updated',
+                        });
+                        setUpdateModalVisible(false);
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+            }
         }
     }
 
@@ -252,10 +282,10 @@ export default function LaundryItemList() {
                                 </View>
                             }
                             {upvalues != undefined && upvalues.pricingMethod == "Flat" &&
-                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
+                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
                             }
                             {upvalues != undefined && upvalues.pricingMethod === "Weight" &&
-                                <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} />
+                                <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
                             }
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => updateLaundry()} title="Update" style={{ width: "48%" }} />
