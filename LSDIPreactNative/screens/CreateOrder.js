@@ -9,8 +9,8 @@ import {
     TouchableOpacity,
 } from 'react-native'
 import React, { useState, useEffect } from "react";
+import { Entypo } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-import NumericInput from 'react-native-numeric-input'
 import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import colors from '../colors';
@@ -88,9 +88,6 @@ export default function CreateOrder() {
     }
 
     const handleItemClick = (laundryItem) => {
-        console.log(laundryItem);
-        console.log("here");
-        // const [laundryItemName, typeOfServices, price, pricingMethod] = laundryItem;
         if (laundryItem.pricingMethod === "Range") {
             setCreateModalData({ ...laundryItem, ["price"]: laundryItem.fromPrice, ["quantity"]: 1 });
         } else {
@@ -102,6 +99,30 @@ export default function CreateOrder() {
     const filteredLaundryItemList = laundryItems.filter((laundryItem) =>
         laundryItem.laundryItemName.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const handleMinus = () => {
+        setCreateModalData(prevState => {
+            if (prevState.quantity >= 2) {
+                return {
+                    ...prevState,
+                    quantity: prevState.quantity - 1
+                }
+            } else {
+                return {
+                    ...prevState
+                }
+            }
+        })
+    }
+
+    const handlePlus = () => {
+        setCreateModalData(prevState => {
+            return {
+                ...prevState,
+                quantity: prevState.quantity + 1
+            }
+        })
+    }
 
     return (
         <View>
@@ -188,8 +209,20 @@ export default function CreateOrder() {
                             {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
                                 <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
                             }
-                            {/* <NumericInput initValue={1} rounded value={createModalData.quantity} type='plus-minus' onChange={value => this.handleChange(value, "quantity")} /> */}
-                            <NumericInput type='plus-minus' onChange={value => console.log(value)} totalWidth={240} totalHeight={50} iconSize={25}/>
+                            <View style={styles.quantityContainer}>
+                                <TouchableOpacity
+                                    onPress={() => handleMinus()}>
+                                    <Entypo name="minus" size={24} color="black" />
+                                </TouchableOpacity>
+                                <View style={styles.quantityBorder}>
+                                    <TextInput style={styles.quantityTextBox} placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} value={createModalData.quantity} />
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => handlePlus()}>
+                                    <Entypo name="plus" size={24} color="black" />
+                                </TouchableOpacity>
+                            </View >
+
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
                                 <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -208,8 +241,23 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: "center",
         width: "92%",
-        height: 42,
         margin: 20,
+    },
+    quantityContainer: {
+        flexDirection: 'row',
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    quantityBorder: {
+        width: "48%",
+        margin: 20,
+    },
+    quantityTextBox: {
+        height: 42,
+        borderRadius: 25,
+        borderColor: "#0B3270",
+        borderWidth: 1,
+        textAlign: "center",
     },
     searchInput: {
         height: 40,
