@@ -18,7 +18,8 @@ import { doc, addDoc, getFirestore, collection, getDoc, getDocs, QuerySnapshot, 
 import { SelectList } from 'react-native-dropdown-select-list'
 import LaundryList from "../components/LaundryItemList";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { TextInput } from "react-native-gesture-handler";
+import Toast from 'react-native-toast-message';
 
 if (
     Platform.OS === 'android' &&
@@ -30,7 +31,7 @@ if (
 export default function LaundryItem({ navigation }) {
 
     const [modalVisible, setModalVisible] = useState(false);
-    const [values, setValues] = useState(initialValues);
+    const [values, setValues] = useState({});
     const laundryItem = firebase.firestore().collection('laundryItem');
     const laundryCItem = firebase.firestore().collection('laundryCategory');
     const [data, setData] = useState([]);
@@ -81,19 +82,6 @@ export default function LaundryItem({ navigation }) {
         });
     }, []);
 
-    //for laundry Item
-    const initialValues = {
-        typeOfServices: "",
-        laundryItemName: "",
-        pricingMethod: "",
-        price: "",
-    };
-
-    //for laundry item
-    const clearState = () => {
-        setValues({ ...initialValues });
-    }
-
     //for laundry items
     function handleChange(text, eventName) {
         setValues(prev => {
@@ -107,8 +95,11 @@ export default function LaundryItem({ navigation }) {
     function createLaundryItem() {
         laundryItem.add(values)
             .then(() => {
-                setModalVisible(!modalVisible);
-                clearState;
+                setModalVisible(false);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Laundry item created',
+                });
                 console.log("Success");
             }).catch((err) => {
                 console.log(err);
@@ -139,6 +130,7 @@ export default function LaundryItem({ navigation }) {
                                         data={data}
                                         placeholder="Choose service"
                                         searchPlaceholder="Search service"
+                                        search={false}
                                         setSelected={(val) => handleChange(val, "typeOfServices")}
                                         save="value"
                                     />
@@ -153,11 +145,27 @@ export default function LaundryItem({ navigation }) {
                                         data={pricingMethods}
                                         placeholder="Choose pricing method"
                                         searchPlaceholder="Search pricing method"
+                                        search={false}
                                         setSelected={(val) => handleChange(val, "pricingMethod")}
                                         save="value"
                                     />
                                 </View>
-                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
+                                {values != undefined && values.pricingMethod === "Range" &&
+                                    <View style={styles.rangeText}>
+                                        <View style={styles.rangeTextContainer}>
+                                            <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} />
+                                        </View>
+                                        <View style={styles.rangeTextContainer}>
+                                            <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} />
+                                        </View>
+                                    </View>
+                                }
+                                {values != undefined && values.pricingMethod == "Flat" &&
+                                    <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
+                                }
+                                {values != undefined && values.pricingMethod === "Weight" &&
+                                    <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} />
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
                                     <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -181,11 +189,30 @@ export default function LaundryItem({ navigation }) {
                 </View>
 
             </View >
-        </ScrollView>
+        </ScrollView >
     )
 }
 
 const styles = StyleSheet.create({
+    rangeText: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+        alignItems: "center",
+        width: "92%",
+    },
+    rangeTextContainer: {
+        height: 42,
+        width: "48%",
+        borderRadius: 25,
+        marginTop: 20,
+    },
+    rangeTextBox: {
+        height: 42,
+        borderRadius: 25,
+        borderColor: "#0B3270",
+        borderWidth: 1,
+        paddingLeft: 15
+    },
     cardBody: {
         padding: 16,
     },
