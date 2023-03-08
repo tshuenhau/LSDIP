@@ -9,6 +9,8 @@ import {
     TouchableOpacity,
 } from 'react-native'
 import React, { useState, useEffect } from "react";
+import Slider from '@react-native-community/slider';
+import NumericInput from 'react-native-numeric-input'
 import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import colors from '../colors';
@@ -17,7 +19,7 @@ import { firebase } from "../config/firebase";
 export default function CreateOrder() {
 
     const [laundryItems, setLaundryItems] = useState([]);
-    const [laundryCategories, setLaundryCategories] = useState([]);
+    // const [laundryCategories, setLaundryCategories] = useState([]);
     const [createModalData, setCreateModalData] = useState({});
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -25,39 +27,60 @@ export default function CreateOrder() {
     const [totalAmount, setTotalAmount] = useState(0);
 
     useEffect(() => {
-        const laundry_item = firebase.firestore().collection('laundryItem');
-        laundry_item
+        const laundryItem = firebase.firestore().collection('laundryItem');
+        laundryItem
             .get()
             .then(querySnapshot => {
                 const laundryItems = [];
                 querySnapshot.forEach(doc => {
-                    const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
-                    laundryItems.push({
-                        id: doc.id,
-                        laundryItemName,
-                        typeOfServices,
-                        price,
-                        pricingMethod
-                    })
+                    const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice } = doc.data();
+                    if (pricingMethod === "Range") {
+                        laundryItems.push({
+                            id: doc.id,
+                            typeOfServices,
+                            laundryItemName,
+                            pricingMethod,
+                            fromPrice,
+                            toPrice,
+                        })
+                    } else {
+                        laundryItems.push({
+                            id: doc.id,
+                            typeOfServices,
+                            laundryItemName,
+                            pricingMethod,
+                            price,
+                        })
+                    }
                 })
                 setLaundryItems(laundryItems)
             })
 
-        const laundryCategory = firebase.firestore().collection('laundryCategory');
-        laundryCategory
-            .get()
-            .then(querySnapshot => {
-                const laundryCategories = [];
-                querySnapshot.forEach(doc => {
-                    const { serviceName } = doc.data();
-                    laundryCategories.push(serviceName);
-                })
-                setLaundryCategories(laundryCategories);
-            })
+        // const laundryCategory = firebase.firestore().collection('laundryCategory');
+        // laundryCategory
+        //     .get()
+        //     .then(querySnapshot => {
+        //         const laundryCategories = [];
+        //         querySnapshot.forEach(doc => {
+        //             const { serviceName } = doc.data();
+        //             laundryCategories.push(serviceName);
+        //         })
+        //         setLaundryCategories(laundryCategories);
+        //     })
     }, [])
+
+    function handleChange(text, eventName) {
+        setCreateModalData(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
 
     const addToCart = () => {
         console.log("todo add to cart");
+        console.log(createModalData);
     }
 
     const removeFromCart = () => {
@@ -68,7 +91,11 @@ export default function CreateOrder() {
         console.log(laundryItem);
         console.log("here");
         // const [laundryItemName, typeOfServices, price, pricingMethod] = laundryItem;
-        setCreateModalData(laundryItem);
+        if (laundryItem.pricingMethod === "Range") {
+            setCreateModalData({ ...laundryItem, ["price"]: laundryItem.fromPrice, ["quantity"]: 1 });
+        } else {
+            setCreateModalData({ ...laundryItem, ["quantity"]: 1 });
+        }
         setCreateModalVisible(true);
     }
 
@@ -106,7 +133,7 @@ export default function CreateOrder() {
                 <View style={styles.totalContainer}>
                     <View style={styles.tableHeader}>
                         <Text style={styles.tableHeaderText}>Item Type</Text>
-                        <Text style={styles.tableHeaderText}>Description</Text>
+                        {/* <Text style={styles.tableHeaderText}>Description</Text> */}
                         <Text style={styles.tableHeaderText}>Item Name</Text>
                         <Text style={styles.tableHeaderText}>Price</Text>
                     </View>
@@ -129,6 +156,8 @@ export default function CreateOrder() {
                     <Btn onClick={() => addToCart()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                 </View>
             </View>
+
+            {/* Add to cart modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -139,11 +168,28 @@ export default function CreateOrder() {
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
                             <Text style={styles.itemText}> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
-                            {/* <Text style={styles.itemText}>Type of Service:  </Text> */}
                             <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
-                            <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
-                            <Text style={styles.itemText}>Input price: </Text>
-                            <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                            {/* <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} /> */}
+                            <Text style={styles.itemText}>Input price: {createModalData.price}</Text>
+                            {createModalData != undefined && createModalData.pricingMethod === "Range" &&
+                                <View style={styles.rangeText}>
+                                    <Slider
+                                        onValueChange={text => handleChange(text, "price")}
+                                        minimumValue={parseInt(createModalData.fromPrice)}
+                                        maximumValue={parseInt(createModalData.toPrice)}
+                                        value={parseInt(createModalData.fromPrice)}
+                                        step={1}
+                                    />
+                                </View>
+                            }
+                            {createModalData != undefined && createModalData.pricingMethod == "Flat" &&
+                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                            }
+                            {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
+                                <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                            }
+                            {/* <NumericInput initValue={1} rounded value={createModalData.quantity} type='plus-minus' onChange={value => this.handleChange(value, "quantity")} /> */}
+                            <NumericInput type='plus-minus' onChange={value => console.log(value)} totalWidth={240} totalHeight={50} iconSize={25}/>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
                                 <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -157,6 +203,14 @@ export default function CreateOrder() {
 }
 
 const styles = StyleSheet.create({
+    rangeText: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+        alignItems: "center",
+        width: "92%",
+        height: 42,
+        margin: 20,
+    },
     searchInput: {
         height: 40,
         borderWidth: 1,
