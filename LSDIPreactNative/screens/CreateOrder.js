@@ -19,10 +19,11 @@ import { firebase } from "../config/firebase";
 export default function CreateOrder() {
 
     const [laundryItems, setLaundryItems] = useState([]);
-    // const [laundryCategories, setLaundryCategories] = useState([]);
+    const [laundryCategories, setLaundryCategories] = useState([]);
     const [createModalData, setCreateModalData] = useState({});
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedButtonFilter, setSelectedButtonFilter] = useState("");
     const [cart, setCart] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
 
@@ -56,17 +57,20 @@ export default function CreateOrder() {
                 setLaundryItems(laundryItems)
             })
 
-        // const laundryCategory = firebase.firestore().collection('laundryCategory');
-        // laundryCategory
-        //     .get()
-        //     .then(querySnapshot => {
-        //         const laundryCategories = [];
-        //         querySnapshot.forEach(doc => {
-        //             const { serviceName } = doc.data();
-        //             laundryCategories.push(serviceName);
-        //         })
-        //         setLaundryCategories(laundryCategories);
-        //     })
+        const laundryCategory = firebase.firestore().collection('laundryCategory');
+        laundryCategory
+            .get()
+            .then(querySnapshot => {
+                const laundryCategories = [];
+                querySnapshot.forEach(doc => {
+                    const { serviceName } = doc.data();
+                    laundryCategories.push({
+                        serviceName,
+                        // selected: false
+                    });
+                })
+                setLaundryCategories(laundryCategories);
+            })
     }, [])
 
     function handleChange(text, eventName) {
@@ -99,9 +103,12 @@ export default function CreateOrder() {
         setCreateModalVisible(true);
     }
 
-    const filteredLaundryItemList = laundryItems.filter((laundryItem) =>
-        laundryItem.laundryItemName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredLaundryItemList = laundryItems.filter((laundryItem) => {
+        if (selectedButtonFilter && selectedButtonFilter !== laundryItem.typeOfServices) {
+            return false;
+        }
+        return laundryItem.laundryItemName.toLowerCase().includes(searchQuery.toLowerCase())
+    });
 
     const handleMinus = () => {
         setCreateModalData(prevState => {
@@ -127,10 +134,18 @@ export default function CreateOrder() {
         })
     }
 
+    const handleFilterButtonClick = (serviceName) => {
+        if (selectedButtonFilter == serviceName) {
+            setSelectedButtonFilter("");
+        } else {
+            setSelectedButtonFilter(serviceName);
+        }
+    }
+
     return (
         <View>
             <View style={styles.orderPage}>
-                <View style={styles.buttonsContainer}>
+                <View style={styles.filterContainer}>
                     <View style={styles.searchContainer}>
                         <TextInput
                             style={styles.searchInput}
@@ -138,10 +153,31 @@ export default function CreateOrder() {
                             onChangeText={setSearchQuery}
                             placeholder="Search laundry item"
                         />
+                        <View style={styles.buttonContainer}>
+                            {
+                                laundryCategories.map((category, key) =>
+                                    <View key={key} style={{ marginRight: 10 }}>
+                                        <TouchableOpacity
+                                            onPress={() => handleFilterButtonClick(category.serviceName)}
+                                            style={
+                                                category.serviceName === selectedButtonFilter
+                                                    ? styles.selectedButton
+                                                    : styles.filterButton
+                                            }
+                                        >
+                                            <Text style={
+                                                category.serviceName === selectedButtonFilter
+                                                    ? { color: "white" }
+                                                    : { color: "black" }
+                                            }>
+                                                {category.serviceName}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )
+                            }
+                        </View>
                     </View>
-                    <View>
 
-                    </View>
                     {filteredLaundryItemList.map((laundryItem, key) =>
                         <View key={key} style={styles.container} >
                             <TouchableOpacity style={styles.card_template} onPress={() => handleItemClick(laundryItem)}>
@@ -193,7 +229,6 @@ export default function CreateOrder() {
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
                             <Text style={styles.itemText}> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
                             <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
-                            {/* <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} /> */}
                             <Text style={styles.itemText}>Input price: {createModalData.price}</Text>
                             {createModalData != undefined && createModalData.pricingMethod === "Range" &&
                                 <View style={styles.rangeText}>
@@ -341,12 +376,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-evenly',
     },
-    buttonsContainer: {
+    filterContainer: {
         flexDirection: 'row',
         flex: 5,
         flexWrap: 'wrap',
         margin: 10,
         justifyContent: 'space-evenly',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+    },
+    filterButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '#0B3270',
+        padding: 10,
+        borderRadius: 25
+    },
+    selectedButton: {
+        backgroundColor: '#0B3270',
+
+        borderWidth: 1,
+        borderColor: '#0B3270',
+        padding: 10,
+        borderRadius: 25
     },
     totalContainer: {
         flex: 2,
