@@ -80,7 +80,6 @@ export default function CreateOrder() {
                     const { serviceName } = doc.data();
                     laundryCategories.push({
                         serviceName,
-                        // selected: false
                     });
                 })
                 setLaundryCategories(laundryCategories);
@@ -108,14 +107,10 @@ export default function CreateOrder() {
     };
 
     const addToCart = () => {
-        // i think adding to cart can be looping through quantity and adding each qty as a line item 
-        // to help pinpoint a specific piece in the case of order issue
-        // needs a function to calculate the current total to display in the cart segment
-        ///*
         const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = createModalData;
         let found = false;
         cart.forEach(item => {
-            if(item.laundryItemName === laundryItemName && item.typeOfServices === typeOfServices 
+            if (item.laundryItemName === laundryItemName && item.typeOfServices === typeOfServices
                 && item.pricingMethod === pricingMethod && item.price === price) {
                 item.quantity += quantity;
                 found = true;
@@ -125,70 +120,60 @@ export default function CreateOrder() {
         if (!found) {
             setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
         }
-        
+
         setCreateModalVisible(false);
-        //*/
-        console.log("todo add to cart");
-        console.log(createModalData);
     }
 
     const removeFromCart = (item) => {
-        const cartCopy = cart.map((x) => x);
-        let index = cartCopy.indexOf(item);
-        console.log(index);
-        cartCopy.splice(index, 1);
-        //console.log("cartcopy", cartCopy);
+        const cartCopy = cart.filter((x) => x != item);
         setCart(cartCopy);
     }
 
+    // should be called to update the total price after every item is added
     const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
 
-    const createOrder = async () => {
-        console.log(customerDetails);
-        try {
-            const orderItemRefs = await Promise.all(
-                cart.map(async (item) => {
-                    const orderItemRef = await orderItems.add(item);
-                    return orderItemRef;
-                })
-            );
+    // need to review  (need to persist one order item for each quantity)
+    const checkout = async () => {
+        console.log(cart);
+        // console.log(customerDetails);
+        // try {
+        //     const orderItemRefs = await Promise.all(
+        //         cart.map(async (item) => {
+        //             const orderItemRef = await orderItems.add(item);
+        //             return orderItemRef;
+        //         })
+        //     );
 
-            // Get IDs of created order items
-            const orderItemIds = orderItemRefs.map((ref) => ref.id);
+        //     // Get IDs of created order items
+        //     const orderItemIds = orderItemRefs.map((ref) => ref.id);
 
-            // Create order
-            const orderRef = await orders.add({
-                ...orderValues,
-                customerName: customerDetails.customerName,
-                customerNumber: customerDetails.customerNumber,
-                endDate: null,
-                totalPrice: totalPrice,
-                orderStatus: "Pending Wash",
-                receiveFromWasherDate: null,
-                sendFromWasherDate: null,
-                staffID: await getUserId(),
-                outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
-                orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-                orderItemIds: orderItemIds, // Add order item IDs to order
-            });
+        //     // Create order
+        //     const orderRef = await orders.add({
+        //         ...orderValues,
+        //         customerName: customerDetails.customerName,
+        //         customerNumber: customerDetails.customerNumber,
+        //         endDate: null,
+        //         totalPrice: totalPrice,
+        //         orderStatus: "Pending Wash",
+        //         receiveFromWasherDate: null,
+        //         sendFromWasherDate: null,
+        //         staffID: await getUserId(),
+        //         outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+        //         orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+        //         orderItemIds: orderItemIds, // Add order item IDs to order
+        //     });
 
-            setCart([]);
-            setOrderValues(initialOrderValues);
-            setCustomerDetails({ customerName: "", customerNumber: "" });
-            // alert("Order created successfully");
-            Toast.show({
-                type: 'success',
-                text1: 'Order Created',
-            });
-
-            // Print.printAsync({
-            //       html,
-            // });
-
-        } catch (error) {
-            console.error(error);
-            Alert.alert("Error creating order. Please try again.");
-        }
+        //     setCart([]);
+        //     setOrderValues(initialOrderValues);
+        //     setCustomerDetails({ customerName: "", customerNumber: "" });
+        //     Toast.show({
+        //         type: 'success',
+        //         text1: 'Order Created',
+        //     });
+        // } catch (error) {
+        //     console.error(error);
+        //     Alert.alert("Error creating order. Please try again.");
+        // }
     };
 
     const handleItemClick = (laundryItem) => {
@@ -288,16 +273,15 @@ export default function CreateOrder() {
                     )}
                 </View>
                 <View style={styles.totalContainer}>
+                    {/* cart headers */}
                     <View style={styles.tableHeader}>
-                        <Text style={styles.tableHeaderText}>Item Type</Text>
-                        {/* <Text style={styles.tableHeaderText}>Description</Text> */}
+                        <Text style={styles.tableHeaderText}>Service</Text>
                         <Text style={styles.tableHeaderText}>Item Name</Text>
                         <Text style={styles.tableHeaderText}>Price</Text>
                         <Text style={styles.tableHeaderText}>Qty</Text>
-                        {/* <Text style={styles.tableHeaderText}>Qty</Text> */}
+                        <Text style={styles.tableHeaderText}>Action</Text>
                     </View>
-
-                    {/* todo cart display */}
+                    {/* cart display */}
                     <ScrollView style={styles.tableBody}>
                         {cart.map((item, index) => (
                             <View key={index} style={styles.tableRow}>
@@ -306,21 +290,21 @@ export default function CreateOrder() {
                                 <Text style={styles.tableRowText}>{item.price}</Text>
                                 <Text style={styles.tableRowText}>{item.quantity}</Text>
                                 <FontAwesome
-                                    style={styles.outletIcon}
+                                    style={styles.deleteIcon}
                                     name="trash-o"
                                     color='red'
                                     onPress={() => removeFromCart(item)}
                                 />
                             </View>
-                        ))} 
+                        ))}
                     </ScrollView>
 
                     <View style={{ alignItems: "center", marginBottom: "5%", marginLeft: "5%", width: "90%" }}>
-                        <TextBox style={styles.textBox} placeholder="Total Price: "  />
-                        <Btn onClick={() => addToCart()} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                        <TextBox style={styles.textBox} placeholder="Total Price: " />
+                        <Btn onClick={() => checkout()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                     </View>
                 </View>
-                
+
             </View>
 
             {/* Add to cart modal */}
@@ -445,6 +429,10 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10
     },
+    deleteIcon: {
+        fontSize: 20,
+        margin: 10,
+    },
     card_title: {
         color: "white",
     },
@@ -508,8 +496,9 @@ const styles = StyleSheet.create({
         borderRadius: 25
     },
     totalContainer: {
+        // position: 'absolute',
+        // zIndex: 1,
         flex: 2,
-        alignItems: 'center',
         marginTop: 20,
         marginBottom: 20,
         marginLeft: 10,
@@ -525,9 +514,8 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     tableHeader: {
-        flex: 1,
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: 'space-between',
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
@@ -535,11 +523,11 @@ const styles = StyleSheet.create({
     tableHeaderText: {
         fontWeight: "bold",
         fontSize: 12,
-        flex: 1,
     },
     tableRow: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: 'center',
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
@@ -547,8 +535,10 @@ const styles = StyleSheet.create({
     },
     tableRowText: {
         marginTop: 8,
-        fontSize: 16,
-        flex: 1,
+        fontSize: 12,
+        // backgroundColor: "blue",
+        // flex: 1,
+        // textAlign: 'center',
     },
     image: {
         width: 200,
