@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import React, { useState, useEffect } from "react";
 import { Entypo } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
@@ -24,8 +25,21 @@ export default function CreateOrder() {
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedButtonFilter, setSelectedButtonFilter] = useState("");
+    const orderItems = firebase.firestore().collection('orderItem');
+    const [orderValues, setOrderValues] = useState(initialOrderValues);
     const [cart, setCart] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
+
+    const initialOrderValues = {
+        //orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
+        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+        customerName: "",
+        customerAddress: "",
+        customerNumber: "",
+        pickupDate: "",
+        deliveryDate: "",
+        customerNumber: "",
+    }
 
     useEffect(() => {
         const laundryItem = firebase.firestore().collection('laundryItem');
@@ -82,17 +96,100 @@ export default function CreateOrder() {
         })
     }
 
+    const getUserId = async () => {
+        try {
+            const id = await AsyncStorage.getItem('userId');
+            if (id !== null) {
+                return id;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
     const addToCart = () => {
         // i think adding to cart can be looping through quantity and adding each qty as a line item 
         // to help pinpoint a specific piece in the case of order issue
         // needs a function to calculate the current total to display in the cart segment
+        ///*
+        const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = createModalData;
+        let found = false;
+        cart.forEach(item => {
+            if(item.laundryItemName === laundryItemName && item.typeOfServices === typeOfServices 
+                && item.pricingMethod === pricingMethod && item.price === price) {
+                item.quantity += quantity;
+                found = true;
+                setCart(cart);
+            }
+        });
+        if (!found) {
+            setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
+        }
+        
+        setCreateModalVisible(false);
+        //*/
         console.log("todo add to cart");
         console.log(createModalData);
     }
 
-    const removeFromCart = () => {
-        console.log("todo remove from cart");
+    const removeFromCart = (item) => {
+        const cartCopy = cart.map((x) => x);
+        let index = cartCopy.indexOf(item);
+        console.log(index);
+        cartCopy.splice(index, 1);
+        //console.log("cartcopy", cartCopy);
+        setCart(cartCopy);
     }
+
+    const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
+
+    const createOrder = async () => {
+        console.log(customerDetails);
+        try {
+            const orderItemRefs = await Promise.all(
+                cart.map(async (item) => {
+                    const orderItemRef = await orderItems.add(item);
+                    return orderItemRef;
+                })
+            );
+
+            // Get IDs of created order items
+            const orderItemIds = orderItemRefs.map((ref) => ref.id);
+
+            // Create order
+            const orderRef = await orders.add({
+                ...orderValues,
+                customerName: customerDetails.customerName,
+                customerNumber: customerDetails.customerNumber,
+                endDate: null,
+                totalPrice: totalPrice,
+                orderStatus: "Pending Wash",
+                receiveFromWasherDate: null,
+                sendFromWasherDate: null,
+                staffID: await getUserId(),
+                outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+                orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+                orderItemIds: orderItemIds, // Add order item IDs to order
+            });
+
+            setCart([]);
+            setOrderValues(initialOrderValues);
+            setCustomerDetails({ customerName: "", customerNumber: "" });
+            // alert("Order created successfully");
+            Toast.show({
+                type: 'success',
+                text1: 'Order Created',
+            });
+
+            // Print.printAsync({
+            //       html,
+            // });
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error creating order. Please try again.");
+        }
+    };
 
     const handleItemClick = (laundryItem) => {
         if (laundryItem.pricingMethod === "Range") {
@@ -196,25 +293,34 @@ export default function CreateOrder() {
                         {/* <Text style={styles.tableHeaderText}>Description</Text> */}
                         <Text style={styles.tableHeaderText}>Item Name</Text>
                         <Text style={styles.tableHeaderText}>Price</Text>
+                        <Text style={styles.tableHeaderText}>Qty</Text>
+                        {/* <Text style={styles.tableHeaderText}>Qty</Text> */}
                     </View>
 
                     {/* todo cart display */}
-                    {/* {cart.map((item, index) => (
-                    <View key={index} style={styles.tableRow}>
-                        <Text style={styles.tableRowText}>item type</Text>
-                        <Text style={styles.tableRowText}>item desc</Text>
-                        <Text style={styles.tableRowText}>item name</Text>
-                        <Text style={styles.tableRowText}>price</Text>
-                        <FontAwesome
-                            style={styles.outletIcon}
-                            name="trash-o"
-                            color='red'
-                            onPress={() => deleteItem(item)}
-                        />
+                    <ScrollView style={styles.tableBody}>
+                        {cart.map((item, index) => (
+                            <View key={index} style={styles.tableRow}>
+                                <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                                <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                                <Text style={styles.tableRowText}>{item.price}</Text>
+                                <Text style={styles.tableRowText}>{item.quantity}</Text>
+                                <FontAwesome
+                                    style={styles.outletIcon}
+                                    name="trash-o"
+                                    color='red'
+                                    onPress={() => removeFromCart(item)}
+                                />
+                            </View>
+                        ))} 
+                    </ScrollView>
+
+                    <View style={{ alignItems: "center", marginBottom: "5%", marginLeft: "5%", width: "90%" }}>
+                        <TextBox style={styles.textBox} placeholder="Total Price: "  />
+                        <Btn onClick={() => addToCart()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                     </View>
-                ))} */}
-                    <Btn onClick={() => addToCart()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                 </View>
+                
             </View>
 
             {/* Add to cart modal */}
@@ -434,7 +540,6 @@ const styles = StyleSheet.create({
     tableRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignContent: "center",
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
