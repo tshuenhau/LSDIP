@@ -58,49 +58,93 @@ const getMonthDays = (month, year) => {
       });
     }
   }, [handleMonthChange]);
+const AvailableTimingsModal = ({ date, onClose }) => {
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [blockedTimings, setBlockedTimings] = useState([]);
+  const [availableTimings, setAvailableTimings] = useState([]);
+  useEffect(() => {
+    if (selectedDate) {
+      const db = firebase.firestore();
+      db.collection('blocked_timings')
+        .doc(selectedDate)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            console.log(doc.data());
+            const blockedTimings = doc.data().blockedTimings;
+            setBlockedTimings(blockedTimings);
+            setAvailableTimings(filterAvailableTimings(timings, blockedTimings));
+          } else {
+            setBlockedTimings([]);
+            setAvailableTimings(filterAvailableTimings(timings, []));
+          }
+        }) 
+        .catch((error) => {
+          console.log('Error getting blocked timings: ', error);
+        });
+    }
+  }, [selectedDate]);
 
-  const AvailableTimingsModal = ({ date, onClose }) => {
-    const [availableTimings, setAvailableTimings] = useState([]);
-    //const [isOpen, setIsOpen] = useState(!!date);
-    const [selectedTime, setSelectedTime] = useState(null);
-  
-    useEffect(() => {
-      if (date) {
-        // Retrieve available timings for the selected date from Firebase
-        const db = firebase.firestore();
-        db.collection('available_timings')
-          .doc(date)
-          .get()
-          .then((doc) => {
-            if (doc.exists) {
-              setAvailableTimings(doc.data().available_times);
-            } else {
-              setAvailableTimings([]);
-            }
-          })
-          .catch((error) => {
-            console.error(error);
+        const timings = [
+          '12:00am - 1:00am',
+          '1:00am - 2:00am',
+          '2:00am - 3:00am',
+          '3:00am - 4:00am',
+          '4:00am - 5:00am',
+          '5:00am - 6:00am',
+          '6:00am - 7:00am',
+          '7:00am - 8:00am',
+          '8:00am - 9:00am',
+          '9:00am - 10:00am',
+          '10:00am - 11:00am',
+          '11:00am - 12:00pm',
+          '12:00pm - 1:00pm',
+          '1:00pm - 2:00pm',
+          '2:00pm - 3:00pm',
+          '3:00pm - 4:00pm',
+          '4:00pm - 5:00pm',
+          '5:00pm - 6:00pm',
+          '6:00pm - 7:00pm',
+          '7:00pm - 8:00pm',
+          '8:00pm - 9:00pm',
+          '9:00pm - 10:00pm',
+          '10:00pm - 11:00pm',
+          '11:00pm - 12:00am',
+        ];
+
+        const filterAvailableTimings = (timings, blockedTimings) => {
+          return timings.filter((timing) => {
+            const startTime = moment(`${selectedDate} ${timing.split(' - ')[0]}`, 'YYYY-MM-DD hh:mmA');
+            const endTime = moment(`${selectedDate} ${timing.split(' - ')[1]}`, 'YYYY-MM-DD hh:mmA');
+            console.log("options " + startTime + " and " + endTime);
+            return !blockedTimings.some((blockedTiming) => {
+              const blockedStartTime = moment(new Date(blockedTiming.startTime['seconds'] * 1000));
+              const blockedEndTime = moment(new Date(blockedTiming.endTime['seconds'] * 1000));
+              console.log("options blocking  " + blockedStartTime + " and " + blockedEndTime);
+              return (
+                (startTime.isSameOrAfter(blockedStartTime) && startTime.isBefore(blockedEndTime)) ||
+                (endTime.isSameOrAfter(blockedStartTime) && endTime.isBefore(blockedEndTime))
+              );
+            });
           });
-      }
-    }, [date]);
-  
-    const handleTimeSelect = (timing) => {
-      setSelectedTime(timing);
-    };
-  
-    const handleClose = () => {
-      setSelectedTime(null);
-      setSelectedDate(null);
-      onClose();
-      //setIsOpen(false);
-    };
+        };
+
+  const handleTimeSelect = (timing) => {
+    setSelectedTime(timing);
+  };
+
+  const handleClose = () => {
+    setSelectedTime(null);
+    setSelectedDate(null);
+    onClose();
+  };
   
     const handleConfirm = () => {
       if (selectedTime) {
         const existingTime = selectedTimesList.find(
           (item) => item.date === selectedDate && item.time === selectedTime
         );
-    
+  
         if (existingTime) {
           setDuplicateMessage(
             `The selected time ${selectedTime} is already added for ${selectedDate}`
@@ -129,13 +173,7 @@ const getMonthDays = (month, year) => {
               })
               .then(() => {
                 console.log('Selected time added for user with UID: ', user.uid);
-                const newSelectedTimesList = [
-                  ...selectedTimesList,
-                  {
-                    date: selectedDate,
-                    time: selectedTime,
-                  },
-                ];
+                const newSelectedTimesList = [                ...selectedTimesList,                {                  date: selectedDate,                  time: selectedTime,                },              ];
                 setSelectedTimesList(newSelectedTimesList);
                 setSelectedTime(null);
                 setIsModalOpen(false);
@@ -147,44 +185,37 @@ const getMonthDays = (month, year) => {
         }
       }
     };
-    
-  
+
     return (
       <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Available Timings on {date}</Text>
           <ScrollView>
-            {availableTimings.length > 0 ? (
-              availableTimings.map((timing) => {
-                const isDisabled =
-                  selectedTime !== null && selectedTime !== timing;
-                return (
-                  <TouchableOpacity
-                    key={timing}
+            {console.log(availableTimings)}
+          {availableTimings.map((timing) => {
+              const isDisabled = selectedTime !== null && selectedTime !== timing;
+              return (
+                <TouchableOpacity
+                  key={timing}
+                  style={[
+                    styles.timingButton,
+                    selectedTime === timing && styles.selectedTimingButton,
+                    isDisabled && styles.disabledTimingButton,
+                  ]}
+                  onPress={() => handleTimeSelect(timing)}
+                  disabled={isDisabled}
+                >
+                  <Text
                     style={[
-                      styles.timingButton,
-                      selectedTime === timing && styles.selectedTimingButton,
-                      isDisabled && styles.disabledTimingButton,
+                      styles.timingText,
+                      isDisabled && styles.disabledTimingText,
                     ]}
-                    onPress={() => handleTimeSelect(timing)}
-                    disabled={isDisabled}
                   >
-                    <Text
-                      style={[
-                        styles.timingText,
-                        isDisabled && styles.disabledTimingText,
-                      ]}
-                    >
-                      {timing}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })
-            ) : (
-              <Text style={styles.noTimingsText}>
-                No available timings for selected
-              </Text>
-            )}
+                    {timing}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
           <View style={styles.modalButtons}>
             <TouchableOpacity
