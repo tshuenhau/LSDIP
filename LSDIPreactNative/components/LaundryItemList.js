@@ -17,7 +17,7 @@ import alert from '../components/Alert'
 import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import { SelectList } from 'react-native-dropdown-select-list'
-
+import Toast from 'react-native-toast-message';
 
 if (
     Platform.OS === 'android' &&
@@ -93,7 +93,10 @@ export default function LaundryItemList() {
                         laundryItem.doc(laundry.id)
                             .delete()
                             .then(() => {
-                                alert("Deleted Successfully");
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Laundry Item deleted',
+                                });
                             }).catch((err) => {
                                 console.log(err);
                             })
@@ -135,6 +138,10 @@ export default function LaundryItemList() {
                     price: upvalues.price,
                 }).then(() => {
                     console.log("Update Success")
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Laundry updated',
+                    });
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
                     console.log(err)
@@ -185,12 +192,14 @@ export default function LaundryItemList() {
     return (
         <View>
             <View style={styles.container}>
-                {!(laundryItemList.length > 0) && <Text> No Data Found! </Text>}
                 <View>
                     <FlatList
                         data={laundryItemList}
                         keyExtractor={laundryItem => laundryItem.id}
                         renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDataText}>No Data Found!</Text>
+                        }
                     />
                 </View >
             </View>
@@ -204,34 +213,15 @@ export default function LaundryItemList() {
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Laundry Item</Text>
                             <TextBox placeholder={upvalues.laundryItemName} onChangeText={text => handleChange(text, "laundryItemName")} />
-                            {/*<TextBox placeholder= {upvalues.typeOfServices} onChangeText={text => handleChange(text, "typeOfServices")} />*/}
-                            <View style={{
-                                // height: 42,
-                                width: "80%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
-                                <SelectList 
-                                placeholder={upvalues.typeOfServices}
-                                data={data} 
-                                setSelected={(val) => handleChange(val, "typeOfServices")} 
-                                save = "value"
-                                />
-
-                                {/*<SelectList
-                                    data={initialServices}
+                            <View style={styles.selectList}>
+                                <SelectList
                                     placeholder={upvalues.typeOfServices}
+                                    data={data}
                                     setSelected={(val) => handleChange(val, "typeOfServices")}
                                     save="value"
-                        />*/}
+                                />
                             </View>
-                            {/*<TextBox placeholder= {upvalues.pricingMethod} onChangeText={text => handleChange(text, "pricingMethod")} />*/}
-                            <View style={{
-                                // height: 42,
-                                width: "80%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
+                            <View style={styles.selectList}>
                                 <SelectList
                                     data={pricingMethods}
                                     placeholder={upvalues.pricingMethod}
@@ -247,13 +237,22 @@ export default function LaundryItemList() {
                         </View>
                     </View>
                 </View>
-            </Modal>
-        </View>
-
+            </Modal >
+        </View >
     );
 }
 
 const styles = StyleSheet.create({
+    selectList: {
+        // flex: 1,
+        marginTop: 20,
+        width: "92%",
+    },
+    noDataText: {
+        fontStyle: "italic",
+        textAlign: "center",
+        marginVertical: 10,
+    },
     cardBody: {
         padding: 16,
     },

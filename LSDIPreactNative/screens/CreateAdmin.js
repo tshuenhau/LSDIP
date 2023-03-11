@@ -2,30 +2,24 @@ import React, { useState } from 'react'
 import { Text, View, StyleSheet } from "react-native"
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
-import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from "../config/firebase";
 import Toast from 'react-native-toast-message';
 
-export default function SignUpScreen({ navigation }) {
+export default function CreateAdmin({ navigation }) {
 
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
 
-    const roles = [
-        { key: '1', value: 'Admin' },
-        { key: '2', value: 'Staff' },
-        { key: '3', value: 'Driver' },
-        { key: '4', value: 'Customer' }
-    ]
-
-    const [values, setValues] = useState({
+    const initialValues = {
         name: "",
-        role: "",
+        role: "Admin",
         email: "",
         number: "",
         pwd: "",
         pwd2: ""
-    })
+    };
+
+    const [values, setValues] = useState(initialValues);
 
     function handleChange(text, eventName) {
         setValues(prev => {
@@ -48,23 +42,22 @@ export default function SignUpScreen({ navigation }) {
                         email,
                         number
                     })
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Admin created',
+                    });
+                    setValues(initialValues);
                 })
                 .catch((error) => {
                     alert(error.message)
                 });
-            // alert("account created") 
-            Toast.show({
-                type: 'success',
-                text1: 'Account created',
-            });
-            navigation.navigate("Login")
         } else {
             alert("Passwords are different!")
         }
     }
 
     return <View style={styles.view}>
-        <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Sign Up</Text>
+        <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create Admin</Text>
         <TextBox placeholder="Full Name" onChangeText={text => handleChange(text, "name")} />
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
         <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} />
@@ -73,18 +66,11 @@ export default function SignUpScreen({ navigation }) {
             borderRadius: 25,
             marginTop: 20
         }}>
-            <SelectList
-                data={roles}
-                placeholder="Signing up as?"
-                searchPlaceholder="Search role"
-                setSelected={(val) => handleChange(val, "role")}
-                save="value"
-            />
         </View>
         <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleChange(text, "pwd")} />
         <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleChange(text, "pwd2")} />
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
-            <Btn onClick={() => SignUp()} title="Sign Up" style={{ width: "48%" }} />
+            <Btn onClick={() => SignUp()} title="Create Admin" style={{ width: "48%" }} />
             <Btn onClick={() => navigation.replace("Login")} title="Back" style={{ width: "48%", backgroundColor: "#344869" }} />
         </View>
     </View>

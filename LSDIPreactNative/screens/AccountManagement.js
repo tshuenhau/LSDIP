@@ -4,29 +4,33 @@ import {
     Text,
     StyleSheet,
     Modal,
-    Alert,
     FlatList,
     LayoutAnimation,
     UIManager,
     Platform,
-    ScrollView,
+    TextInput
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-// import alert from '../components/Alert';
 import colors from '../colors';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import { SelectList } from 'react-native-dropdown-select-list'
+import Toast from 'react-native-toast-message';
+
+if (
+    Platform.OS === "android" &&
+    UIManager.setLayoutAnimationEnabledExperimental
+) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function AccountManagement() {
     const [index, setIndex] = React.useState(0);
     const userDatabase = firebase.firestore().collection('users');
     const [users, setUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [expandedItem, setExpandedItem] = useState(null);
     const [updateModalData, setUpdateModalData] = useState(false);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
@@ -40,22 +44,22 @@ export default function AccountManagement() {
     ]
 
     useEffect(() => {
-        userDatabase
-            .onSnapshot(querySnapshot => {
-                const users = [];
-                querySnapshot.forEach(doc => {
-                    const { email, name, number, role } = doc.data();
-                    users.push({
-                        id: doc.id,
-                        email,
-                        name,
-                        number,
-                        role
-                    })
-                })
-                setUsers(users)
-            })
-    }, [])
+        const unsubscribe = userDatabase.onSnapshot(querySnapshot => {
+            const users = [];
+            querySnapshot.forEach(doc => {
+                const { email, name, number, role } = doc.data();
+                users.push({
+                    id: doc.id,
+                    email,
+                    name,
+                    number,
+                    role
+                });
+            });
+            setUsers(users)
+        });
+        return () => unsubscribe();
+    }, []);
 
     const toggleExpand = (id) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -97,52 +101,95 @@ export default function AccountManagement() {
                     </View>
                 </View>
             )}
-
         </TouchableOpacity>
     );
 
+    const filteredUserList = users.filter((user) =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const Admin = () => (
-        <FlatList
-            data={users.filter(l => l.role === "Admin")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDataText}>No available items</Text>
-            }
-        />
+        <View>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Search by user's name"
+                />
+            </View>
+            <FlatList
+                data={filteredUserList.filter(user => user.role === "Admin")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No available items</Text>
+                }
+            />
+        </View>
     );
 
     const Staff = () => (
-        <FlatList
-            data={users.filter(l => l.role === "Staff")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDataText}>No available items</Text>
-            }
-        />
+        <View>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Search by user's name"
+                />
+            </View>
+            <FlatList
+                data={filteredUserList.filter(user => user.role === "Staff")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No available items</Text>
+                }
+            />
+        </View>
     );
 
     const Driver = () => (
-        <FlatList
-            data={users.filter(l => l.role === "Driver")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDataText}>No available items</Text>
-            }
-        />
+        <View>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Search by user's name"
+                />
+            </View>
+            <FlatList
+                data={filteredUserList.filter(user => user.role === "Driver")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No available items</Text>
+                }
+            />
+        </View>
     );
 
     const Customer = () => (
-        <FlatList
-            data={users.filter(l => l.role === "Customer")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDataText}>No available items</Text>
-            }
-        />
+        <View>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Search by user's name"
+                />
+            </View>
+            <FlatList
+                data={filteredUserList.filter(user => user.role === "Customer")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No available items</Text>
+                }
+            />
+        </View>
     );
 
     const Disabled = () => (
@@ -171,6 +218,10 @@ export default function AccountManagement() {
                 .update({
                     role: updateModalData.role,
                 }).then(() => {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'User updated',
+                    });
                     console.log("Update Success")
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
@@ -195,13 +246,13 @@ export default function AccountManagement() {
         { key: 'disabled', title: 'Disabled' },
     ]);
 
-
     return (
         <View>
             <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
                 onIndexChange={setIndex}
+                renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#0B3270' }} />}
             />
 
             {/* Update Modal */}
@@ -239,11 +290,31 @@ export default function AccountManagement() {
                 </View>
             </Modal>
 
-
         </View>
     );
 }
+
 const styles = StyleSheet.create({
+    searchInput: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: colors.gray,
+        paddingHorizontal: 10,
+        fontSize: 18,
+        backgroundColor: colors.white,
+        marginVertical: 10,
+    },
+    cardButtons: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+    },
+    searchContainer: {
+        justifyContent: "center",
+        alignContent: "center",
+        width: "96%",
+        marginLeft: 15
+    },
     noDataText: {
         fontStyle: "italic",
         textAlign: "center",

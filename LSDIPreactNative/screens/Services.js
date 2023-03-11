@@ -5,7 +5,6 @@ import {
     Text,
     StyleSheet,
     Modal,
-    Alert,
     FlatList,
     LayoutAnimation,
     UIManager,
@@ -17,8 +16,7 @@ import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
 import alert from '../components/Alert'
-import { SelectList } from 'react-native-dropdown-select-list'
-
+import Toast from 'react-native-toast-message';
 
 if (
     Platform.OS === 'android' &&
@@ -27,10 +25,9 @@ if (
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function Services({navigation}) {
+export default function Services({ navigation }) {
 
-    const [modalVisible2, setModalVisible2] = useState(false);
-    const [modalVisible3, setModalVisible3] = useState(false);
+    const [modalVisible, setmodalVisible] = useState(false);
     const laundryCItem = firebase.firestore().collection('laundryCategory');
     const [cvalues, setCValues] = useState(initialCategoryValues);
     const [serviceList, setServiceList] = useState('');
@@ -84,7 +81,7 @@ export default function Services({navigation}) {
     const deleteService = (service) => {
         return alert(
             "Confirmation",
-            "Are you sure you want to delete this Laundry Item?",
+            "Are you sure you want to delete this Service?",
             [
                 {
                     text: "Yes",
@@ -92,7 +89,10 @@ export default function Services({navigation}) {
                         laundryCItem.doc(service.id)
                             .delete()
                             .then(() => {
-                                alert("Deleted Successfully");
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Service Deleted',
+                                });
                             }).catch((err) => {
                                 console.log(err);
                             })
@@ -110,7 +110,7 @@ export default function Services({navigation}) {
     function createLaundryCategory() {
         laundryCItem.add(cvalues)
             .then(() => {
-                setModalVisible2(!modalVisible2);
+                setmodalVisible(!modalVisible);
                 clearCState;
                 console.log("Success");
             }).catch((err) => {
@@ -155,11 +155,8 @@ export default function Services({navigation}) {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={modalVisible2}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setModalVisible2(!modalVisible2);
-                }}>
+                visible={modalVisible}
+            >
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
@@ -168,16 +165,16 @@ export default function Services({navigation}) {
 
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setModalVisible2(!modalVisible2)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                             </View>
                         </View>
                     </View>
                 </View>
             </Modal >
-            {/*to view service list */}   
+            {/*to view service list */}
             <View style={styles.view}>
                 <TouchableOpacity
-                    onPress={() => setModalVisible2(!modalVisible2)}
+                    onPress={() => setmodalVisible(!modalVisible)}
                     style={styles.btn}>
                     <Text style={styles.text}>Create Service</Text>
                 </TouchableOpacity>
@@ -194,13 +191,9 @@ export default function Services({navigation}) {
                     }
                 />
             </View>
-
         </View>
-
     )
-
 }
-
 
 const styles = StyleSheet.create({
     cardBody: {
@@ -235,7 +228,7 @@ const styles = StyleSheet.create({
     outletName: {
         fontSize: 20,
         fontWeight: 'bold',
-        padding:20
+        padding: 20
     },
     outletIcon: {
         fontSize: 25,
@@ -253,7 +246,7 @@ const styles = StyleSheet.create({
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        padding:10
+        padding: 10
     },
     view2: {
         width: "40%",

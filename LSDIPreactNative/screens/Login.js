@@ -29,12 +29,6 @@ export default function Login({ navigation }) {
                 });
                 navigation.navigate("Login")
               }
-              // if (user.data().role === "Admin") {
-              //   navigation.navigate("Admin");
-              // } else {
-              //   console.log(user)
-              //   navigation.navigate("Home");
-              // }
             })
         })
         .catch((err) => {
