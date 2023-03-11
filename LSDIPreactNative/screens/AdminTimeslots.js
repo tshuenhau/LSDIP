@@ -70,11 +70,15 @@ const BlockTimePage = () => {
       return;
     }
   
-    const startTimestamp = firebase.firestore.Timestamp.fromDate(tempStartTime);
-    const endTimestamp = firebase.firestore.Timestamp.fromDate(tempEndTime);
+    const selectedDateTime = new Date(selectedDate);
+    const startDateTime = new Date(selectedDateTime.setHours(tempStartTime.getHours(), tempStartTime.getMinutes(), tempStartTime.getSeconds()));
+    const endDateTime = new Date(selectedDateTime.setHours(tempEndTime.getHours(), tempEndTime.getMinutes(), tempEndTime.getSeconds()));
+  
+    const startTimestamp = firebase.firestore.Timestamp.fromDate(startDateTime);
+    const endTimestamp = firebase.firestore.Timestamp.fromDate(endDateTime);
   
     db.collection('blocked_timings')
-      .doc(selectedDate.toISOString().slice(0, 10))
+      .doc(selectedDate.toISOString().slice(0, 10)) // Use selectedDate to create document ID
       .set(
         {
           blockedTimings: firebase.firestore.FieldValue.arrayUnion({
@@ -97,6 +101,7 @@ const BlockTimePage = () => {
         console.error(error);
       });
   }, [selectedDate, tempStartTime, tempEndTime]);
+  
   
 
   const removeBlockedTiming = useCallback((date, startTime, endTime) => {
@@ -173,7 +178,7 @@ const BlockTimePage = () => {
     <View style={styles.inputContainer}>
     <Text style={styles.inputLabel}>Date:</Text>
     <Text style={styles.inputText}>
-    {selectedDate ? selectedDate.toISOString().slice(0, 10) : 'Select a date'}
+    {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
     </Text>
     </View>
     </TouchableOpacity>

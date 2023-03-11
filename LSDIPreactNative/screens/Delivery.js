@@ -62,28 +62,6 @@ const AvailableTimingsModal = ({ date, onClose }) => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [blockedTimings, setBlockedTimings] = useState([]);
   const [availableTimings, setAvailableTimings] = useState([]);
-
-  // useEffect(() => {
-  //   if (selectedDate) {
-  //     const db = firebase.firestore();
-  //     db.collection('blocked_timings')
-  //       .doc(selectedDate)
-  //       .get()
-  //       .then((doc) => {
-  //       if (doc.exists) {
-  //         console.log(doc.data());
-  //         setBlockedTimings(doc.data().blocked_timings || []);
-  //       } else {
-  //         setBlockedTimings([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log('Error getting blocked timings: ', error);
-  //     });
-  //   }
-  // }, [selectedDate]);
-  
-
   useEffect(() => {
     if (selectedDate) {
       const db = firebase.firestore();
@@ -91,63 +69,65 @@ const AvailableTimingsModal = ({ date, onClose }) => {
         .doc(selectedDate)
         .get()
         .then((doc) => {
-        if (doc.exists) {
-          console.log(doc.data());
-          setBlockedTimings(doc.data().blockedTimings || []);
-        } else {
-          setBlockedTimings([]);
-        }
-      })
-      .catch((error) => {
-        console.log('Error getting blocked timings: ', error);
-      });
-
-
-      const timings = [
-        '12:00am - 1:00am',
-        '1:00am - 2:00am',
-        '2:00am - 3:00am',
-        '3:00am - 4:00am',
-        '4:00am - 5:00am',
-        '5:00am - 6:00am',
-        '6:00am - 7:00am',
-        '7:00am - 8:00am',
-        '8:00am - 9:00am',
-        '9:00am - 10:00am',
-        '10:00am - 11:00am',
-        '11:00am - 12:00pm',
-        '12:00pm - 1:00pm',
-        '1:00pm - 2:00pm',
-        '2:00pm - 3:00pm',
-        '3:00pm - 4:00pm',
-        '4:00pm - 5:00pm',
-        '5:00pm - 6:00pm',
-        '6:00pm - 7:00pm',
-        '7:00pm - 8:00pm',
-        '8:00pm - 9:00pm',
-        '9:00pm - 10:00pm',
-        '10:00pm - 11:00pm',
-        '11:00pm - 12:00am',
-      ];
-    
-      const available = timings.filter((timing) => {
-        const startTime = moment(`${selectedDate} ${timing.split(' - ')[0]}`, 'YYYY-MM-DD hh:mmA');
-        const endTime = moment(`${selectedDate} ${timing.split(' - ')[1]}`, 'YYYY-MM-DD hh:mmA');
-        console.log(blockedTimings);
-        return !blockedTimings.some((blockedTiming) => {
-          const blockedStartTime = moment(`${selectedDate} ${blockedTiming[0].startTime.getTime()}`, 'YYYY-MM-DD hh:mm:ss');
-          const blockedEndTime = moment(`${selectedDate} ${blockedTiming[0].endTime.getTime()}`, 'YYYY-MM-DD hh:mm:ss');
-
-          return (
-            (startTime.isSameOrAfter(blockedStartTime) && startTime.isBefore(blockedEndTime)) ||
-            (endTime.isSameOrAfter(blockedStartTime) && endTime.isBefore(blockedEndTime))
-          );
+          if (doc.exists) {
+            console.log(doc.data());
+            const blockedTimings = doc.data().blockedTimings;
+            setBlockedTimings(blockedTimings);
+            setAvailableTimings(filterAvailableTimings(timings, blockedTimings));
+          } else {
+            setBlockedTimings([]);
+            setAvailableTimings(filterAvailableTimings(timings, []));
+          }
+        }) 
+        .catch((error) => {
+          console.log('Error getting blocked timings: ', error);
         });
-      });
-      setAvailableTimings(available);
     }
-  }, [selectedDate, blockedTimings]);
-  
+  }, [selectedDate]);
+
+        const timings = [
+          '12:00am - 1:00am',
+          '1:00am - 2:00am',
+          '2:00am - 3:00am',
+          '3:00am - 4:00am',
+          '4:00am - 5:00am',
+          '5:00am - 6:00am',
+          '6:00am - 7:00am',
+          '7:00am - 8:00am',
+          '8:00am - 9:00am',
+          '9:00am - 10:00am',
+          '10:00am - 11:00am',
+          '11:00am - 12:00pm',
+          '12:00pm - 1:00pm',
+          '1:00pm - 2:00pm',
+          '2:00pm - 3:00pm',
+          '3:00pm - 4:00pm',
+          '4:00pm - 5:00pm',
+          '5:00pm - 6:00pm',
+          '6:00pm - 7:00pm',
+          '7:00pm - 8:00pm',
+          '8:00pm - 9:00pm',
+          '9:00pm - 10:00pm',
+          '10:00pm - 11:00pm',
+          '11:00pm - 12:00am',
+        ];
+
+        const filterAvailableTimings = (timings, blockedTimings) => {
+          return timings.filter((timing) => {
+            const startTime = moment(`${selectedDate} ${timing.split(' - ')[0]}`, 'YYYY-MM-DD hh:mmA');
+            const endTime = moment(`${selectedDate} ${timing.split(' - ')[1]}`, 'YYYY-MM-DD hh:mmA');
+            console.log("options " + startTime + " and " + endTime);
+            return !blockedTimings.some((blockedTiming) => {
+              const blockedStartTime = moment(new Date(blockedTiming.startTime['seconds'] * 1000));
+              const blockedEndTime = moment(new Date(blockedTiming.endTime['seconds'] * 1000));
+              console.log("options blocking  " + blockedStartTime + " and " + blockedEndTime);
+              return (
+                (startTime.isSameOrAfter(blockedStartTime) && startTime.isBefore(blockedEndTime)) ||
+                (endTime.isSameOrAfter(blockedStartTime) && endTime.isBefore(blockedEndTime))
+              );
+            });
+          });
+        };
 
   const handleTimeSelect = (timing) => {
     setSelectedTime(timing);
@@ -205,43 +185,15 @@ const AvailableTimingsModal = ({ date, onClose }) => {
         }
       }
     };
-  
-    const timings = [
-      '12:00am - 1:00am',
-      '1:00am - 2:00am',
-      '2:00am - 3:00am',
-      '3:00am - 4:00am',
-      '4:00am - 5:00am',
-      '5:00am - 6:00am',
-      '6:00am - 7:00am',
-      '7:00am - 8:00am',
-      '8:00am - 9:00am',
-      '9:00am - 10:00am',
-      '10:00am - 11:00am',
-      '11:00am - 12:00pm',
-      '12:00pm - 1:00pm',
-      '1:00pm - 2:00pm',
-      '2:00pm - 3:00pm',
-      '3:00pm - 4:00pm',
-      '4:00pm - 5:00pm',
-      '5:00pm - 6:00pm',
-      '6:00pm - 7:00pm',
-      '7:00pm - 8:00pm',
-      '8:00pm - 9:00pm',
-      '9:00pm - 10:00pm',
-      '10:00pm - 11:00pm',
-      '11:00pm - 12:00am',
-  ];
-  
-  
+
     return (
       <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Available Timings on {date}</Text>
           <ScrollView>
-            {timings.map((timing) => {
-              const isDisabled =
-                selectedTime !== null && selectedTime !== timing;
+            {console.log(availableTimings)}
+          {availableTimings.map((timing) => {
+              const isDisabled = selectedTime !== null && selectedTime !== timing;
               return (
                 <TouchableOpacity
                   key={timing}
@@ -254,7 +206,10 @@ const AvailableTimingsModal = ({ date, onClose }) => {
                   disabled={isDisabled}
                 >
                   <Text
-                    style={[                    styles.timingText,                    isDisabled && styles.disabledTimingText,                  ]}
+                    style={[
+                      styles.timingText,
+                      isDisabled && styles.disabledTimingText,
+                    ]}
                   >
                     {timing}
                   </Text>
