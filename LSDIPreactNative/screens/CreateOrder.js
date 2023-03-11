@@ -17,13 +17,11 @@ import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
-import Toast from 'react-native-toast-message';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SCREEN_WIDTH = Dimensions.get('window').width * 0.8;
 const SCREEN_HEIGHT = Dimensions.get('window').height - 100;
 
-export default function CreateOrder({navigation}) {
+export default function CreateOrder({ navigation }) {
 
     const [laundryItems, setLaundryItems] = useState([]);
     const [laundryCategories, setLaundryCategories] = useState([]);
@@ -31,23 +29,8 @@ export default function CreateOrder({navigation}) {
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedButtonFilter, setSelectedButtonFilter] = useState("");
-    const orderItems = firebase.firestore().collection('orderItem');
-    const orders = firebase.firestore().collection('orders');
-    const [orderValues, setOrderValues] = useState(initialOrderValues);
     const [cart, setCart] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
-
-    const initialOrderValues = {
-        //orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
-        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
-        customerName: "",
-        customerAddress: "",
-        customerNumber: "",
-        pickupDate: "",
-        deliveryDate: "",
-        customerNumber: "",
-        description: ""
-    }
 
     useEffect(() => {
         const laundryItem = firebase.firestore().collection('laundryItem');
@@ -103,17 +86,6 @@ export default function CreateOrder({navigation}) {
         })
     }
 
-    const getUserId = async () => {
-        try {
-            const id = await AsyncStorage.getItem('userId');
-            if (id !== null) {
-                return id;
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
     const addToCart = () => {
         const { laundryItemName, typeOfServices, pricingMethod, price, quantity, weight } = createModalData;
         if (pricingMethod === "Weight") {
@@ -150,62 +122,6 @@ export default function CreateOrder({navigation}) {
 
         setCart(cartCopy);
     }
-
-    // move to summary page
-    const checkout = async () => {
-        console.log(cart);
-        // // console.log(customerDetails);
-        // try {
-        //     const orderItemRefs = await Promise.all(
-        //         cart.map(async (item) => {
-        //             if (item.pricingMethod !== "Weight") {
-        //                 const { laundryItemName, typeOfServices, pricingMethod, price } = item;
-        //                 for (let i = 0; i < item.quantity; i++) {
-        //                     const orderItemRef = await orderItems.add({ laundryItemName, typeOfServices, pricingMethod, price });
-        //                     return orderItemRef;
-        //                 }
-        //             } else {
-        //                 const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
-        //                 const orderItemRef = await orderItems.add({ laundryItemName, typeOfServices, pricingMethod, price, weight });
-        //                 return orderItemRef;
-        //             }
-        //         })
-        //     );
-
-        //     // Get IDs of created order items
-        //     const orderItemIds = orderItemRefs.map((ref) => ref.id);
-
-        //     // Create order
-        //     const orderRef = await orders.add({
-        //         ...orderValues,
-        //         customerName: "testxy",
-        //         customerNumber: "testxy",
-        //         endDate: null,
-        //         totalPrice: totalPrice,
-        //         orderStatus: "Pending Wash",
-        //         receiveFromWasherDate: null,
-        //         sendFromWasherDate: null,
-        //         staffID: await getUserId(),
-        //         outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
-        //         orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-        //         orderItemIds: orderItemIds, // Add order item IDs to order
-        //     });
-
-        //     setCart([]);
-        //     setOrderValues(initialOrderValues);
-        //     // setCustomerDetails({ customerName: "", customerNumber: "" });
-        //     Toast.show({
-        //         type: 'success',
-        //         text1: 'Order Created',
-        //     });
-        // } catch (error) {
-        //     console.error(error);
-        //     Toast.show({
-        //         type: 'error',
-        //         text1: 'an error occurred',
-        //     });
-        // }
-    };
 
     const handleItemClick = (laundryItem) => {
         if (laundryItem.pricingMethod === "Range") {
@@ -336,7 +252,7 @@ export default function CreateOrder({navigation}) {
 
                         <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
                             <TextBox style={styles.textBox} value={"Total Price: $" + totalAmount} />
-                            <Btn onClick={() => navigation.navigate('OrderSummary', {cart: cart, totalAmount: totalAmount })} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                            <Btn onClick={() => navigation.navigate('OrderSummary', { cart: cart, totalAmount: totalAmount })} title="Checkout" style={{ width: "48%", margin: 5 }} />
                         </View>
                     </View>
                 </View>
