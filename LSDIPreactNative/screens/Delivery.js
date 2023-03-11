@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import { firebase } from '../config/firebase';
 import { auth } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import Btn from "../components/Button"
 
