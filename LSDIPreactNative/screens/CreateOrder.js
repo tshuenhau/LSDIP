@@ -150,7 +150,6 @@ export default function CreateOrder() {
         setCart(cartCopy);
     }
 
-
     // move to summary page
     const checkout = async () => {
         console.log(cart);
@@ -307,7 +306,6 @@ export default function CreateOrder() {
                             </View>
                         )}
                     </View>
-                    <View style={{ flex: 2, margin: 10 }}></View>
                     <View style={styles.totalContainer}>
                         {/* cart headers */}
                         <View style={styles.tableHeader}>
@@ -541,10 +539,9 @@ const styles = StyleSheet.create({
         borderRadius: 25
     },
     totalContainer: {
-        position: 'absolute',
-        height: "80%",
-        width: "28.5%",
-        right: 0,
+        position: 'sticky',
+        flex: 2,
+        top: 10,
         maxHeight: SCREEN_HEIGHT,
         marginTop: 20,
         marginBottom: 20,
