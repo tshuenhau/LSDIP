@@ -95,7 +95,7 @@ export default function AccountManagement() {
                         <FontAwesome
                             style={styles.outletIcon}
                             name="edit"
-                            color='green'
+                            color= {colors.green}
                             onPress={() => openModal(item)}
                         />
                     </View>
