@@ -23,7 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SCREEN_WIDTH = Dimensions.get('window').width * 0.8;
 const SCREEN_HEIGHT = Dimensions.get('window').height - 100;
 
-export default function CreateOrder() {
+export default function CreateOrder({navigation}) {
 
     const [laundryItems, setLaundryItems] = useState([]);
     const [laundryCategories, setLaundryCategories] = useState([]);
@@ -46,6 +46,7 @@ export default function CreateOrder() {
         pickupDate: "",
         deliveryDate: "",
         customerNumber: "",
+        description: ""
     }
 
     useEffect(() => {
@@ -337,7 +338,7 @@ export default function CreateOrder() {
 
                         <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
                             <TextBox style={styles.textBox} value={"Total Price: $" + totalAmount} />
-                            <Btn onClick={() => checkout()} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                            <Btn onClick={() => navigation.navigate('OrderSummary', {cart: cart, totalAmount: totalAmount })} title="Checkout" style={{ width: "48%", margin: 5 }} />
                         </View>
                     </View>
                 </View>

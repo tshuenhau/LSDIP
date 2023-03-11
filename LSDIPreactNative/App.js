@@ -36,6 +36,7 @@ import Toast from 'react-native-toast-message';
 import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
 import CreateAdmin from './screens/CreateAdmin';
+import OrderSummary from './screens/OrderSummary';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -165,6 +166,11 @@ function RootNavigator() {
               drawerItemStyle: { display: "none" }
             }}
           />
+          <Drawer.Screen name='OrderSummary' component={OrderSummary}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
         </Drawer.Navigator>
       </NavigationContainer >
     );
@@ -187,6 +193,11 @@ function RootNavigator() {
               }}
             />
             <Drawer.Screen name='Invoice' component={Invoice}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
+            />
+            <Drawer.Screen name='OrderSummary' component={OrderSummary}
               options={{
                 drawerItemStyle: { display: "none" }
               }}
