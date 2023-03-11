@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
+import { useNavigation } from '@react-navigation/native';
 import { firebase } from '../config/firebase';
+import { auth } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import moment from 'moment';
+import Btn from "../components/Button"
 
-const DeliveryScreen = ({ navigation }) => {
+const DeliveryScreen = ({ navigation, route }) => {
+  const { curuser } = route.params;
   const [duplicateMessage, setDuplicateMessage] = useState(null);
   const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -14,6 +18,34 @@ const DeliveryScreen = ({ navigation }) => {
   const [selectedTimesList, setSelectedTimesList] = useState([]);
   const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
+
+  const [matchingOrders, setMatchingOrders] = useState([]);
+
+useEffect(() => {
+  const db = firebase.firestore();
+  const user = firebase.auth().currentUser;
+  const orders = firebase.firestore().collection('orders');
+
+  if (curuser) {
+    console.log(curuser)
+      orders
+          .where("customerNumber", "==", curuser.number)
+          .where("orderStatus", "==", "Back From Washer")
+          .get()
+          .then(querySnapshot => {
+        const orders = [];
+        querySnapshot.forEach((doc) => {
+          orders.push({ id: doc.id, ...doc.data() });
+        });
+        setMatchingOrders(orders);
+        console.log(orders);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+}, []);
+
 
 const getMonthDays = (month, year) => {
 
@@ -118,8 +150,8 @@ const AvailableTimingsModal = ({ date, onClose }) => {
             const endTime = moment(`${selectedDate} ${timing.split(' - ')[1]}`, 'YYYY-MM-DD hh:mmA');
             console.log("options " + startTime + " and " + endTime);
             return !blockedTimings.some((blockedTiming) => {
-              const blockedStartTime = moment(new Date(blockedTiming.startTime['seconds'] * 1000));
-              const blockedEndTime = moment(new Date(blockedTiming.endTime['seconds'] * 1000));
+              const blockedStartTime = moment(new Date(blockedTiming.startTime['seconds'] * 1000)).add(8, 'hours');
+              const blockedEndTime = moment(new Date(blockedTiming.endTime['seconds'] * 1000)).add(8, 'hours');
               console.log("options blocking  " + blockedStartTime + " and " + blockedEndTime);
               return (
                 (startTime.isSameOrAfter(blockedStartTime) && startTime.isBefore(blockedEndTime)) ||
@@ -127,7 +159,7 @@ const AvailableTimingsModal = ({ date, onClose }) => {
               );
             });
           });
-        };
+        };        
 
   const handleTimeSelect = (timing) => {
     setSelectedTime(timing);
@@ -138,53 +170,69 @@ const AvailableTimingsModal = ({ date, onClose }) => {
     setSelectedDate(null);
     onClose();
   };
+
+  const handleConfirm = () => {
+    if (selectedTime) {
+      const existingTime = selectedTimesList.find(
+        (item) => item.date === selectedDate && item.time === selectedTime
+      );
   
-    const handleConfirm = () => {
-      if (selectedTime) {
-        const existingTime = selectedTimesList.find(
-          (item) => item.date === selectedDate && item.time === selectedTime
+      if (existingTime) {
+        setDuplicateMessage(
+          `The selected time ${selectedTime} is already added for ${selectedDate}`
         );
+        setIsDuplicateOpen(true);
+        setIsModalOpen(false);
+      } else {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
   
-        if (existingTime) {
-          setDuplicateMessage(
-            `The selected time ${selectedTime} is already added for ${selectedDate}`
-          );
-          setIsDuplicateOpen(true);
-          setIsModalOpen(false);
-        } else {
-          const db = firebase.firestore();
-          const user = firebase.auth().currentUser;
-          if (user) {
-            const docRef = db.collection('user_timings').doc(user.uid);
-            docRef
-              .get()
-              .then((doc) => {
-                let selectedTimes = [];
-                if (doc.exists) {
-                  selectedTimes = doc.data().selected_times;
-                }
-                selectedTimes.push({
-                  date: selectedDate,
-                  time: selectedTime,
-                });
-                return docRef.set({
-                  selected_times: selectedTimes,
-                });
-              })
+        if (user) {
+          const docRef = db.collection('user_timings').doc(user.uid);
+          docRef.get().then((doc) => {
+            let selectedTimes = [];
+  
+            if (doc.exists) {
+              selectedTimes = doc.data().selected_times;
+            }
+  
+            selectedTimes.push({
+              date: selectedDate,
+              time: selectedTime,
+              orders: matchingOrders,
+            });
+  
+            return docRef.set({
+              selected_times: selectedTimes,
+            });
+          })
+          .then(() => {
+            console.log('Selected time added for user with UID: ', user.uid);
+            const newSelectedTimesList = [            ...selectedTimesList,            {              date: selectedDate,              time: selectedTime,              orders: matchingOrders,            },          ];
+            setSelectedTimesList(newSelectedTimesList);
+            setSelectedTime(null);
+            setIsModalOpen(false);
+            const batch = db.batch();
+            console.log(matchingOrders);
+            matchingOrders.forEach((order) => {
+              const orderRef = db.collection('orders').doc(order.id);
+              batch.update(orderRef, { orderStatus: 'Pending Delivery' });
+            });
+            batch.commit()
               .then(() => {
-                console.log('Selected time added for user with UID: ', user.uid);
-                const newSelectedTimesList = [                ...selectedTimesList,                {                  date: selectedDate,                  time: selectedTime,                },              ];
-                setSelectedTimesList(newSelectedTimesList);
-                setSelectedTime(null);
-                setIsModalOpen(false);
+                console.log('Orders updated successfully');
               })
               .catch((error) => {
-                console.error(error);
+                console.error('Error updating orders:', error);
               });
-          }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
         }
       }
-    };
+    }
+  };      
 
     return (
       <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
@@ -243,28 +291,47 @@ const AvailableTimingsModal = ({ date, onClose }) => {
   const handleDelete = (id) => {
     const db = firebase.firestore();
     const user = firebase.auth().currentUser;
+    
     if (user) {
       const docRef = db.collection('user_timings').doc(user.uid);
       docRef.get().then((doc) => {
         if (doc.exists) {
+          const selectedTime = doc.data().selected_times.find(
+            (time) => time.date === id.date && time.time === id.time
+          );
           const selectedTimes = doc.data().selected_times.filter(
             (time) => time.date !== id.date || time.time !== id.time
           );
+          
           return docRef.set({
             selected_times: selectedTimes,
+          }).then(() => {
+            console.log('Selected time deleted for user with UID: ', user.uid);
+            
+            const newSelectedTimesList = selectedTimesList.filter(
+              (item) => item.date !== id.date || item.time !== id.time
+            );
+            
+            setSelectedTimesList(newSelectedTimesList);
+            
+            const batch = db.batch();
+            
+            selectedTime.orders.forEach((order) => {
+              const orderRef = db.collection('orders').doc(order.id);
+              batch.update(orderRef, { orderStatus: 'Back From Washer' });
+            });
+            
+            return batch.commit();
           });
         }
       }).then(() => {
-        console.log('Selected time deleted for user with UID: ', user.uid);
-        const newSelectedTimesList = selectedTimesList.filter(
-          (item) => item.date !== id.date || item.time !== id.time
-        );
-        setSelectedTimesList(newSelectedTimesList);
+        console.log('Orders updated successfully');
       }).catch((error) => {
         console.error(error);
       });
     }
   };
+  
 
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
@@ -272,6 +339,7 @@ const AvailableTimingsModal = ({ date, onClose }) => {
   
   return (
     <View style={styles.container}>
+      <Btn onClick={() => navigation.navigate("Home")} title="Back" style={{ width: "48%", backgroundColor: "#344869" }} /> 
       <CalendarList
         onDayPress={handleDayPress}
         markedDates={{
@@ -320,19 +388,29 @@ const AvailableTimingsModal = ({ date, onClose }) => {
         <View style={styles.selectedTimesContainer}>
           <Text style={styles.selectedTimesTitle}>Selected Times</Text>
           <ScrollView style={styles.selectedTimesList}>
-            {selectedTimesList.map((item) => (
-              <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
-                <Text style={styles.selectedTimeText}>
-                  {item.date} - {item.time}
-                </Text>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDelete(item)}
-                >
-                  <Text style={styles.deleteButtonText}>X</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+          {selectedTimesList.map((item) => (
+            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+              <Text style={styles.selectedTimeText}>
+                {item.date} - {item.time}
+              </Text>
+              {item.orders ? (
+                <View>
+                  <Text style={styles.orderTitle}>Order IDs:</Text>
+                  <Text style={styles.orderText}>{item.orders.map((order) => order.id).join(", ")}</Text>
+                </View>
+              ) : (
+                <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
+              )}
+
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDelete(item)}
+              >
+                <Text style={styles.deleteButtonText}>X</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+
           </ScrollView>
         </View>
 
