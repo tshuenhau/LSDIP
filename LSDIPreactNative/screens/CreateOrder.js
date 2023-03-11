@@ -7,6 +7,7 @@ import {
     TextInput,
     Modal,
     TouchableOpacity,
+    Dimensions,
 } from 'react-native'
 import React, { useState, useEffect } from "react";
 import { Entypo } from '@expo/vector-icons';
@@ -16,6 +17,11 @@ import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const SCREEN_WIDTH = Dimensions.get('window').width * 0.8;
+const SCREEN_HEIGHT = Dimensions.get('window').height - 100;
 
 export default function CreateOrder() {
 
@@ -26,6 +32,7 @@ export default function CreateOrder() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedButtonFilter, setSelectedButtonFilter] = useState("");
     const orderItems = firebase.firestore().collection('orderItem');
+    const orders = firebase.firestore().collection('orders');
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const [cart, setCart] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -107,18 +114,26 @@ export default function CreateOrder() {
     };
 
     const addToCart = () => {
-        const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = createModalData;
-        let found = false;
-        cart.forEach(item => {
-            if (item.laundryItemName === laundryItemName && item.typeOfServices === typeOfServices
-                && item.pricingMethod === pricingMethod && item.price === price) {
-                item.quantity += quantity;
-                found = true;
-                setCart(cart);
+        const { laundryItemName, typeOfServices, pricingMethod, price, quantity, weight } = createModalData;
+        if (pricingMethod === "Weight") {
+            const displayQuantity = weight + "kg";
+            const displayPrice = price * weight;
+            setTotalAmount(totalAmount + (price * weight));
+            setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, ["price"]: displayPrice, ["quantity"]: displayQuantity, weight }]);
+        } else {
+            let found = false;
+            cart.forEach(item => {
+                if (item.laundryItemName === laundryItemName && item.typeOfServices === typeOfServices
+                    && item.pricingMethod === pricingMethod && item.price === price) {
+                    item.quantity += quantity;
+                    found = true;
+                    setCart(cart);
+                }
+            });
+            if (!found) {
+                setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
             }
-        });
-        if (!found) {
-            setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
+            setTotalAmount(totalAmount + (price * quantity));
         }
 
         setCreateModalVisible(false);
@@ -126,21 +141,34 @@ export default function CreateOrder() {
 
     const removeFromCart = (item) => {
         const cartCopy = cart.filter((x) => x != item);
+        if (item.pricingMethod === "Weight") {
+            setTotalAmount(totalAmount - (item.price));
+        } else {
+            setTotalAmount(totalAmount - (item.price * item.quantity));
+        }
+
         setCart(cartCopy);
     }
 
-    // should be called to update the total price after every item is added
-    const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
 
-    // need to review  (need to persist one order item for each quantity)
+    // move to summary page
     const checkout = async () => {
         console.log(cart);
-        // console.log(customerDetails);
+        // // console.log(customerDetails);
         // try {
         //     const orderItemRefs = await Promise.all(
         //         cart.map(async (item) => {
-        //             const orderItemRef = await orderItems.add(item);
-        //             return orderItemRef;
+        //             if (item.pricingMethod !== "Weight") {
+        //                 const { laundryItemName, typeOfServices, pricingMethod, price } = item;
+        //                 for (let i = 0; i < item.quantity; i++) {
+        //                     const orderItemRef = await orderItems.add({ laundryItemName, typeOfServices, pricingMethod, price });
+        //                     return orderItemRef;
+        //                 }
+        //             } else {
+        //                 const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
+        //                 const orderItemRef = await orderItems.add({ laundryItemName, typeOfServices, pricingMethod, price, weight });
+        //                 return orderItemRef;
+        //             }
         //         })
         //     );
 
@@ -150,8 +178,8 @@ export default function CreateOrder() {
         //     // Create order
         //     const orderRef = await orders.add({
         //         ...orderValues,
-        //         customerName: customerDetails.customerName,
-        //         customerNumber: customerDetails.customerNumber,
+        //         customerName: "testxy",
+        //         customerNumber: "testxy",
         //         endDate: null,
         //         totalPrice: totalPrice,
         //         orderStatus: "Pending Wash",
@@ -165,20 +193,26 @@ export default function CreateOrder() {
 
         //     setCart([]);
         //     setOrderValues(initialOrderValues);
-        //     setCustomerDetails({ customerName: "", customerNumber: "" });
+        //     // setCustomerDetails({ customerName: "", customerNumber: "" });
         //     Toast.show({
         //         type: 'success',
         //         text1: 'Order Created',
         //     });
         // } catch (error) {
         //     console.error(error);
-        //     Alert.alert("Error creating order. Please try again.");
+        //     Toast.show({
+        //         type: 'error',
+        //         text1: 'an error occurred',
+        //     });
         // }
     };
 
     const handleItemClick = (laundryItem) => {
         if (laundryItem.pricingMethod === "Range") {
             setCreateModalData({ ...laundryItem, ["price"]: laundryItem.fromPrice, ["quantity"]: 1 });
+        } else if (laundryItem.pricingMethod === "Weight") {
+            // minimum load for weight is 3kg
+            setCreateModalData({ ...laundryItem, ["weight"]: 3, ["quantity"]: 1 });
         } else {
             setCreateModalData({ ...laundryItem, ["quantity"]: 1 });
         }
@@ -225,87 +259,89 @@ export default function CreateOrder() {
     }
 
     return (
-        <View>
-            <View style={styles.orderPage}>
-                <View style={styles.filterContainer}>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={styles.searchInput}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search laundry item"
-                        />
-                        <View style={styles.buttonContainer}>
-                            {
-                                laundryCategories.map((category, key) =>
-                                    <View key={key} style={{ marginRight: 10 }}>
-                                        <TouchableOpacity
-                                            onPress={() => handleFilterButtonClick(category.serviceName)}
-                                            style={
-                                                category.serviceName === selectedButtonFilter
-                                                    ? styles.selectedButton
-                                                    : styles.filterButton
-                                            }
-                                        >
-                                            <Text style={
-                                                category.serviceName === selectedButtonFilter
-                                                    ? { color: "white" }
-                                                    : { color: "black" }
-                                            }>
-                                                {category.serviceName}</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )
-                            }
-                        </View>
-                    </View>
-
-                    {filteredLaundryItemList.map((laundryItem, key) =>
-                        <View key={key} style={styles.container} >
-                            <TouchableOpacity style={styles.card_template} onPress={() => handleItemClick(laundryItem)}>
-                                {/* to store url of icon in db */}
-                                <Image source={'https://picsum.photos/200'} style={styles.card_image} />
-                                <View style={styles.text_container}>
-                                    <Text style={styles.card_title}>{laundryItem.typeOfServices} {laundryItem.laundryItemName}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.totalContainer}>
-                    {/* cart headers */}
-                    <View style={styles.tableHeader}>
-                        <Text style={styles.tableHeaderText}>Service</Text>
-                        <Text style={styles.tableHeaderText}>Item Name</Text>
-                        <Text style={styles.tableHeaderText}>Price</Text>
-                        <Text style={styles.tableHeaderText}>Qty</Text>
-                        <Text style={styles.tableHeaderText}>Action</Text>
-                    </View>
-                    {/* cart display */}
-                    <ScrollView style={styles.tableBody}>
-                        {cart.map((item, index) => (
-                            <View key={index} style={styles.tableRow}>
-                                <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
-                                <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
-                                <Text style={styles.tableRowText}>{item.price}</Text>
-                                <Text style={styles.tableRowText}>{item.quantity}</Text>
-                                <FontAwesome
-                                    style={styles.deleteIcon}
-                                    name="trash-o"
-                                    color='red'
-                                    onPress={() => removeFromCart(item)}
-                                />
+        <View style={{ flex: 1 }}>
+            <ScrollView>
+                <View style={styles.orderPage}>
+                    <View style={styles.filterContainer}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Search laundry item"
+                            />
+                            <View style={styles.buttonContainer}>
+                                {
+                                    laundryCategories.map((category, key) =>
+                                        <View key={key} style={{ marginRight: 10 }}>
+                                            <TouchableOpacity
+                                                onPress={() => handleFilterButtonClick(category.serviceName)}
+                                                style={
+                                                    category.serviceName === selectedButtonFilter
+                                                        ? styles.selectedButton
+                                                        : styles.filterButton
+                                                }
+                                            >
+                                                <Text style={
+                                                    category.serviceName === selectedButtonFilter
+                                                        ? { color: "white" }
+                                                        : { color: "black" }
+                                                }>
+                                                    {category.serviceName}</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )
+                                }
                             </View>
-                        ))}
-                    </ScrollView>
+                        </View>
 
-                    <View style={{ alignItems: "center", marginBottom: "5%", marginLeft: "5%", width: "90%" }}>
-                        <TextBox style={styles.textBox} placeholder="Total Price: " />
-                        <Btn onClick={() => checkout()} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                        {filteredLaundryItemList.map((laundryItem, key) =>
+                            <View key={key} style={styles.container} >
+                                <TouchableOpacity style={styles.card_template} onPress={() => handleItemClick(laundryItem)}>
+                                    {/* to store url of icon in db */}
+                                    <Image source={'https://picsum.photos/200'} style={styles.card_image} />
+                                    <View style={styles.text_container}>
+                                        <Text style={styles.card_title}>{laundryItem.typeOfServices} {laundryItem.laundryItemName}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                    <View style={{ flex: 2, margin: 10 }}></View>
+                    <View style={styles.totalContainer}>
+                        {/* cart headers */}
+                        <View style={styles.tableHeader}>
+                            <Text style={styles.tableHeaderText}>Service</Text>
+                            <Text style={styles.tableHeaderText}>Item Name</Text>
+                            <Text style={styles.tableHeaderText}>Price</Text>
+                            <Text style={styles.tableHeaderText}>Qty</Text>
+                            <Text style={styles.tableHeaderText}>Action</Text>
+                        </View>
+                        {/* cart display */}
+                        <ScrollView style={styles.tableBody}>
+                            {cart.map((item, index) => (
+                                <View key={index} style={styles.tableRow}>
+                                    <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                                    <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                                    <Text style={styles.tableRowText}>{item.price}</Text>
+                                    <Text style={styles.tableRowText}>{item.quantity}</Text>
+                                    <FontAwesome
+                                        style={styles.deleteIcon}
+                                        name="trash-o"
+                                        color='red'
+                                        onPress={() => removeFromCart(item)}
+                                    />
+                                </View>
+                            ))}
+                        </ScrollView>
+
+                        <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
+                            <TextBox style={styles.textBox} value={"Total Price: $" + totalAmount} />
+                            <Btn onClick={() => checkout()} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                        </View>
                     </View>
                 </View>
-
-            </View>
+            </ScrollView>
 
             {/* Add to cart modal */}
             <Modal
@@ -319,7 +355,10 @@ export default function CreateOrder() {
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
                             <Text style={styles.itemText}> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
                             <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
-                            <Text style={styles.itemText}>Input price: {createModalData.price}</Text>
+                            {createModalData != undefined && createModalData.pricingMethod !== "Weight"
+                                ? <Text style={styles.itemText}>Input price: {createModalData.price}</Text>
+                                : <Text style={styles.itemText}>Input weight: {createModalData.weight} kg</Text>
+                            }
                             {createModalData != undefined && createModalData.pricingMethod === "Range" &&
                                 <View style={styles.rangeText}>
                                     <Slider
@@ -335,21 +374,24 @@ export default function CreateOrder() {
                                 <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
                             }
                             {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
-                                <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                                <TextBox placeholder="kg" onChangeText={text => handleChange(text, "weight")} defaultValue={createModalData.weight} />
                             }
-                            <View style={styles.quantityContainer}>
-                                <TouchableOpacity
-                                    onPress={() => handleMinus()}>
-                                    <Entypo name="minus" size={24} color="black" />
-                                </TouchableOpacity>
-                                <View style={styles.quantityBorder}>
-                                    <TextInput style={styles.quantityTextBox} placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} value={createModalData.quantity} />
+
+                            {createModalData != undefined && createModalData.pricingMethod !== "Weight" &&
+                                <View style={styles.quantityContainer}>
+                                    <TouchableOpacity
+                                        onPress={() => handleMinus()}>
+                                        <Entypo name="minus" size={24} color="black" />
+                                    </TouchableOpacity>
+                                    <View style={styles.quantityBorder}>
+                                        <TextInput style={styles.quantityTextBox} placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} value={createModalData.quantity} />
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => handlePlus()}>
+                                        <Entypo name="plus" size={24} color="black" />
+                                    </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity
-                                    onPress={() => handlePlus()}>
-                                    <Entypo name="plus" size={24} color="black" />
-                                </TouchableOpacity>
-                            </View >
+                            }
 
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
@@ -429,6 +471,10 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10
     },
+    textBox: {
+        fontWeight: "bold",
+        fontSize: 14,
+    },
     deleteIcon: {
         fontSize: 20,
         margin: 10,
@@ -489,20 +535,20 @@ const styles = StyleSheet.create({
     },
     selectedButton: {
         backgroundColor: '#0B3270',
-
         borderWidth: 1,
         borderColor: '#0B3270',
         padding: 10,
         borderRadius: 25
     },
     totalContainer: {
-        // position: 'absolute',
-        // zIndex: 1,
-        flex: 2,
+        position: 'absolute',
+        height: "80%",
+        width: "28.5%",
+        right: 0,
+        maxHeight: SCREEN_HEIGHT,
         marginTop: 20,
         marginBottom: 20,
-        marginLeft: 10,
-        marginRight: 10,
+        marginRight: 15,
         backgroundColor: "#fff",
         borderRadius: 10,
         shadowColor: "#000",
@@ -516,13 +562,13 @@ const styles = StyleSheet.create({
     tableHeader: {
         flexDirection: "row",
         justifyContent: 'space-between',
-        padding: 16,
+        padding: 14,
         borderBottomWidth: 1,
         borderBottomColor: "#ccc",
     },
     tableHeaderText: {
         fontWeight: "bold",
-        fontSize: 12,
+        fontSize: 14,
     },
     tableRow: {
         flexDirection: "row",
@@ -535,10 +581,7 @@ const styles = StyleSheet.create({
     },
     tableRowText: {
         marginTop: 8,
-        fontSize: 12,
-        // backgroundColor: "blue",
-        // flex: 1,
-        // textAlign: 'center',
+        fontSize: 12
     },
     image: {
         width: 200,
