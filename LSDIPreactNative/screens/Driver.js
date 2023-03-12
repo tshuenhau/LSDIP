@@ -21,7 +21,8 @@ import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import alert from '../components/Alert'
+import alert from '../components/Alert';
+import { Ionicons } from '@expo/vector-icons';
 
 if (
     Platform.OS === 'android' &&
@@ -44,12 +45,6 @@ export default function Driver() {
         { key: 5, value: "Out for Delivery" },
         { key: 6, value: "Closed" },
       ];
-
-    const roles = [
-        { key: '1', value: 'Pending Delivery' },
-        { key: '2', value: 'Out for Delivery' },
-        { key: '3', value: 'Closed' },
-    ]
 
     //read all order data method
     useEffect(() => {
@@ -114,6 +109,73 @@ export default function Driver() {
         order.id.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+
+    //mark the start of delivery function
+    function startDelivery(id) {
+        if (id != "") {
+            alert(
+                "Confirm start of delivery?",
+                "This action cannot be reversed.",
+                [
+                    {
+                        text: "Yes",
+                        onPress: () => {
+                            const order = doc(db, "orders", id);
+                            const newStatus = {orderStatus : "Out for Delivery"}
+                            updateDoc(order, newStatus)
+                            .then(() => {
+                                console.log("Update Success")
+                            }).catch((err) => {
+                                console.log(err)
+                            })
+
+                        }
+                    },
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancelled`"),
+                        style: "cancel"
+                    }
+
+                ]
+            )
+            
+        }
+    }
+
+    //mark item delivered function
+    function markDelivered(id) {
+        if (id != "") {
+            alert(
+                "Complete Delivery?",
+                "This action cannot be reversed.",
+                [
+                    {
+                        text: "Yes",
+                        onPress: () => {
+                            const order = doc(db, "orders", id);
+                            const newStatus = {orderStatus : "Closed"}
+                            updateDoc(order, newStatus)
+                            .then(() => {
+                                console.log("Update Success")
+                            }).catch((err) => {
+                                console.log(err)
+                            })
+
+                        }
+                    },
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancelled`"),
+                        style: "cancel"
+                    }
+
+                ]
+            )
+            
+        }
+    }
+
     const PendingDelivery = () => (
         <View>
             <View style={styles.searchContainer}>
@@ -127,7 +189,7 @@ export default function Driver() {
             <FlatList
                 data={filteredOrderList.filter(item => item.orderStatus === "Pending Delivery")}
                 keyExtractor={item => item.id}
-                renderItem={renderItem}
+                renderItem={renderPendingItem}
                 ListEmptyComponent={
                     <Text style={styles.noDataText}>No available items</Text>
                 }
@@ -148,7 +210,7 @@ export default function Driver() {
             <FlatList
                 data={filteredOrderList.filter(item => item.orderStatus === "Out for Delivery")}
                 keyExtractor={item => item.id}
-                renderItem={renderItem}
+                renderItem={renderDeliveringItem}
                 ListEmptyComponent={
                     <Text style={styles.noDataText}>No available items</Text>
                 }
@@ -202,7 +264,7 @@ export default function Driver() {
         return "#" + id.slice(0, 4).toUpperCase();
       };
 
-    const renderItem = ({ item }) => (
+    const renderPendingItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
             onPress={() => toggleExpand(item.id)}
@@ -218,8 +280,64 @@ export default function Driver() {
                     style={styles.outletIcon} 
                     name="truck-delivery" size={24} 
                     color="black"
-                    onPress={() => deleteVehicle(item.id)} 
+                    onPress={() => startDelivery(item.id)} 
                     />
+                </View>
+            </View>
+            {expandedOrder === item.id && (
+                <View style={styles.itemContainer}>
+                    <View style={styles.cardBody}>
+                        <Text style={styles.itemText}>Address: </Text>
+                        <Text style={styles.itemText}>Items: </Text>
+                    </View>
+                </View>
+            )}
+        </TouchableOpacity>
+    );
+
+    const renderDeliveringItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => toggleExpand(item.id)}
+            activeOpacity={0.8}
+        >
+            <View style={styles.cardHeader}>
+                <View style={styles.cardHeader2}>
+                    <Text style={styles.orderNumber}>{formatOrderNumber(item.id)}</Text>
+                    <Text style={styles.orderNumber}>{item.orderStatus}</Text>
+                </View>
+                <View style={styles.cardHeaderIcon}>
+                    <Ionicons 
+                    style={styles.outletIcon} 
+                    name="checkmark-done-sharp" 
+                    size={24} color="black" 
+                    onPress={() => markDelivered(item.id)} 
+                    />
+                </View>
+            </View>
+            {expandedOrder === item.id && (
+                <View style={styles.itemContainer}>
+                    <View style={styles.cardBody}>
+                        <Text style={styles.itemText}>Address: </Text>
+                        <Text style={styles.itemText}>Items: </Text>
+                    </View>
+                </View>
+            )}
+        </TouchableOpacity>
+    );
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => toggleExpand(item.id)}
+            activeOpacity={0.8}
+        >
+            <View style={styles.cardHeader}>
+                <View style={styles.cardHeader2}>
+                    <Text style={styles.orderNumber}>{formatOrderNumber(item.id)}</Text>
+                    <Text style={styles.orderNumber}>{item.orderStatus}</Text>
+                </View>
+                <View style={styles.cardHeaderIcon}>
                 </View>
             </View>
             {expandedOrder === item.id && (
