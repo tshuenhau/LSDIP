@@ -12,5 +12,10 @@ export default {
     blue600: '#2563eb',
     blue700: '#1d4ed8',
     blue800: '#1e40af',
-    blue900: '#1e3a8a'
+    blue900: '#1e3a8a',
+    teal200: '#99f6e4',
+    teal300: '#5eead4',
+    teal400: '#2dd4bf',
+    teal500: '#14b8a6',
+    violet400: '#a78bfa',
 };
