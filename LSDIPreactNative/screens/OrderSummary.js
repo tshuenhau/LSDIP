@@ -101,6 +101,7 @@ export default function OrderSummary(props) {
                 });
 
                 setOrderValues(initialOrderValues);
+                navigation.navigate('Home');
                 Toast.show({
                     type: 'success',
                     text1: 'Order Created',
@@ -122,7 +123,6 @@ export default function OrderSummary(props) {
             <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
             <Text style={styles.orderNumber}>{item.price}</Text>
             <Text style={styles.orderNumber}>{item.quantity}</Text>
-
         </View>
     );
 

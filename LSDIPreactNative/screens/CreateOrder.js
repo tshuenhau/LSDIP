@@ -17,6 +17,7 @@ import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
+import alert from "../components/Alert";
 
 const SCREEN_WIDTH = Dimensions.get('window').width * 0.8;
 const SCREEN_HEIGHT = Dimensions.get('window').height - 100;
@@ -174,6 +175,21 @@ export default function CreateOrder({ navigation }) {
         }
     }
 
+    const handleNavigateToSummary = () => {
+        if (cart.length == 0) {
+            alert("Cart is empty!", "", [
+                {
+                    text: "Ok",
+                    onPress: () => {
+                        console.log("Closed");
+                    },
+                },
+            ]);
+        } else {
+            navigation.navigate('Order Summary', { cart: cart, subTotal: subTotal })
+        }
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <ScrollView>
@@ -252,7 +268,7 @@ export default function CreateOrder({ navigation }) {
 
                         <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
                             <TextBox style={styles.textBox} value={"Total Price: $" + subTotal} />
-                            <Btn onClick={() => navigation.navigate('Order Summary', { cart: cart, subTotal: subTotal })} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                            <Btn onClick={() => handleNavigateToSummary()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                         </View>
                     </View>
                 </View>
