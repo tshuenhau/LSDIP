@@ -4,6 +4,7 @@ import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
 import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from "../config/firebase";
+import Toast from 'react-native-toast-message';
 
 export default function SignUpScreen({ navigation }) {
 
@@ -51,8 +52,12 @@ export default function SignUpScreen({ navigation }) {
                 .catch((error) => {
                     alert(error.message)
                 });
-                alert("account created") 
-                navigation.navigate("Login")
+            // alert("account created") 
+            Toast.show({
+                type: 'success',
+                text1: 'Account created',
+            });
+            navigation.navigate("Login")
         } else {
             alert("Passwords are different!")
         }

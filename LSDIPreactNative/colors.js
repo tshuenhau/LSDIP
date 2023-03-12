@@ -3,6 +3,16 @@ export default {
     gray: '#C5C5C7',
     mediumGray: '#F6F7FB',
     lightGray: '#FAFAFA',
+    shadowGray: '#000000',
+    dismissBlue: '#344869',
+    darkBlue: '#0B3270',
+    lightBlue: '#69ACF5',
+    blue: '6A97DE',
+    brown: '916F29',
+    lightBrown: 'DEB86A',
+    white: '#ffffff',
+    red: '#E03B24',
+    green: '#239452',
     blue50: '#eff6ff',
     blue100: '#dbeafe',
     blue200: '#bfdbfe',
@@ -12,5 +22,5 @@ export default {
     blue600: '#2563eb',
     blue700: '#1d4ed8',
     blue800: '#1e40af',
-    blue900: '#1e3a8a'
+    blue900: '#1e3a8a',
 };

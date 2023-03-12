@@ -6,6 +6,7 @@ import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import CustomerOrderList from "../components/CustomerOrderList";
+import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
 
 export default function Home({ navigation }) {
@@ -14,6 +15,7 @@ export default function Home({ navigation }) {
 
     const [user, setUser] = useState(null) // This user
     const users = firebase.firestore().collection('users');
+    const [selectedTimesList, setSelectedTimesList] = useState([]);
 
     useEffect(() => {
         users.doc(auth1().currentUser.uid)
@@ -23,6 +25,23 @@ export default function Home({ navigation }) {
                 console.log(user)
             })
     }, [])
+
+    useEffect(() => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+        if (user) {
+          const docRef = db.collection('user_timings').doc(user.uid);
+          docRef.onSnapshot((doc) => {
+            if (doc.exists) {
+              const selectedTimes = doc.data().selected_times || [];
+              console.log(selectedTimes);
+              setSelectedTimesList(selectedTimes);
+            } else {
+              setSelectedTimesList([]);
+            }
+          });
+        }
+      }, []);
 
     useEffect(() => {
         navigation.setOptions({
@@ -38,6 +57,51 @@ export default function Home({ navigation }) {
             ),
         });
     }, [navigation]);
+
+    const handleDelete = (id) => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+        
+        if (user) {
+          const docRef = db.collection('user_timings').doc(user.uid);
+          docRef.get().then((doc) => {
+            if (doc.exists) {
+              const selectedTime = doc.data().selected_times.find(
+                (time) => time.date === id.date && time.time === id.time
+              );
+              const selectedTimes = doc.data().selected_times.filter(
+                (time) => time.date !== id.date || time.time !== id.time
+              );
+              
+              return docRef.set({
+                selected_times: selectedTimes,
+              }).then(() => {
+                console.log('Selected time deleted for user with UID: ', user.uid);
+                
+                const newSelectedTimesList = selectedTimesList.filter(
+                  (item) => item.date !== id.date || item.time !== id.time
+                );
+                
+                setSelectedTimesList(newSelectedTimesList);
+                
+                const batch = db.batch();
+                
+                selectedTime.orders.forEach((order) => {
+                  const orderRef = db.collection('orders').doc(order.id);
+                  batch.update(orderRef, { orderStatus: 'Back From Washer' });
+                });
+                
+                return batch.commit();
+              });
+            }
+          }).then(() => {
+            console.log('Orders updated successfully');
+          }).catch((error) => {
+            console.error(error);
+          });
+        }
+      };
+      
 
     return (
         <View style={{ flex: 1 }}>
@@ -64,16 +128,49 @@ export default function Home({ navigation }) {
                     : null
                 }
                 {user?.role === "Customer" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.name}</Text>
-                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-                        <Text> </Text>
-                        <Text style={styles.listtext}>My Orders</Text>
-                        <CustomerOrderList curUser={user} />
+                <View>
+                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.name}</Text>
+                    <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+                    <Text>Email: {auth.currentUser?.email}</Text>
                     </View>
-                    : null
+                    <Text> </Text>
+                    <Text style={styles.listtext}>My Orders</Text>
+                    <CustomerOrderList curUser={user} />
+                    <Text style={styles.listtext}>Available for Delivery</Text>
+                    <CustomerAvailableOrderList navigation={navigation} curUser={user} />
+                    {selectedTimesList.length > 0 && (
+                        <View style={styles.selectedTimesContainer}>
+                        <Text style={styles.selectedTimesTitle}>Selected Delivery Times</Text>
+                        <ScrollView style={styles.selectedTimesList}>
+                        {selectedTimesList.map((item) => (
+                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                            <Text style={styles.selectedTimeText}>
+                                {item.date} - {item.time}
+                            </Text>
+                            {item.orders ? (
+                                <View>
+                                <Text style={styles.orderTitle}>Order IDs:</Text>
+                                <Text style={styles.orderText}>{item.orders.map((order) => order.id).join(", ")}</Text>
+                                </View>
+                            ) : (
+                                <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
+                            )}
+
+                            <TouchableOpacity
+                                style={styles.deleteButton}
+                                onPress={() => handleDelete(item)}
+                            >
+                                <Text style={styles.deleteButtonText}>X</Text>
+                            </TouchableOpacity>
+                            </View>
+                        ))}
+
+                        </ScrollView>
+                        </View>
+
+                    )}
+                </View>
+                : null
                 }
                 {user?.role === "Driver" ?
                     <View>
@@ -175,4 +272,49 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: "black"
     },
+      selectedTimesContent: {
+        marginTop: 20,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: 'gray',
+        paddingVertical: 10,
+      },
+      selectedTimesTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+      },
+      selectedTimeCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f1f1f1',
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: 'gray',
+      },
+      selectedTimeText: {
+        flex: 1,
+        fontSize: 16,
+      },
+      selectedTimesContainer: {
+        marginTop: 20,
+        marginBottom: 20,
+        height: 300,
+      },
+      selectedTimesList: {
+        flex: 1,
+      },
+      deleteButton: {
+        backgroundColor: 'red',
+        borderRadius: 5,
+        padding: 10,
+        marginLeft: 10,
+      },
+      deleteButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
 });

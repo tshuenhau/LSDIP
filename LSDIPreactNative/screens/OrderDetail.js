@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  LayoutAnimation,
   UIManager,
   Platform,
   Modal,
@@ -16,8 +15,6 @@ import { firebase } from '../config/firebase';
 import colors from '../colors';
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
-
-
 
 if (
   Platform.OS === 'android' &&
@@ -189,19 +186,19 @@ export default function OrderPage(props) {
     <View style={styles.container}>
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>Order #{orderId}</Text>
-        <View style = {{padding:10, flexDirection:'row'}}>
-        <View style={styles.cardHeaderIcon}>
-          <FontAwesome
-            style={styles.outletIcon}
-            name="trash-o"
-            color='red'
-            onPress={() => deleteOrder()}
-          />
-        </View>
+        <View style={{ padding: 10, flexDirection: 'row' }}>
+          <View style={styles.cardHeaderIcon}>
+            <FontAwesome
+              style={styles.outletIcon}
+              name="trash-o"
+              color='red'
+              onPress={() => deleteOrder()}
+            />
+          </View>
 
-        <TouchableOpacity onPress={() => props.navigation.goBack()}>
-          <Text style={styles.backButton}>Back</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => props.navigation.goBack()}>
+            <Text style={styles.backButton}>Back</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <FlatList
@@ -308,8 +305,8 @@ const styles = StyleSheet.create({
   backButton: {
     fontSize: 16,
     color: 'blue',
-    paddingTop:30,
-    fontWeight:"bold"
+    paddingTop: 30,
+    fontWeight: "bold"
   },
   card: {
     backgroundColor: '#fff',

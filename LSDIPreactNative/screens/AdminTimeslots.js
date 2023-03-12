@@ -1,425 +1,423 @@
-import React, { useState, useEffect, useCallback  } from 'react';
-import { View, Text, TouchableOpacity, TouchableHighlight, Modal, StyleSheet, Alert, FlatList, TextInput, ScrollView } from 'react-native';
-import { CalendarList } from 'react-native-calendars';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
+import DateTimePicker from 'react-datetime-picker';
 import { firebase } from '../config/firebase';
-import DuplicateAlert from '../components/DuplicateAlert';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import moment from 'moment';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const AdminSetTimingsScreen = ({ navigation }) => {
-    const [markedDates, setMarkedDates] = useState({});
-    const [availableDates, setAvailableDates] = useState({});
-    const [timingsModalVisible, setTimingsModalVisible] = useState(false);
-    //const [selectedDate, setSelectedDate] = useState('');
-    const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-    const [selectedTimings, setSelectedTimings] = useState([]);
-    const [availableTimings, setAvailableTimings] = useState(null);
-    const [timingsInput, setTimingsInput] = useState('');
-    
+const db = firebase.firestore();
+const user = firebase.auth().currentUser;
 
-    const db = firebase.firestore();
-    const user = firebase.auth().currentUser;
+const BlockTimePage = () => {
+  const [selectedDate, setSelectedDate] = useState();
+  const [startTime, setStartTime] = useState();
+  const [endTime, setEndTime] = useState();
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState('date');
+  const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(true);
+  const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(true);
+  const [tempStartTime, setTempStartTime] = useState(startTime);
+  const [tempEndTime, setTempEndTime] = useState(endTime);
+  const [blockedTimings, setBlockedTimings] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  
 
-    const CustomArrow = ({ direction, onPress }) => {
-      return (
-        <TouchableOpacity onPress={onPress}>
-          <MaterialIcons name={direction === 'left' ? 'chevron-left' : 'chevron-right'} size={24} color="black" />
-        </TouchableOpacity>
+  useEffect(() => {
+    db.collection('blocked_timings').onSnapshot((snapshot) => {
+      const blockedTimingsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBlockedTimings(
+        blockedTimingsData.map((blockedTimingData) => {
+          return {
+            ...blockedTimingData,
+            blockedTimings: blockedTimingData.blockedTimings.map((timing) => {
+              return {
+                startTime: new Date(timing.startTime.toDate().toLocaleString('en-US', {timeZone: 'Asia/Singapore'})),
+                endTime: new Date(timing.endTime.toDate().toLocaleString('en-US', {timeZone: 'Asia/Singapore'})),
+              };
+            }),
+          };
+          
+        })
       );
-    };
-    const AddTimingsModal = ({
-      visible,
-      onClose,
-      onAddTimings,
-      onDeleteDate,
-      onDeleteTimings,
-      selectedDate,
-      selectedTimings,
-    }) => {
-      const db = firebase.firestore();
-      const [availableTimings, setAvailableTimings] = useState([]);
-      const [timingsInput, setTimingsInput] = useState('');
-    
-      const getAvailableTimings = useCallback(async () => {
-        try {
-          const timingsDoc = await db.collection('available_timings').doc(selectedDate).get();
-          const availableTimings = timingsDoc.data()?.available_times || [];
-          setAvailableTimings(availableTimings);
-        } catch (error) {
-          console.error(error);
-          setAvailableTimings([]);
-        }
-      }, [db, selectedDate]);
-    
-      useEffect(() => {
-        getAvailableTimings();
-      }, [getAvailableTimings]);
-    
-      const handleAddPress = () => {
-        onAddTimings(timingsInput.split(","));
-        setTimingsInput("");
-      };
-    
-      const handleDeleteTimings = async () => {
-        try {
-          const timingsRef = db.collection('available_timings').doc(selectedDate);
-          const timingsDoc = await timingsRef.get();
-          const availableTimings = timingsDoc.data()?.available_times || [];
-          const updatedTimings = availableTimings?.filter((timing) => !selectedTimings.includes(timing)) || [];
-          await timingsRef.update({ available_times: updatedTimings });
-          setSelectedTimings([]);
-        } catch (err) {
-          console.log('Error deleting available timings: ', err);
-        }
-      };
-      
-    
-      return (
-        <Modal visible={visible} animationType="slide" transparent={true}>
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{selectedDate}</Text>
-              <ScrollView style={styles.timingsContainer}>
-                  {availableTimings.length > 0 ? (
-                    availableTimings.map((timing, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          styles.timingButton,
-                          selectedTimings.includes(timing) && styles.selectedTimingButton,
-                        ]}
-                        onPress={() => {
-                          if (selectedTimings.includes(timing)) {
-                            setSelectedTimings(selectedTimings.filter((t) => t !== timing));
-                          } else {
-                            setSelectedTimings([...selectedTimings, timing]);
-                          }
-                        }}
-                      >
-                        <Text
-                          style={[
-                            styles.timingText,
-                            !availableDates[selectedDate] && styles.disabledTimingText,
-                          ]}
-                        >
-                          {timing}
-                        </Text>
-                      </TouchableOpacity>
-                    ))
-                  ) : (
-                    <Text style={styles.noTimingsText}>No available timings</Text>
-                  )}
-                </ScrollView>
-    
-              <TextInput
-                style={styles.timingsInput}
-                placeholder="Enter comma-separated timings"
-                value={timingsInput}
-                onChangeText={(text) => setTimingsInput(text)}
-              />
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={handleAddPress}
-                disabled={!timingsInput}
-              >
-                <Text style={styles.addButtonLabel}>Add Timings</Text>
-              </TouchableOpacity>
-              <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteTimings}>
-                <Text style={styles.deleteButtonText}>Delete Timings</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton} onPress={onDeleteDate}>
-                <Text style={styles.deleteButtonText}>Delete Date</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-            </View>
-            </View>
-          </Modal>
-        );
-      };
-      
-      const onDayPress = (day) => {
-        const date = day.dateString;
-        if (availableDates[date]) {
-          const timings = availableDates[date].timings;
-          setSelectedTimings(timings);
-        }
-        setTimingsModalVisible(true);
-        setSelectedDate(date);
-      };
-  
-      const handleAddTimings = async (available_times) => {
-        try {
-          const timingsRef = db.collection('available_timings').doc(selectedDate);
-          const timingsDoc = await timingsRef.get();
-          if (timingsDoc.exists) {
-            const updatedTimings = [...selectedTimings, ...available_times];
-            await timingsRef.update({ available_times: updatedTimings });
-            setSelectedTimings(updatedTimings);
-          } else {
-            await timingsRef.set({ available_times });
-            setSelectedTimings(available_times);
-            setAvailableDates((prevAvailableDates) => {
-              const updatedAvailableDates = { ...prevAvailableDates };
-              updatedAvailableDates[selectedDate] = true;
-              return updatedAvailableDates;
-            });
-            setMarkedDates((prevMarkedDates) => {
-              const updatedMarkedDates = { ...prevMarkedDates };
-              updatedMarkedDates[selectedDate] = { marked: true };
-              return updatedMarkedDates;
-            });
-          }
-          setTimingsModalVisible(false);
-        } catch (err) {
-          console.log('Error adding available timings: ', err);
-        }
-      };
-      
-  
-    const handleDeleteDate = async () => {
-      try {
-        await db.collection('available_timings').doc(selectedDate).delete();
-        setAvailableDates((prevAvailableDates) => {
-          const updatedAvailableDates = { ...prevAvailableDates };
-          delete updatedAvailableDates[selectedDate];
-          return updatedAvailableDates;
-        });
-        setTimingsModalVisible(false);
-      } catch (err) {
-        console.log('Error deleting available date: ', err);
-      }
-    };
-    useEffect(() => {
-      const unsubscribe = db
-        .collection('available_timings')
-        .onSnapshot((snapshot) => {
-          const updatedAvailableDates = {};
-          const updatedMarkedDates = {};
-          snapshot.forEach((doc) => {
-            const date = doc.id;
-            const timings = doc.data().timings;
-            updatedAvailableDates[date] = true;
-            updatedMarkedDates[date] = { marked: true };
-          });
-          setAvailableDates(updatedAvailableDates);
-          setMarkedDates(updatedMarkedDates);
-        });
-      return unsubscribe;
-    }, []);
+    });
+  }, []);
 
-    return (
-      <View style={styles.container}>
-        <View style={styles.calendarContainer}>
-        <CalendarList
-          onDayPress={onDayPress}
-          markedDates={markedDates}
-          markingType="simple"
-          pastScrollRange={0}
-          futureScrollRange={1}
-          scrollEnabled={true}
-          horizontal={true}
-          pagingEnabled={true}
-          calendarWidth={350}
-          calendarHeight={350}
-          theme={{
-            selectedDayBackgroundColor: '#007aff',
-            selectedDayTextColor: '#ffffff',
-            todayTextColor: '#00adf5',
-            textDisabledColor: '#d9e1e8',
-            arrowColor: 'gray',
-          }}
-        />
-        </View>
-        <View style={styles.timingsContainer}>
-          <Text style={styles.timingsTitle}>Available Timings</Text>
-          <FlatList
-            data={Object.keys(availableDates)}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableHighlight
-                style={styles.dateButton}
-                underlayColor="#DDDDDD"
-                onPress={() => {
-                  setSelectedDate(item);
-                  if (!timingsModalVisible) {
-                    setTimingsModalVisible(true);
-                  }
-                }}
-              >
-                <Text style={styles.dateText}>{item}</Text>
-              </TouchableHighlight>
-            )}
-            
-            ListEmptyComponent={
-              <Text style={styles.noDatesText}>No available timings</Text>
-            }
-          />
-        </View>
-        <AddTimingsModal
-            visible={timingsModalVisible}
-            onClose={() => setTimingsModalVisible(false)}
-            onAddTimings={handleAddTimings}
-            onDeleteDate={handleDeleteDate}
-            selectedDate={selectedDate}
-            selectedTimings={selectedTimings}
-        />
-      </View>
+  const handleDateTimeConfirm = useCallback((date) => {
+    console.log(date);
+    if (isDateTimePickerVisible === 'date') {
+      setSelectedDate(date);
+    } else if (isDateTimePickerVisible === 'start') {
+      setStartTime(date);
+    } else {
+      setEndTime(date);
+    }
+    setDateTimePickerVisible(false);
+  }, [isDateTimePickerVisible]);
+
+  const handleStartTimeConfirm = useCallback((time) => {
+    setTempStartTime(time);
+  }, []);
+
+  const handleEndTimeConfirm = useCallback((time) => {
+    setTempEndTime(time);
+  }, []);
+
+  const handleBlockDate = useCallback(() => {
+    if (!selectedDate) {
+      setErrorMessage('Please select a date');
+      return;
+    }
+  
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setDate(selectedDateTime.getDate() + 1);
+    selectedDateTime.setUTCHours(0, 0, 0, 0); // set time to midnight in UTC time zone
+    const documentId = selectedDateTime.toISOString().slice(0, 10); // use UTC date string for document ID
+  
+    const startDateTime = new Date(
+      selectedDateTime.getUTCFullYear(),
+      selectedDateTime.getUTCMonth(),
+      selectedDateTime.getUTCDate(),
+      0,
+      0,
+      0
     );
-  };
+    const endDateTime = new Date(
+      selectedDateTime.getUTCFullYear(),
+      selectedDateTime.getUTCMonth(),
+      selectedDateTime.getUTCDate(),
+      23,
+      59,
+      59
+    );
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-    },
-    calendarContainer: {
-      marginBottom: 20,
-    },
-    timingsContainer: {
-      flex: 1,
-    },
-    timingsTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 10,
-    },
-    dateButton: {
-      backgroundColor: 'white',
-      borderRadius: 5,
-      padding: 10,
-      marginVertical: 5,
-      alignItems: 'center',
-    },
-    dateText: {
-      fontSize: 16,
-    },
-    noDatesText: {
-      fontStyle: 'italic',
-      textAlign: 'center',
-      marginVertical: 10,
-    },
-    modalBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContent: {
-      backgroundColor: 'white',
-      padding: 20,
-      borderRadius: 5,
-      minWidth: 300,
-      width: '80%',
-      maxHeight: '80%',
-    },
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 10,
-      textAlign: 'center',
-    },
-    timingsContainer: {
-      marginBottom: 20,
-    },
-    timingsTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 10,
-    },
-    timingButton: {
-      backgroundColor: 'white',
-      borderRadius: 5,
-      padding: 10,
-      marginVertical: 5,
-      alignItems: 'center',
-    },
-    selectedTimingButton: {
-      backgroundColor: 'blue',
-    },
-    disabledTimingButton: {
-      backgroundColor: 'lightgray',
-    },
-    timingText: {
-      fontSize: 16,
-    },
-    disabledTimingText: {
-      color: 'gray',
-    },
-    noTimingsText: {
-      fontStyle: 'italic',
-      textAlign: 'center',
-      marginVertical: 10,
-    },
-    modalButtons: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      marginTop: 20,
-    },
-    closeButton: {
-      backgroundColor: 'red',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 5,
-      marginHorizontal: 10,
-    },
-    closeButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    confirmButton: {
-      backgroundColor: 'blue',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 5,
-      marginHorizontal: 10,
-    },
-    confirmButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    addButton: {
-      backgroundColor: 'blue',
-      borderRadius: 5,
-      padding: 10,
-      marginTop: 20,
-      alignSelf: 'center',
-    },
-    addButtonLabel: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    deleteButton: {
-      backgroundColor: 'blue',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 5,
-      marginHorizontal: 10,
-    },
-    deleteButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },  
-    timingsInput: {
-      borderWidth: 1,
-      borderColor: 'gray',
-      borderRadius: 5,
-      height: 40,
-      paddingHorizontal: 10,
-      marginBottom: 10,
-    },
-  });
+    const startTimestamp = firebase.firestore.Timestamp.fromDate(new Date(startDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
+    const endTimestamp = firebase.firestore.Timestamp.fromDate(new Date(endDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
+  
+    db.collection('blocked_timings')
+      .doc(documentId)
+      .set(
+        {
+          blockedTimings: firebase.firestore.FieldValue.arrayUnion({
+            startTime: startTimestamp,
+            endTime: endTimestamp,
+          }),
+        },
+        { merge: true }
+      )
+      .then(() => {
+        setSelectedDate();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+      setErrorMessage('');
+  }, [selectedDate]);
+  
+  const handleSaveBlockedTime = useCallback(() => {
+    if (!selectedDate || !tempStartTime || !tempEndTime) {
+      setErrorMessage('Please select a date, start time, and end time');
+      console.log('Please select a date, start time, and end time');
+      return;
+    }
+    
+    if (tempEndTime <= tempStartTime) {
+      setErrorMessage('End time must be after start time');
+      return;
+    }
+  
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setDate(selectedDateTime.getDate() + 1);
+    selectedDateTime.setUTCHours(0, 0, 0, 0); // set time to midnight in UTC time zone
+    const documentId = selectedDateTime.toISOString().slice(0, 10); // use UTC date string for document ID
+  
+    const startDateTime = new Date(
+      selectedDateTime.getUTCFullYear(),
+      selectedDateTime.getUTCMonth(),
+      selectedDateTime.getUTCDate(),
+      tempStartTime.getUTCHours(),
+      tempStartTime.getUTCMinutes(),
+      tempStartTime.getUTCSeconds(),
+    );
+    const endDateTime = new Date(
+      selectedDateTime.getUTCFullYear(),
+      selectedDateTime.getUTCMonth(),
+      selectedDateTime.getUTCDate(),
+      tempEndTime.getUTCHours(),
+      tempEndTime.getUTCMinutes(),
+      tempEndTime.getUTCSeconds(),
+    );
+  
+    const startTimestamp = firebase.firestore.Timestamp.fromDate(new Date(startDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
+    const endTimestamp = firebase.firestore.Timestamp.fromDate(new Date(endDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
+  
+    db.collection('blocked_timings')
+      .doc(documentId) // Use selectedDate to create document ID
+      .set(
+        {
+          blockedTimings: firebase.firestore.FieldValue.arrayUnion({
+            startTime: startTimestamp,
+            endTime: endTimestamp,
+          }),
+        },
+        { merge: true }
+      )
+      .then(() => {
+        setSelectedDate();
+        setStartTime();
+        setEndTime();
+        setTempStartTime();
+        setTempEndTime();
+        setStartTimePickerVisible(false);
+        setEndTimePickerVisible(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+      setErrorMessage('');
+  }, [selectedDate, tempStartTime, tempEndTime]);  
+  
+
+  const removeBlockedTiming = useCallback((date, startTime, endTime) => {
+    const blockedTiming = blockedTimings.find((timing) => {
+      return (
+        timing.id === date &&
+        timing.blockedTimings[0].startTime.getTime() === startTime.getTime() &&
+        timing.blockedTimings[0].endTime.getTime() === endTime.getTime()
+      );
+    });
+  
+    if (blockedTiming) {
+      db.collection('blocked_timings')
+        .doc(date)
+        .delete()
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, [blockedTimings]);
   
   
-  export default AdminSetTimingsScreen;
-  
-  
+
+  return (
+    <View style={styles.container}>
+      {errorMessage ? (
+        <View style={styles.errorMessageContainer}>
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        </View>
+      ) : null}
+    <TouchableOpacity onPress={() => setStartTimePickerVisible(true)}>
+    <View style={styles.inputContainer}>
+    <Text style={styles.inputLabel}>Start Time:</Text>
+    <Text style={styles.inputText}>
+    {startTime ? startTime.toLocaleTimeString() : 'Select start time'}
+    </Text>
+    </View>
+    </TouchableOpacity>
+    {isStartTimePickerVisible && (
+    <View style={styles.dateTimePicker}>
+    <DateTimePicker
+      value={tempStartTime}
+      onChange={handleStartTimeConfirm}
+      format="HH:mm:ss"
+      disableClearIcon={true}
+      disableTextInput={true}
+      disableCalendar={true}
+      display="spinner"
+      mode="time"
+      disableClock={true}
+    />
+  </View>
+)}
+
+<TouchableOpacity onPress={() => setEndTimePickerVisible(true)}>
+  <View style={styles.inputContainer}>
+    <Text style={styles.inputLabel}>End Time:</Text>
+    <Text style={styles.inputText}>
+      {endTime ? endTime.toLocaleTimeString() : 'Select end time'}
+    </Text>
+  </View>
+</TouchableOpacity>
+{isEndTimePickerVisible && (
+  <View style={styles.dateTimePicker}>
+    <DateTimePicker
+      value={tempEndTime}
+      onChange={handleEndTimeConfirm}
+      format="HH:mm:ss"
+      disableClearIcon={true}
+      disableTextInput={true}
+      disableCalendar={true}
+      display="spinner"
+      mode="time"
+      disableClock={true}
+    />
+  </View>
+)}
+    <TouchableOpacity onPress={() => setDateTimePickerVisible('date')}>
+    <View style={styles.inputContainer}>
+    <Text style={styles.inputLabel}>Date:</Text>
+    <Text style={styles.inputText}>
+    {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
+    </Text>
+    </View>
+    </TouchableOpacity>
+    {isDateTimePickerVisible === 'date' && (
+    <View style={styles.dateTimePicker}>
+    <DateTimePicker
+             value={selectedDate}
+             onChange={handleDateTimeConfirm}
+             format="yyyy-MM-dd"
+           />
+    </View>
+    )}
+<TouchableOpacity onPress={handleBlockDate}>
+  <View style={styles.saveButton}>
+    <Text style={styles.saveButtonText}>Block Date</Text>
+  </View>
+</TouchableOpacity>
+
+<TouchableOpacity onPress={handleSaveBlockedTime}>
+  <View style={styles.saveButton}>
+    <Text style={styles.saveButtonText}>Save</Text>
+  </View>
+</TouchableOpacity>
+
+<View style={{ flex: 2 }}>
+  <ScrollView>
+  {blockedTimings &&
+  blockedTimings.map((blockedTiming, index) => (
+    <View key={index} style={styles.cardContainer}>
+      <Text style={styles.cardTitle}>Date: {blockedTiming.id}</Text>
+      {blockedTiming.blockedTimings[0].startTime.getHours() === 0 && 
+        blockedTiming.blockedTimings[0].startTime.getMinutes() === 0 && 
+        blockedTiming.blockedTimings[0].endTime.getHours() === 23 && 
+        blockedTiming.blockedTimings[0].endTime.getMinutes() === 59 ? (
+          <Text style={styles.cardText}>Whole day has been blocked</Text>
+        ) : (
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <MaterialIcons name="timer" size={24} color="black" />
+              <Text style={styles.cardText}>
+                Start Time: {new Date(blockedTiming.blockedTimings[0].startTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <MaterialIcons name="timer" size={24} color="black" />
+              <Text style={styles.cardText}>
+                End Time: {new Date(blockedTiming.blockedTimings[0].endTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
+              </Text>
+            </View>
+          </>
+        )}
+      <TouchableOpacity
+        onPress={() =>
+          removeBlockedTiming(
+            blockedTiming.id,
+            blockedTiming.blockedTimings[0].startTime,
+            blockedTiming.blockedTimings[0].endTime,
+          )
+        }
+        style={styles.removeButton}>
+        <Text style={styles.removeButtonText}>Remove</Text>
+      </TouchableOpacity>
+    </View>
+  ))}
+
+  </ScrollView>
+</View>
+</View>
+
+  );
+};
+
+export default BlockTimePage;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5F5F5',
+    padding: 20,
+  },
+  inputContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  inputLabel: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginRight: 10,
+  },
+  inputText: {
+    fontSize: 16,
+    color: '#333333',
+    flex: 1,
+  },
+  dateTimePicker: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 5,
+    marginBottom: 10,
+    padding: 10,
+    width: '100%',
+    position: 'relative', 
+    zIndex: 1, 
+  },
+  isStartTimePickerVisible: {
+    position: 'absolute',
+    top: 80,
+    left: 0,
+    right: 0, 
+  },
+  saveButton: {
+    backgroundColor: '#333333',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cardContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    padding: 16,
+    marginVertical: 10,
+    width: '100%',
+  },
+  cardTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  cardText: {
+    fontSize: 16,
+    color: '#333333',
+    marginBottom: 4,
+  },
+  removeButton: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+  },
+  removeButtonText: {
+    color: 'red',
+  },
+});
+

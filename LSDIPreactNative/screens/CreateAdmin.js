@@ -3,6 +3,7 @@ import { Text, View, StyleSheet } from "react-native"
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
 import { firebase } from "../config/firebase";
+import Toast from 'react-native-toast-message';
 
 export default function CreateAdmin({ navigation }) {
 
@@ -41,7 +42,10 @@ export default function CreateAdmin({ navigation }) {
                         email,
                         number
                     })
-                    alert("account created");
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Admin created',
+                    });
                     setValues(initialValues);
                 })
                 .catch((error) => {

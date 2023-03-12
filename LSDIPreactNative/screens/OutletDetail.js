@@ -14,6 +14,7 @@ import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
 import { MultipleSelectList } from 'react-native-dropdown-select-list';
+import Toast from 'react-native-toast-message';
 
 export default function OutletDetail({ route, navigation }) {
 
@@ -79,6 +80,10 @@ export default function OutletDetail({ route, navigation }) {
                     outletEmail: updateModalData.outletEmail
                 }).then(() => {
                     console.log("Update Success")
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Outlet Updated',
+                    });
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
                     console.log(err)
@@ -113,6 +118,10 @@ export default function OutletDetail({ route, navigation }) {
                                 number: staffList.find(s => s.key === doc.data().staffID).number
                             })
                         })
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Staff Allocated',
+                        });
                         setAllocateStaffList(allocatedStaffList);
                     })
             }).catch((err) => {
@@ -131,6 +140,10 @@ export default function OutletDetail({ route, navigation }) {
                             .then(() => {
                                 console.log("Deallocated")
                                 const temp = allocatedStaffList.filter(x => x.id != item.id)
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Removed',
+                                });
                                 setAllocateStaffList(temp);
                             }).catch((err) => {
                                 console.log(err)
@@ -332,6 +345,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         padding: 10,
+        margin: 10,
         borderRadius: 25,
         backgroundColor: "#0B3270",
         justifyContent: "center",

@@ -5,9 +5,6 @@ import {
     Text,
     StyleSheet,
     Modal,
-    Alert,
-    FlatList,
-    LayoutAnimation,
     UIManager,
     Platform,
     ScrollView,
@@ -39,19 +36,6 @@ export default function LaundryItem({ navigation }) {
     const [data, setData] = useState([]);
     const [user, setUser] = useState(false);
     const db = firebase.firestore()
-
-
-    //for getting user
-    const getUserRole = async () => {
-        try {
-            const role = await AsyncStorage.getItem('role');
-            if (role !== null) {
-                return id;
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
 
     useEffect(() => {
         try {
@@ -105,15 +89,6 @@ export default function LaundryItem({ navigation }) {
         price: "",
     };
 
-    const toggleExpand = (id) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        if (expandedOutlet === id) {
-            setExpandedService(null);
-        } else {
-            setExpandedService(id);
-        }
-    };
-
     //for laundry item
     const clearState = () => {
         setValues({ ...initialValues });
@@ -128,7 +103,6 @@ export default function LaundryItem({ navigation }) {
             }
         })
     }
-
 
     function createLaundryItem() {
         laundryItem.add(values)
@@ -149,17 +123,12 @@ export default function LaundryItem({ navigation }) {
                     animationType="slide"
                     transparent={true}
                     visible={modalVisible}
-                    onRequestClose={() => {
-                        Alert.alert('Modal has been closed.');
-                        setModalVisible(!modalVisible);
-                    }}>
+                >
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
-
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Laundry Item</Text>
                                 <TextBox placeholder="Laundry Item Name" onChangeText={text => handleChange(text, "laundryItemName")} />
-                                {/*<TextBox placeholder="Laundry Category" onChangeText={text => handleChange(text, "typeOfServices")} />*/}
                                 <View style={{
                                     // height: 42,
                                     width: "92%",
@@ -173,13 +142,7 @@ export default function LaundryItem({ navigation }) {
                                         setSelected={(val) => handleChange(val, "typeOfServices")}
                                         save="value"
                                     />
-                                    {/*<SelectList
-                                    data={initialServices}
-                                    setSelected={(val) => handleChange(val, "typeOfServices")}
-                                    save="value"
-                        />*/}
                                 </View>
-                                {/*<TextBox placeholder="Pricing Method (Flat, Range, Weight)" onChangeText={text => handleChange(text, "pricingMethod")} /> */}
                                 <View style={{
                                     // height: 42,
                                     width: "92%",
@@ -195,9 +158,6 @@ export default function LaundryItem({ navigation }) {
                                     />
                                 </View>
                                 <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
-
-                                {/*<TextBox placeholder="Lower Price (For Range Only)" onChangeText={text => handleChange(text, "lowerPrice")} />
-                            <TextBox placeholder="Price (Upper for Range Only)" onChangeText={text => handleChange(text, "upperPrice")} />*/}
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
                                     <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -207,23 +167,12 @@ export default function LaundryItem({ navigation }) {
                     </View>
                 </Modal >
 
-
                 <View style={styles.view2}>
                     <TouchableOpacity
                         onPress={() => setModalVisible(!modalVisible)}
                         style={styles.btn}>
                         <Text style={styles.text}>Create Laundry Item</Text>
                     </TouchableOpacity>
-                    {/* {user.role ==="Admin" ?
-                <View>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Service")}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Services</Text>
-                </TouchableOpacity>
-                </View>
-                :null
-                } */}
                 </View>
 
                 <View>
