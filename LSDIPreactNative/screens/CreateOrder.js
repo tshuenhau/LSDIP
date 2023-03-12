@@ -266,7 +266,7 @@ export default function CreateOrder({ navigation }) {
                             ))}
                         </ScrollView>
 
-                        <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
+                        <View style={styles.checkoutSection}>
                             <TextBox style={styles.textBox} value={"Total Price: $" + subTotal} />
                             <Btn onClick={() => handleNavigateToSummary()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                         </View>
@@ -326,7 +326,7 @@ export default function CreateOrder({ navigation }) {
 
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
                             </View>
                         </View>
                     </View>
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     quantityTextBox: {
         height: 42,
         borderRadius: 25,
-        borderColor: "#0B3270",
+        borderColor: colors.darkBlue,
         borderWidth: 1,
         textAlign: "center",
     },
@@ -453,6 +453,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         margin: 10,
         justifyContent: 'space-evenly',
+        alignContent: 'flex-start',
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -460,14 +461,14 @@ const styles = StyleSheet.create({
     filterButton: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: '#0B3270',
+        borderColor: colors.darkBlue,
         padding: 10,
         borderRadius: 25
     },
     selectedButton: {
-        backgroundColor: '#0B3270',
+        backgroundColor: colors.darkBlue,
         borderWidth: 1,
-        borderColor: '#0B3270',
+        borderColor: colors.darkBlue,
         padding: 10,
         borderRadius: 25
     },
@@ -475,7 +476,7 @@ const styles = StyleSheet.create({
         position: 'sticky',
         flex: 2,
         top: 10,
-        maxHeight: SCREEN_HEIGHT,
+        height: SCREEN_HEIGHT,
         marginTop: 20,
         marginBottom: 20,
         marginRight: 15,
@@ -488,6 +489,12 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         elevation: 3,
+    },
+    checkoutSection: {
+        alignItems: "center",
+        marginBottom: "5%",
+        width: "90%",
+        padding: 14
     },
     tableHeader: {
         flexDirection: "row",
