@@ -36,6 +36,7 @@ import Toast from 'react-native-toast-message';
 import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
 import CreateAdmin from './screens/CreateAdmin';
+import OrderSummary from './screens/OrderSummary';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -142,6 +143,8 @@ function RootNavigator() {
         >
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
+          <Drawer.Screen name='Create Order' component={CreateOrder} />
+          <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
@@ -150,8 +153,6 @@ function RootNavigator() {
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
-          <Drawer.Screen name='Create Order' component={CreateOrder} />
-          <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='Payment' component={Payment} />
           <Drawer.Screen name='Create Admin' component={CreateAdmin} />
@@ -161,6 +162,11 @@ function RootNavigator() {
             }}
           />
           <Drawer.Screen name='Invoice' component={Invoice}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
+          <Drawer.Screen name='Order Summary' component={OrderSummary}
             options={{
               drawerItemStyle: { display: "none" }
             }}
@@ -187,6 +193,11 @@ function RootNavigator() {
               }}
             />
             <Drawer.Screen name='Invoice' component={Invoice}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
+            />
+            <Drawer.Screen name='OrderSummary' component={OrderSummary}
               options={{
                 drawerItemStyle: { display: "none" }
               }}
