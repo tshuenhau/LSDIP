@@ -142,6 +142,7 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Screen name='Create Order' component={CreateOrder} />
+          {/* <Drawer.Screen name='OrderSummaryTemp' component={OrderSummary} /> */}
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Home' component={Home} />
           <Drawer.Screen name='My Profile' component={MyProfile} />
@@ -166,7 +167,7 @@ function RootNavigator() {
               drawerItemStyle: { display: "none" }
             }}
           />
-          <Drawer.Screen name='OrderSummary' component={OrderSummary}
+          <Drawer.Screen name='Order Summary' component={OrderSummary}
             options={{
               drawerItemStyle: { display: "none" }
             }}

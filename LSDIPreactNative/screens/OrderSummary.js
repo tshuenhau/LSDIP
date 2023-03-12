@@ -9,10 +9,8 @@ import {
     UIManager,
     ScrollView,
     Platform,
-    Alert,
     Modal
 } from 'react-native';
-import { SelectList } from 'react-native-dropdown-select-list'
 import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
@@ -21,6 +19,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import * as Print from 'expo-print';
+import InvoiceLine from '../components/InvoiceLine';
 
 if (
     Platform.OS === 'android' &&
@@ -30,35 +29,9 @@ if (
 }
 
 export default function OrderSummary(props) {
-    // const { cart } = props.route.params;
-    // const { totalAmount } = props.route.params;
-    // console.log('tp:', totalAmount);
-    // console.log('cart: ', cart);
-    const totalAmount = 47;
-    const cart = [
-        {
-            "laundryItemName": "Coat",
-            "typeOfServices": "Dry Clean",
-            "pricingMethod": "Weight",
-            "price": 15,
-            "quantity": "3kg",
-            "weight": 3
-        },
-        {
-            "laundryItemName": "Short",
-            "typeOfServices": "Dry Clean",
-            "pricingMethod": "Flat",
-            "price": "7",
-            "quantity": 2
-        },
-        {
-            "laundryItemName": "Shirt",
-            "typeOfServices": "Dry Clean",
-            "pricingMethod": "Flat",
-            "price": "6",
-            "quantity": 3
-        }
-    ]
+    const { cart } = props.route.params;
+    const { subTotal } = props.route.params;
+    const [totalPrice, setTotalPrice] = useState(subTotal);
 
     const initialOrderValues = {
         orderDate: firebase.firestore.FieldValue.serverTimestamp(),
@@ -72,7 +45,7 @@ export default function OrderSummary(props) {
     }
 
     const [orderValues, setOrderValues] = useState(initialOrderValues);
-    const orderItems = firebase.firestore().collection('orderItem');
+    const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
 
     const getUserId = async () => {
@@ -87,59 +60,58 @@ export default function OrderSummary(props) {
     };
 
     const createOrder = async () => {
-        console.log(orderValues);
-        // console.log(customerDetails);
-        // try {
-        //     const orderItemRefs = await Promise.all(
-        //         cart.map(async (item) => {
-        //             if (item.pricingMethod !== "Weight") {
-        //                 const { laundryItemName, typeOfServices, pricingMethod, price } = item;
-        //                 for (let i = 0; i < item.quantity; i++) {
-        //                     const orderItemRef = await orderItems.add({ laundryItemName, typeOfServices, pricingMethod, price });
-        //                     return orderItemRef;
-        //                 }
-        //             } else {
-        //                 const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
-        //                 const orderItemRef = await orderItems.add({ laundryItemName, typeOfServices, pricingMethod, price, weight });
-        //                 return orderItemRef;
-        //             }
-        //         })
-        //     );
+        console.log(cart);
+        const batch = firebase.firestore().batch();
+        const orderItemIds = [];
 
-        //     // Get IDs of created order items
-        //     const orderItemIds = orderItemRefs.map((ref) => ref.id);
+        // Creating orderItem Ids
+        cart.forEach((item) => {
+            if (item.pricingMethod !== "Weight") {
+                const { laundryItemName, typeOfServices, pricingMethod, price } = item;
+                for (let i = 0; i < item.quantity; i++) {
+                    const docRef = orderItem.doc();
+                    batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price });
+                    orderItemIds.push(docRef.id);
+                }
+            } else {
+                const docRef = orderItem.doc();
+                const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
+                batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, weight });
+                orderItemIds.push(docRef.id);
+            }
+        })
+        batch.commit()
+            .then(async () => {
 
-        //     // Create order
-        //     const orderRef = await orders.add({
-        //         ...orderValues,
-        //         customerName: customerDetails.customerName,
-        //         customerNumber: customerDetails.customerNumber,
-        //         description: orderValues.description,
-        //         endDate: null,
-        //         totalPrice: totalPrice,
-        //         orderStatus: "Pending Wash",
-        //         receiveFromWasherDate: null,
-        //         sendFromWasherDate: null,
-        //         staffID: await getUserId(),
-        //         outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
-        //         orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-        //         orderItemIds: orderItemIds, // Add order item IDs to order
-        //     });
+                // Create order
+                const orderRef = await orders.add({
+                    ...orderValues,
+                    customerName: orderValues.customerName,
+                    customerNumber: orderValues.customerNumber,
+                    description: orderValues.description,
+                    endDate: null,
+                    totalPrice: totalPrice,
+                    orderStatus: "Pending Wash",
+                    receiveFromWasherDate: null,
+                    sendFromWasherDate: null,
+                    staffID: await getUserId(),
+                    outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+                    orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+                    orderItemIds: orderItemIds, // Add order item IDs to order
+                });
 
-        //     setCart([]);
-        //     setOrderValues(initialOrderValues);
-        //     setCustomerDetails(customerDetailsInitialValues);
-        //     Toast.show({
-        //         type: 'success',
-        //         text1: 'Order Created',
-        //     });
-        // } catch (error) {
-        //     console.error(error);
-        //     Toast.show({
-        //         type: 'error',
-        //         text1: 'an error occurred',
-        //     });
-        // }
+                setOrderValues(initialOrderValues);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Order Created',
+                });
+            }).catch((err) => {
+                console.error(err);
+                Toast.show({
+                    type: 'error',
+                    text1: 'an error occurred',
+                });
+            })
     };
 
     const renderItem = ({ item }) => (
@@ -192,12 +164,20 @@ export default function OrderSummary(props) {
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
                         </View>
                         <View style={{ flex: 2, backgroundColor: "#f8f4f4", borderRadius: 5, padding: 25, margin: 10, }}>
-                            <Text style={styles.totalAmount}>
-                                Total Price: ${totalAmount}
-                            </Text>
-                            <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
-                                <Text style={styles.checkoutButtonText}>Create Order</Text>
-                            </TouchableOpacity>
+                            <Text style={styles.subTotal}>Order Details</Text>
+                            <View style={{ borderBottomColor: "#ccc", borderBottomWidth: 1, paddingBottom: 10, marginVertical: 10, }}>
+                                <InvoiceLine label={"Subtotal"} value={subTotal} />
+                                {/* pending CRM module */}
+                                <InvoiceLine label={"Membership Discount"} value={0} />
+                                {/* pending CRM module */}
+                                <InvoiceLine label={"Voucher Discount"} value={0} />
+                            </View>
+                            <View >
+                                <InvoiceLine label={"Amount Due"} value={subTotal} total={true} />
+                                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                                    <Text style={styles.checkoutButtonText}>Create Order</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
 
@@ -247,7 +227,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         padding: 16,
     },
-    totalAmount: {
+    subTotal: {
         fontSize: 20,
         fontWeight: 'bold',
     },
@@ -297,8 +277,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#0B3270",
         padding: 10,
         borderRadius: 25,
-        width: "48%",
-        marginBottom: 20,
+        width: "96%",
+        marginVertical: 20,
     },
     checkoutButtonText: {
         color: "#fff",

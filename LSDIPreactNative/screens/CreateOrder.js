@@ -30,7 +30,7 @@ export default function CreateOrder({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedButtonFilter, setSelectedButtonFilter] = useState("");
     const [cart, setCart] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
+    const [subTotal, setSubTotal] = useState(0);
 
     useEffect(() => {
         const laundryItem = firebase.firestore().collection('laundryItem');
@@ -91,7 +91,7 @@ export default function CreateOrder({ navigation }) {
         if (pricingMethod === "Weight") {
             const displayQuantity = weight + "kg";
             const displayPrice = price * weight;
-            setTotalAmount(totalAmount + (price * weight));
+            setSubTotal(subTotal + (price * weight));
             setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, ["price"]: displayPrice, ["quantity"]: displayQuantity, weight }]);
         } else {
             let found = false;
@@ -106,7 +106,7 @@ export default function CreateOrder({ navigation }) {
             if (!found) {
                 setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
             }
-            setTotalAmount(totalAmount + (price * quantity));
+            setSubTotal(subTotal + (price * quantity));
         }
 
         setCreateModalVisible(false);
@@ -115,9 +115,9 @@ export default function CreateOrder({ navigation }) {
     const removeFromCart = (item) => {
         const cartCopy = cart.filter((x) => x != item);
         if (item.pricingMethod === "Weight") {
-            setTotalAmount(totalAmount - (item.price));
+            setSubTotal(subTotal - (item.price));
         } else {
-            setTotalAmount(totalAmount - (item.price * item.quantity));
+            setSubTotal(subTotal - (item.price * item.quantity));
         }
 
         setCart(cartCopy);
@@ -251,8 +251,8 @@ export default function CreateOrder({ navigation }) {
                         </ScrollView>
 
                         <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
-                            <TextBox style={styles.textBox} value={"Total Price: $" + totalAmount} />
-                            <Btn onClick={() => navigation.navigate('OrderSummary', { cart: cart, totalAmount: totalAmount })} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                            <TextBox style={styles.textBox} value={"Total Price: $" + subTotal} />
+                            <Btn onClick={() => navigation.navigate('Order Summary', { cart: cart, subTotal: subTotal })} title="Checkout" style={{ width: "48%", margin: 5 }} />
                         </View>
                     </View>
                 </View>
