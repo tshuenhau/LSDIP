@@ -18,6 +18,8 @@ import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
 import { SelectList } from 'react-native-dropdown-select-list'
 import Toast from 'react-native-toast-message';
+import { ScrollView } from "react-native-gesture-handler";
+import TextBox from "../components/TextBox";
 
 if (
     Platform.OS === "android" &&
@@ -34,6 +36,52 @@ export default function AccountManagement() {
     const [expandedItem, setExpandedItem] = useState(null);
     const [updateModalData, setUpdateModalData] = useState(false);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
+    const [createModalVisible, setCreateModalVisible] = useState(false);
+    const [values, setValues] = useState(initialValues);
+    const auth1 = firebase.auth;
+    const firestore = firebase.firestore;
+
+
+    const initialValues = {
+        name: "",
+        role: "",
+        email: "",
+        number: "",
+        pwd: "",
+        pwd2: ""
+    };
+    const createRoles = [
+        { key: '1', value: 'Admin' },
+        { key: '2', value: 'Staff' },
+        { key: '3', value: 'Driver' }
+    ]
+    //for admin to create Admin, Staff, Driver
+    //Customer only limit to customer signup on their own
+    function SignUp() {
+        const { email, pwd, pwd2, name, role, number } = values
+        if (pwd == pwd2) {
+            auth1().createUserWithEmailAndPassword(email, pwd)
+                .then(() => {
+                    firestore().collection("users").doc(auth1().currentUser.uid).set({
+                        uid: auth1().currentUser.uid,
+                        name,
+                        role,
+                        email,
+                        number
+                    })
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Admin created',
+                    });
+                    setValues(initialValues);
+                })
+                .catch((error) => {
+                    alert(error.message)
+                });
+        } else {
+            alert("Passwords are different!")
+        }
+    }
 
     const roles = [
         { key: '1', value: 'Admin' },
@@ -76,6 +124,23 @@ export default function AccountManagement() {
         setUpdateModalVisible(true);
     }
 
+    //directly change the user role to disabled
+    const deleteUser = (users) => {
+        userDatabase.doc(users.id)
+            .update({
+                role: "Disabled"
+            }).then(() => {
+                Toast.show({
+                    type: 'success',
+                    text1: 'User Disabled',
+                });
+                console.log("Update Success")
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
+
+    //for list
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
@@ -83,21 +148,27 @@ export default function AccountManagement() {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <Text style={styles.itemName}>{item.name} </Text>
+                <Text style={styles.itemName}>{item.name} | {item.role} </Text>
+                <View style={styles.cardButtons}>
+                    <FontAwesome
+                        style={styles.outletIcon}
+                        name="edit"
+                        color={colors.green}
+                        onPress={() => openModal(item)}
+                    />
+                    <FontAwesome
+                        style={styles.outletIcon}
+                        name="trash-o"
+                        color={colors.red}
+                        onPress={() => deleteUser(item)}
+                    />
+                </View>
             </View>
             {expandedItem === item.id && (
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
                         <Text style={styles.itemText}>Phone Number: {item.number} </Text>
                         <Text style={styles.itemText}>Email: {item.email} </Text>
-                    </View>
-                    <View style={styles.cardButtons}>
-                        <FontAwesome
-                            style={styles.outletIcon}
-                            name="edit"
-                            color= {colors.green}
-                            onPress={() => openModal(item)}
-                        />
                     </View>
                 </View>
             )}
@@ -110,13 +181,20 @@ export default function AccountManagement() {
 
     const Admin = () => (
         <View>
-            <View style={styles.searchContainer}>
+            <View style = {styles.searchView}>
+            <View style={styles.searchContainerWithBtn}>
                 <TextInput
-                    style={styles.searchInput}
+                    style={styles.searchInputWithBtn}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by user's name"
                 />
+            </View>
+            <TouchableOpacity
+                onPress={() => setCreateModalVisible(!createModalVisible)}
+                style={styles.btn}>
+                <Text style={styles.text}>Create User</Text>
+            </TouchableOpacity>
             </View>
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Admin")}
@@ -131,13 +209,20 @@ export default function AccountManagement() {
 
     const Staff = () => (
         <View>
-            <View style={styles.searchContainer}>
+            <View style = {styles.searchView}>
+            <View style={styles.searchContainerWithBtn}>
                 <TextInput
-                    style={styles.searchInput}
+                    style={styles.searchInputWithBtn}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by user's name"
                 />
+            </View>
+            <TouchableOpacity
+                onPress={() => setCreateModalVisible(!createModalVisible)}
+                style={styles.btn}>
+                <Text style={styles.text}>Create User</Text>
+            </TouchableOpacity>
             </View>
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Staff")}
@@ -152,13 +237,20 @@ export default function AccountManagement() {
 
     const Driver = () => (
         <View>
-            <View style={styles.searchContainer}>
+            <View style = {styles.searchView}>
+            <View style={styles.searchContainerWithBtn}>
                 <TextInput
-                    style={styles.searchInput}
+                    style={styles.searchInputWithBtn}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by user's name"
                 />
+            </View>
+            <TouchableOpacity
+                onPress={() => setCreateModalVisible(!createModalVisible)}
+                style={styles.btn}>
+                <Text style={styles.text}>Create User</Text>
+            </TouchableOpacity>
             </View>
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Driver")}
@@ -193,14 +285,24 @@ export default function AccountManagement() {
     );
 
     const Disabled = () => (
-        <FlatList
-            data={users.filter(l => l.role === "Disabled")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDataText}>No available items</Text>
-            }
-        />
+        <View>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Search by user's name"
+                />
+            </View>
+            <FlatList
+                data={users.filter(l => l.role === "Disabled")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No available items</Text>
+                }
+            />
+        </View>
     );
 
     function handleChange(text, eventName) {
@@ -212,10 +314,23 @@ export default function AccountManagement() {
         })
     }
 
+    //for creating user change
+    function handleCreateChange(text, eventName) {
+        setValues(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
     const updateRole = () => {
         if (updateModalData.role.length > 0) {
             userDatabase.doc(updateModalData.id)
                 .update({
+                    name: updateModalData.name,
+                    number: updateModalData.number,
+                    email: updateModalData.email,
                     role: updateModalData.role,
                 }).then(() => {
                     Toast.show({
@@ -247,50 +362,90 @@ export default function AccountManagement() {
     ]);
 
     return (
-        <View>
-            <TabView
-                navigationState={{ index, routes }}
-                renderScene={renderScene}
-                onIndexChange={setIndex}
-                renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#0B3270' }} />}
-            />
+        <ScrollView>
+            <View>
 
-            {/* Update Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={updateModalVisible}
-            >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Role</Text>
-                            <Text style={styles.itemText}>Name: {updateModalData.name} </Text>
-                            <Text style={styles.itemText}>Email: {updateModalData.email} </Text>
-                            <Text style={styles.itemText}>Phone: {updateModalData.number} </Text>
-                            <View style={{
-                                width: "100%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
-                                <SelectList
-                                    data={roles}
-                                    placeholder="Change role to?"
-                                    searchPlaceholder="Search role"
-                                    setSelected={(val) => handleChange(val, "role")}
-                                    save="value"
-                                />
-                            </View>
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
-                                <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    onIndexChange={setIndex}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.darkBlue }} />}
+                />
+
+                {/* Update Modal */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={updateModalVisible}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update User</Text>
+                                <TextBox placeholder={updateModalData.name} onChangeText={text => handleChange(text, "name")} />
+                                <TextBox placeholder={updateModalData.email} onChangeText={text => handleChange(text, "email")} />
+                                <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
+                                <View style={{
+                                    width: "100%",
+                                    borderRadius: 25,
+                                    marginTop: 20
+                                }}>
+                                    <SelectList
+                                        data={roles}
+                                        placeholder="Change role to?"
+                                        searchPlaceholder="Search role"
+                                        setSelected={(val) => handleChange(val, "role")}
+                                        save="value"
+                                    />
+                                </View>
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                                    <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-        </View>
+                {/*create user modal*/}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={createModalVisible}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create User</Text>
+                                <TextBox placeholder="Full Name" onChangeText={text => handleCreateChange(text, "name")} />
+                                <TextBox placeholder="Email Address" onChangeText={text => handleCreateChange(text, "email")} />
+                                <TextBox placeholder="Phone Number" onChangeText={text => handleCreateChange(text, "number")} />
+                                <View style={{
+                                    width: "100%",
+                                    borderRadius: 25,
+                                    marginTop: 20
+                                }}>
+                                    <SelectList
+                                        data={createRoles}
+                                        placeholder="What is their role?"
+                                        searchPlaceholder="Search role"
+                                        setSelected={(val) => handleCreateChange(val, "role")}
+                                        save="value"
+                                    />
+                                </View>
+                                <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd")} />
+                                <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd2")} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
+                                    <Btn onClick={() => SignUp()} title="Create Admin" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+            </View>
+        </ScrollView>
     );
 }
 
@@ -315,77 +470,31 @@ const styles = StyleSheet.create({
         width: "96%",
         marginLeft: 15
     },
+    searchView: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop:5
+    },
+    searchContainerWithBtn: {
+        justifyContent: "center",
+        alignContent: "center",
+        width: "70%",
+        marginLeft: 15
+    },
+    searchInputWithBtn: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: colors.gray,
+        paddingHorizontal: 10,
+        fontSize: 18,
+        backgroundColor: colors.white,
+        marginVertical: 10,
+    },
     noDataText: {
         fontStyle: "italic",
         textAlign: "center",
         marginVertical: 10,
-    },
-    tableContainer: {
-        marginTop: 20,
-        marginBottom: 20,
-        marginLeft: "auto",
-        marginRight: "auto",
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.2,
-        elevation: 3,
-        width: "80%",
-    },
-
-    tableHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ccc",
-    },
-    tableHeaderText: {
-        fontWeight: "bold",
-        fontSize: 16,
-        flex: 1,
-    },
-    tableBody: {},
-    tableRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ccc",
-    },
-    tableRowText: {
-        fontSize: 16,
-        flex: 1,
-    },
-
-    checkoutButton: {
-        backgroundColor: "#0B3270",
-        padding: 16,
-        borderRadius: 10,
-        width: "80%",
-        marginLeft: "auto",
-        marginRight: "auto",
-        marginBottom: 20,
-    },
-    checkoutButtonText: {
-        color: "#fff",
-        textAlign: "center",
-        fontSize: 18,
-    },
-    button: {
-        height: 60,
-        width: "40%",
-        backgroundColor: "#0B3270",
-        color: "#fff",
-        fontSize: 20,
-        borderRadius: 25,
-        marginTop: 20,
-        marginLeft: "auto",
-        marginRight: "auto"
     },
     cardBody: {
         padding: 16,
@@ -399,22 +508,14 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingRight: 20,
     },
-    itemText: {
-        flex: 1,
-        fontSize: 16,
-    },
-    cardButtons: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
-    },
     card: {
-        backgroundColor: '#fff',
-        width: "60%",
-        marginLeft: "auto",
+        backgroundColor: colors.white,
+        width: "96%",
+        marginLeft: 15,
         marginRight: "auto",
         marginVertical: 10,
         borderRadius: 10,
-        shadowColor: '#000',
+        shadowColor: colors.shadowGray,
         shadowOpacity: 0.2,
         shadowOffset: {
             width: 0,
@@ -432,29 +533,14 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     outletIcon: {
-        fontSize: 25,
-        margin: 10,
-    },
-    cardHeaderIcon: {
-        flexDirection: 'row',
-        padding: 16,
+        fontSize: 30,
+        marginLeft: 20,
+        marginRight: 10
     },
     view: {
         width: "100%",
         justifyContent: "center",
         alignItems: "center"
-    },
-    btn: {
-        padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    text: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: "#fff"
     },
     centeredView: {
         flex: 1,
@@ -464,6 +550,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: '50%',
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
@@ -476,5 +563,20 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+    },
+    btn: {
+        borderRadius: 10,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 30,
+        marginTop: 5,
+        width: '20%',
+        height: '75%'
+    },
+    text: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: colors.white,
     }
 });
