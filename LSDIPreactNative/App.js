@@ -149,7 +149,7 @@ function RootNavigator() {
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
-          <Drawer.Screen name='Delivery' component={Delivery} />
+          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}/>
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
@@ -232,7 +232,7 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Delivery' component={Delivery} />
+            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}/>
             <Drawer.Screen name='Payment' component={Payment} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
