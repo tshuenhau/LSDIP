@@ -155,7 +155,10 @@ function RootNavigator() {
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='Payment' component={Payment} />
-          <Drawer.Screen name='Create Admin' component={CreateAdmin} />
+          <Drawer.Screen name='Create Admin' component={CreateAdmin} 
+          options={{
+            drawerItemStyle: { display: "none" }
+          }}/>
           <Drawer.Screen name='Order Page' component={OrderDetail}
             options={{
               drawerItemStyle: { display: "none" }
