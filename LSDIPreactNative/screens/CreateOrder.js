@@ -424,7 +424,8 @@ const styles = StyleSheet.create({
     textView: {
         width: "100%",
         justifyContent: 'space-evenly',
-        alignItems: 'stretch'
+        alignItems: 'stretch',
+        marginLeft:40
     },
     itemText: {
         flex: 1,

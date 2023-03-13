@@ -389,7 +389,7 @@ export default function AccountManagement() {
                                 <TextBox placeholder={updateModalData.email} onChangeText={text => handleChange(text, "email")} />
                                 <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
                                 <View style={{
-                                    width: "100%",
+                                    width: "92%",
                                     borderRadius: 25,
                                     marginTop: 20
                                 }}>
@@ -424,7 +424,7 @@ export default function AccountManagement() {
                                 <TextBox placeholder="Email Address" onChangeText={text => handleCreateChange(text, "email")} />
                                 <TextBox placeholder="Phone Number" onChangeText={text => handleCreateChange(text, "number")} />
                                 <View style={{
-                                    width: "100%",
+                                    width: "92%",
                                     borderRadius: 25,
                                     marginTop: 20
                                 }}>
@@ -553,6 +553,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: '50%',
         backgroundColor: colors.white,
         borderRadius: 20,
         padding: 35,
