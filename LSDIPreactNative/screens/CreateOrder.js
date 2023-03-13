@@ -283,13 +283,16 @@ export default function CreateOrder({ navigation }) {
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
-                            <Text style={styles.itemText}> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
-                            <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
+                            
+                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
+                            <View style={styles.textView}>
+                            <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
                             {createModalData != undefined && createModalData.pricingMethod !== "Weight"
-                                ? <Text style={styles.itemText}>Input price: {createModalData.price}</Text>
-                                : <Text style={styles.itemText}>Input weight: {createModalData.weight} kg</Text>
+                                ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
+                                : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
                             }
+                            </View>
                             {createModalData != undefined && createModalData.pricingMethod === "Range" &&
                                 <View style={styles.rangeText}>
                                     <Slider
@@ -418,9 +421,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
+    textView: {
+        width: "100%",
+        justifyContent: 'space-evenly',
+        alignItems: 'stretch'
+    },
     itemText: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 20,
     },
     centeredView: {
         flex: 1,
@@ -430,10 +438,11 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: '50%',
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
-        alignItems: 'center',
+        alignItems: 'justify',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
