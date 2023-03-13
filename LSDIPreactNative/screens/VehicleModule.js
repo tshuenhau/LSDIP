@@ -18,6 +18,8 @@ import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import alert from '../components/Alert'
+
 
 if (
     Platform.OS === 'android' &&
@@ -70,7 +72,8 @@ export default function VehicleModule() {
             console.log(error);
         })
         clearState();
-    }
+        setModalVisible(!modalVisible);
+	}
 
     //create data method 2
     /*function createVehicle() {

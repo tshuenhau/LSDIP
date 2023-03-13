@@ -266,7 +266,7 @@ export default function CreateOrder({ navigation }) {
                             ))}
                         </ScrollView>
 
-                        <View style={{ alignItems: "center", marginBottom: "5%", width: "90%" }}>
+                        <View style={styles.checkoutSection}>
                             <TextBox style={styles.textBox} value={"Total Price: $" + subTotal} />
                             <Btn onClick={() => handleNavigateToSummary()} title="Checkout" style={{ width: "48%", margin: 5 }} />
                         </View>
@@ -283,13 +283,16 @@ export default function CreateOrder({ navigation }) {
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
-                            <Text style={styles.itemText}> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
-                            <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
+                            
+                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
+                            <View style={styles.textView}>
+                            <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
                             {createModalData != undefined && createModalData.pricingMethod !== "Weight"
-                                ? <Text style={styles.itemText}>Input price: {createModalData.price}</Text>
-                                : <Text style={styles.itemText}>Input weight: {createModalData.weight} kg</Text>
+                                ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
+                                : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
                             }
+                            </View>
                             {createModalData != undefined && createModalData.pricingMethod === "Range" &&
                                 <View style={styles.rangeText}>
                                     <Slider
@@ -326,7 +329,7 @@ export default function CreateOrder({ navigation }) {
 
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
                             </View>
                         </View>
                     </View>
@@ -356,7 +359,7 @@ const styles = StyleSheet.create({
     quantityTextBox: {
         height: 42,
         borderRadius: 25,
-        borderColor: "#0B3270",
+        borderColor: colors.darkBlue,
         borderWidth: 1,
         textAlign: "center",
     },
@@ -418,9 +421,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
+    textView: {
+        width: "100%",
+        justifyContent: 'space-evenly',
+        alignItems: 'stretch'
+    },
     itemText: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 20,
     },
     centeredView: {
         flex: 1,
@@ -430,10 +438,11 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: '50%',
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
-        alignItems: 'center',
+        alignItems: 'justify',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -453,6 +462,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         margin: 10,
         justifyContent: 'space-evenly',
+        alignContent: 'flex-start',
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -460,14 +470,14 @@ const styles = StyleSheet.create({
     filterButton: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: '#0B3270',
+        borderColor: colors.darkBlue,
         padding: 10,
         borderRadius: 25
     },
     selectedButton: {
-        backgroundColor: '#0B3270',
+        backgroundColor: colors.darkBlue,
         borderWidth: 1,
-        borderColor: '#0B3270',
+        borderColor: colors.darkBlue,
         padding: 10,
         borderRadius: 25
     },
@@ -475,7 +485,7 @@ const styles = StyleSheet.create({
         position: 'sticky',
         flex: 2,
         top: 10,
-        maxHeight: SCREEN_HEIGHT,
+        height: SCREEN_HEIGHT,
         marginTop: 20,
         marginBottom: 20,
         marginRight: 15,
@@ -488,6 +498,12 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         elevation: 3,
+    },
+    checkoutSection: {
+        alignItems: "center",
+        marginBottom: "5%",
+        width: "90%",
+        padding: 14
     },
     tableHeader: {
         flexDirection: "row",

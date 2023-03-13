@@ -5,20 +5,15 @@ import {
     Text,
     StyleSheet,
     FlatList,
-    LayoutAnimation,
     UIManager,
     ScrollView,
     Platform,
-    Modal
 } from 'react-native';
 import TextBox from "../components/TextBox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
-import Btn from "../components/Button";
-import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import * as Print from 'expo-print';
 import InvoiceLine from '../components/InvoiceLine';
 
 if (
@@ -130,7 +125,7 @@ export default function OrderSummary(props) {
         <ScrollView>
             <View style={styles.container}>
                 <TouchableOpacity
-                    onPress={() => props.navigation.goBack()}
+                    onPress={() => props.navigation.navigate('Create Order')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back to Cart</Text>
                 </TouchableOpacity>
@@ -165,9 +160,9 @@ export default function OrderSummary(props) {
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
                         </View>
-                        <View style={{ flex: 2, backgroundColor: "#f8f4f4", borderRadius: 5, padding: 25, margin: 10, }}>
+                        <View style={styles.orderDetails}>
                             <Text style={styles.subTotal}>Order Details</Text>
-                            <View style={{ borderBottomColor: "#ccc", borderBottomWidth: 1, paddingBottom: 10, marginVertical: 10, }}>
+                            <View style={styles.orderDetailsBreakdown}>
                                 <InvoiceLine label={"Subtotal"} value={subTotal} />
                                 {/* pending CRM module */}
                                 <InvoiceLine label={"Membership Discount"} value={0} />
@@ -192,10 +187,9 @@ export default function OrderSummary(props) {
 const styles = StyleSheet.create({
     btn: {
         borderRadius: 20,
-        backgroundColor: "#0B3270",
+        backgroundColor: colors.darkBlue,
         justifyContent: "center",
         alignItems: "center",
-        // margin: 10,
         width: "13%"
     },
     noDataText: {
@@ -259,7 +253,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         padding: 10,
         marginTop: -20,
-        borderColor: "#0B3270",
+        borderColor: colors.darkBlue,
         borderWidth: 1,
         borderRadius: 8,
         backgroundColor: "#fff"
@@ -276,7 +270,7 @@ const styles = StyleSheet.create({
         flex: 3,
     },
     checkoutButton: {
-        backgroundColor: "#0B3270",
+        backgroundColor: colors.darkBlue,
         padding: 10,
         borderRadius: 25,
         width: "96%",
@@ -286,5 +280,18 @@ const styles = StyleSheet.create({
         color: "#fff",
         textAlign: "center",
         fontSize: 18,
+    },
+    orderDetails: {
+        flex: 2,
+        backgroundColor: "#f8f4f4",
+        borderRadius: 5,
+        padding: 25,
+        margin: 10
+    },
+    orderDetailsBreakdown: {
+        borderBottomColor: "#ccc",
+        borderBottomWidth: 1,
+        paddingBottom: 10,
+        marginVertical: 10
     }
 });
