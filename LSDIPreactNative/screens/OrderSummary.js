@@ -15,6 +15,7 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
+import * as Print from 'expo-print';
 
 if (
     Platform.OS === 'android' &&
@@ -42,6 +43,17 @@ export default function OrderSummary(props) {
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
+    const [selectedPrinter, setSelectedPrinter] = React.useState();
+
+    const html = () => OrderPage(props);
+    const print = async () => {
+        console.log("order:" + orderValues.customerName);
+        // On iOS/android prints the given html. On web prints the HTML from the current page.
+        await Print.printAsync({
+          html,
+          printerUrl: selectedPrinter?.url, // iOS only
+        });
+    };
 
     const getUserId = async () => {
         try {
@@ -101,6 +113,8 @@ export default function OrderSummary(props) {
                     type: 'success',
                     text1: 'Order Created',
                 });
+
+                navigation.navigate("Orders");
             }).catch((err) => {
                 console.error(err);
                 Toast.show({
@@ -123,7 +137,7 @@ export default function OrderSummary(props) {
         <ScrollView>
             <View style={styles.container}>
                 <TouchableOpacity
-                    onPress={() => props.navigation.goBack()}
+                    onPress={() => props.navigation.navigate('Create Order')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back to Cart</Text>
                 </TouchableOpacity>
@@ -171,6 +185,9 @@ export default function OrderSummary(props) {
                                 <InvoiceLine label={"Amount Due"} value={subTotal} total={true} />
                                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                                     <Text style={styles.checkoutButtonText}>Create Order</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.checkoutButton} onPress={print}>
+                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

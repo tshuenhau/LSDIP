@@ -37,6 +37,7 @@ import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
 import CreateAdmin from './screens/CreateAdmin';
 import OrderSummary from './screens/OrderSummary';
+import Orders from './screens/Orders';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -149,13 +150,19 @@ function RootNavigator() {
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
           <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
-          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}/>
+          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='Payment' component={Payment} />
-          <Drawer.Screen name='Create Admin' component={CreateAdmin} />
+          <Drawer.Screen name='Orders' component={Orders} />
+
+          {/* hidden screens */}
+          {/* <Drawer.Screen name='Create Admin' component={CreateAdmin}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }} /> */}
           <Drawer.Screen name='Order Page' component={OrderDetail}
             options={{
               drawerItemStyle: { display: "none" }
@@ -232,7 +239,7 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}/>
+            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
             <Drawer.Screen name='Payment' component={Payment} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>

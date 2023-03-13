@@ -41,7 +41,6 @@ export default function AccountManagement() {
     const auth1 = firebase.auth;
     const firestore = firebase.firestore;
 
-
     const initialValues = {
         name: "",
         role: "",
@@ -55,6 +54,7 @@ export default function AccountManagement() {
         { key: '2', value: 'Staff' },
         { key: '3', value: 'Driver' }
     ]
+
     //for admin to create Admin, Staff, Driver
     //Customer only limit to customer signup on their own
     function SignUp() {
@@ -71,7 +71,7 @@ export default function AccountManagement() {
                     })
                     Toast.show({
                         type: 'success',
-                        text1: 'Admin created',
+                        text1: 'Account created',
                     });
                     setValues(initialValues);
                 })
@@ -148,7 +148,10 @@ export default function AccountManagement() {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <Text style={styles.itemName}>{item.name} | {item.role} </Text>
+                <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style>    {item.role}</Text>
+                </View>
                 <View style={styles.cardButtons}>
                     <FontAwesome
                         style={styles.outletIcon}
@@ -181,20 +184,20 @@ export default function AccountManagement() {
 
     const Admin = () => (
         <View>
-            <View style = {styles.searchView}>
-            <View style={styles.searchContainerWithBtn}>
-                <TextInput
-                    style={styles.searchInputWithBtn}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Search by user's name"
-                />
-            </View>
-            <TouchableOpacity
-                onPress={() => setCreateModalVisible(!createModalVisible)}
-                style={styles.btn}>
-                <Text style={styles.text}>Create User</Text>
-            </TouchableOpacity>
+            <View style={styles.searchView}>
+                <View style={styles.searchContainerWithBtn}>
+                    <TextInput
+                        style={styles.searchInputWithBtn}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder="Search by user's name"
+                    />
+                </View>
+                <TouchableOpacity
+                    onPress={() => setCreateModalVisible(!createModalVisible)}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Create User</Text>
+                </TouchableOpacity>
             </View>
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Admin")}
@@ -209,20 +212,20 @@ export default function AccountManagement() {
 
     const Staff = () => (
         <View>
-            <View style = {styles.searchView}>
-            <View style={styles.searchContainerWithBtn}>
-                <TextInput
-                    style={styles.searchInputWithBtn}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Search by user's name"
-                />
-            </View>
-            <TouchableOpacity
-                onPress={() => setCreateModalVisible(!createModalVisible)}
-                style={styles.btn}>
-                <Text style={styles.text}>Create User</Text>
-            </TouchableOpacity>
+            <View style={styles.searchView}>
+                <View style={styles.searchContainerWithBtn}>
+                    <TextInput
+                        style={styles.searchInputWithBtn}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder="Search by user's name"
+                    />
+                </View>
+                <TouchableOpacity
+                    onPress={() => setCreateModalVisible(!createModalVisible)}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Create User</Text>
+                </TouchableOpacity>
             </View>
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Staff")}
@@ -237,20 +240,20 @@ export default function AccountManagement() {
 
     const Driver = () => (
         <View>
-            <View style = {styles.searchView}>
-            <View style={styles.searchContainerWithBtn}>
-                <TextInput
-                    style={styles.searchInputWithBtn}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Search by user's name"
-                />
-            </View>
-            <TouchableOpacity
-                onPress={() => setCreateModalVisible(!createModalVisible)}
-                style={styles.btn}>
-                <Text style={styles.text}>Create User</Text>
-            </TouchableOpacity>
+            <View style={styles.searchView}>
+                <View style={styles.searchContainerWithBtn}>
+                    <TextInput
+                        style={styles.searchInputWithBtn}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder="Search by user's name"
+                    />
+                </View>
+                <TouchableOpacity
+                    onPress={() => setCreateModalVisible(!createModalVisible)}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Create User</Text>
+                </TouchableOpacity>
             </View>
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Driver")}
@@ -386,7 +389,7 @@ export default function AccountManagement() {
                                 <TextBox placeholder={updateModalData.email} onChangeText={text => handleChange(text, "email")} />
                                 <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
                                 <View style={{
-                                    width: "100%",
+                                    width: "92%",
                                     borderRadius: 25,
                                     marginTop: 20
                                 }}>
@@ -421,7 +424,7 @@ export default function AccountManagement() {
                                 <TextBox placeholder="Email Address" onChangeText={text => handleCreateChange(text, "email")} />
                                 <TextBox placeholder="Phone Number" onChangeText={text => handleCreateChange(text, "number")} />
                                 <View style={{
-                                    width: "100%",
+                                    width: "92%",
                                     borderRadius: 25,
                                     marginTop: 20
                                 }}>
@@ -473,7 +476,7 @@ const styles = StyleSheet.create({
     searchView: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop:5
+        marginTop: 5
     },
     searchContainerWithBtn: {
         justifyContent: "center",
@@ -551,11 +554,11 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         width: '50%',
-        backgroundColor: 'white',
+        backgroundColor: colors.white,
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: colors.shadowGray,
         shadowOffset: {
             width: 0,
             height: 2,

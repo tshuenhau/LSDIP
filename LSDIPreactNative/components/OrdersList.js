@@ -209,19 +209,6 @@ export default function OrdersList({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.createOrderContainer}>
-        {/*<TouchableOpacity style={styles.button}>
-          <Button
-            title="Create Order"
-            onPress={() => navigation.navigate("Create Order")}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Button
-            title="Update Order"
-            onPress={() => setUpdateModalVisible(true)}
-          />
-  </TouchableOpacity>*/}
-
         <View style={styles.buttonView}>
           <TouchableOpacity
             onPress={() => navigation.navigate("Create Order")}
@@ -231,7 +218,7 @@ export default function OrdersList({ navigation }) {
           <TouchableOpacity
             onPress={() => setUpdateModalVisible(true)}
             style={styles.btn}>
-            <Text style={styles.text}>Update Order</Text>
+            <Text style={styles.text}>Update Status</Text>
           </TouchableOpacity>
         </View>
       </View>

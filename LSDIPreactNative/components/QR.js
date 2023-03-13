@@ -4,6 +4,7 @@ import QRCode from "react-native-qrcode-svg";
 import { View, StyleSheet, Button, Platform, Text } from "react-native";
 import * as Print from "expo-print";
 import * as React from "react";
+import colors from "../colors";
 
 // TODO: https://stackoverflow.com/questions/57694271/print-react-native-text-and-qr-generatedad
 export default function QR(props) {
@@ -64,7 +65,7 @@ export default function QR(props) {
           </View>
         </>
       )}
-      <Button title="Print QR" onPress={print}></Button>
+      <Button style={styles.button} title="Print QR" onPress={print}></Button>
       {Platform.OS === "ios" && (
         <>
           <View style={styles.spacer} />
@@ -79,4 +80,11 @@ export default function QR(props) {
       )}
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  button: {
+    width: '25%',
+    color: colors.blue600
+  }
+});
