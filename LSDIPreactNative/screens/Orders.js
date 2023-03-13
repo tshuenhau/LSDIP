@@ -65,7 +65,7 @@ export default function Orders({ navigation }) {
                     deliveryDate
                 });
             });
-            orderList.sort(function(a,b) {
+            orderList.sort(function (a, b) {
                 return b.orderDate - a.orderDate;
             });
             setOrderList(orderList);
@@ -245,6 +245,22 @@ export default function Orders({ navigation }) {
     return (
         <View>
             <View style={styles.container}>
+                <View style={styles.createOrderContainer}>
+
+                    <View style={styles.buttonView}>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Create Order")}
+                            style={styles.btn}>
+                            <Text style={styles.text}>Create Order</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setUpdateModalVisible(true)}
+                            style={styles.btn}>
+                            <Text style={styles.text}>Update Order</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
                 <View style={styles.searchContainer}>
                     <TextInput
                         style={styles.searchInput}
@@ -273,6 +289,50 @@ export default function Orders({ navigation }) {
                             <Text style={styles.noDataText}>No Data Found!</Text>
                         }
                     />
+
+                    {/* update modal */}
+                    <Modal
+                        visible={udpateModalVisible}
+                        animationType="slide"
+                        transparent={true}
+                    >
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text
+                                        style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                                    >
+                                        Update Status
+                                    </Text>
+                                    <SelectList
+                                        data={statuses}
+                                        setSelected={(val) => setSelectedStatus(val)}
+                                        save="value"
+                                        search={false}
+                                    />
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            width: "92%",
+                                        }}
+                                    >
+                                        <Btn
+                                            onClick={() => updateStatus()}
+                                            title="Update"
+                                            style={{ width: "48%" }}
+                                        />
+                                        <Btn
+                                            onClick={() => setUpdateModalVisible(false)}
+                                            title="Dismiss"
+                                            style={{ width: "48%", backgroundColor: "#344869" }}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
                 </View>
             </View>
         </View>
@@ -386,6 +446,32 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: 'space-between',
     },
+    outletIcon: {
+        fontSize: 20,
+        margin: 5,
+    },
+    createOrderContainer: {
+        alignSelf: "center",
+    },
+    text: {
+        fontSize: 20,
+        fontWeight: "600",
+        padding: 10,
+        color: "#fff",
+    },
+    buttonView: {
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 10,
+        flexDirection: 'row',
+    },
+    btn: {
+        borderRadius: 15,
+        backgroundColor: colors.blue600,
+        justifyContent: "center",
+        alignItems: "center",
+        marginHorizontal: 50
+    },
 
 
     ordersListContainer: {
@@ -415,15 +501,8 @@ const styles = StyleSheet.create({
     button: {
         marginTop: "20"
     },
-    createOrderContainer: {
-        alignSelf: "center",
-    },
     list: {
         flex: 1,
-    },
-    outletIcon: {
-        fontSize: 20,
-        margin: 5,
     },
 
 
