@@ -181,7 +181,7 @@ export default function Orders({ navigation }) {
         >
             <View style={styles.cardHeader}>
                 <TouchableOpacity
-                    style={{ paddingTop: 12, marginRight: 15 }}
+                    style={{ paddingVertical: "auto", marginLeft: 15 }}
                     onPress={() => handleCheck(order)}>
                     <Checkbox
                         disabled={false}
@@ -189,20 +189,19 @@ export default function Orders({ navigation }) {
                         onValueChange={() => handleCheck(order)}
                     />
                 </TouchableOpacity>
-                <Text style={styles.orderNumber}>{formatOrderDate(order.orderDate)}</Text>
-                <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+                <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
+                <Text style={styles.orderNum}>{formatOrderNumber(order.id)}</Text>
                 <Text style={styles.orderNumber}>{order.customerName}</Text>
-                <Text style={styles.orderNumber}>${order.totalPrice}</Text>
+                <Text style={styles.orderNum}>${order.totalPrice}</Text>
                 {order.orderStatus === "Pending Wash" && (<Text style={styles.pendingwash}>{order.orderStatus}</Text>)}
                 {order.orderStatus === "Out for Wash" && (<Text style={styles.outforwash}>{order.orderStatus}</Text>)}
                 {order.orderStatus === "Back from Wash" && (<Text style={styles.backfromwash}>{order.orderStatus}</Text>)}
                 {order.orderStatus === "Pending Delivery" && (<Text style={styles.pendingdelivery}>{order.orderStatus}</Text>)}
                 {order.orderStatus === "Out for Delivery" && (<Text style={styles.outfordelivery}>{order.orderStatus}</Text>)}
-                {order.orderStatus === "Closed" && (<Text style={styles.orderNumber}>{order.orderStatus}</Text>)}
-                {order.orderStatus === "Case" && (<Text style={styles.orderNumber}>{order.orderStatus}</Text>)}
-                {order.orderStatus === "Void" && (<Text style={styles.orderNumber}>{order.orderStatus}</Text>)}
-                {order.orderStatus === "" && (<Text style={styles.orderNumber}>{order.orderStatus}</Text>)}
-
+                {order.orderStatus === "Closed" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+                {order.orderStatus === "Case" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+                {order.orderStatus === "Void" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+                {order.orderStatus === "" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
                 <View style={styles.cardButtons}>
 
                     {/*<TouchableOpacity
@@ -230,11 +229,11 @@ export default function Orders({ navigation }) {
             </View>
             {expandedOrder === order.id && (
                 <View style={styles.cardBody}>
-                    <Text style={styles.orderNumber}>Customer Number: {order.customerNumber}</Text>
-                    <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
-                    <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
-                    <Text style={styles.orderNumber}>Delivery Fee: when to add</Text>
-                    <Text style={styles.orderNumber}>Delivery Date: {order.deliveryDate}</Text>
+                    <Text style={styles.orderDetails}>Customer Number: {order.customerNumber}</Text>
+                    <Text style={styles.orderDetails}>Name: {order.customerName}</Text>
+                    <Text style={styles.orderDetails}>OutletId: {order.outletId}</Text>
+                    <Text style={styles.orderDetails}>Delivery Fee: when to add</Text>
+                    <Text style={styles.orderDetails}>Delivery Date: {order.deliveryDate}</Text>
                     <QR orderID={order.id}></QR>
                     {/*<OrderDetails data={order.id}></OrderDetails>*/}
                 </View>
@@ -397,11 +396,27 @@ const styles = StyleSheet.create({
     },
     cardHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        //justifyContent: 'space-between',
         padding: 8,
+    },
+    orderDate: {
+        fontSize: 15,
+        width: "8%",
+        textAlign: "left",
+        marginLeft: "11%",
     },
     orderNumber: {
         fontSize: 15,
+        width: "14%",
+        textAlign: "left",
+        //backgroundColor: colors.blue300,
+        marginLeft: "10%"
+    },
+    orderNum: {
+        fontSize: 15,
+        width: "8%",
+        textAlign: "left",
+        marginLeft: "5%",
     },
     pendingwash: {
         fontSize: 15,
@@ -409,6 +424,8 @@ const styles = StyleSheet.create({
         padding: 3,
         borderRadius: 15,
         color: "#fff",
+        marginLeft: "5%",
+        marginRight: "auto"
     },
     outforwash: {
         fontSize: 15,
@@ -416,6 +433,8 @@ const styles = StyleSheet.create({
         padding: 3,
         borderRadius: 15,
         color: "#fff",
+        marginLeft: "5%",
+        marginRight: "auto"
     },
     backfromwash: {
         fontSize: 15,
@@ -423,6 +442,8 @@ const styles = StyleSheet.create({
         padding: 3,
         borderRadius: 15,
         color: "#fff",
+        marginLeft: "5%",
+        marginRight: "auto"
     },
     pendingdelivery: {
         fontSize: 15,
@@ -430,6 +451,8 @@ const styles = StyleSheet.create({
         padding: 3,
         borderRadius: 15,
         color: "#fff",
+        marginLeft: "5%",
+        marginRight: "auto"
     },
     outfordelivery: {
         fontSize: 15,
@@ -437,6 +460,13 @@ const styles = StyleSheet.create({
         padding: 3,
         borderRadius: 15,
         color: "#fff",
+        marginLeft: "5%",
+        marginRight: "auto",
+    },
+    otherstatuses: {
+        fontSize: 15,
+        marginLeft: "5%",
+        marginRight: "auto"
     },
     cardBody: {
         backgroundColor: colors.blue50,
@@ -445,10 +475,18 @@ const styles = StyleSheet.create({
     cardButtons: {
         flexDirection: "row",
         justifyContent: 'space-between',
+        //marginLeft: "5%",
+        //marginHorizontal: "auto",
+        //width: "4%",
+        //backgroundColor: colors.blue50
     },
     outletIcon: {
         fontSize: 20,
         margin: 5,
+    },
+    orderDetails: {
+        fontSize: 15,
+        textAlign: "left",
     },
     createOrderContainer: {
         alignSelf: "center",
@@ -471,6 +509,32 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         marginHorizontal: 50
+    },
+    view: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: colors.shadowGray,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
 
 
