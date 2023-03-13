@@ -167,8 +167,6 @@ const BlockTimePage = () => {
         setEndTime();
         setTempStartTime();
         setTempEndTime();
-        setStartTimePickerVisible(false);
-        setEndTimePickerVisible(false);
       })
       .catch((error) => {
         console.error(error);
@@ -201,18 +199,16 @@ const BlockTimePage = () => {
 
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity style=
-            {
-              selectedButtonFilter === "period"
-                ? styles.blockTypeSelectedButton
-                : styles.blockTypeUnselectedButton
+            {selectedButtonFilter === "period"
+              ? styles.blockTypeSelectedButton
+              : styles.blockTypeUnselectedButton
             } onPress={() => setSelectedButtonFilter("period")}>
             <Text style={styles.inputLabel}>Block Period</Text>
           </TouchableOpacity>
           <TouchableOpacity style=
-            {
-              selectedButtonFilter === "date"
-                ? styles.blockTypeSelectedButton
-                : styles.blockTypeUnselectedButton
+            {selectedButtonFilter === "date"
+              ? styles.blockTypeSelectedButton
+              : styles.blockTypeUnselectedButton
             } onPress={() => setSelectedButtonFilter("date")}>
             <Text style={styles.inputLabel}>Block Date</Text>
           </TouchableOpacity>
@@ -270,23 +266,19 @@ const BlockTimePage = () => {
             </View>
           }
 
-          <TouchableOpacity onPress={() => setDateTimePickerVisible('date')}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Date:</Text>
-              <Text style={styles.inputText}>
-                {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          {isDateTimePickerVisible === 'date' && (
-            <View style={styles.dateTimePicker}>
-              <DateTimePicker
-                value={selectedDate}
-                onChange={handleDateTimeConfirm}
-                format="yyyy-MM-dd"
-              />
-            </View>
-          )}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Date:</Text>
+            <Text style={styles.inputText}>
+              {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
+            </Text>
+          </View>
+          <View style={styles.dateTimePicker}>
+            <DateTimePicker
+              value={selectedDate}
+              onChange={handleDateTimeConfirm}
+              format="yyyy-MM-dd"
+            />
+          </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             {selectedButtonFilter === "date"
@@ -423,9 +415,9 @@ const styles = StyleSheet.create({
     right: 0,
   },
   saveButton: {
-    backgroundColor: '#333333',
+    backgroundColor: colors.darkBlue,
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 25,
     width: '40%',
     margin: 10,
     alignItems: 'center',
