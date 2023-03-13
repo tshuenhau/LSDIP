@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'rea
 import DateTimePicker from 'react-datetime-picker';
 import { firebase } from '../config/firebase';
 import { MaterialIcons } from '@expo/vector-icons';
+import colors from '../colors';
 
 const db = firebase.firestore();
 const user = firebase.auth().currentUser;
@@ -18,7 +19,7 @@ const BlockTimePage = () => {
   const [tempEndTime, setTempEndTime] = useState(endTime);
   const [blockedTimings, setBlockedTimings] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
-  
+
 
   useEffect(() => {
     db.collection('blocked_timings').onSnapshot((snapshot) => {
@@ -32,12 +33,12 @@ const BlockTimePage = () => {
             ...blockedTimingData,
             blockedTimings: blockedTimingData.blockedTimings.map((timing) => {
               return {
-                startTime: new Date(timing.startTime.toDate().toLocaleString('en-US', {timeZone: 'Asia/Singapore'})),
-                endTime: new Date(timing.endTime.toDate().toLocaleString('en-US', {timeZone: 'Asia/Singapore'})),
+                startTime: new Date(timing.startTime.toDate().toLocaleString('en-US', { timeZone: 'Asia/Singapore' })),
+                endTime: new Date(timing.endTime.toDate().toLocaleString('en-US', { timeZone: 'Asia/Singapore' })),
               };
             }),
           };
-          
+
         })
       );
     });
@@ -68,12 +69,12 @@ const BlockTimePage = () => {
       setErrorMessage('Please select a date');
       return;
     }
-  
+
     const selectedDateTime = new Date(selectedDate);
     selectedDateTime.setDate(selectedDateTime.getDate() + 1);
     selectedDateTime.setUTCHours(0, 0, 0, 0); // set time to midnight in UTC time zone
     const documentId = selectedDateTime.toISOString().slice(0, 10); // use UTC date string for document ID
-  
+
     const startDateTime = new Date(
       selectedDateTime.getUTCFullYear(),
       selectedDateTime.getUTCMonth(),
@@ -90,10 +91,10 @@ const BlockTimePage = () => {
       59,
       59
     );
-  
-    const startTimestamp = firebase.firestore.Timestamp.fromDate(new Date(startDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
-    const endTimestamp = firebase.firestore.Timestamp.fromDate(new Date(endDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
-  
+
+    const startTimestamp = firebase.firestore.Timestamp.fromDate(new Date(startDateTime.toLocaleString('en-US', { timeZone: 'Asia/Singapore' })));
+    const endTimestamp = firebase.firestore.Timestamp.fromDate(new Date(endDateTime.toLocaleString('en-US', { timeZone: 'Asia/Singapore' })));
+
     db.collection('blocked_timings')
       .doc(documentId)
       .set(
@@ -111,26 +112,26 @@ const BlockTimePage = () => {
       .catch((error) => {
         console.error(error);
       });
-      setErrorMessage('');
+    setErrorMessage('');
   }, [selectedDate]);
-  
+
   const handleSaveBlockedTime = useCallback(() => {
     if (!selectedDate || !tempStartTime || !tempEndTime) {
       setErrorMessage('Please select a date, start time, and end time');
       console.log('Please select a date, start time, and end time');
       return;
     }
-    
+
     if (tempEndTime <= tempStartTime) {
       setErrorMessage('End time must be after start time');
       return;
     }
-  
+
     const selectedDateTime = new Date(selectedDate);
     selectedDateTime.setDate(selectedDateTime.getDate() + 1);
     selectedDateTime.setUTCHours(0, 0, 0, 0); // set time to midnight in UTC time zone
     const documentId = selectedDateTime.toISOString().slice(0, 10); // use UTC date string for document ID
-  
+
     const startDateTime = new Date(
       selectedDateTime.getUTCFullYear(),
       selectedDateTime.getUTCMonth(),
@@ -147,10 +148,10 @@ const BlockTimePage = () => {
       tempEndTime.getUTCMinutes(),
       tempEndTime.getUTCSeconds(),
     );
-  
-    const startTimestamp = firebase.firestore.Timestamp.fromDate(new Date(startDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
-    const endTimestamp = firebase.firestore.Timestamp.fromDate(new Date(endDateTime.toLocaleString('en-US', {timeZone: 'Asia/Singapore'})));
-  
+
+    const startTimestamp = firebase.firestore.Timestamp.fromDate(new Date(startDateTime.toLocaleString('en-US', { timeZone: 'Asia/Singapore' })));
+    const endTimestamp = firebase.firestore.Timestamp.fromDate(new Date(endDateTime.toLocaleString('en-US', { timeZone: 'Asia/Singapore' })));
+
     db.collection('blocked_timings')
       .doc(documentId) // Use selectedDate to create document ID
       .set(
@@ -174,9 +175,8 @@ const BlockTimePage = () => {
       .catch((error) => {
         console.error(error);
       });
-      setErrorMessage('');
-  }, [selectedDate, tempStartTime, tempEndTime]);  
-  
+    setErrorMessage('');
+  }, [selectedDate, tempStartTime, tempEndTime]);
 
   const removeBlockedTiming = useCallback((date, startTime, endTime) => {
     const blockedTiming = blockedTimings.find((timing) => {
@@ -186,7 +186,7 @@ const BlockTimePage = () => {
         timing.blockedTimings[0].endTime.getTime() === endTime.getTime()
       );
     });
-  
+
     if (blockedTiming) {
       db.collection('blocked_timings')
         .doc(date)
@@ -196,136 +196,137 @@ const BlockTimePage = () => {
         });
     }
   }, [blockedTimings]);
-  
-  
 
   return (
     <View style={styles.container}>
-      {errorMessage ? (
-        <View style={styles.errorMessageContainer}>
-          <Text style={styles.errorMessage}>{errorMessage}</Text>
-        </View>
-      ) : null}
-    <TouchableOpacity onPress={() => setStartTimePickerVisible(true)}>
-    <View style={styles.inputContainer}>
-    <Text style={styles.inputLabel}>Start Time:</Text>
-    <Text style={styles.inputText}>
-    {startTime ? startTime.toLocaleTimeString() : 'Select start time'}
-    </Text>
-    </View>
-    </TouchableOpacity>
-    {isStartTimePickerVisible && (
-    <View style={styles.dateTimePicker}>
-    <DateTimePicker
-      value={tempStartTime}
-      onChange={handleStartTimeConfirm}
-      format="HH:mm:ss"
-      disableClearIcon={true}
-      disableTextInput={true}
-      disableCalendar={true}
-      display="spinner"
-      mode="time"
-      disableClock={true}
-    />
-  </View>
-)}
-
-<TouchableOpacity onPress={() => setEndTimePickerVisible(true)}>
-  <View style={styles.inputContainer}>
-    <Text style={styles.inputLabel}>End Time:</Text>
-    <Text style={styles.inputText}>
-      {endTime ? endTime.toLocaleTimeString() : 'Select end time'}
-    </Text>
-  </View>
-</TouchableOpacity>
-{isEndTimePickerVisible && (
-  <View style={styles.dateTimePicker}>
-    <DateTimePicker
-      value={tempEndTime}
-      onChange={handleEndTimeConfirm}
-      format="HH:mm:ss"
-      disableClearIcon={true}
-      disableTextInput={true}
-      disableCalendar={true}
-      display="spinner"
-      mode="time"
-      disableClock={true}
-    />
-  </View>
-)}
-    <TouchableOpacity onPress={() => setDateTimePickerVisible('date')}>
-    <View style={styles.inputContainer}>
-    <Text style={styles.inputLabel}>Date:</Text>
-    <Text style={styles.inputText}>
-    {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
-    </Text>
-    </View>
-    </TouchableOpacity>
-    {isDateTimePickerVisible === 'date' && (
-    <View style={styles.dateTimePicker}>
-    <DateTimePicker
-             value={selectedDate}
-             onChange={handleDateTimeConfirm}
-             format="yyyy-MM-dd"
-           />
-    </View>
-    )}
-<TouchableOpacity onPress={handleBlockDate}>
-  <View style={styles.saveButton}>
-    <Text style={styles.saveButtonText}>Block Date</Text>
-  </View>
-</TouchableOpacity>
-
-<TouchableOpacity onPress={handleSaveBlockedTime}>
-  <View style={styles.saveButton}>
-    <Text style={styles.saveButtonText}>Save</Text>
-  </View>
-</TouchableOpacity>
-
-<View style={{ flex: 2 }}>
-  <ScrollView>
-  {blockedTimings &&
-  blockedTimings.map((blockedTiming, index) => (
-    <View key={index} style={styles.cardContainer}>
-      <Text style={styles.cardTitle}>Date: {blockedTiming.id}</Text>
-      {blockedTiming.blockedTimings[0].startTime.getHours() === 0 && 
-        blockedTiming.blockedTimings[0].startTime.getMinutes() === 0 && 
-        blockedTiming.blockedTimings[0].endTime.getHours() === 23 && 
-        blockedTiming.blockedTimings[0].endTime.getMinutes() === 59 ? (
-          <Text style={styles.cardText}>Whole day has been blocked</Text>
-        ) : (
-          <>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-              <MaterialIcons name="timer" size={24} color="black" />
-              <Text style={styles.cardText}>
-                Start Time: {new Date(blockedTiming.blockedTimings[0].startTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialIcons name="timer" size={24} color="black" />
-              <Text style={styles.cardText}>
-                End Time: {new Date(blockedTiming.blockedTimings[0].endTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
-              </Text>
-            </View>
-          </>
+      <View style={{ flex: 1, marginRight: 10, marginVertical: 10, }}>
+        {errorMessage ? (
+          <View style={styles.errorMessageContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+        ) : null}
+        <TouchableOpacity onPress={() => setStartTimePickerVisible(true)}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Start Time:</Text>
+            <Text style={styles.inputText}>
+              {startTime ? startTime.toLocaleTimeString() : 'Select start time'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        {isStartTimePickerVisible && (
+          <View style={styles.dateTimePicker}>
+            <DateTimePicker
+              value={tempStartTime}
+              onChange={handleStartTimeConfirm}
+              format="HH:mm:ss"
+              disableClearIcon={true}
+              disableTextInput={true}
+              disableCalendar={true}
+              display="spinner"
+              mode="time"
+              disableClock={true}
+            />
+          </View>
         )}
-      <TouchableOpacity
-        onPress={() =>
-          removeBlockedTiming(
-            blockedTiming.id,
-            blockedTiming.blockedTimings[0].startTime,
-            blockedTiming.blockedTimings[0].endTime,
-          )
-        }
-        style={styles.removeButton}>
-        <Text style={styles.removeButtonText}>Remove</Text>
-      </TouchableOpacity>
-    </View>
-  ))}
 
-  </ScrollView>
-</View>
-</View>
+        <TouchableOpacity onPress={() => setEndTimePickerVisible(true)}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>End Time:</Text>
+            <Text style={styles.inputText}>
+              {endTime ? endTime.toLocaleTimeString() : 'Select end time'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        {isEndTimePickerVisible && (
+          <View style={styles.dateTimePicker}>
+            <DateTimePicker
+              value={tempEndTime}
+              onChange={handleEndTimeConfirm}
+              format="HH:mm:ss"
+              disableClearIcon={true}
+              disableTextInput={true}
+              disableCalendar={true}
+              display="spinner"
+              mode="time"
+              disableClock={true}
+            />
+          </View>
+        )}
+
+        <TouchableOpacity onPress={() => setDateTimePickerVisible('date')}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Date:</Text>
+            <Text style={styles.inputText}>
+              {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        {isDateTimePickerVisible === 'date' && (
+          <View style={styles.dateTimePicker}>
+            <DateTimePicker
+              value={selectedDate}
+              onChange={handleDateTimeConfirm}
+              format="yyyy-MM-dd"
+            />
+          </View>
+        )}
+
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <TouchableOpacity onPress={handleBlockDate} style={styles.saveButton}>
+            <Text style={styles.saveButtonText}>Block Date</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleSaveBlockedTime} style={styles.saveButton}>
+            <Text style={styles.saveButtonText}>Block Period</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{ flex: 1, marginLeft: 10, }}>
+        <ScrollView>
+          {blockedTimings &&
+            blockedTimings.map((blockedTiming, index) => (
+              <View key={index} style={styles.cardContainer}>
+                <Text style={styles.cardTitle}>Date: {blockedTiming.id}</Text>
+                {blockedTiming.blockedTimings[0].startTime.getHours() === 0 &&
+                  blockedTiming.blockedTimings[0].startTime.getMinutes() === 0 &&
+                  blockedTiming.blockedTimings[0].endTime.getHours() === 23 &&
+                  blockedTiming.blockedTimings[0].endTime.getMinutes() === 59 ? (
+                  <Text style={styles.cardText}>Whole day has been blocked</Text>
+                ) : (
+                  <>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                      <MaterialIcons name="timer" size={24} color="black" />
+                      <Text style={styles.cardText}>
+                        Start Time: {new Date(blockedTiming.blockedTimings[0].startTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <MaterialIcons name="timer" size={24} color="black" />
+                      <Text style={styles.cardText}>
+                        End Time: {new Date(blockedTiming.blockedTimings[0].endTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
+                      </Text>
+                    </View>
+                  </>
+                )}
+                <TouchableOpacity
+                  onPress={() =>
+                    removeBlockedTiming(
+                      blockedTiming.id,
+                      blockedTiming.blockedTimings[0].startTime,
+                      blockedTiming.blockedTimings[0].endTime,
+                    )
+                  }
+                  style={styles.removeButton}>
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+
+        </ScrollView>
+      </View>
+
+    </View>
 
   );
 };
@@ -335,13 +336,13 @@ export default BlockTimePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.background,
     padding: 20,
   },
   inputContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
@@ -361,34 +362,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dateTimePicker: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 5,
     marginBottom: 10,
     padding: 10,
     width: '100%',
-    position: 'relative', 
-    zIndex: 1, 
+    position: 'relative',
+    zIndex: 1,
   },
   isStartTimePickerVisible: {
     position: 'absolute',
     top: 80,
     left: 0,
-    right: 0, 
+    right: 0,
   },
   saveButton: {
     backgroundColor: '#333333',
     padding: 10,
     borderRadius: 5,
-    width: '100%',
+    // width: '100%',
+    width: '40%',
+    margin: 10,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   cardContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: {
