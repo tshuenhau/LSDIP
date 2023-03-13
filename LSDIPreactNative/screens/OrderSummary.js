@@ -123,7 +123,7 @@ export default function OrderSummary(props) {
         <ScrollView>
             <View style={styles.container}>
                 <TouchableOpacity
-                    onPress={() => props.navigation.goBack()}
+                    onPress={() => props.navigation.navigate('Create Order')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back to Cart</Text>
                 </TouchableOpacity>
