@@ -255,12 +255,18 @@ export default function OutletDetail({ route, navigation }) {
                     <View style={styles.modalView}>
                         <View style={styles.view}>
                             <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
-                            <MultipleSelectList
-                                setSelected={(val) => setSelectedStaff(val)}
-                                data={staffList}
-                                save="key"
-                                label='Staff'
-                            />
+                            <View style={{
+                                width: "92%",
+                                borderRadius: 25,
+                                marginTop: 20
+                            }}>
+                                <MultipleSelectList
+                                    setSelected={(val) => setSelectedStaff(val)}
+                                    data={staffList}
+                                    save="key"
+                                    label='Staff'
+                                />
+                            </View>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
                                 <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -366,6 +372,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         backgroundColor: 'white',
+        width: '50%',
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
