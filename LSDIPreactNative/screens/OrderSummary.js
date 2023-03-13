@@ -101,6 +101,8 @@ export default function OrderSummary(props) {
                     type: 'success',
                     text1: 'Order Created',
                 });
+
+                navigation.navigate("Orders");
             }).catch((err) => {
                 console.error(err);
                 Toast.show({
