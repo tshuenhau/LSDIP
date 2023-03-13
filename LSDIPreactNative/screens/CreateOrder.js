@@ -1,75 +1,80 @@
 import {
     View,
-    TouchableOpacity,
     Text,
+    Image,
     StyleSheet,
-    Modal,
-    Alert,
-    FlatList,
-    LayoutAnimation,
-    UIManager,
-    Platform,
     ScrollView,
-} from "react-native";
+    TextInput,
+    Modal,
+    TouchableOpacity,
+    Dimensions,
+} from 'react-native'
 import React, { useState, useEffect } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import TextBox from "../components/TextBox";
-import Btn from "../components/Button";
+import { Entypo } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-// import alert from '../components/Alert';
+import Slider from '@react-native-community/slider';
+import Btn from "../components/Button";
+import TextBox from "../components/TextBox";
 import colors from '../colors';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { firebase } from "../config/firebase";
-import moment from "moment";
-import Toast from 'react-native-toast-message';
-import * as Print from 'expo-print';
+import alert from "../components/Alert";
 
-export default function CreateOrder() {
-    const initialOrderValues = {
-        //orderDate: moment().format("YYYY-MM-DD HH:mm:ss a")
-        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
-        customerName: "",
-        customerAddress: "",
-        customerNumber: "",
-        pickupDate: "",
-        deliveryDate: "",
-        customerNumber: "",
-    }
+const SCREEN_WIDTH = Dimensions.get('window').width * 0.8;
+const SCREEN_HEIGHT = Dimensions.get('window').height - 100;
 
-    const [index, setIndex] = React.useState(0);
-    const [expandedItem, setExpandedItem] = useState(null);
+export default function CreateOrder({ navigation }) {
+
     const [laundryItems, setLaundryItems] = useState([]);
-    const laundry_item = firebase.firestore().collection('laundryItem');
-    const [createModalData, setCreateModalData] = useState(false);
+    const [laundryCategories, setLaundryCategories] = useState([]);
+    const [createModalData, setCreateModalData] = useState({});
     const [createModalVisible, setCreateModalVisible] = useState(false);
-    const today = moment().format("YYYY-MM-DD");
-    const orderItems = firebase.firestore().collection('orderItem');
-    const orders = firebase.firestore().collection("orders");
-    const [customerDetails, setCustomerDetails] = useState({
-        customerName: "",
-        customerNumber: ""
-    });
-    const [orderValues, setOrderValues] = useState(initialOrderValues);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedButtonFilter, setSelectedButtonFilter] = useState("");
     const [cart, setCart] = useState([]);
-    let orderId = "";
+    const [subTotal, setSubTotal] = useState(0);
 
     useEffect(() => {
-        laundry_item
+        const laundryItem = firebase.firestore().collection('laundryItem');
+        laundryItem
             .get()
             .then(querySnapshot => {
                 const laundryItems = [];
                 querySnapshot.forEach(doc => {
-                    const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
-                    laundryItems.push({
-                        id: doc.id,
-                        laundryItemName,
-                        typeOfServices,
-                        price,
-                        pricingMethod
-                    })
+                    const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice } = doc.data();
+                    if (pricingMethod === "Range") {
+                        laundryItems.push({
+                            id: doc.id,
+                            typeOfServices,
+                            laundryItemName,
+                            pricingMethod,
+                            fromPrice,
+                            toPrice,
+                        })
+                    } else {
+                        laundryItems.push({
+                            id: doc.id,
+                            typeOfServices,
+                            laundryItemName,
+                            pricingMethod,
+                            price,
+                        })
+                    }
                 })
                 setLaundryItems(laundryItems)
+            })
+
+        const laundryCategory = firebase.firestore().collection('laundryCategory');
+        laundryCategory
+            .get()
+            .then(querySnapshot => {
+                const laundryCategories = [];
+                querySnapshot.forEach(doc => {
+                    const { serviceName } = doc.data();
+                    laundryCategories.push({
+                        serviceName,
+                    });
+                })
+                setLaundryCategories(laundryCategories);
             })
     }, [])
 
@@ -82,420 +87,348 @@ export default function CreateOrder() {
         })
     }
 
-    const getUserId = async () => {
-        try {
-            const id = await AsyncStorage.getItem('userId');
-            if (id !== null) {
-                return id;
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const clearState = () => {
-        cart.length = 0;
-        console.log(cart.length);
-    }
-
-    const toggleExpand = (id) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        if (expandedItem === id) {
-            setExpandedItem(null);
-        } else {
-            setExpandedItem(id);
-        }
-    };
-
     const addToCart = () => {
-        // TODO addToCart
-        /*
-        if(cart.length == 0) {
-            console.log("cart is empty");
-            orders.add(orderValues)
-            .then(function(docRef) {
-                orderId = docRef.id;
-                cart.push(orderId);
-                console.log("new order id: ", orderId)
-                console.log(cart.toString);
-            }).catch((err) => {
-                console.log(err);
-            })
-        }     
-        console.log(orderId);
-        */
-        const { laundryItemName, typeOfServices, pricingMethod, description, price } = createModalData;
-        setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, description, price }]);
-        setCreateModalVisible(false);
-        console.log(createModalData);
-        console.log("added item");
-    }
-
-    const openModal = (laundryItem) => {
-        console.log(laundryItem);
-        setCreateModalData(laundryItem);
-        setCreateModalVisible(true);
-    }
-
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.card}
-            onPress={() => toggleExpand(item.id)}
-            activeOpacity={0.8}
-        >
-            <View style={styles.cardHeader}>
-                <Text style={styles.itemName}>{item.laundryItemName} </Text>
-            </View>
-            {expandedItem === item.id && (
-                <View style={styles.itemContainer}>
-                    <View style={styles.cardBody}>
-                        <Text style={styles.itemText}>Pricing Method: {item.pricingMethod} </Text>
-                        <Text style={styles.itemText}>Pricing: {item.price} </Text>
-                    </View>
-                    <View style={styles.cardButtons}>
-                        <Ionicons
-                            style={styles.outletIcon}
-                            name="add-circle"
-                            color="#0B3270"
-                            onPress={() => openModal(item)}
-                        />
-                    </View>
-                </View>
-            )}
-
-        </TouchableOpacity>
-    );
-
-    const WetWash = () => (
-        <FlatList
-            data={laundryItems.filter(l => l.typeOfServices === "Wet Wash")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
-            }
-        />
-    );
-
-    const DryClean = () => (
-        <FlatList
-            data={laundryItems.filter(l => l.typeOfServices === "Dry Clean")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
-            }
-        />
-    );
-
-    const Others = () => (
-        <FlatList
-            data={laundryItems.filter(l => l.typeOfServices === "Alteration")}
-            keyExtractor={item => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <Text style={styles.noDatesText}>No available items</Text>
-            }
-        />
-    );
-
-    const renderScene = SceneMap({
-        wetWash: WetWash,
-        dryClean: DryClean,
-        others: Others
-    });
-
-    const [routes] = React.useState([
-        { key: 'wetWash', title: 'Wet Wash' },
-        { key: 'dryClean', title: 'Dry Clean' },
-        { key: 'others', title: 'Others' },
-    ]);
-
-    const totalPrice = cart.reduce((acc, item) => acc + Number(item.price), 0);
-
-    const createOrder = async () => {
-        console.log(customerDetails);
-        try {
-            const orderItemRefs = await Promise.all(
-                cart.map(async (item) => {
-                    const orderItemRef = await orderItems.add(item);
-                    return orderItemRef;
-                })
-            );
-
-            // Get IDs of created order items
-            const orderItemIds = orderItemRefs.map((ref) => ref.id);
-
-            // Create order
-            const orderRef = await orders.add({
-                ...orderValues,
-                customerName: customerDetails.customerName,
-                customerNumber: customerDetails.customerNumber,
-                endDate: null,
-                totalPrice: totalPrice,
-                orderStatus: "Pending Wash",
-                receiveFromWasherDate: null,
-                sendFromWasherDate: null,
-                staffID: await getUserId(),
-                outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
-                orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-                orderItemIds: orderItemIds, // Add order item IDs to order
-            });
-
-            setCart([]);
-            setOrderValues(initialOrderValues);
-            setCustomerDetails({ customerName: "", customerNumber: "" });
-            // alert("Order created successfully");
-            Toast.show({
-                type: 'success',
-                text1: 'Order Created',
-            });
-
-            // Print.printAsync({
-            //       html,
-            // });
-
-        } catch (error) {
-            console.error(error);
-            Alert.alert("Error creating order. Please try again.");
-        }
-    };
-
-    const deleteItem = (item) => {
-        /*
-        return alert(
-            "Are you sure you want to delete this item?",
-            [
-                {
-                    text: "Yes",
-                    onPress: () => {
-                        const index = cart.indexOf(item);
-                        console.log(index);
-                    }
-                },
-                {
-                    text: "Cancel",
-                    onPress: () => console.log("Cancelled`"),
-                    style: "cancel"
+        const { laundryItemName, typeOfServices, pricingMethod, price, quantity, weight } = createModalData;
+        if (pricingMethod === "Weight") {
+            const displayQuantity = weight + "kg";
+            const displayPrice = price * weight;
+            setSubTotal(subTotal + (price * weight));
+            setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, ["price"]: displayPrice, ["quantity"]: displayQuantity, weight }]);
+        } else {
+            let found = false;
+            cart.forEach(item => {
+                if (item.laundryItemName === laundryItemName && item.typeOfServices === typeOfServices
+                    && item.pricingMethod === pricingMethod && item.price === price) {
+                    item.quantity += quantity;
+                    found = true;
+                    setCart(cart);
                 }
-            ]
-        );
-        */
-        const cartCopy = cart.map((x) => x);
-        let index = cartCopy.indexOf(item);
-        console.log(index);
-        cartCopy.splice(index, 1);
-        //console.log("cartcopy", cartCopy);
+            });
+            if (!found) {
+                setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
+            }
+            setSubTotal(subTotal + (price * quantity));
+        }
+
+        setCreateModalVisible(false);
+    }
+
+    const removeFromCart = (item) => {
+        const cartCopy = cart.filter((x) => x != item);
+        if (item.pricingMethod === "Weight") {
+            setSubTotal(subTotal - (item.price));
+        } else {
+            setSubTotal(subTotal - (item.price * item.quantity));
+        }
+
         setCart(cartCopy);
     }
 
-    return (
-        <ScrollView>
-            <View>
-                <TabView
-                    navigationState={{ index, routes }}
-                    renderScene={renderScene}
-                    onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#0B3270' }} />}
-                />
+    const handleItemClick = (laundryItem) => {
+        if (laundryItem.pricingMethod === "Range") {
+            setCreateModalData({ ...laundryItem, ["price"]: laundryItem.fromPrice, ["quantity"]: 1 });
+        } else if (laundryItem.pricingMethod === "Weight") {
+            // minimum load for weight is 3kg
+            setCreateModalData({ ...laundryItem, ["weight"]: 3, ["quantity"]: 1 });
+        } else {
+            setCreateModalData({ ...laundryItem, ["quantity"]: 1 });
+        }
+        setCreateModalVisible(true);
+    }
 
-                {/* Create Modal */}
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={createModalVisible}
-                >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item to Cart</Text>
-                                <Text style={styles.itemText}>Item Name: {createModalData.laundryItemName} </Text>
-                                <Text style={styles.itemText}>Type of Service: {createModalData.typeOfServices} </Text>
-                                <Text style={styles.itemText}>Pricing Method: {createModalData.pricingMethod} </Text>
-                                <TextBox placeholder="Description" onChangeText={text => handleChange(text, "description")} defaultValue={createModalData.description} />
-                                <Text style={styles.itemText}>Input price: </Text>
-                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                    <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+    const filteredLaundryItemList = laundryItems.filter((laundryItem) => {
+        if (selectedButtonFilter && selectedButtonFilter !== laundryItem.typeOfServices) {
+            return false;
+        }
+        return laundryItem.laundryItemName.toLowerCase().includes(searchQuery.toLowerCase())
+    });
+
+    const handleMinus = () => {
+        setCreateModalData(prevState => {
+            if (prevState.quantity >= 2) {
+                return {
+                    ...prevState,
+                    quantity: prevState.quantity - 1
+                }
+            } else {
+                return {
+                    ...prevState
+                }
+            }
+        })
+    }
+
+    const handlePlus = () => {
+        setCreateModalData(prevState => {
+            return {
+                ...prevState,
+                quantity: prevState.quantity + 1
+            }
+        })
+    }
+
+    const handleFilterButtonClick = (serviceName) => {
+        if (selectedButtonFilter == serviceName) {
+            setSelectedButtonFilter("");
+        } else {
+            setSelectedButtonFilter(serviceName);
+        }
+    }
+
+    const handleNavigateToSummary = () => {
+        if (cart.length == 0) {
+            alert("Cart is empty!", "", [
+                {
+                    text: "Ok",
+                    onPress: () => {
+                        console.log("Closed");
+                    },
+                },
+            ]);
+        } else {
+            navigation.navigate('Order Summary', { cart: cart, subTotal: subTotal })
+        }
+    }
+
+    return (
+        <View style={{ flex: 1 }}>
+            <ScrollView>
+                <View style={styles.orderPage}>
+                    <View style={styles.filterContainer}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Search laundry item"
+                            />
+                            <View style={styles.buttonContainer}>
+                                {
+                                    laundryCategories.map((category, key) =>
+                                        <View key={key} style={{ marginRight: 10 }}>
+                                            <TouchableOpacity
+                                                onPress={() => handleFilterButtonClick(category.serviceName)}
+                                                style={
+                                                    category.serviceName === selectedButtonFilter
+                                                        ? styles.selectedButton
+                                                        : styles.filterButton
+                                                }
+                                            >
+                                                <Text style={
+                                                    category.serviceName === selectedButtonFilter
+                                                        ? { color: "white" }
+                                                        : { color: "black" }
+                                                }>
+                                                    {category.serviceName}</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )
+                                }
+                            </View>
+                        </View>
+
+                        {filteredLaundryItemList.map((laundryItem, key) =>
+                            <View key={key} style={styles.container} >
+                                <TouchableOpacity style={styles.card_template} onPress={() => handleItemClick(laundryItem)}>
+                                    {/* to store url of icon in db */}
+                                    <Image source={'https://picsum.photos/200'} style={styles.card_image} />
+                                    <View style={styles.text_container}>
+                                        <Text style={styles.card_title}>{laundryItem.typeOfServices} {laundryItem.laundryItemName}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                    <View style={styles.totalContainer}>
+                        {/* cart headers */}
+                        <View style={styles.tableHeader}>
+                            <Text style={styles.tableHeaderText}>Service</Text>
+                            <Text style={styles.tableHeaderText}>Item Name</Text>
+                            <Text style={styles.tableHeaderText}>Price</Text>
+                            <Text style={styles.tableHeaderText}>Qty</Text>
+                            <Text style={styles.tableHeaderText}>Action</Text>
+                        </View>
+                        {/* cart display */}
+                        <ScrollView style={styles.tableBody}>
+                            {cart.map((item, index) => (
+                                <View key={index} style={styles.tableRow}>
+                                    <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
+                                    <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
+                                    <Text style={styles.tableRowText}>{item.price}</Text>
+                                    <Text style={styles.tableRowText}>{item.quantity}</Text>
+                                    <FontAwesome
+                                        style={styles.deleteIcon}
+                                        name="trash-o"
+                                        color='red'
+                                        onPress={() => removeFromCart(item)}
+                                    />
                                 </View>
+                            ))}
+                        </ScrollView>
+
+                        <View style={styles.checkoutSection}>
+                            <TextBox style={styles.textBox} value={"Total Price: $" + subTotal} />
+                            <Btn onClick={() => handleNavigateToSummary()} title="Checkout" style={{ width: "48%", margin: 5 }} />
+                        </View>
+                    </View>
+                </View>
+            </ScrollView>
+
+            {/* Add to cart modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={createModalVisible}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <View style={styles.view}>
+                            
+                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
+                            <View style={styles.textView}>
+                            <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
+                            <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
+                            {createModalData != undefined && createModalData.pricingMethod !== "Weight"
+                                ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
+                                : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
+                            }
+                            </View>
+                            {createModalData != undefined && createModalData.pricingMethod === "Range" &&
+                                <View style={styles.rangeText}>
+                                    <Slider
+                                        onValueChange={text => handleChange(text, "price")}
+                                        minimumValue={parseInt(createModalData.fromPrice)}
+                                        maximumValue={parseInt(createModalData.toPrice)}
+                                        value={parseInt(createModalData.fromPrice)}
+                                        step={1}
+                                    />
+                                </View>
+                            }
+                            {createModalData != undefined && createModalData.pricingMethod == "Flat" &&
+                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                            }
+                            {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
+                                <TextBox placeholder="kg" onChangeText={text => handleChange(text, "weight")} defaultValue={createModalData.weight} />
+                            }
+
+                            {createModalData != undefined && createModalData.pricingMethod !== "Weight" &&
+                                <View style={styles.quantityContainer}>
+                                    <TouchableOpacity
+                                        onPress={() => handleMinus()}>
+                                        <Entypo name="minus" size={24} color="black" />
+                                    </TouchableOpacity>
+                                    <View style={styles.quantityBorder}>
+                                        <TextInput style={styles.quantityTextBox} placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} value={createModalData.quantity} />
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => handlePlus()}>
+                                        <Entypo name="plus" size={24} color="black" />
+                                    </TouchableOpacity>
+                                </View>
+                            }
+
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
+                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
                             </View>
                         </View>
                     </View>
-                </Modal>
-
-                {/* Cart Table */}
-                <View style={styles.tableContainer}>
-                    <View style={styles.tableHeader}>
-                        <Text style={styles.tableHeaderText}>Item Type</Text>
-                        <Text style={styles.tableHeaderText}>Description</Text>
-                        <Text style={styles.tableHeaderText}>Item Name</Text>
-                        <Text style={styles.tableHeaderText}>Price</Text>
-                    </View>
-                    <ScrollView style={styles.tableBody}>
-                        {cart.map((item, index) => (
-                            <View key={index} style={styles.tableRow}>
-                                <Text style={styles.tableRowText}>{item.typeOfServices}</Text>
-                                <Text style={styles.tableRowText}>{item.description}</Text>
-                                <Text style={styles.tableRowText}>{item.laundryItemName}</Text>
-                                <Text style={styles.tableRowText}>{item.price}</Text>
-                                <FontAwesome
-                                    style={styles.outletIcon}
-                                    name="trash-o"
-                                    color='red'
-                                    onPress={() => deleteItem(item)}
-                                />
-                            </View>
-                        ))}
-                    </ScrollView>
                 </View>
-                <View style={{ alignItems: "center", marginBottom: "5%", marginLeft: "5%", width: "90%" }}>
-                    <TextBox style={styles.textBox} placeholder="Customer Name" onChangeText={name => setCustomerDetails({ ...customerDetails, customerName: name })} value={customerDetails.customerName} />
-                    <TextBox style={styles.textBox} placeholder="Customer Number" onChangeText={number => setCustomerDetails({ ...customerDetails, customerNumber: number })} value={customerDetails.customerNumber} />
-                </View>
-                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
-                    <Text style={styles.checkoutButtonText}>Checkout</Text>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
-    );
+            </Modal>
+        </View>
+    )
 }
+
 const styles = StyleSheet.create({
-    tableContainer: {
-        marginTop: 20,
-        marginBottom: 20,
-        marginLeft: "auto",
-        marginRight: "auto",
-        backgroundColor: "#fff",
-        borderRadius: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.2,
-        elevation: 3,
-        width: "80%",
-    },
-
-    tableHeader: {
+    rangeText: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ccc",
-    },
-    tableHeaderText: {
-        fontWeight: "bold",
-        fontSize: 16,
-        flex: 1,
-    },
-    tableBody: {
-    },
-    tableRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignContent: "center",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ccc",
-        marginBottom: 20
-    },
-    tableRowText: {
-        marginTop: 8,
-        fontSize: 16,
-        flex: 1,
-    },
-
-    checkoutButton: {
-        backgroundColor: "#0B3270",
-        padding: 16,
-        borderRadius: 10,
-        width: "80%",
-        marginLeft: "auto",
-        marginRight: "auto",
-        marginBottom: 20,
-    },
-    checkoutButtonText: {
-        color: "#fff",
-        textAlign: "center",
-        fontSize: 18,
-    },
-    button: {
-        height: 60,
-        width: "40%",
-        backgroundColor: "#0B3270",
-        color: "#fff",
-        fontSize: 20,
-        borderRadius: 25,
-        marginTop: 20,
-        marginLeft: "auto",
-        marginRight: "auto"
-    },
-    cardBody: {
-        padding: 16,
-    },
-    itemContainer: {
-        backgroundColor: colors.lightGray,
-        flex: 1,
-        flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: "center",
-        paddingVertical: 8,
-        paddingRight: 20,
+        width: "92%",
+        margin: 20,
     },
-    itemText: {
-        flex: 1,
-        fontSize: 16,
+    quantityContainer: {
+        flexDirection: 'row',
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    quantityBorder: {
+        width: "48%",
+        margin: 20,
+    },
+    quantityTextBox: {
+        height: 42,
+        borderRadius: 25,
+        borderColor: colors.darkBlue,
+        borderWidth: 1,
+        textAlign: "center",
+    },
+    searchInput: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: colors.gray,
+        paddingHorizontal: 10,
+        fontSize: 18,
+        backgroundColor: colors.white,
+        marginVertical: 10,
     },
     cardButtons: {
         flexDirection: "row",
         justifyContent: 'space-between',
     },
-    card: {
-        backgroundColor: '#fff',
-        width: "60%",
-        marginLeft: "auto",
-        marginRight: "auto",
-        marginVertical: 10,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        elevation: 3,
+    searchContainer: {
+        justifyContent: "center",
+        alignContent: "center",
+        width: "96%",
     },
-    itemName: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 16,
-    },
-    outletIcon: {
-        fontSize: 25,
+    container: {
         margin: 10,
+    },
+    card_template: {
+        width: 250,
+        height: 250,
+        boxShadow: "10px 10px 17px -12px rgba(0,0,0,0.75)"
+    },
+    card_image: {
+        width: 250,
+        height: 250,
+        borderRadius: 10
+    },
+    text_container: {
+        position: "absolute",
+        width: 250,
+        height: 30,
+        bottom: 0,
+        padding: 5,
+        backgroundColor: "rgba(0,0,0, 0.3)",
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10
+    },
+    textBox: {
+        fontWeight: "bold",
+        fontSize: 14,
+    },
+    deleteIcon: {
+        fontSize: 20,
+        margin: 10,
+    },
+    card_title: {
+        color: "white",
     },
     view: {
         width: "100%",
         justifyContent: "center",
         alignItems: "center"
     },
-    btn: {
-        padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
-        justifyContent: "center",
-        alignItems: "center",
+    textView: {
+        width: "100%",
+        justifyContent: 'space-evenly',
+        alignItems: 'stretch'
     },
-    text: {
+    itemText: {
+        flex: 1,
         fontSize: 20,
-        fontWeight: "600",
-        color: "#fff"
     },
     centeredView: {
         flex: 1,
@@ -505,10 +438,11 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: '50%',
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
-        alignItems: 'center',
+        alignItems: 'justify',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -518,15 +452,85 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     },
-    textBox: {
-        width: "96%",
-        marginLeft: 13,
-        fontSize: 16,
-        padding: 10,
-        borderColor: "#0B3270",
-        borderWidth: 1,
-        borderRadius: 8,
-        backgroundColor: "#fff"
+    orderPage: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
     },
-});
-
+    filterContainer: {
+        flexDirection: 'row',
+        flex: 5,
+        flexWrap: 'wrap',
+        margin: 10,
+        justifyContent: 'space-evenly',
+        alignContent: 'flex-start',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+    },
+    filterButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: colors.darkBlue,
+        padding: 10,
+        borderRadius: 25
+    },
+    selectedButton: {
+        backgroundColor: colors.darkBlue,
+        borderWidth: 1,
+        borderColor: colors.darkBlue,
+        padding: 10,
+        borderRadius: 25
+    },
+    totalContainer: {
+        position: 'sticky',
+        flex: 2,
+        top: 10,
+        height: SCREEN_HEIGHT,
+        marginTop: 20,
+        marginBottom: 20,
+        marginRight: 15,
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        shadowOpacity: 0.2,
+        elevation: 3,
+    },
+    checkoutSection: {
+        alignItems: "center",
+        marginBottom: "5%",
+        width: "90%",
+        padding: 14
+    },
+    tableHeader: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+        padding: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+    },
+    tableHeaderText: {
+        fontWeight: "bold",
+        fontSize: 14,
+    },
+    tableRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: 'center',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+        marginBottom: 20
+    },
+    tableRowText: {
+        marginTop: 8,
+        fontSize: 12
+    },
+    image: {
+        width: 200,
+        height: 200,
+    }
+})
