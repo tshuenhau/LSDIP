@@ -101,7 +101,7 @@ export default function Orders({ navigation }) {
     const formatOrderDate = (date) => {
         //return date.toDate().toLocaleString();
         var convertedDate = date.toDate();
-        return convertedDate.getFullYear() + "-" + convertedDate.getMonth() + "-" + convertedDate.getDate();
+        return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
     };
 
     const handleCheck = (order) => {
