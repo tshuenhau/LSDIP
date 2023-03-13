@@ -15,6 +15,7 @@ import { firebase } from '../config/firebase'
 import { FontAwesome } from '@expo/vector-icons'
 import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
+import colors from '../colors';
 
 export default function MyProfile() {
 
@@ -171,19 +172,24 @@ export default function MyProfile() {
                     />
                     <View>
                         <Text style={styles.mainText}>{userDetails.name}</Text>
-                        <Text style={styles.textLabel}>Name</Text>
                     </View>
+                    {/*
                     <FontAwesome
                         style={styles.editIcon}
                         color="black"
                         name="edit"
                         onPress={() => setUpdateModalVisible(!updateModalVisible)}
-                    />
+    />*/}
                 </View>
                 <Text style={styles.roleText}>Role: {userDetails.role}</Text>
                 <Text style={styles.detailText}>Email: {userDetails.email}</Text>
                 <Text style={styles.detailText}>Phone Number: {userDetails.number}</Text>
-                <View style={styles.view}>
+                <View style={styles.btnView}>
+                    <TouchableOpacity
+                        onPress={() => setUpdateModalVisible(!updateModalVisible)}
+                        style={styles.btn}>
+                        <Text style={styles.password}>Edit Profile</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => setPasswordModalVisible(!passwordModalVisible)}
                         style={styles.btn}>
@@ -208,17 +214,6 @@ export default function MyProfile() {
                             <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={userDetails.name} />
                             <TextBox placeholder="laundry@email.com" onChangeText={text => handleChange(text, "email")} defaultValue={userDetails.email} />
                             <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} defaultValue={userDetails.number} />
-                            <View style={{
-                                width: "92%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
-                                <SelectList
-                                    data={roles}
-                                    setSelected={(val) => handleChange(val, "role")}
-                                    save="value"
-                                />
-                            </View>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                 <Btn onClick={() => updateDetails()} title="Update" style={{ width: "48%" }} />
                                 <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -298,10 +293,17 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
+    btnView: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row"
+        
+    },
     btn: {
         padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
+        borderRadius: 10,
+        backgroundColor: colors.darkBlue,
         justifyContent: "center",
         alignItems: "center",
         margin: 25,
@@ -323,11 +325,12 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
-        backgroundColor: 'white',
+        width: '50%',
+        backgroundColor: colors.white,
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: colors.shadowGray,
         shadowOffset: {
             width: 0,
             height: 2,
