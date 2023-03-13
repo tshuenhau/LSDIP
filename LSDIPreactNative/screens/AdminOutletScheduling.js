@@ -304,7 +304,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
     );
 
     const renderStaffModal = ({ item }) => (
-        <View style={styles.itemContainer}>
+        <View style={styles.staffContainer}>
             <View style={styles.cardBody}>
                 <Text style={styles.itemText}>{item.userName} </Text>
                 <Text style={styles.itemText}>{item.shiftName} </Text>
@@ -363,6 +363,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 data={selectedDateSchedule}
                                 keyExtractor={(item) => item.id}
                                 renderItem={renderStaffModal}
+                                
                                 ListEmptyComponent={
                                     <Text style={styles.noDatesText}>No staff allocated</Text>
                                 }
@@ -377,6 +378,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 />
                             </View>
                             <View style={styles.modalDropdown}>
+                           
                                 <SelectList
                                     data={shiftDetails.filter(s => s.type === "weekday")}
                                     setSelected={(val) => handleChange(val, "shiftID")}
@@ -396,7 +398,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                 <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <Text style={styles.modalHeader}>{selectedDate}</Text>
+                            <Text style={styles.modalHeader}>Date: {selectedDate}</Text>
                             <Text style={styles.modalTitle}>Roster</Text>
                             <FlatList
                                 data={selectedDateSchedule}
@@ -408,6 +410,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                             />
                             <Text style={styles.modalTitle}>Allocate Staff</Text>
                             <View style={styles.modalDropdown}>
+
                                 <SelectList
                                     data={staffDetails}
                                     setSelected={(val) => handleChange(val, "staffID")}
@@ -416,6 +419,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 />
                             </View>
                             <View style={styles.modalDropdown}>
+
                                 <SelectList
                                     data={shiftDetails.filter(s => s.type === "weekend")}
                                     setSelected={(val) => handleChange(val, "shiftID")}
@@ -500,6 +504,24 @@ const styles = StyleSheet.create({
         },
         elevation: 3,
     },
+    staffContainer: {
+        backgroundColor: colors.lightGray,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingRight: 20,
+        marginVertical: 10,
+        marginHorizontal: 16,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
+    },
     cardBody: {
         padding: 16,
     },
@@ -548,6 +570,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         backgroundColor: 'white',
+        width: '50%',
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
@@ -561,10 +584,10 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: 'bold',
         marginBottom: 10,
-        textAlign: 'center',
+        textAlign: "left",
     },
     modalButtons: {
         flexDirection: "row",
@@ -579,5 +602,9 @@ const styles = StyleSheet.create({
     },
     modalDropdown: {
         marginBottom: 20,
+            width: "92%",
+            borderRadius: 25,
+            marginTop: 20
+    
     }
 });

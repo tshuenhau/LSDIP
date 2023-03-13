@@ -26,7 +26,7 @@ const DeliveryScreen = ({ navigation, route }) => {
       const orders = db.collection('orders');
       orders
         .where("customerNumber", "==", curuser.number)
-        .where("orderStatus", "==", "Back From Washer")
+        .where("orderStatus", "==", "Back from Wash")
         .get()
         .then(querySnapshot => {
           const orders = [];
@@ -478,7 +478,7 @@ const AvailableTimingsModal = ({ date, onClose }) => {
               const batch = db.batch();
               selectedTime.orders.forEach((order) => {
                 const orderRef = db.collection('orders').doc(order.id);
-                batch.update(orderRef, { orderStatus: 'Back From Washer' });
+                batch.update(orderRef, { orderStatus: 'Back from Wash' });
               });
   
               return batch.commit();
