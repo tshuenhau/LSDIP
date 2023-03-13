@@ -5,6 +5,8 @@ import Btn from "../components/Button"
 import { firebase } from "../config/firebase";
 import Toast from 'react-native-toast-message';
 
+// depreciated
+
 export default function CreateAdmin({ navigation }) {
 
     const firestore = firebase.firestore;

@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     },
     topButtons: {
         width: "100%",
-        justifyContent: "center",
+        justifyContent: "space-between",
         alignItems: "center",
         flexDirection: "row",
         marginVertical: 10,
@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
     btn: {
         padding: 10,
         margin: 10,
+        marginHorizontal: 20,
         borderRadius: 25,
         backgroundColor: "#0B3270",
         justifyContent: "center",
