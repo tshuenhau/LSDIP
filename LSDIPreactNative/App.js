@@ -35,7 +35,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
-import CreateAdmin from './screens/CreateAdmin';
 import OrderSummary from './screens/OrderSummary';
 import Orders from './screens/Orders';
 

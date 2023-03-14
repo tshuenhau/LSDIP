@@ -27,9 +27,13 @@ import { Entypo } from '@expo/vector-icons';
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import CustomerOrderList from "../components/CustomerOrderList";
-import { color } from "react-native-reanimated";
+import Toast from 'react-native-toast-message';
 
 export default function Orders({ navigation }) {
+
+    const auth1 = firebase.auth;
+    const [user, setUser] = useState(null) // This user
+    const users = firebase.firestore().collection('users');
 
     const [orderList, setOrderList] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -39,7 +43,8 @@ export default function Orders({ navigation }) {
     const orders = firebase.firestore().collection("orders");
 
     useEffect(() => {
-        const unsubscribe = orders.onSnapshot((querySnapshot) => {
+        const query = orders.orderBy('orderDate', 'desc');
+        const unsubscribe = query.onSnapshot((querySnapshot) => {
             const orderList = [];
             querySnapshot.forEach((doc) => {
                 const {
@@ -65,13 +70,19 @@ export default function Orders({ navigation }) {
                     deliveryDate
                 });
             });
-            orderList.sort(function (a, b) {
-                return b.orderDate - a.orderDate;
-            });
             setOrderList(orderList);
         });
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        users.doc(auth1().currentUser.uid)
+            .get()
+            .then(user => {
+                setUser(user.data())
+                console.log(user)
+            })
+    }, [])
 
     const statuses = [
         { key: 1, value: "Pending Wash" },
@@ -118,14 +129,6 @@ export default function Orders({ navigation }) {
         setOrderList(updatedArray);
     };
 
-
-    // const auth1 = firebase.auth;
-
-    const [user, setUser] = useState(null) // This user
-    const users = firebase.firestore().collection('users');
-
-
-
     useEffect(() => {
         navigation.setOptions({
             headerRight: () => (
@@ -140,8 +143,6 @@ export default function Orders({ navigation }) {
             ),
         });
     }, [navigation]);
-
-
 
     const updateStatus = () => {
         const selectedOrders = orderList.filter((s) => s.isSelected);
@@ -162,7 +163,10 @@ export default function Orders({ navigation }) {
                         orderStatus: selectedStatus,
                     })
                     .then(() => {
-                        console.log(o.id, "updated");
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Status Updated',
+                        });
                     });
             });
             setUpdateModalVisible(false);
@@ -190,8 +194,8 @@ export default function Orders({ navigation }) {
                     />
                 </TouchableOpacity>
                 <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
-                <Text style={styles.orderNum}>{formatOrderNumber(order.id)}</Text>
-                <Text style={styles.orderNumber}>{order.customerName}</Text>
+                <Text style={styles.orderId}>{formatOrderNumber(order.id)}</Text>
+                <Text style={styles.orderCustomerName}>{order.customerName}</Text>
                 <Text style={styles.orderNum}>${order.totalPrice}</Text>
                 {order.orderStatus === "Pending Wash" && (<Text style={styles.pendingwash}>{order.orderStatus}</Text>)}
                 {order.orderStatus === "Out for Wash" && (<Text style={styles.outforwash}>{order.orderStatus}</Text>)}
@@ -242,98 +246,105 @@ export default function Orders({ navigation }) {
     );
 
     return (
-        <View>
-            <View style={styles.container}>
-                <View style={styles.createOrderContainer}>
-
-                    <View style={styles.buttonView}>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate("Create Order")}
-                            style={styles.btn}>
-                            <Text style={styles.text}>Create Order</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => setUpdateModalVisible(true)}
-                            style={styles.btn}>
-                            <Text style={styles.text}>Update Order</Text>
-                        </TouchableOpacity>
-                    </View>
+        <View style={{ flex: 1, }}>
+            <View style={{ marginLeft: "2.5%" }}>
+                <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+                <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+                    <Text>{auth.currentUser?.email}</Text>
                 </View>
-
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.searchInput}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder="Search by Order ID"
-                    />
-                    <FontAwesome name="search" size={20} color="black" />
-                </View>
-                <View style={styles.orders}>
-                    <View style={styles.tableHeader}>
-                        <Text style={styles.tableHeaderText}>Select</Text>
-                        <Text style={styles.tableHeaderText}>Date</Text>
-                        <Text style={styles.tableHeaderText}>Order Id</Text>
-                        <Text style={styles.tableHeaderText}>Customer</Text>
-                        <Text style={styles.tableHeaderText}>Price</Text>
-                        <Text style={styles.tableHeaderText}>Status</Text>
-                        <Text style={styles.tableHeaderText}>Action</Text>
+            </View>
+            <ScrollView>
+                <View style={styles.container}>
+                    <View style={styles.createOrderContainer}>
+                        <View style={styles.buttonView}>
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate("Create Order")}
+                                style={styles.btn}>
+                                <Text style={styles.text}>Create Order</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => setUpdateModalVisible(true)}
+                                style={styles.btn}>
+                                <Text style={styles.text}>Update Order</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <FlatList
-                        style={styles.list}
-                        data={filteredOrderList}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={renderItem}
-                        ListEmptyComponent={
-                            <Text style={styles.noDataText}>No Data Found!</Text>
-                        }
-                    />
 
-                    {/* update modal */}
-                    <Modal
-                        visible={udpateModalVisible}
-                        animationType="slide"
-                        transparent={true}
-                    >
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <View style={styles.view}>
-                                    <Text
-                                        style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
-                                    >
-                                        Update Status
-                                    </Text>
-                                    <SelectList
-                                        data={statuses}
-                                        setSelected={(val) => setSelectedStatus(val)}
-                                        save="value"
-                                        search={false}
-                                    />
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            width: "92%",
-                                        }}
-                                    >
-                                        <Btn
-                                            onClick={() => updateStatus()}
-                                            title="Update"
-                                            style={{ width: "48%" }}
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by Order ID"
+                        />
+                        <FontAwesome name="search" size={20} color="black" />
+                    </View>
+                    <View style={styles.orders}>
+                        <View style={styles.tableHeader}>
+                            <Text style={styles.tableHeaderText}>Select</Text>
+                            <Text style={styles.tableHeaderText}>Date</Text>
+                            <Text style={styles.tableHeaderText}>Order Id</Text>
+                            <Text style={styles.tableHeaderText}>Customer</Text>
+                            <Text style={styles.tableHeaderText}>Price</Text>
+                            <Text style={styles.tableHeaderText}>Status</Text>
+                            <Text style={styles.tableHeaderText}>Action</Text>
+                        </View>
+                        <FlatList
+                            style={styles.list}
+                            data={filteredOrderList}
+                            keyExtractor={(item, index) => index.toString()}
+                            renderItem={renderItem}
+                            ListEmptyComponent={
+                                <Text style={styles.noDataText}>No Data Found!</Text>
+                            }
+                        />
+
+                        {/* update modal */}
+                        <Modal
+                            visible={udpateModalVisible}
+                            animationType="slide"
+                            transparent={true}
+                        >
+                            <View style={styles.centeredView}>
+                                <View style={styles.modalView}>
+                                    <View style={styles.view}>
+                                        <Text
+                                            style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                                        >
+                                            Update Status
+                                        </Text>
+                                        <SelectList
+                                            data={statuses}
+                                            setSelected={(val) => setSelectedStatus(val)}
+                                            save="value"
+                                            search={false}
                                         />
-                                        <Btn
-                                            onClick={() => setUpdateModalVisible(false)}
-                                            title="Dismiss"
-                                            style={{ width: "48%", backgroundColor: "#344869" }}
-                                        />
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                width: "92%",
+                                            }}
+                                        >
+                                            <Btn
+                                                onClick={() => updateStatus()}
+                                                title="Update"
+                                                style={{ width: "48%" }}
+                                            />
+                                            <Btn
+                                                onClick={() => setUpdateModalVisible(false)}
+                                                title="Dismiss"
+                                                style={{ width: "48%", backgroundColor: "#344869" }}
+                                            />
+                                        </View>
                                     </View>
                                 </View>
                             </View>
-                        </View>
-                    </Modal>
+                        </Modal>
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         </View>
 
     )
@@ -405,67 +416,76 @@ const styles = StyleSheet.create({
         textAlign: "left",
         marginLeft: "11%",
     },
-    orderNumber: {
+    orderCustomerName: {
         fontSize: 15,
         width: "14%",
-        textAlign: "left",
-        //backgroundColor: colors.blue300,
-        marginLeft: "10%"
+        textAlign: "center",
+        marginLeft: "5%"
+    },
+    orderId: {
+        fontSize: 15,
+        width: "8%",
+        textAlign: "center",
+        marginLeft: "8%",
     },
     orderNum: {
         fontSize: 15,
         width: "8%",
-        textAlign: "left",
+        textAlign: "center",
         marginLeft: "5%",
     },
     pendingwash: {
         fontSize: 15,
         backgroundColor: colors.teal400,
-        padding: 3,
+        padding: 5,
         borderRadius: 15,
         color: "#fff",
-        marginLeft: "5%",
+        marginLeft: "7%",
         marginRight: "auto"
     },
     outforwash: {
         fontSize: 15,
         backgroundColor: colors.violet400,
-        padding: 3,
+        padding: 5,
         borderRadius: 15,
         color: "#fff",
-        marginLeft: "5%",
+        marginLeft: "7%",
         marginRight: "auto"
     },
     backfromwash: {
         fontSize: 15,
         backgroundColor: colors.blue400,
-        padding: 3,
+        padding: 5,
         borderRadius: 15,
         color: "#fff",
-        marginLeft: "5%",
+        marginLeft: "7%",
         marginRight: "auto"
     },
     pendingdelivery: {
         fontSize: 15,
         backgroundColor: colors.blue600,
-        padding: 3,
+        padding: 5,
         borderRadius: 15,
         color: "#fff",
-        marginLeft: "5%",
+        marginLeft: "7%",
         marginRight: "auto"
     },
     outfordelivery: {
         fontSize: 15,
         backgroundColor: colors.blue800,
-        padding: 3,
+        padding: 5,
         borderRadius: 15,
         color: "#fff",
-        marginLeft: "5%",
+        marginLeft: "7%",
         marginRight: "auto",
     },
     otherstatuses: {
         fontSize: 15,
-        marginLeft: "5%",
+        backgroundColor: colors.gray,
+        padding: 5,
+        borderRadius: 15,
+        color: "#fff",
+        marginLeft: "7%",
         marginRight: "auto"
     },
     cardBody: {
