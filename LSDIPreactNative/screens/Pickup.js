@@ -119,8 +119,6 @@ export default function Pickup({ navigation }) {
                 } else {
                     const db = firebase.firestore();
                     const user = firebase.auth().currentUser;
-                    // const selectedOrders = matchingOrders.map((order) => order.id);
-                    // console.log(selectedOrders);
 
                     if (user) {
                         console.log(selectedTime.split(' - ')[0]);
@@ -182,19 +180,6 @@ export default function Pickup({ navigation }) {
                                         setSelectedTimesList(newSelectedTimesList);
                                         setSelectedTime(null);
                                         setIsModalOpen(false);
-                                        // const batch = db.batch();
-                                        // console.log(matchingOrders);
-                                        // matchingOrders.forEach((order) => {
-                                        //     const orderRef = db.collection('orders').doc(order.id);
-                                        //     batch.update(orderRef, { orderStatus: 'Pending Delivery' });
-                                        // });
-                                        // batch.commit()
-                                        //     .then(() => {
-                                        //         console.log('Orders updated successfully');
-                                        //     })
-                                        //     .catch((error) => {
-                                        //         console.error('Error updating orders:', error);
-                                        //     });
                                     })
                                     .catch((error) => {
                                         console.error(error);
