@@ -11,6 +11,7 @@ export default function Pickup({ navigation }) {
     const today = moment().format("YYYY-MM-DD");;
 
     const [selectedDate, setSelectedDate] = useState(null);
+    const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
     const [currentMonthDays, setCurrentMonthDays] = useState([]);
     const [selectedTimesList, setSelectedTimesList] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -266,6 +267,58 @@ export default function Pickup({ navigation }) {
                 </View>
             </Modal>
         );
+    };
+
+    const handleDelete = (id) => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+
+        if (user) {
+            const docRef = db.collection('pickup_timings').doc(user.uid);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const selectedTime = doc.data().selected_times.find(
+                        (time) => time.date === id.date && time.time === id.time
+                    );
+                    const selectedTimes = doc.data().selected_times.filter(
+                        (time) => time.date !== id.date || time.time !== id.time
+                    );
+
+                    return docRef.set({
+                        selected_times: selectedTimes,
+                    }).then(() => {
+                        console.log('Selected time deleted for user with UID: ', user.uid);
+
+                        const newSelectedTimesList = selectedTimesList.filter(
+                            (item) => item.date !== id.date || item.time !== id.time
+                        );
+
+                        setSelectedTimesList(newSelectedTimesList);
+
+                        const selectedHour = id.time.split(' - ')[0];
+                        const shiftTime = selectedHour.split('00')[1];
+                        console.log(selectedHour);
+                        console.log(shiftTime);
+                        const docRef = db.collection('pickup_orders').doc(id.date);
+                        docRef.get().then((doc) => {
+                            const shiftData = doc.exists ? doc.data() : { am_shift: [], pm_shift: [] };
+                            if (shiftTime === 'am') {
+                                shiftData.am_shift = shiftData.am_shift.filter((id) => !user.uid);
+                            } else if (shiftTime === 'pm') {
+                                shiftData.pm_shift = shiftData.pm_shift.filter((id) => !user.uid);
+                            }
+                            return docRef.set(shiftData);
+                        }).catch((error) => {
+                            console.error(error);
+                        });
+                    }).catch((error) => {
+                        console.error(error);
+                    });
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
     };
 
     return (
