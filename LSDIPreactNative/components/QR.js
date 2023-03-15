@@ -65,6 +65,8 @@ export default function QR(props) {
           </View>
         </>
       )}
+
+      {/*
       <Button style={styles.button} title="Print QR" onPress={print}></Button>
       {Platform.OS === "ios" && (
         <>
@@ -77,7 +79,7 @@ export default function QR(props) {
             >{`Selected printer: ${selectedPrinter.name}`}</Text>
           ) : undefined}
         </>
-      )}
+          )} */}
     </View>
   );
 };

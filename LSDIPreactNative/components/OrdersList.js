@@ -208,8 +208,8 @@ export default function OrdersList({ navigation }) {
           <Text style={styles.orderDetails}>OutletId: {order.outletId}</Text>
           <Text style={styles.orderDetails}>Delivery Fee: when to add</Text>
           <Text style={styles.orderDetails}>Delivery Date: {order.deliveryDate}</Text>
-          <QR orderID={order.id}></QR>
-          {/*<OrderDetails data={order.id}></OrderDetails>*/}
+          {/*<QR orderID={order.id}></QR>
+          <OrderDetails data={order.id}></OrderDetails>*/}
         </View>
       )}
     </TouchableOpacity>
