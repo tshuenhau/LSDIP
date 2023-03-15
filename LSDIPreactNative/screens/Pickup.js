@@ -17,6 +17,27 @@ export default function Pickup({ navigation }) {
     const [duplicateMessage, setDuplicateMessage] = useState(null);
     const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
 
+    useEffect(() => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+        if (user) {
+            const docRef = db.collection('pickup_timings').doc(user.uid);
+            docRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const selectedTimes = doc.data().selected_times || [];
+                    console.log(selectedTimes);
+                    setSelectedTimesList(selectedTimes);
+                } else {
+                    setSelectedTimesList([]);
+                }
+            });
+        }
+    }, [handleMonthChange]);
+
+    const handleMonthChange = useCallback(({ year, month }) => {
+        setDisplayMonth(`${Number(year)}-${Number(month)}`);
+    }, []);
+
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
     };
