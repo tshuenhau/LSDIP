@@ -51,6 +51,7 @@ export default function VehicleModule() {
 
     //initial vehicle values
     const initialValues = {
+        driver: "",
         location: new firebase.firestore.GeoPoint(0, 0),
         mileage: 0,
         numberPlate: "",
@@ -61,6 +62,7 @@ export default function VehicleModule() {
     //Create data method 1
     function createVehicle() {
         addDoc(collection(db, "vehicles"), {
+            driver: "",
             location: new firebase.firestore.GeoPoint(0, 0),
             mileage: 0,
             numberPlate: numberPlate,
@@ -137,9 +139,10 @@ export default function VehicleModule() {
                 querySnapshot => {
                     const vehicles = []
                     querySnapshot.forEach((doc) => {
-                        const { location, mileage, numberPlate, vehicleStatus } = doc.data()
+                        const { driver, location, mileage, numberPlate, vehicleStatus } = doc.data()
                         vehicles.push({
                             id: doc.id,
+                            driver,
                             location,
                             mileage,
                             numberPlate,
@@ -220,6 +223,7 @@ export default function VehicleModule() {
         if (id != "") {
             console.log(upvalues)
             vehicle.doc(id).update({
+                driver: upvalues.driver,
                 location: upvalues.location,
                 mileage: upvalues.mileage,
                 numberPlate: upvalues.numberPlate,
@@ -273,6 +277,7 @@ export default function VehicleModule() {
             {expandedVehicle === item.id && (
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
+                        <Text style={styles.itemText}>Driver: {item.driver} </Text>
                         <Text style={styles.itemText}>Location: {item.location.latitude} ,{item.location.longitude} </Text>
                         <Text style={styles.itemText}>Mileage: {item.mileage} </Text>
                         <Text style={styles.itemText}>Number Plate: {item.numberPlate} </Text>
