@@ -245,13 +245,10 @@ const AvailableTimingsModal = ({ date, onClose }) => {
         const db = firebase.firestore();
         const user = firebase.auth().currentUser;
         const selectedOrders = matchingOrders.map((order) => order.id);
-        console.log(selectedOrders);
   
         if (user) {
-          console.log(selectedTime.split(' - ')[0]);
-          const selectedHour =  selectedTime.split(' - ')[0];
+          const selectedHour = selectedTime.split(' - ')[0];
           const shiftTime = selectedHour.split('00')[1];
-          console.log(shiftTime);
           const docRef = db.collection('shift_orders').doc(selectedDate);
   
           docRef.get()
@@ -260,24 +257,17 @@ const AvailableTimingsModal = ({ date, onClose }) => {
               if (doc.exists) {
                 shiftData = doc.data();
               } else {
-                shiftData = {
-                  am_shift: [],
-                  pm_shift: []
-                }
+                shiftData = {};
               }
   
-              const ordersToAdd = shiftTime === 'am' ? shiftData.am_shift.concat(selectedOrders) : shiftData.pm_shift.concat(selectedOrders);
-              console.log(shiftData);
-              console.log(ordersToAdd);
-              console.log(shiftTime);
-              if (shiftTime === 'am') {
-                shiftData.am_shift = ordersToAdd;
-              } else if (shiftTime === 'pm') {
-                shiftData.pm_shift = ordersToAdd;
+              // Check if orders exist for this date, and create an empty array if not
+              if (!shiftData[selectedDate]) {
+                shiftData[selectedDate] = [];
               }
-              console.log(shiftData);
-              console.log(shiftData.am_shift);
-              console.log(shiftData.pm_shift);
+  
+              // Add selected orders to the array for this date
+              shiftData[selectedDate].push(...selectedOrders);
+  
               return docRef.set(shiftData);
             })
             .then(() => {
@@ -308,7 +298,6 @@ const AvailableTimingsModal = ({ date, onClose }) => {
                   setSelectedTime(null);
                   setIsModalOpen(false);
                   const batch = db.batch();
-                  console.log(matchingOrders);
                   matchingOrders.forEach((order) => {
                     const orderRef = db.collection('orders').doc(order.id);
                     batch.update(orderRef, { orderStatus: 'Pending Delivery' });
@@ -332,6 +321,7 @@ const AvailableTimingsModal = ({ date, onClose }) => {
       }
     }
   };
+  
   
     return (
       <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
@@ -456,22 +446,16 @@ const AvailableTimingsModal = ({ date, onClose }) => {
   
             setSelectedTimesList(newSelectedTimesList);
   
-            const selectedHour =  id.time.split(' - ')[0];
-            const shiftTime = selectedHour.split('00')[1];
-            console.log(selectedHour);
-            console.log(shiftTime);
             const docRef = db.collection('shift_orders').doc(id.date);
             docRef.get().then((doc) => {
-              const shiftData = doc.exists ? doc.data() : { am_shift: [], pm_shift: [] };
+              const shiftData = doc.exists ? doc.data() : [];
               const ordersToRemove = selectedTime.orders.map((order) => order.id);
-              
-              if (shiftTime === 'am') {
-                shiftData.am_shift = shiftData.am_shift.filter((id) => !ordersToRemove.includes(id));
-              } else if (shiftTime === 'pm') {
-                shiftData.pm_shift = shiftData.pm_shift.filter((id) => !ordersToRemove.includes(id));
-              }
-              
-              return docRef.set(shiftData);
+              const updatedShiftData = shiftData.filter((item) => item.timing !== id.time).concat({
+                timing: id.time,
+                orders: shiftData.find((item) => item.timing === id.time) ? shiftData.find((item) => item.timing === id.time).orders.filter((id) => !ordersToRemove.includes(id)) : [],
+              });
+  
+              return docRef.set(updatedShiftData);
             })
             .then(() => {
               console.log('Orders removed from shift orders');
@@ -495,9 +479,9 @@ const AvailableTimingsModal = ({ date, onClose }) => {
         console.error(error);
       });
     }
-  };
+  };  
   
-  
+
 
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);

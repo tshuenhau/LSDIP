@@ -19,6 +19,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
 import alert from "../components/Alert";
 import QR from "../components/QR";
+import Toast from 'react-native-toast-message';
 
 if (
   Platform.OS === "android" &&

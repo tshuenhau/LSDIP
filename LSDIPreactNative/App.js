@@ -36,6 +36,7 @@ import Toast from 'react-native-toast-message';
 import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
+import Pickup from './screens/Pickup';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -236,6 +237,7 @@ function RootNavigator() {
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home} />
+            <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }} />
             <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
             <Drawer.Screen name='Payment' component={Payment} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
