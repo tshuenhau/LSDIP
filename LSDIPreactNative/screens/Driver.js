@@ -18,11 +18,9 @@ import colors from '../colors';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
-import { FontAwesome } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import alert from '../components/Alert';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, EvilIcons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 if (
     Platform.OS === 'android' &&
@@ -114,14 +112,47 @@ export default function Driver() {
     function startDelivery(id) {
         if (id != "") {
             alert(
-                "Confirm start of delivery?",
-                "This action cannot be reversed.",
+                "Start delivery?",
+                " ",
                 [
                     {
                         text: "Yes",
                         onPress: () => {
                             const order = doc(db, "orders", id);
                             const newStatus = {orderStatus : "Out for Delivery"}
+                            updateDoc(order, newStatus)
+                            .then(() => {
+                                console.log("Update Success")
+                            }).catch((err) => {
+                                console.log(err)
+                            })
+
+                        }
+                    },
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancelled`"),
+                        style: "cancel"
+                    }
+
+                ]
+            )
+            
+        }
+    }
+
+    //undo out of delivery function
+    function undoDelivery(id) {
+        if (id != "") {
+            alert(
+                "Revert to pending delivery?",
+                " ",
+                [
+                    {
+                        text: "Yes",
+                        onPress: () => {
+                            const order = doc(db, "orders", id);
+                            const newStatus = {orderStatus : "Pending Delivery"}
                             updateDoc(order, newStatus)
                             .then(() => {
                                 console.log("Update Success")
@@ -307,10 +338,18 @@ export default function Driver() {
                     <Text style={styles.orderNumber}>{item.orderStatus}</Text>
                 </View>
                 <View style={styles.cardHeaderIcon}>
+                    <EvilIcons 
+                    style={styles.outletIcon}
+                    name="undo" 
+                    size={24} 
+                    color="black"
+                    onPress={() => undoDelivery(item.id)} 
+                    />
                     <Ionicons 
                     style={styles.outletIcon} 
                     name="checkmark-done-sharp" 
-                    size={24} color="black" 
+                    size={24} 
+                    color="black" 
                     onPress={() => markDelivered(item.id)} 
                     />
                 </View>
