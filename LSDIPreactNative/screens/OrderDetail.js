@@ -17,6 +17,7 @@ import colors from '../colors';
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 if (
   Platform.OS === 'android' &&
@@ -221,7 +222,11 @@ export default function OrderPage(props) {
           orderItemId: selectedOrderItem.id,
           refundAmount: refundAmount,
           refundDetails: details,  
-        })
+        });
+        Toast.show({
+          type: 'success',
+          text1: 'Refund added',
+        });
       }
     })
     .catch(err => {
@@ -287,7 +292,7 @@ return (
     <View style={styles.container}>
       <View style={styles.buttonView}>
         <TouchableOpacity
-          onPress={() => props.navigation.navigate('Orders')}
+          onPress={() => props.navigation.navigate('Home')}
           style={styles.btn}>
           <Text style={styles.text}>Back</Text>
         </TouchableOpacity>
