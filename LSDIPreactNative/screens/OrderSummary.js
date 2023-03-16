@@ -178,7 +178,7 @@ export default function OrderSummary(props) {
                                 style={{marginLeft: 12, }}
                                 disabled={false}
                                 value={orderValues.pickup}
-                                onValueChange={() => {handleCheck(), handlePickUpChange(), setTotalPrice(subTotal + pickupfee)}}
+                                onValueChange={() => {handleCheck(), handlePickUpChange()}}
                                 />
                             </Text>
                         </View>
@@ -193,7 +193,7 @@ export default function OrderSummary(props) {
                                 <InvoiceLine label={"Pick up Fee"} value={pickupfee} />
                             </View>
                             <View >
-                                <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
+                                <InvoiceLine label={"Amount Due"} value={subTotal + pickupfee} total={true} />
                                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                                     <Text style={styles.checkoutButtonText}>Create Order</Text>
                                 </TouchableOpacity>
