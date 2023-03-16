@@ -29,4 +29,5 @@ export default {
     teal400: '#2dd4bf',
     teal500: '#14b8a6',
     violet400: '#a78bfa',
+    warning500: '#f97316'
 };

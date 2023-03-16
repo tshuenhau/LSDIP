@@ -220,6 +220,7 @@ export default function OrderPage(props) {
           orderId: orderId,
           orderItemId: selectedOrderItem.id,
           refundAmount: refundAmount,
+          refundMethod: refundMethod,
           refundDetails: details,  
         });
         Toast.show({
@@ -236,6 +237,7 @@ export default function OrderPage(props) {
     //const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
     const details = modalData.refundDetails;
     const refundAmount = modalData.refundAmount;
+    const refundMethod = modalData.refundMethod;
     console.log("cn now", cn);
     /*
     refunds.add({
@@ -280,7 +282,8 @@ const renderItem = ({ item }) => (
           refund();
         }}
       >
-        <MaterialCommunityIcons name="cash-refund" size={28} color="black" />
+        {/*<MaterialCommunityIcons name="cash-refund" size={28} color="black" /> */}
+        <Text style={styles.refund}>Refund</Text>
       </TouchableOpacity>
     </View>
   </View>
@@ -386,6 +389,11 @@ return (
               />
               <TextBox
                 style={styles.textBox}
+                placeholder="Refund Method"
+                onChangeText={(text) => handleChange(text, 'refundMethod')}
+              />
+              <TextBox
+                style={styles.textBox}
                 placeholder="Refund Details"
                 onChangeText={(text) => handleChange(text, 'refundDetails')}
               />
@@ -488,6 +496,16 @@ const styles = StyleSheet.create({
   cardButtons: {
     flexDirection: "row",
     justifyContent: 'space-between',
+  },
+  refund: {
+    fontSize: 12,
+    backgroundColor: colors.warning500,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginTop: 10
+    //marginLeft: "7%",
+    //marginRight: "auto"
   },
 
   list: {
