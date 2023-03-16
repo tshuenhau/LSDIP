@@ -15,6 +15,9 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
+import Checkbox from "expo-checkbox";
+import { sub } from 'react-native-reanimated';
+import { pick } from 'lodash';
 
 if (
     Platform.OS === 'android' &&
@@ -26,6 +29,7 @@ if (
 export default function OrderSummary(props) {
     const { cart } = props.route.params;
     const { subTotal } = props.route.params;
+    const [pickupfee, setPickUpFee] = useState(0);
     const [totalPrice, setTotalPrice] = useState(subTotal);
 
     const initialOrderValues = {
@@ -36,7 +40,8 @@ export default function OrderSummary(props) {
         pickupDate: "",
         deliveryDate: "",
         customerNumber: "",
-        description: ""
+        description: "",
+        pickup: false,
     }
 
     const [orderValues, setOrderValues] = useState(initialOrderValues);
@@ -110,6 +115,17 @@ export default function OrderSummary(props) {
             })
     };
 
+    function handleCheck(){
+        setOrderValues({...orderValues, pickup : !orderValues.pickup})
+    };
+
+    function handlePickUpChange() {
+        setPickUpFee(!orderValues.pickup * 10)
+    }
+
+
+    
+
     const renderItem = ({ item }) => (
         <View style={styles.cardHeader}>
             <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
@@ -157,6 +173,14 @@ export default function OrderSummary(props) {
                             <TextBox style={styles.textBox} onChangeText={number => setOrderValues({ ...orderValues, customerNumber: number })} />
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
+                            <Text style={styles.checkoutDetails}>Do you need laundry pick up? ($10) 
+                                <Checkbox
+                                style={{marginLeft: 12, }}
+                                disabled={false}
+                                value={orderValues.pickup}
+                                onValueChange={() => {handleCheck(), handlePickUpChange(), setTotalPrice(subTotal + pickupfee)}}
+                                />
+                            </Text>
                         </View>
                         <View style={styles.orderDetails}>
                             <Text style={styles.subTotal}>Order Details</Text>
@@ -166,9 +190,10 @@ export default function OrderSummary(props) {
                                 <InvoiceLine label={"Membership Discount"} value={0} />
                                 {/* pending CRM module */}
                                 <InvoiceLine label={"Voucher Discount"} value={0} />
+                                <InvoiceLine label={"Pick up Fee"} value={pickupfee} />
                             </View>
                             <View >
-                                <InvoiceLine label={"Amount Due"} value={subTotal} total={true} />
+                                <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
                                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                                     <Text style={styles.checkoutButtonText}>Create Order</Text>
                                 </TouchableOpacity>
