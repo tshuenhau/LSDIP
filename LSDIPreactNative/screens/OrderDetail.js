@@ -156,14 +156,13 @@ export default function OrderPage(props) {
   }
   const addOrderItem1 = () => {
     const selectedItem = modalData.typeOfServices;
-    const selectedItemName = modalData.laundryItemName;
     // Create a new order item document in the 'orderItem' collection
     // Get the values of description and price from the state modalData
     const { price } = modalData;
     firebase.firestore().collection('orderItem').add({
-      laundryItemName: selectedItemName,
+      laundryItemName: selectedItem.split("--")[1],
       //typeOfServices: selectedItem.split(' ')[1],
-      typeOfServices: selectedItem.split(' ')[0],
+      typeOfServices: selectedItem.split("--")[0],
       price: price,
       orderId: orderId,
     }).then((docRef) => {
@@ -342,20 +341,10 @@ return (
                 }}>
                 <SelectList
                   data={laundryItemsData.map(
-                    (item) => item.typeOfServices + ' ' + item.laundryItemName
+                    (item) => item.typeOfServices + "--" + item.laundryItemName
                     //(item) => item.typeOfServices
                   )}
                   setSelected={(val) => handleChange(val, 'typeOfServices')}
-                  save="value"
-                />
-                <SelectList
-                  style={{
-                    marginTop: 15
-                  }}
-                  data={laundryItemsData.map(
-                    (item) => item.laundryItemName
-                  )}
-                  setSelected={(val) => handleChange(val, 'laundryItemName')}
                   save="value"
                 />
               </View>
