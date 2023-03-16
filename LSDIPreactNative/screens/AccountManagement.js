@@ -43,9 +43,12 @@ export default function AccountManagement() {
 
     const initialValues = {
         name: "",
-        role: "",
         email: "",
+        role: "",
+        salary: "",
+        overtimeRate: "",
         number: "",
+        address: "",
         pwd: "",
         pwd2: ""
     };
@@ -58,7 +61,7 @@ export default function AccountManagement() {
     //for admin to create Admin, Staff, Driver
     //Customer only limit to customer signup on their own
     function SignUp() {
-        const { email, pwd, pwd2, name, role, number } = values
+        const { email, pwd, pwd2, name, role, number, salary, overtimeRate, address } = values
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -67,13 +70,17 @@ export default function AccountManagement() {
                         name,
                         role,
                         email,
-                        number
+                        number,
+                        salary,
+                        overtimeRate,
+                        address
                     })
                     Toast.show({
                         type: 'success',
                         text1: 'Account created',
                     });
                     setValues(initialValues);
+                    setCreateModalVisible(false);
                 })
                 .catch((error) => {
                     alert(error.message)
@@ -95,13 +102,16 @@ export default function AccountManagement() {
         const unsubscribe = userDatabase.onSnapshot(querySnapshot => {
             const users = [];
             querySnapshot.forEach(doc => {
-                const { email, name, number, role } = doc.data();
+                const { email, name, number, role, address, salary, overtimeRate } = doc.data();
                 users.push({
                     id: doc.id,
                     email,
                     name,
                     number,
-                    role
+                    role,
+                    address,
+                    salary,
+                    overtimeRate
                 });
             });
             setUsers(users)
@@ -332,16 +342,18 @@ export default function AccountManagement() {
             userDatabase.doc(updateModalData.id)
                 .update({
                     name: updateModalData.name,
-                    number: updateModalData.number,
-                    email: updateModalData.email,
                     role: updateModalData.role,
+                    salary: updateModalData.salary,
+                    overtimeRate: updateModalData.overtimeRate,
+                    number: updateModalData.number,
+                    address: updateModalData.address,
                 }).then(() => {
                     Toast.show({
                         type: 'success',
                         text1: 'User updated',
                     });
                     console.log("Update Success")
-                    setUpdateModalVisible(!updateModalVisible);
+                    setUpdateModalVisible(false);
                 }).catch((err) => {
                     console.log(err)
                 })
@@ -386,8 +398,6 @@ export default function AccountManagement() {
                             <View style={styles.view}>
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update User</Text>
                                 <TextBox placeholder={updateModalData.name} onChangeText={text => handleChange(text, "name")} />
-                                <TextBox placeholder={updateModalData.email} onChangeText={text => handleChange(text, "email")} />
-                                <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
                                 <View style={{
                                     width: "92%",
                                     borderRadius: 25,
@@ -401,6 +411,10 @@ export default function AccountManagement() {
                                         save="value"
                                     />
                                 </View>
+                                <TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
+                                <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
+                                <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
+                                <TextBox placeholder={updateModalData.address} onChangeText={text => handleChange(text, "address")} />
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                                     <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
                                     <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
@@ -423,6 +437,7 @@ export default function AccountManagement() {
                                 <TextBox placeholder="Full Name" onChangeText={text => handleCreateChange(text, "name")} />
                                 <TextBox placeholder="Email Address" onChangeText={text => handleCreateChange(text, "email")} />
                                 <TextBox placeholder="Phone Number" onChangeText={text => handleCreateChange(text, "number")} />
+                                <TextBox placeholder="Address" onChangeText={text => handleCreateChange(text, "address")} />
                                 <View style={{
                                     width: "92%",
                                     borderRadius: 25,
@@ -436,10 +451,12 @@ export default function AccountManagement() {
                                         save="value"
                                     />
                                 </View>
+                                <TextBox placeholder="Salary ($/h)" onChangeText={text => handleCreateChange(text, "salary")} />
+                                <TextBox placeholder="Overtime Rate" onChangeText={text => handleCreateChange(text, "overtimeRate")} />
                                 <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd")} />
                                 <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd2")} />
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
-                                    <Btn onClick={() => SignUp()} title="Create Admin" style={{ width: "48%" }} />
+                                    <Btn onClick={() => SignUp()} title="Create User" style={{ width: "48%" }} />
                                     <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
                                 </View>
                             </View>
