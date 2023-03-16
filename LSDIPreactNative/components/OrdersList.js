@@ -34,8 +34,15 @@ export default function OrdersList({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
+  const [udpateModal1Visible, setUpdateModal1Visible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const orders = firebase.firestore().collection("orders");
+  const refunds = firebase.firestore().collection("refunds");
+  const [refundList, setRefundList] = useState([]);
+  const [refund, setRefund] = useState(null);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundDetails, setRefundDetails] = useState("");
+  const [refundMethod, setRefundMethod] = useState("");
 
   useEffect(() => {
     const query = orders.orderBy('orderDate', 'desc');
@@ -51,6 +58,10 @@ export default function OrdersList({ navigation }) {
           orderStatus,
           totalPrice,
           deliveryDate,
+          pickupDate,
+          sendFromWasherDate,
+          receiveFromWasherDate,
+          endDate
         } = doc.data();
         orderList.push({
           isSelected: false,
@@ -62,12 +73,35 @@ export default function OrdersList({ navigation }) {
           outletId,
           orderStatus,
           totalPrice,
-          deliveryDate
+          deliveryDate,
+          pickupDate,
+          sendFromWasherDate,
+          receiveFromWasherDate,
+          endDate
         });
       });
       setOrderList(orderList);
     });
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    refunds.onSnapshot(querySnapshot => {
+      const refundList = [];
+      querySnapshot.forEach(doc => {
+        const { customerName, orderId, orderItemId, refundAmount, refundDetails, refundMethod } = doc.data();
+          refundList.push({
+            id: doc.id,
+            customerName,
+            orderId,
+            orderItemId,
+            refundAmount,
+            refundDetails,
+            refundMethod
+          })
+      });
+      setRefundList(refundList);
+    });
   }, []);
 
   const statuses = [
@@ -76,10 +110,11 @@ export default function OrdersList({ navigation }) {
     { key: 3, value: "Back from Wash" },
     { key: 4, value: "Pending Delivery" },
     { key: 5, value: "Out for Delivery" },
-    { key: 6, value: "Closed" },
+    { key: 6, value: "Refunded" },
+    { key: 7, value: "Closed" },
     // for orders with problems
-    { key: 7, value: "Case" },
-    { key: 8, value: "Void" },
+    { key: 8, value: "Case" },
+    { key: 9, value: "Void" },
   ];
 
   const toggleExpand = (id) => {
@@ -148,6 +183,16 @@ export default function OrdersList({ navigation }) {
     order.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const showRefundDetails = (orderid) => {
+    console.log(orderid);
+    const refund = refundList.find(element => element.orderId === orderid);
+    setRefund(refund);
+    setRefundAmount(refund.refundAmount);
+    setRefundDetails(refund.refundDetails);
+    setRefundMethod(refund.refundMethod);
+    //console.log(refund);
+  }
+
   const renderItem = ({ item: order }) => (
     <TouchableOpacity
       style={styles.card}
@@ -173,6 +218,7 @@ export default function OrdersList({ navigation }) {
         {order.orderStatus === "Back from Wash" && (<Text style={styles.backfromwash}>{order.orderStatus}</Text>)}
         {order.orderStatus === "Pending Delivery" && (<Text style={styles.pendingdelivery}>{order.orderStatus}</Text>)}
         {order.orderStatus === "Out for Delivery" && (<Text style={styles.outfordelivery}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Refunded" && (<Text style={styles.refunded}>{order.orderStatus}</Text>)}
         {order.orderStatus === "Closed" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
         {order.orderStatus === "Case" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
         {order.orderStatus === "Void" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
@@ -204,13 +250,25 @@ export default function OrdersList({ navigation }) {
       </View>
       {expandedOrder === order.id && (
         <View style={styles.cardBody}>
-          <Text style={styles.orderDetails}>Customer Number: {order.customerNumber}</Text>
-          <Text style={styles.orderDetails}>Name: {order.customerName}</Text>
-          <Text style={styles.orderDetails}>OutletId: {order.outletId}</Text>
-          <Text style={styles.orderDetails}>Delivery Fee: when to add</Text>
-          <Text style={styles.orderDetails}>Delivery Date: {order.deliveryDate}</Text>
-          {/*<QR orderID={order.id}></QR>
-          <OrderDetails data={order.id}></OrderDetails>*/}
+          <Text style={styles.orderDetails}><b>OutletId: </b>{order.outletId}</Text>
+          <Text style={styles.orderDetails}><b>Customer Number: </b>{order.customerNumber}</Text>
+          {order.customerAddress !== "" && (<Text style={styles.orderDetails}><b>Customer Address: </b>{order.customerAddress}</Text>)}
+          {order.pickupDate !== "" && (<Text style={styles.orderDetails}><b>Pick Up Date: </b>{order.pickupDate}</Text>)}
+          {order.sendFromWasherDate !== "" && (<Text style={styles.orderDetails}><b>Send to Washer Date: </b>{order.sendFromWasherDate}</Text>)}
+          {order.receiveFromWasherDate !== "" && (<Text style={styles.orderDetails}><b>Receive from Washer Date: </b>{order.receiveFromWasherDate}</Text>)}
+          {order.deliveryDate !== "" && (<Text style={styles.orderDetails}><b>Delivery Date: </b>{order.deliveryDate}</Text>)}
+          {order.endDate !== "" && (<Text style={styles.orderDetails}><b>End Date: </b>{order.endDate}</Text>)}
+          <Text style={styles.orderDetails}><b>Delivery Fee: </b>when to add</Text>
+          {order.orderStatus === "Refunded" && (
+            <TouchableOpacity
+              onPress={() => {
+                showRefundDetails(order.id);
+                setUpdateModal1Visible(true)
+              }}>
+              <Text style={styles.refunddetailsbtn}>Refund Details</Text>
+            </TouchableOpacity>)}
+          {/* <QR orderID={order.id}></QR>*/}
+          {/*<OrderDetails data={order.id}></OrderDetails>*/}
         </View>
       )}
     </TouchableOpacity>
@@ -232,15 +290,16 @@ export default function OrdersList({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search by Order ID"
-        />
-        <FontAwesome name="search" size={20} color="black" />
+      <View style={styles.searchnfilter}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search by Order ID"
+          />
+          <FontAwesome name="search" size={20} color="black" />
+        </View>
       </View>
       <View style={styles.orders}>
         <View style={styles.tableHeader}>
@@ -305,6 +364,40 @@ export default function OrdersList({ navigation }) {
             </View>
           </View>
         </Modal>
+        <Modal
+          visible={udpateModal1Visible}
+          animationType="slide"
+          transparent={true}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.dview}>
+                <Text
+                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                >
+                  Refund Details
+                </Text>
+                <Text style={styles.refunddetails}><b>Refund Amount: </b>{refundAmount}</Text>
+                <Text style={styles.refunddetails}><b>Refund Method: </b>{refundMethod}</Text>
+                <Text style={styles.refunddetails}><b>Refund Details:</b> {refundDetails}</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "92%",
+                  }}
+                >
+                  <Btn
+                    onClick={() => setUpdateModal1Visible(false)}
+                    title="Dismiss"
+                    style={{ width: "48%", backgroundColor: "#344869" }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </View>
   );
@@ -317,6 +410,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: '2%',
     width: '95%'
+  },
+  searchnfilter: {
+    flexDirection: 'row',
   },
   searchContainer: {
     width: "96%",
@@ -439,6 +535,15 @@ const styles = StyleSheet.create({
     marginLeft: "7%",
     marginRight: "auto",
   },
+  refunded: {
+    fontSize: 15,
+    backgroundColor: colors.warning500,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto"
+  },
   otherstatuses: {
     fontSize: 15,
     backgroundColor: colors.gray,
@@ -447,6 +552,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginLeft: "7%",
     marginRight: "auto"
+  },
+  refunddetailsbtn: {
+    fontSize: 15,
+    backgroundColor: colors.warning500,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    width: "15%",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  refunddetails: {
+    fontSize: 15,
+    textAlign: "left"
   },
   cardBody: {
     backgroundColor: colors.blue50,
@@ -494,6 +613,11 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center"
+  },
+  dview: {
+    width: "100%",
+    justifyContent: "left",
+    alignItems: "left"
   },
   centeredView: {
     flex: 1,

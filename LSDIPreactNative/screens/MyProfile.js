@@ -10,21 +10,13 @@ import {
 import React, { useState, useEffect } from 'react'
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
-import { SelectList } from 'react-native-dropdown-select-list'
 import { firebase } from '../config/firebase'
-import { FontAwesome } from '@expo/vector-icons'
+import { FontAwesome, Entypo } from '@expo/vector-icons';
 import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
 
 export default function MyProfile() {
-
-    const roles = [
-        { key: '1', value: 'Admin' },
-        { key: '2', value: 'Staff' },
-        { key: '3', value: 'Driver' },
-        { key: '3', value: 'Customer' },
-    ]
 
     const initialValues = {
         email: "",
@@ -77,10 +69,8 @@ export default function MyProfile() {
     }
 
     const updateDetails = () => {
-        if (updateModalData.email &&
-            updateModalData.name &&
-            updateModalData.number &&
-            updateModalData.role) {
+        if (updateModalData.name &&
+            updateModalData.number) {
             users.doc(updateModalData.uid)
                 .update({
                     email: updateModalData.email,
@@ -163,38 +153,69 @@ export default function MyProfile() {
         }
     };
 
+    const LeftCardDetails = ({ label, text }) => {
+        return (
+            <View style={styles.leftCardDetailsContainer}>
+                <Text style={styles.leftCardLabel}>{label}</Text>
+                <Text style={styles.leftCardText}>{text}</Text>
+            </View>
+        )
+    }
+
+    const ProfileDetail = ({ label, text }) => {
+        return (
+            <View style={styles.profileDetailContainer}>
+                <Text style={styles.itemLabel}>{label}</Text>
+                <Text style={styles.itemText}>{text}</Text>
+            </View >
+        );
+    }
+
     return (
-        <View>
-            <View style={styles.container}>
-                <View style={styles.topContainer}>
+        <View style={{ backgroundColor: colors.background, flex: 1 }}>
+            <View style={styles.itemContainer}>
+                <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
                         source={require('../assets/defaultProfilePicture.png')}
                     />
-                    <View>
-                        <Text style={styles.mainText}>{userDetails.name}</Text>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={styles.mainNameText}>{userDetails.name}</Text>
+                        <Text style={styles.mainRoleText}>{userDetails.role}</Text>
                     </View>
-                    {/*
-                    <FontAwesome
-                        style={styles.editIcon}
-                        color="black"
-                        name="edit"
-                        onPress={() => setUpdateModalVisible(!updateModalVisible)}
-    />*/}
-                </View>
-                <Text style={styles.roleText}>Role: {userDetails.role}</Text>
-                <Text style={styles.detailText}>Email: {userDetails.email}</Text>
-                <Text style={styles.detailText}>Phone Number: {userDetails.number}</Text>
-                <View style={styles.btnView}>
-                    <TouchableOpacity
-                        onPress={() => setUpdateModalVisible(!updateModalVisible)}
-                        style={styles.btn}>
-                        <Text style={styles.password}>Edit Profile</Text>
-                    </TouchableOpacity>
+                    <LeftCardDetails label={"Salary ($/h)"} text={userDetails.salary} />
+                    <LeftCardDetails label={"Overtime Rate"} text={userDetails.overtimeRate} />
+
                     <TouchableOpacity
                         onPress={() => setPasswordModalVisible(!passwordModalVisible)}
                         style={styles.btn}>
                         <Text style={styles.password}>Change Password</Text>
                     </TouchableOpacity>
+                </View>
+
+                <View style={styles.rightProfileContainer}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{ fontWeight: "bold", fontSize: 24 }}>Profile</Text>
+                        <TouchableOpacity
+                            onPress={() => setUpdateModalVisible(!updateModalVisible)}
+                            style={styles.editBtn}
+                        >
+                            <Entypo name="edit" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Name"} text={userDetails.name} />
+                        <ProfileDetail label={"Role"} text={userDetails.role} />
+                    </View>
+                    <ProfileDetail label={"Address"} text={userDetails.address} />
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Salary ($/h)"} text={userDetails.salary} />
+                        <ProfileDetail label={"Overtime Rate"} text={userDetails.overtimeRate} />
+                    </View>
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Email"} text={userDetails.email} />
+                        <ProfileDetail label={"Number"} text={userDetails.number} />
+                    </View>
                 </View>
             </View>
 
@@ -243,32 +264,79 @@ export default function MyProfile() {
                     </View>
                 </View>
             </Modal>
-        </View >
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: 'white',
-        height: '100%',
+    profileDetailRow: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+    profileDetailContainer: {
+        flex: 1,
+        marginVertical: 20,
+        borderBottomColor: colors.shadowGray,
+        borderBottomWidth: 1,
+    },
+    leftProfileContainer: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: colors.white,
+        alignItems: 'center',
+        marginLeft: 40,
+        marginRight: 40,
+        borderRadius: 25,
+    },
+    leftCardDetailsContainer: {
+        width: "100%",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 5,
+    },
+    leftCardLabel: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    leftCardText: {
+        fontSize: 16,
+    },
+    rightProfileContainer: {
+        flex: 2,
+        padding: 25,
+        backgroundColor: colors.white,
+        marginRight: 40,
+        borderRadius: 25,
+    },
+    itemLabel: {
+        color: colors.shadowGray,
+        fontWeight: "400",
+        fontSize: 16,
+    },
+    itemText: {
+        fontSize: 20,
+        fontWeight: '500',
     },
     image: {
-        height: 60,
-        width: 60,
-        backgroundColor: 'grey',
+        height: 250,
+        width: 250,
         borderRadius: 50,
     },
-    topContainer: {
+    itemContainer: {
+        flex: 1,
         flexDirection: 'row',
-        alignItems: 'center',
+        justifyContent: 'space-between',
+        alignItems: "flex-start",
         marginTop: 20,
-        marginLeft: 10,
     },
-    mainText: {
+    mainNameText: {
         fontWeight: '400',
-        fontSize: 20,
-        color: 'blue',
-        paddingHorizontal: 10,
+        fontSize: 32,
+    },
+    mainRoleText: {
+        color: colors.shadowGray,
+        fontWeight: "400",
+        fontSize: 16,
     },
     textLabel: {
         fontSize: 20,
@@ -293,20 +361,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
-    btnView: {
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row"
-        
-    },
     btn: {
         padding: 10,
         borderRadius: 10,
         backgroundColor: colors.darkBlue,
         justifyContent: "center",
         alignItems: "center",
-        margin: 25,
+        margin: 10,
     },
     password: {
         fontSize: 20,
