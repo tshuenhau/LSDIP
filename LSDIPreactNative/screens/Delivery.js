@@ -5,8 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import { firebase } from '../config/firebase';
 import { auth } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
+import { updateDoc } from "firebase/firestore";
 import moment from 'moment';
 import Btn from "../components/Button"
+import Checkbox from "expo-checkbox";
 
 const DeliveryScreen = ({ navigation, route }) => {
   const { curuser } = route.params;
@@ -17,6 +19,9 @@ const DeliveryScreen = ({ navigation, route }) => {
   const [selectedTimesList, setSelectedTimesList] = useState([]);
   const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
+  const [deliveryfee, setDeliveryFee] = useState(0);
+  const [requireDelivery, setRequireDelivery] = useState(false);
+  const orderList = firebase.firestore().collection('orders');
 
   const [matchingOrders, setMatchingOrders] = useState([]);
 
@@ -34,6 +39,7 @@ const DeliveryScreen = ({ navigation, route }) => {
             orders.push({ id: doc.id, ...doc.data() });
           });
           setMatchingOrders(orders);
+          //console.log(orders)
         })
         .catch((error) => {
           console.error(error);
@@ -167,6 +173,14 @@ const AvailableTimingsModal = ({ date, onClose }) => {
     onClose();
   };
 
+  function handleDeliveryFeeChange() {
+    setDeliveryFee(!requireDelivery * 10)
+  }
+
+  function handleCheck() {
+    setRequireDelivery(!requireDelivery)
+  }
+
   // const handleConfirm = () => {
   //   if (selectedTime) {
   //     const existingTime = selectedTimesList.find(
@@ -230,6 +244,7 @@ const AvailableTimingsModal = ({ date, onClose }) => {
   //   }
   // };      
   const handleConfirm = () => {
+    console.log(deliveryfee)
     if (selectedTime) {
       const existingTime = selectedTimesList.find(
         (item) => item.date === selectedDate && item.time === selectedTime
@@ -245,6 +260,7 @@ const AvailableTimingsModal = ({ date, onClose }) => {
         const db = firebase.firestore();
         const user = firebase.auth().currentUser;
         const selectedOrders = matchingOrders.map((order) => order.id);
+        console.log(selectedOrders)
   
         if (user) {
           const selectedHour = selectedTime.split(' - ')[0];
@@ -300,7 +316,9 @@ const AvailableTimingsModal = ({ date, onClose }) => {
                   const batch = db.batch();
                   matchingOrders.forEach((order) => {
                     const orderRef = db.collection('orders').doc(order.id);
-                    batch.update(orderRef, { orderStatus: 'Pending Delivery' });
+                    updateDoc(orderRef, {requireDelivery: requireDelivery, totalPrice: order.totalPrice + deliveryfee});
+                    console.log(order)
+                    batch.update(orderRef, { orderStatus: 'Pending Delivery'});
                   });
                   batch.commit()
                     .then(() => {
@@ -355,6 +373,14 @@ const AvailableTimingsModal = ({ date, onClose }) => {
             })}
           </ScrollView>
           <View style={styles.modalButtons}>
+            <Text style={styles.checkoutDetails}>Do you need delivery services? ($10) 
+                <Checkbox
+                style={{marginLeft: 12, }}
+                disabled={false}
+                value={requireDelivery}
+                onValueChange={() => {handleCheck(), handleDeliveryFeeChange()}}
+                />
+            </Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleClose}

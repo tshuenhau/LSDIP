@@ -43,6 +43,7 @@ export default function OrderSummary(props) {
         customerNumber: "",
         description: "",
         pickup: false,
+        requireDelivery: false,
     }
 
     const [orderValues, setOrderValues] = useState(initialOrderValues);
