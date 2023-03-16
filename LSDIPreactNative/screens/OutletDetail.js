@@ -1,14 +1,16 @@
 import {
-    View,
-    TouchableOpacity,
-    Text,
-    StyleSheet,
-    Modal,
-    FlatList,
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Modal,
+  FlatList,
+  Image,
+  ScrollView
 } from 'react-native'
-import alert from '../components/Alert'
 import React, { useState, useEffect } from 'react'
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Entypo } from '@expo/vector-icons';
+import alert from '../components/Alert'
 import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import colors from '../colors';
@@ -183,206 +185,251 @@ export default function OutletDetail({ route, navigation }) {
         </TouchableOpacity>
     );
 
+    const OutletDetail = ({ label, text }) => {
+        return (
+            <View style={styles.outletDetailContainer}>
+                <Text style={styles.itemLabel}>{label}</Text>
+                <Text style={styles.itemText}>{text}</Text>
+            </View >
+        );
+    }
+
     return (
-        <View>
-            <View style={styles.topButtons}>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Go Back</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => setUpdateModalVisible(!updateModalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Edit Outlet</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.itemContainer}>
-                <View style={styles.cardBody}>
-                    <Text style={styles.outletName}>Name: {updateModalData.outletName} </Text>
-                    <Text style={styles.itemText}>Address: {updateModalData.outletAddress} </Text>
-                    <Text style={styles.itemText}>Number: {updateModalData.outletNumber} </Text>
-                    <Text style={styles.itemText}>Email: {updateModalData.outletEmail} </Text>
-                </View>
-            </View>
-            <View style={styles.btmButtons}>
-                <TouchableOpacity
-                    onPress={() => setAllocateModalVisible(!allocateModalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Allocate Staff</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View>
-                <FlatList
-                    data={allocatedStaffList}
-                    keyExtractor={item => item.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noStaffText}>No staff allocated</Text>
-                    }
-                />
-            </View>
-
-            {/* Update Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={updateModalVisible}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Outlet</Text>
-                            <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} defaultValue={updateModalData.outletName} />
-                            <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
-                            <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
-                            <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
-                                <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Allocate Staff Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={allocateModalVisible}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
-                            <View style={{
-                                width: "92%",
-                                borderRadius: 25,
-                                marginTop: 20
-                            }}>
-                                <MultipleSelectList
-                                    setSelected={(val) => setSelectedStaff(val)}
-                                    data={staffList}
-                                    save="key"
-                                    label='Staff'
-                                />
-                            </View>
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                                <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+    <View style={{ backgroundColor: colors.background, flex: 1 }}>
+      <ScrollView>
+        <View style={styles.topButtons}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.btn}>
+            <Text style={styles.text}>Go Back</Text>
+          </TouchableOpacity>
         </View>
-    )
+        <View style={styles.itemContainer}>
+          <View style={styles.outletSettings}>
+            <Image source={require('../assets/outlet.png')} style={{ width: 250, height: 250 }} />
+            <Text style={styles.outletName}>Name: {updateModalData.outletName} </Text>
+          </View>
+          <View style={styles.outletDetails}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={{ fontWeight: "bold", fontSize: 24 }}>Outlet Profile</Text>
+              <TouchableOpacity
+                onPress={() => setUpdateModalVisible(!updateModalVisible)}
+                style={styles.editBtn}
+              >
+                <Entypo name="edit" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+            <OutletDetail label={"Info"} text={updateModalData.outletName} />
+            <OutletDetail label={"UniqueID"} text={updateModalData.id} />
+            <OutletDetail label={"Address"} text={updateModalData.outletAddress} />
+            <View style={{ flex: 1, flexDirection: 'row', }}>
+              <OutletDetail label={"Number"} text={updateModalData.outletNumber} />
+              <OutletDetail label={"Email"} text={updateModalData.outletEmail} />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.btmButtons}>
+          <TouchableOpacity
+            onPress={() => setAllocateModalVisible(!allocateModalVisible)}
+            style={styles.btn}>
+            <Text style={styles.text}>Allocate Staff</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View>
+          <FlatList
+            data={allocatedStaffList}
+            keyExtractor={item => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+              <Text style={styles.noStaffText}>No staff allocated</Text>
+            }
+          />
+        </View>
+
+        {/* Update Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={updateModalVisible}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Outlet</Text>
+                <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} defaultValue={updateModalData.outletName} />
+                <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
+                <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
+                <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                  <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
+                  <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Allocate Staff Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={allocateModalVisible}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
+                <View style={{
+                  width: "92%",
+                  borderRadius: 25,
+                  marginTop: 20
+                }}>
+                  <MultipleSelectList
+                    setSelected={(val) => setSelectedStaff(val)}
+                    data={staffList}
+                    save="key"
+                    label='Staff'
+                  />
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                  <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                  <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+      </ScrollView>
+    </View >
+  )
 }
 
 const styles = StyleSheet.create({
-    cardBody: {
-        padding: 16,
+  outletSettings: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    marginLeft: 40,
+    marginRight: 40,
+    borderRadius: 25,
+  },
+  outletDetails: {
+    flex: 2,
+    padding: 25,
+    backgroundColor: colors.white,
+    marginRight: 40,
+    borderRadius: 25,
+  },
+  itemContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: "flex-start",
+  },
+  outletDetailContainer: {
+    flex: 1,
+    marginVertical: 20,
+    borderBottomColor: colors.shadowGray,
+    borderBottomWidth: 1,
+  },
+  itemLabel: {
+    color: colors.shadowGray,
+    fontWeight: "400",
+    fontSize: 16,
+  },
+  itemText: {
+    fontSize: 20,
+    fontWeight: '500',
+  },
+  cardButtons: {
+    flexDirection: "row",
+    justifyContent: 'space-between',
+  },
+  card: {
+    backgroundColor: '#fff',
+    marginVertical: 10,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: {
+      width: 0,
+      height: 3,
     },
-    itemContainer: {
-        backgroundColor: colors.lightGray,
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: "center",
-        paddingVertical: 8,
-        paddingRight: 20,
+    elevation: 3,
+  },
+  outletName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  staffIcon: {
+    fontSize: 25,
+    margin: 10,
+  },
+  topButtons: {
+    width: "100%",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexDirection: "row",
+    marginVertical: 10,
+  },
+  btmButtons: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    marginVertical: 10,
+  },
+  noStaffText: {
+    fontSize: 20,
+    fontWeight: "600",
+  },
+  view: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  btn: {
+    padding: 10,
+    margin: 10,
+    marginHorizontal: 20,
+    borderRadius: 25,
+    backgroundColor: "#0B3270",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff"
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    width: '50%',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    itemText: {
-        flex: 1,
-        fontSize: 16,
-    },
-    cardButtons: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
-    },
-    card: {
-        backgroundColor: '#fff',
-        marginVertical: 10,
-        marginHorizontal: 16,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        elevation: 3,
-    },
-    outletName: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 16,
-    },
-    staffIcon: {
-        fontSize: 25,
-        margin: 10,
-    },
-    topButtons: {
-        width: "100%",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexDirection: "row",
-        marginVertical: 10,
-    },
-    btmButtons: {
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row",
-        marginVertical: 10,
-    },
-    noStaffText: {
-        fontSize: 20,
-        fontWeight: "600",
-    },
-    view: {
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    btn: {
-        padding: 10,
-        margin: 10,
-        marginHorizontal: 20,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    text: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: "#fff"
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        width: '50%',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    }
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  }
 })
