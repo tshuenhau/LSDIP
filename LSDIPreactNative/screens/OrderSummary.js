@@ -90,7 +90,7 @@ export default function OrderSummary(props) {
                     customerNumber: orderValues.customerNumber,
                     description: orderValues.description,
                     endDate: null,
-                    totalPrice: totalPrice,
+                    totalPrice: subTotal + pickupfee,
                     orderStatus: "Pending Wash",
                     receiveFromWasherDate: null,
                     sendFromWasherDate: null,
