@@ -1,9 +1,10 @@
 export default {
+    background: '#F5F5F5',
     primary: '#0782F9',
     gray: '#C5C5C7',
     mediumGray: '#F6F7FB',
     lightGray: '#FAFAFA',
-    shadowGray: '#000000',
+    shadowGray: '#595953',
     dismissBlue: '#344869',
     darkBlue: '#0B3270',
     lightBlue: '#69ACF5',
