@@ -215,6 +215,9 @@ export default function OrderPage(props) {
         cn = doc.data().customerName;
         console.log('Document data:', doc.data().customerName);
         console.log('customer', cn);
+        orderRef.update({
+          orderStatus: "Refunded"
+        });
         refunds.add({
           customerName: cn,
           orderId: orderId,
