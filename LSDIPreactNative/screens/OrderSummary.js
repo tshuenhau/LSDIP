@@ -18,6 +18,7 @@ import InvoiceLine from '../components/InvoiceLine';
 import Checkbox from "expo-checkbox";
 import { sub } from 'react-native-reanimated';
 import { pick } from 'lodash';
+import * as Print from 'expo-print';
 
 if (
     Platform.OS === 'android' &&
@@ -47,6 +48,17 @@ export default function OrderSummary(props) {
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
+    const [selectedPrinter, setSelectedPrinter] = React.useState();
+
+    const html = () => OrderPage(props);
+    const print = async () => {
+        console.log("order:" + orderValues.customerName);
+        // On iOS/android prints the given html. On web prints the HTML from the current page.
+        await Print.printAsync({
+          html,
+          printerUrl: selectedPrinter?.url, // iOS only
+        });
+    };
 
     const getUserId = async () => {
         try {
@@ -106,6 +118,8 @@ export default function OrderSummary(props) {
                     type: 'success',
                     text1: 'Order Created',
                 });
+
+                navigation.navigate("Orders");
             }).catch((err) => {
                 console.error(err);
                 Toast.show({
@@ -196,6 +210,9 @@ export default function OrderSummary(props) {
                                 <InvoiceLine label={"Amount Due"} value={subTotal + pickupfee} total={true} />
                                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                                     <Text style={styles.checkoutButtonText}>Create Order</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.checkoutButton} onPress={print}>
+                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

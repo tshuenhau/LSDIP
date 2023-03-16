@@ -88,7 +88,7 @@ export default function Home({ navigation }) {
                 
                 selectedTime.orders.forEach((order) => {
                   const orderRef = db.collection('orders').doc(order.id);
-                  batch.update(orderRef, { orderStatus: 'Back From Washer' });
+                  batch.update(orderRef, { orderStatus: 'Back from Wash' });
                 });
                 
                 return batch.commit();

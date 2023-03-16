@@ -12,7 +12,6 @@ import {
   TextInput
 } from 'react-native';
 import { firebase } from '../config/firebase';
-import OrderDetails from "../components/OrderDetails";
 import colors from '../colors';
 import { FontAwesome } from '@expo/vector-icons';
 import Checkbox from "expo-checkbox";
@@ -20,6 +19,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
 import alert from "../components/Alert";
 import QR from "../components/QR";
+import Toast from 'react-native-toast-message';
 
 if (
   Platform.OS === "android" &&
@@ -29,6 +29,7 @@ if (
 }
 
 export default function OrdersList({ navigation }) {
+
   const [orderList, setOrderList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
@@ -37,28 +38,31 @@ export default function OrdersList({ navigation }) {
   const orders = firebase.firestore().collection("orders");
 
   useEffect(() => {
-    const unsubscribe = orders.onSnapshot((querySnapshot) => {
+    const query = orders.orderBy('orderDate', 'desc');
+    const unsubscribe = query.onSnapshot((querySnapshot) => {
       const orderList = [];
       querySnapshot.forEach((doc) => {
         const {
           customerName,
           customerNumber,
-          date,
+          orderDate,
           orderItems,
           outletId,
           orderStatus,
           totalPrice,
+          deliveryDate,
         } = doc.data();
         orderList.push({
           isSelected: false,
           id: doc.id,
           customerName,
           customerNumber,
-          date,
+          orderDate,
           orderItems,
           outletId,
           orderStatus,
           totalPrice,
+          deliveryDate
         });
       });
       setOrderList(orderList);
@@ -93,7 +97,8 @@ export default function OrdersList({ navigation }) {
 
   const formatOrderDate = (date) => {
     //return date.toDate().toLocaleString();
-    return date;
+    var convertedDate = date.toDate();
+    return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
   };
 
   const handleCheck = (order) => {
@@ -109,73 +114,6 @@ export default function OrdersList({ navigation }) {
 
     setOrderList(updatedArray);
   };
-
-  const renderItem = ({ item: order }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => toggleExpand(order.id)}
-      activeOpacity={0.8}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
-        <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
-        <Text style={styles.orderNumber}>{order.orderStatus}</Text>
-
-        <View style={styles.cardButtons}>
-
-          <TouchableOpacity
-            style={{ paddingTop: 12, marginRight: 15 }}
-            onPress={() => handleCheck(order)}>
-            <Checkbox
-              disabled={false}
-              value={order.isSelected}
-              onValueChange={() => handleCheck(order)}
-            />
-          </TouchableOpacity>
-
-          <FontAwesome
-            style={styles.outletIcon}
-            name="edit"
-            color='green'
-            onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
-          />
-          <FontAwesome
-            style={styles.outletIcon}
-            name="print"
-            color='black'
-            onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
-          />
-        </View>
-        {/*
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() =>
-            navigation.navigate("Order Page", { orderId: order.id })
-          }
-        >
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => navigation.navigate("Invoice", { orderId: order.id })}
-        >
-          <Text style={styles.editButtonText}>Print</Text>
-  </TouchableOpacity>*/}
-      </View>
-      {expandedOrder === order.id && (
-        <View style={styles.cardBody}>
-          <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
-          <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
-          <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
-          <Text style={styles.orderNumber}>
-            Total Price: {order.totalPrice}
-          </Text>
-          <QR orderID={order.id}></QR>
-          <OrderDetails data={order.id}></OrderDetails>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
 
   const updateStatus = () => {
     const selectedOrders = orderList.filter((s) => s.isSelected);
@@ -196,32 +134,91 @@ export default function OrdersList({ navigation }) {
             orderStatus: selectedStatus,
           })
           .then(() => {
-            console.log(o.id, "updated");
+            Toast.show({
+              type: 'success',
+              text1: 'Status Updated',
+            });
           });
       });
       setUpdateModalVisible(false);
     }
   };
+
   const filteredOrderList = orderList.filter((order) =>
     order.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const renderItem = ({ item: order }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => toggleExpand(order.id)}
+      activeOpacity={0.8}
+    >
+      <View style={styles.cardHeader}>
+        <TouchableOpacity
+          style={{ paddingVertical: "auto", marginLeft: 15 }}
+          onPress={() => handleCheck(order)}>
+          <Checkbox
+            disabled={false}
+            value={order.isSelected}
+            onValueChange={() => handleCheck(order)}
+          />
+        </TouchableOpacity>
+        <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
+        <Text style={styles.orderId}>{formatOrderNumber(order.id)}</Text>
+        <Text style={styles.orderCustomerName}>{order.customerName}</Text>
+        <Text style={styles.orderNum}>${order.totalPrice}</Text>
+        {order.orderStatus === "Pending Wash" && (<Text style={styles.pendingwash}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Out for Wash" && (<Text style={styles.outforwash}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Back from Wash" && (<Text style={styles.backfromwash}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Pending Delivery" && (<Text style={styles.pendingdelivery}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Out for Delivery" && (<Text style={styles.outfordelivery}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Closed" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Case" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "Void" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+        {order.orderStatus === "" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
+        <View style={styles.cardButtons}>
+
+          {/*<TouchableOpacity
+                    style={{ paddingTop: 12, marginRight: 15 }}
+                    onPress={() => handleCheck(order)}>
+                    <Checkbox
+                        disabled={false}
+                        value={order.isSelected}
+                        onValueChange={() => handleCheck(order)}
+                    />
+                 </TouchableOpacity>*/}
+          <FontAwesome
+            style={styles.outletIcon}
+            name="edit"
+            color='green'
+            onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
+          />
+          <FontAwesome
+            style={styles.outletIcon}
+            name="print"
+            color='black'
+            onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
+          />
+        </View>
+      </View>
+      {expandedOrder === order.id && (
+        <View style={styles.cardBody}>
+          <Text style={styles.orderDetails}>Customer Number: {order.customerNumber}</Text>
+          <Text style={styles.orderDetails}>Name: {order.customerName}</Text>
+          <Text style={styles.orderDetails}>OutletId: {order.outletId}</Text>
+          <Text style={styles.orderDetails}>Delivery Fee: when to add</Text>
+          <Text style={styles.orderDetails}>Delivery Date: {order.deliveryDate}</Text>
+          <QR orderID={order.id}></QR>
+          {/*<OrderDetails data={order.id}></OrderDetails>*/}
+        </View>
+      )}
+    </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.createOrderContainer}>
-        {/*<TouchableOpacity style={styles.button}>
-          <Button
-            title="Create Order"
-            onPress={() => navigation.navigate("Create Order")}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Button
-            title="Update Order"
-            onPress={() => setUpdateModalVisible(true)}
-          />
-  </TouchableOpacity>*/}
-
         <View style={styles.buttonView}>
           <TouchableOpacity
             onPress={() => navigation.navigate("Create Order")}
@@ -235,6 +232,7 @@ export default function OrdersList({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
+
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -242,121 +240,274 @@ export default function OrdersList({ navigation }) {
           onChangeText={setSearchQuery}
           placeholder="Search by Order ID"
         />
+        <FontAwesome name="search" size={20} color="black" />
       </View>
+      <View style={styles.orders}>
+        <View style={styles.tableHeader}>
+          <Text style={styles.tableHeaderText}>Select</Text>
+          <Text style={styles.tableHeaderText}>Date</Text>
+          <Text style={styles.tableHeaderText}>Order Id</Text>
+          <Text style={styles.tableHeaderText}>Customer</Text>
+          <Text style={styles.tableHeaderText}>Price</Text>
+          <Text style={styles.tableHeaderText}>Status</Text>
+          <Text style={styles.tableHeaderText}>Action</Text>
+        </View>
+        <FlatList
+          style={styles.list}
+          data={filteredOrderList}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={styles.noDataText}>No Data Found!</Text>
+          }
+        />
 
-      <FlatList
-        style={styles.list}
-        data={filteredOrderList}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.noDataText}>No Data Found!</Text>
-        }
-      />
-
-      {/* update modal */}
-      <Modal
-        visible={udpateModalVisible}
-        animationType="slide"
-        transparent={true}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.view}>
-              <Text
-                style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
-              >
-                Update Status
-              </Text>
-              <SelectList
-                data={statuses}
-                setSelected={(val) => setSelectedStatus(val)}
-                save="value"
-                search={false}
-              />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  width: "92%",
-                }}
-              >
-                <Btn
-                  onClick={() => updateStatus()}
-                  title="Update"
-                  style={{ width: "48%" }}
+        {/* update modal */}
+        <Modal
+          visible={udpateModalVisible}
+          animationType="slide"
+          transparent={true}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text
+                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                >
+                  Update Status
+                </Text>
+                <SelectList
+                  data={statuses}
+                  setSelected={(val) => setSelectedStatus(val)}
+                  save="value"
+                  search={false}
                 />
-                <Btn
-                  onClick={() => setUpdateModalVisible(false)}
-                  title="Dismiss"
-                  style={{ width: "48%", backgroundColor: "#344869" }}
-                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "92%",
+                  }}
+                >
+                  <Btn
+                    onClick={() => updateStatus()}
+                    title="Update"
+                    style={{ width: "48%" }}
+                  />
+                  <Btn
+                    onClick={() => setUpdateModalVisible(false)}
+                    title="Dismiss"
+                    style={{ width: "48%", backgroundColor: "#344869" }}
+                  />
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+  container: {
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    alignSelf: 'center',
+    marginTop: '2%',
+    width: '95%'
+  },
+  searchContainer: {
+    width: "96%",
+    marginVertical: 15,
+    marginLeft: "auto",
+    marginRight: "auto",
+    borderWidth: 1,
+    borderRadius: 15,
+    borderColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5',
     alignItems: "center",
-    marginTop: 20,
+    flexDirection: "row"
   },
-  indicateButton: {
-    backgroundColor: "blue",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginHorizontal: 10,
+  searchInput: {
+    height: 40,
+    fontSize: 18,
+    width: '95%',
+    marginLeft: 10,
+    paddingHorizontal: 10
   },
-  indicateButtonText: {
-    color: "white",
-    fontSize: 16,
+  searchbaricon: {
+    height: 40
+  },
+  orders: {
+    marginHorizontal: "auto",
+    width: '95%'
+  },
+  tableHeader: {
+    flexDirection: "row",
+    justifyContent: 'space-between',
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  tableHeaderText: {
     fontWeight: "bold",
-  },
-  closeButton: {
-    backgroundColor: "grey",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginHorizontal: 10,
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 5,
-    minWidth: 300,
-  },
-  modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+  },
+  card: {
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: {
+      width: 0,
+      height: 0.5,
+    },
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    //justifyContent: 'space-between',
+    padding: 8,
+  },
+  orderDate: {
+    fontSize: 15,
+    width: "8%",
+    textAlign: "left",
+    marginLeft: "11%",
+  },
+  orderCustomerName: {
+    fontSize: 15,
+    width: "14%",
     textAlign: "center",
+    marginLeft: "5%"
+  },
+  orderId: {
+    fontSize: 15,
+    width: "8%",
+    textAlign: "center",
+    marginLeft: "8%",
+  },
+  orderNum: {
+    fontSize: 15,
+    width: "8%",
+    textAlign: "center",
+    marginLeft: "5%",
+  },
+  pendingwash: {
+    fontSize: 15,
+    backgroundColor: colors.teal400,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto"
+  },
+  outforwash: {
+    fontSize: 15,
+    backgroundColor: colors.violet400,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto"
+  },
+  backfromwash: {
+    fontSize: 15,
+    backgroundColor: colors.blue400,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto"
+  },
+  pendingdelivery: {
+    fontSize: 15,
+    backgroundColor: colors.blue600,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto"
+  },
+  outfordelivery: {
+    fontSize: 15,
+    backgroundColor: colors.blue800,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto",
+  },
+  otherstatuses: {
+    fontSize: 15,
+    backgroundColor: colors.gray,
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    marginLeft: "7%",
+    marginRight: "auto"
+  },
+  cardBody: {
+    backgroundColor: colors.blue50,
+    padding: 16,
+  },
+  cardButtons: {
+    flexDirection: "row",
+    justifyContent: 'space-between',
+    //marginLeft: "5%",
+    //marginHorizontal: "auto",
+    //width: "4%",
+    //backgroundColor: colors.blue50
+  },
+  outletIcon: {
+    fontSize: 20,
+    margin: 5,
+  },
+  orderDetails: {
+    fontSize: 15,
+    textAlign: "left",
+  },
+  createOrderContainer: {
+    alignSelf: "center",
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    padding: 10,
+    color: "#fff",
+  },
+  buttonView: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    flexDirection: 'row',
+  },
+  btn: {
+    borderRadius: 15,
+    backgroundColor: colors.blue600,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 50
+  },
+  view: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center"
   },
   centeredView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 22,
   },
   modalView: {
     margin: 20,
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 20,
     padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: colors.shadowGray,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -365,138 +516,40 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  view: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonView: {
-    width: "92%",
-    justifyContent: "center",
-    alignItems: "center",
+  ordersListContainer: {
+    flex: 1,
     padding: 10,
-    flexDirection: 'row',
+  },
+  chatButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+  },
+  chatButton: {
+    backgroundColor: colors.primary,
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: .9,
+    shadowRadius: 8,
   },
   button: {
-    margin: 10,
-    backgroundColor: "#0B3270",
-  },
-  btn: {
-    borderRadius: 15,
-    backgroundColor: "#0B3270",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10
-  },
-  createOrderContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-  },
-  noDataText: {
-    fontStyle: "italic",
-    textAlign: "center",
-    marginVertical: 10,
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#fff",
-    padding: 10
-  },
-  container: {
-    flex: 1,
+    marginTop: "20"
   },
   list: {
     flex: 1,
   },
-  card: {
-    backgroundColor: "#fff",
-    marginVertical: 10,
-    marginHorizontal: 16,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  orderNumber: {
+  listtext: {
+    paddingLeft: 20,
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "600",
+    color: "black"
   },
-  orderDate: {
-    fontSize: 14,
-    color: colors.gray,
-  },
-  cardBody: {
-    backgroundColor: colors.lightGray,
-    padding: 16,
-  },
-  itemContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-  },
-  itemText: {
-    flex: 1,
-    fontSize: 16,
-  },
-  itemPrice: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.darkBlue,
-    marginLeft: 8,
-  },
-  refreshButton: {
-    backgroundColor: colors.blue,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-  },
-  refreshButtonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  noDataText: {
-    alignSelf: "center",
-    marginTop: 32,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  outletIcon: {
-    fontSize: 20,
-    margin: 10,
-  },
-  cardHeaderIcon: {
-    flexDirection: 'row',
-    padding: 16,
-  },
-  searchInput: {
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: colors.gray,
-    paddingHorizontal: 10,
-    fontSize: 18,
-    backgroundColor: colors.white,
-    marginVertical: 10,
-  },
-  cardButtons: {
-    flexDirection: "row",
-    justifyContent: 'space-between',
-  },
-  searchContainer: {
-    justifyContent: "center",
-    alignContent: "center",
-    width: "96%",
-    marginLeft: 15
-  }
 });

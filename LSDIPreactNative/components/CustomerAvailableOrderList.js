@@ -24,7 +24,7 @@ export default function CustomerOrderList({ curUser, navigation }) {
         if (curUser) {
             orders
                 .where("customerNumber", "==", curUser.number)
-                .where("orderStatus", "==", "Back From Washer")
+                .where("orderStatus", "==", "Back from Wash")
                 .get()
                 .then(querySnapshot => {
                     const orderList = [];
