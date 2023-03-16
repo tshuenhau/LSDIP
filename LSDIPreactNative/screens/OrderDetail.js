@@ -205,7 +205,7 @@ export default function OrderPage(props) {
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     console.log(orderRef);
     let cn = "";
-    
+
     orderRef.get().then(doc => {
       if (!doc.exists) {
         console.log('No such User document!');
@@ -221,7 +221,7 @@ export default function OrderPage(props) {
           orderItemId: selectedOrderItem.id,
           refundAmount: refundAmount,
           refundMethod: refundMethod,
-          refundDetails: details,  
+          refundDetails: details,
         });
         Toast.show({
           type: 'success',
@@ -229,11 +229,11 @@ export default function OrderPage(props) {
         });
       }
     })
-    .catch(err => {
-      console.log('Error getting document', err);
-      return false;
-    });
-    
+      .catch(err => {
+        console.log('Error getting document', err);
+        return false;
+      });
+
     //const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
     const details = modalData.refundDetails;
     const refundAmount = modalData.refundAmount;
@@ -253,169 +253,169 @@ export default function OrderPage(props) {
     toggleModal1();
   }
 
-const toggleModal1 = () => {
-  setIsModal1Visible(!isModal1Visible);
-}
+  const toggleModal1 = () => {
+    setIsModal1Visible(!isModal1Visible);
+  }
 
-const renderItem = ({ item }) => (
-  <View style={styles.itemContainer}>
-    <Text style={styles.itemName}>{item.typeOfServices}</Text>
-    <Text style={styles.itemName}>{item.laundryItemName}</Text>
-    <Text style={styles.itemName}>S$ {item.price}</Text>
-    <View style={styles.cardButtons}>
-      <FontAwesome
-        style={styles.outletIcon}
-        name="trash-o"
-        color='red'
-        onPress={() => {
-          const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
-          orderRef.update({
-            items: firebase.firestore.FieldValue.arrayRemove(item.id),
-          });
-          const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
-          orderItemRef.delete();
-        }}
-      />
-      <TouchableOpacity
-        onPress={() => {
-          setSelectedOrderItem(item);
-          refund();
-        }}
-      >
-        {/*<MaterialCommunityIcons name="cash-refund" size={28} color="black" /> */}
-        <Text style={styles.refund}>Refund</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
-
-return (
-  <ScrollView>
-    <View style={styles.container}>
-      <View style={styles.buttonView}>
-        <TouchableOpacity
-          onPress={() => props.navigation.navigate('Home')}
-          style={styles.btn}>
-          <Text style={styles.text}>Back</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={addOrderItem}
-          style={styles.btn}>
-          <Text style={styles.text}>Add Item</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.checkoutCard}>
-        <Text style={styles.sectionText}>Order Details</Text>
-        <Text style={styles.orderNumber}>Order #{orderId}</Text>
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText}>Service</Text>
-          <Text style={styles.tableHeaderText}>Item Name</Text>
-          <Text style={styles.tableHeaderText}>Price</Text>
-          <Text style={styles.tableHeaderText}>Action</Text>
-        </View>
-        <FlatList
-          style={styles.cardBody}
-          data={data}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={renderSeparator}
-          renderItem={renderItem}
+  const renderItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Text style={styles.itemName}>{item.typeOfServices}</Text>
+      <Text style={styles.itemName}>{item.laundryItemName}</Text>
+      <Text style={styles.itemName}>S$ {item.price}</Text>
+      <View style={styles.cardButtons}>
+        <FontAwesome
+          style={styles.outletIcon}
+          name="trash-o"
+          color='red'
+          onPress={() => {
+            const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
+            orderRef.update({
+              items: firebase.firestore.FieldValue.arrayRemove(item.id),
+            });
+            const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
+            orderItemRef.delete();
+          }}
         />
-        <Text style={styles.orderNumber}>Order Description</Text>
-        <Text style={styles.orderDescription}>{description}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setSelectedOrderItem(item);
+            refund();
+          }}
+        >
+          {/*<MaterialCommunityIcons name="cash-refund" size={28} color="black" /> */}
+          <Text style={styles.refund}>Refund</Text>
+        </TouchableOpacity>
       </View>
-
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.view}>
-
-              <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item</Text>
-              <View
-                style={{
-                  width: '100%',
-                  borderRadius: 20,
-                  marginTop: 20,
-                  backgroundColor: 'white',
-                }}>
-                <SelectList
-                  data={laundryItemsData.map(
-                    (item) => item.typeOfServices + "--" + item.laundryItemName
-                    //(item) => item.typeOfServices
-                  )}
-                  setSelected={(val) => handleChange(val, 'typeOfServices')}
-                  save="value"
-                />
-              </View>
-              <TextBox
-                style={styles.textBox}
-                placeholder="Price"
-                onChangeText={(text) => handleChange(text, 'price')}
-              />
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                <Btn
-                  onClick={() => addOrderItem1()}
-                  title="Update"
-                  style={{ width: "48%" }}
-                />
-                <Btn
-                  onClick={() => toggleModal()}
-                  title="Close"
-                  style={{ width: "48%", backgroundColor: "#344869" }}
-                />
-              </View>
-            </View>
-          </View>
-        </View >
-      </Modal>
-      <Modal
-        visible={isModal1Visible}
-        transparent={true}
-        animationType="slide"
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.view}>
-
-              <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Refund Item</Text>
-              <TextBox
-                style={styles.textBox}
-                placeholder="Refund Amount"
-                onChangeText={(text) => handleChange(text, 'refundAmount')}
-              />
-              <TextBox
-                style={styles.textBox}
-                placeholder="Refund Method"
-                onChangeText={(text) => handleChange(text, 'refundMethod')}
-              />
-              <TextBox
-                style={styles.textBox}
-                placeholder="Refund Details"
-                onChangeText={(text) => handleChange(text, 'refundDetails')}
-              />
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                <Btn
-                  onClick={() => refund1()}
-                  title="Refund"
-                  style={{ width: "48%" }}
-                />
-                <Btn
-                  onClick={() => toggleModal1()}
-                  title="Close"
-                  style={{ width: "48%", backgroundColor: "#344869" }}
-                />
-              </View>
-            </View>
-          </View>
-        </View >
-      </Modal>
     </View>
-  </ScrollView>
-);
+  );
+
+  return (
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.buttonView}>
+          <TouchableOpacity
+            onPress={() => props.navigation.navigate('Home')}
+            style={styles.btn}>
+            <Text style={styles.text}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={addOrderItem}
+            style={styles.btn}>
+            <Text style={styles.text}>Add Item</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.checkoutCard}>
+          <Text style={styles.sectionText}>Order Details</Text>
+          <Text style={styles.orderNumber}>Order #{orderId}</Text>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText}>Service</Text>
+            <Text style={styles.tableHeaderText}>Item Name</Text>
+            <Text style={styles.tableHeaderText}>Price</Text>
+            <Text style={styles.tableHeaderText}>Action</Text>
+          </View>
+          <FlatList
+            style={styles.cardBody}
+            data={data}
+            keyExtractor={(item) => item.id}
+            ItemSeparatorComponent={renderSeparator}
+            renderItem={renderItem}
+          />
+          <Text style={styles.orderNumber}>Order Description</Text>
+          <Text style={styles.orderDescription}>{description}</Text>
+        </View>
+
+        <Modal
+          visible={isModalVisible}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item</Text>
+                <View
+                  style={{
+                    width: '100%',
+                    borderRadius: 20,
+                    marginTop: 20,
+                    backgroundColor: 'white',
+                  }}>
+                  <SelectList
+                    data={laundryItemsData.map(
+                      (item) => item.typeOfServices + "--" + item.laundryItemName
+                      //(item) => item.typeOfServices
+                    )}
+                    setSelected={(val) => handleChange(val, 'typeOfServices')}
+                    save="value"
+                  />
+                </View>
+                <TextBox
+                  style={styles.textBox}
+                  placeholder="Price"
+                  onChangeText={(text) => handleChange(text, 'price')}
+                />
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                  <Btn
+                    onClick={() => addOrderItem1()}
+                    title="Update"
+                    style={{ width: "48%" }}
+                  />
+                  <Btn
+                    onClick={() => toggleModal()}
+                    title="Close"
+                    style={{ width: "48%", backgroundColor: "#344869" }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View >
+        </Modal>
+        <Modal
+          visible={isModal1Visible}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Refund Item</Text>
+                <TextBox
+                  style={styles.textBox}
+                  placeholder="Refund Amount"
+                  onChangeText={(text) => handleChange(text, 'refundAmount')}
+                />
+                <TextBox
+                  style={styles.textBox}
+                  placeholder="Refund Method"
+                  onChangeText={(text) => handleChange(text, 'refundMethod')}
+                />
+                <TextBox
+                  style={styles.textBox}
+                  placeholder="Refund Details"
+                  onChangeText={(text) => handleChange(text, 'refundDetails')}
+                />
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                  <Btn
+                    onClick={() => refund1()}
+                    title="Refund"
+                    style={{ width: "48%" }}
+                  />
+                  <Btn
+                    onClick={() => toggleModal1()}
+                    title="Close"
+                    style={{ width: "48%", backgroundColor: "#344869" }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View >
+        </Modal>
+      </View>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -429,8 +429,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "13%",
-    marginRight: "50%",
-    marginLeft: "5%"
+    marginHorizontal: "5%",
   },
   checkoutCard: {
     marginHorizontal: "auto",
@@ -488,7 +487,7 @@ const styles = StyleSheet.create({
     paddingLeft: 15
   },
   buttonView: {
-    //justifyContent: "center",
+    justifyContent: 'space-between',
     //alignItems: "center",
     //padding: 10,
     flexDirection: 'row',
