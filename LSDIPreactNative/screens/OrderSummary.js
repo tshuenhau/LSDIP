@@ -38,6 +38,8 @@ export default function OrderSummary(props) {
         deliveryDate: "",
         description: "",
         express: false,
+        redeemPoints: false,
+        pointsDiscount: 0,
     }
 
     const [totalPrice, setTotalPrice] = useState(subTotal);
@@ -45,9 +47,9 @@ export default function OrderSummary(props) {
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const [selectedPrinter, setSelectedPrinter] = React.useState();
+    const users = firebase.firestore().collection('users');
 
     useEffect(() => {
-        const users = firebase.firestore().collection('users');
         users
             .where("number", "==", customerNumber)
             .limit(1)
@@ -56,13 +58,14 @@ export default function OrderSummary(props) {
                 if (querySnapshot.empty) {
                     console.log('No documents found');
                 } else {
-                    // need to add points attr!!
                     const { name, address, points } = querySnapshot.docs[0].data();
                     const updatedOrderValues = {
                         ...orderValues,
                         customerName: name,
                         customerAddress: address,
+                        // need to update when admin point management is implemented
                         points,
+                        pointsDiscount: points * 0.01,
                     }
                     console.log(updatedOrderValues);
                     setOrderValues(updatedOrderValues);
@@ -99,6 +102,16 @@ export default function OrderSummary(props) {
             setTotalPrice(totalPrice * 2);
         }
         setOrderValues({ ...orderValues, express: !orderValues.express })
+    }
+
+    const handleRedeemPoints = () => {
+
+        if (orderValues.redeemPoints) {
+            setTotalPrice(totalPrice + orderValues.pointsDiscount);
+        } else {
+            setTotalPrice(totalPrice - orderValues.pointsDiscount);
+        }
+        setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints })
     }
 
     const createOrder = async () => {
@@ -142,117 +155,145 @@ export default function OrderSummary(props) {
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
 
-        setOrderValues(initialOrderValues);
-        navigation.navigate('Home');
-        Toast.show({
-            type: 'success',
-            text1: 'Order Created',
-        });
+                if (orderValues.customerAddress.length > 0) { //customer is a member
+                    const newPointValue = Number(orderValues.redeemPoints ? 0 : orderValues.points) + Math.floor(totalPrice);
+                    console.log(newPointValue);
+                    users
+                        .where("number", "==", customerNumber)
+                        .update({
+                            points: newPointValue,
+                        })
 
-        navigation.navigate("Orders");
-    }).catch ((err) => {
-        console.error(err);
-        Toast.show({
-            type: 'error',
-            text1: 'an error occurred',
-        });
-    })
-};
+                }
+                setOrderValues(initialOrderValues);
+                navigation.navigate('Home');
+                Toast.show({
+                    type: 'success',
+                    text1: 'Order Created',
+                });
 
-const renderItem = ({ item }) => (
-    <View style={styles.cardHeader}>
-        <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
-        <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
-        <Text style={styles.orderNumber}>{item.price}</Text>
-        <Text style={styles.orderNumber}>{item.quantity}</Text>
-    </View>
-);
+                navigation.navigate("Orders");
+            }).catch((err) => {
+                console.error(err);
+                Toast.show({
+                    type: 'error',
+                    text1: 'an error occurred',
+                });
+            })
+    };
 
-return (
-    <ScrollView>
-        <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() => props.navigation.navigate('Create Order')}
-                style={styles.btn}>
-                <Text style={styles.text}>Back to Cart</Text>
-            </TouchableOpacity>
-
-            <View style={styles.checkoutCard}>
-                <Text style={styles.sectionText}>Checkout</Text>
-                <View style={styles.tableHeader}>
-                    <Text style={styles.tableHeaderText}>Service</Text>
-                    <Text style={styles.tableHeaderText}>Item Name</Text>
-                    <Text style={styles.tableHeaderText}>Price</Text>
-                    <Text style={styles.tableHeaderText}>Qty</Text>
-                </View>
-                <FlatList
-                    style={styles.list}
-                    data={cart}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDataText}>No Data Found!</Text>
-                    }
-                />
-
-            </View>
-
-            <View style={styles.checkoutCard}>
-                <View style={{ flexDirection: 'row' }}>
-                    <View style={styles.checkoutDetailsContainer}>
-                        <Text style={styles.checkoutDetails}>Customer Name</Text>
-                        <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
-                        <Text style={styles.checkoutDetails}>Customer Number</Text>
-                        <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
-                        <Text style={styles.checkoutDetails}>Order Description</Text>
-                        <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
-                        <View style={{
-                            flexDirection: 'row',
-                            alignSelf: 'flex-start',
-                            marginLeft: "6%",
-                            alignItems: 'flex-end'
-                        }}>
-                            <Text style={styles.checkoutDetails}>Express</Text>
-                            <Checkbox
-                                disabled={false}
-                                style={{ marginLeft: 10, marginBottom: 2 }}
-                                value={orderValues.express}
-                                onValueChange={() => handleExpressCheck()}
-                            />
-                        </View>
-                    </View>
-                    <View style={styles.orderDetails}>
-                        <Text style={styles.subTotal}>Order Details</Text>
-                        <View style={styles.orderDetailsBreakdown}>
-                            <InvoiceLine label={"Subtotal"} value={subTotal} />
-                            {
-                                orderValues.express &&
-                                <InvoiceLine label={"Express"} value={subTotal} />
-                            }
-                            {/* pending CRM module */}
-                            <InvoiceLine label={"Membership Discount"} value={0} />
-                            {/* pending CRM module */}
-                            <InvoiceLine label={"Voucher Discount"} value={0} />
-                        </View>
-                        <View >
-                            <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
-                            <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
-                                <Text style={styles.checkoutButtonText}>Create Order</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.checkoutButton} onPress={print}>
-                                <Text style={styles.checkoutButtonText}>Print Invoice</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-
-            </View>
+    const renderItem = ({ item }) => (
+        <View style={styles.cardHeader}>
+            <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
+            <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
+            <Text style={styles.orderNumber}>{item.price}</Text>
+            <Text style={styles.orderNumber}>{item.quantity}</Text>
         </View>
-    </ScrollView >
-);
+    );
+
+    return (
+        <ScrollView>
+            <View style={styles.container}>
+                <TouchableOpacity
+                    onPress={() => props.navigation.navigate('Create Order')}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Back to Cart</Text>
+                </TouchableOpacity>
+
+                <View style={styles.checkoutCard}>
+                    <Text style={styles.sectionText}>Checkout</Text>
+                    <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderText}>Service</Text>
+                        <Text style={styles.tableHeaderText}>Item Name</Text>
+                        <Text style={styles.tableHeaderText}>Price</Text>
+                        <Text style={styles.tableHeaderText}>Qty</Text>
+                    </View>
+                    <FlatList
+                        style={styles.list}
+                        data={cart}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDataText}>No Data Found!</Text>
+                        }
+                    />
+
+                </View>
+
+                <View style={styles.checkoutCard}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={styles.checkoutDetailsContainer}>
+                            <Text style={styles.checkoutDetails}>Customer Name</Text>
+                            <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
+                            <Text style={styles.checkoutDetails}>Customer Number</Text>
+                            <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
+                            <Text style={styles.checkoutDetails}>Order Description</Text>
+                            <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
+                            <View style={styles.checkboxContainer}>
+                                <Text style={styles.checkboxLabel}>Express</Text>
+                                <Checkbox
+                                    disabled={false}
+                                    style={{ marginLeft: 20, marginBottom: 2 }}
+                                    value={orderValues.express}
+                                    onValueChange={() => handleExpressCheck()}
+                                />
+                            </View>
+
+                            <View style={styles.checkboxContainer}>
+                                <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
+                                <Checkbox
+                                    disabled={false}
+                                    style={{ marginLeft: 20, marginBottom: 2 }}
+                                    value={orderValues.redeemPoints}
+                                    onValueChange={() => handleRedeemPoints()}
+                                />
+                            </View>
+                        </View>
+                        <View style={styles.orderDetails}>
+                            <Text style={styles.subTotal}>Order Details</Text>
+                            <View style={styles.orderDetailsBreakdown}>
+                                <InvoiceLine label={"Subtotal"} value={subTotal} />
+                                {
+                                    orderValues.express &&
+                                    <InvoiceLine label={"Express"} value={subTotal} />
+                                }
+                                {/* pending CRM module */}
+                                <InvoiceLine label={"Membership Discount"} value={0} />
+                                {/* pending CRM module */}
+                                {orderValues.redeemPoints &&
+                                    <InvoiceLine label={"Redeem Points"} value={orderValues.pointsDiscount} discount={true} />
+                                }
+                            </View>
+                            <View >
+                                <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
+                                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                                    <Text style={styles.checkoutButtonText}>Create Order</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.checkoutButton} onPress={print}>
+                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+
+                </View>
+            </View>
+        </ScrollView >
+    );
 }
 
 const styles = StyleSheet.create({
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignSelf: 'flex-start',
+        marginLeft: "6%",
+        marginBottom: 10,
+        alignItems: 'flex-end'
+    },
+    checkboxLabel: {
+        fontWeight: 'bold',
+        fontSize: 18,
+    },
     btn: {
         borderRadius: 20,
         backgroundColor: colors.darkBlue,
