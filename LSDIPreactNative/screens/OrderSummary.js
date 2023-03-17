@@ -10,6 +10,7 @@ import {
     Platform,
 } from 'react-native';
 import TextBox from "../components/TextBox";
+import Checkbox from "expo-checkbox";
 import { firebase } from '../config/firebase';
 import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,33 +26,58 @@ if (
 }
 
 export default function OrderSummary(props) {
-    const { cart } = props.route.params;
-    const { subTotal } = props.route.params;
-    const [totalPrice, setTotalPrice] = useState(subTotal);
+
+    const { cart, subTotal, customerNumber } = props.route.params;
 
     const initialOrderValues = {
         orderDate: firebase.firestore.FieldValue.serverTimestamp(),
         customerName: "",
         customerAddress: "",
-        customerNumber: "",
+        customerNumber: customerNumber,
         pickupDate: "",
         deliveryDate: "",
-        customerNumber: "",
-        description: ""
+        description: "",
+        express: false,
     }
 
+    const [totalPrice, setTotalPrice] = useState(subTotal);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const [selectedPrinter, setSelectedPrinter] = React.useState();
 
+    useEffect(() => {
+        const users = firebase.firestore().collection('users');
+        users
+            .where("number", "==", customerNumber)
+            .limit(1)
+            .get()
+            .then(querySnapshot => {
+                if (querySnapshot.empty) {
+                    console.log('No documents found');
+                } else {
+                    // need to add points attr!!
+                    const { name, address, points } = querySnapshot.docs[0].data();
+                    const updatedOrderValues = {
+                        ...orderValues,
+                        customerName: name,
+                        customerAddress: address,
+                        points,
+                    }
+                    console.log(updatedOrderValues);
+                    setOrderValues(updatedOrderValues);
+                }
+            })
+    }, [])
+
     const html = () => OrderPage(props);
+
     const print = async () => {
         console.log("order:" + orderValues.customerName);
         // On iOS/android prints the given html. On web prints the HTML from the current page.
         await Print.printAsync({
-          html,
-          printerUrl: selectedPrinter?.url, // iOS only
+            html,
+            printerUrl: selectedPrinter?.url, // iOS only
         });
     };
 
@@ -65,6 +91,15 @@ export default function OrderSummary(props) {
             console.log(e);
         }
     };
+
+    const handleExpressCheck = () => {
+        if (orderValues.express) {
+            setTotalPrice(totalPrice / 2);
+        } else {
+            setTotalPrice(totalPrice * 2);
+        }
+        setOrderValues({ ...orderValues, express: !orderValues.express })
+    }
 
     const createOrder = async () => {
         console.log(cart);
@@ -94,7 +129,7 @@ export default function OrderSummary(props) {
                 const orderRef = await orders.add({
                     ...orderValues,
                     customerName: orderValues.customerName,
-                    customerNumber: orderValues.customerNumber,
+                    // customerNumber: orderValues.customerNumber,
                     description: orderValues.description,
                     endDate: null,
                     totalPrice: totalPrice,
@@ -107,96 +142,114 @@ export default function OrderSummary(props) {
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
 
-                setOrderValues(initialOrderValues);
-                navigation.navigate('Home');
-                Toast.show({
-                    type: 'success',
-                    text1: 'Order Created',
-                });
+        setOrderValues(initialOrderValues);
+        navigation.navigate('Home');
+        Toast.show({
+            type: 'success',
+            text1: 'Order Created',
+        });
 
-                navigation.navigate("Orders");
-            }).catch((err) => {
-                console.error(err);
-                Toast.show({
-                    type: 'error',
-                    text1: 'an error occurred',
-                });
-            })
-    };
+        navigation.navigate("Orders");
+    }).catch ((err) => {
+        console.error(err);
+        Toast.show({
+            type: 'error',
+            text1: 'an error occurred',
+        });
+    })
+};
 
-    const renderItem = ({ item }) => (
-        <View style={styles.cardHeader}>
-            <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
-            <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
-            <Text style={styles.orderNumber}>{item.price}</Text>
-            <Text style={styles.orderNumber}>{item.quantity}</Text>
-        </View>
-    );
+const renderItem = ({ item }) => (
+    <View style={styles.cardHeader}>
+        <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
+        <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
+        <Text style={styles.orderNumber}>{item.price}</Text>
+        <Text style={styles.orderNumber}>{item.quantity}</Text>
+    </View>
+);
 
-    return (
-        <ScrollView>
-            <View style={styles.container}>
-                <TouchableOpacity
-                    onPress={() => props.navigation.navigate('Create Order')}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Back to Cart</Text>
-                </TouchableOpacity>
+return (
+    <ScrollView>
+        <View style={styles.container}>
+            <TouchableOpacity
+                onPress={() => props.navigation.navigate('Create Order')}
+                style={styles.btn}>
+                <Text style={styles.text}>Back to Cart</Text>
+            </TouchableOpacity>
 
-                <View style={styles.checkoutCard}>
-                    <Text style={styles.sectionText}>Checkout</Text>
-                    <View style={styles.tableHeader}>
-                        <Text style={styles.tableHeaderText}>Service</Text>
-                        <Text style={styles.tableHeaderText}>Item Name</Text>
-                        <Text style={styles.tableHeaderText}>Price</Text>
-                        <Text style={styles.tableHeaderText}>Qty</Text>
-                    </View>
-                    <FlatList
-                        style={styles.list}
-                        data={cart}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={renderItem}
-                        ListEmptyComponent={
-                            <Text style={styles.noDataText}>No Data Found!</Text>
-                        }
-                    />
-
+            <View style={styles.checkoutCard}>
+                <Text style={styles.sectionText}>Checkout</Text>
+                <View style={styles.tableHeader}>
+                    <Text style={styles.tableHeaderText}>Service</Text>
+                    <Text style={styles.tableHeaderText}>Item Name</Text>
+                    <Text style={styles.tableHeaderText}>Price</Text>
+                    <Text style={styles.tableHeaderText}>Qty</Text>
                 </View>
+                <FlatList
+                    style={styles.list}
+                    data={cart}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noDataText}>No Data Found!</Text>
+                    }
+                />
 
-                <View style={styles.checkoutCard}>
-                    <View style={{ flexDirection: 'row' }}>
-                        <View style={styles.checkoutDetailsContainer}>
-                            <Text style={styles.checkoutDetails}>Customer Name</Text>
-                            <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} />
-                            <Text style={styles.checkoutDetails}>Customer Number</Text>
-                            <TextBox style={styles.textBox} onChangeText={number => setOrderValues({ ...orderValues, customerNumber: number })} />
-                            <Text style={styles.checkoutDetails}>Order Description</Text>
-                            <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
-                        </View>
-                        <View style={styles.orderDetails}>
-                            <Text style={styles.subTotal}>Order Details</Text>
-                            <View style={styles.orderDetailsBreakdown}>
-                                <InvoiceLine label={"Subtotal"} value={subTotal} />
-                                {/* pending CRM module */}
-                                <InvoiceLine label={"Membership Discount"} value={0} />
-                                {/* pending CRM module */}
-                                <InvoiceLine label={"Voucher Discount"} value={0} />
-                            </View>
-                            <View >
-                                <InvoiceLine label={"Amount Due"} value={subTotal} total={true} />
-                                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
-                                    <Text style={styles.checkoutButtonText}>Create Order</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.checkoutButton} onPress={print}>
-                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-
-                </View>
             </View>
-        </ScrollView>
-    );
+
+            <View style={styles.checkoutCard}>
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={styles.checkoutDetailsContainer}>
+                        <Text style={styles.checkoutDetails}>Customer Name</Text>
+                        <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
+                        <Text style={styles.checkoutDetails}>Customer Number</Text>
+                        <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
+                        <Text style={styles.checkoutDetails}>Order Description</Text>
+                        <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
+                        <View style={{
+                            flexDirection: 'row',
+                            alignSelf: 'flex-start',
+                            marginLeft: "6%",
+                            alignItems: 'flex-end'
+                        }}>
+                            <Text style={styles.checkoutDetails}>Express</Text>
+                            <Checkbox
+                                disabled={false}
+                                style={{ marginLeft: 10, marginBottom: 2 }}
+                                value={orderValues.express}
+                                onValueChange={() => handleExpressCheck()}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.orderDetails}>
+                        <Text style={styles.subTotal}>Order Details</Text>
+                        <View style={styles.orderDetailsBreakdown}>
+                            <InvoiceLine label={"Subtotal"} value={subTotal} />
+                            {
+                                orderValues.express &&
+                                <InvoiceLine label={"Express"} value={subTotal} />
+                            }
+                            {/* pending CRM module */}
+                            <InvoiceLine label={"Membership Discount"} value={0} />
+                            {/* pending CRM module */}
+                            <InvoiceLine label={"Voucher Discount"} value={0} />
+                        </View>
+                        <View >
+                            <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
+                            <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                                <Text style={styles.checkoutButtonText}>Create Order</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.checkoutButton} onPress={print}>
+                                <Text style={styles.checkoutButtonText}>Print Invoice</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
+            </View>
+        </View>
+    </ScrollView >
+);
 }
 
 const styles = StyleSheet.create({
