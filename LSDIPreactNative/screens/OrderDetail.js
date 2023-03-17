@@ -203,7 +203,7 @@ export default function OrderPage(props) {
   const refund1 = () => {
     console.log("refund 1");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
-    console.log(orderRef);
+    //console.log(orderRef);
     let cn = "";
 
     orderRef.get().then(doc => {
@@ -222,6 +222,9 @@ export default function OrderPage(props) {
           customerName: cn,
           orderId: orderId,
           orderItemId: selectedOrderItem.id,
+          orderItemName: selectedOrderItem.laundryItemName,
+          typeOfServices: selectedOrderItem.typeOfServices,
+          price: selectedOrderItem.price,
           refundAmount: refundAmount,
           refundMethod: refundMethod,
           refundDetails: details,

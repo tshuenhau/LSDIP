@@ -43,6 +43,9 @@ export default function OrdersList({ navigation }) {
   const [refundAmount, setRefundAmount] = useState("");
   const [refundDetails, setRefundDetails] = useState("");
   const [refundMethod, setRefundMethod] = useState("");
+  const [orderItemName, setOrderItemName] = useState("");
+  const [typeOfServices, setTypeOfServices] = useState("");
+  const [price, setPrice] = useState("");
 
   useEffect(() => {
     const query = orders.orderBy('orderDate', 'desc');
@@ -89,7 +92,7 @@ export default function OrdersList({ navigation }) {
     refunds.onSnapshot(querySnapshot => {
       const refundList = [];
       querySnapshot.forEach(doc => {
-        const { customerName, orderId, orderItemId, refundAmount, refundDetails, refundMethod } = doc.data();
+        const { customerName, orderId, orderItemId, refundAmount, refundDetails, refundMethod, orderItemName, typeOfServices, price } = doc.data();
           refundList.push({
             id: doc.id,
             customerName,
@@ -97,7 +100,10 @@ export default function OrdersList({ navigation }) {
             orderItemId,
             refundAmount,
             refundDetails,
-            refundMethod
+            refundMethod,
+            orderItemName,
+            typeOfServices,
+            price
           })
       });
       setRefundList(refundList);
@@ -190,6 +196,9 @@ export default function OrdersList({ navigation }) {
     setRefundAmount(refund.refundAmount);
     setRefundDetails(refund.refundDetails);
     setRefundMethod(refund.refundMethod);
+    setOrderItemName(refund.orderItemName);
+    setTypeOfServices(refund.typeOfServices);
+    setPrice(refund.price);
     //console.log(refund);
   }
 
@@ -377,6 +386,9 @@ export default function OrdersList({ navigation }) {
                 >
                   Refund Details
                 </Text>
+                <Text style={styles.refunddetails}><b>Refund Item:</b> {orderItemName}</Text>
+                <Text style={styles.refunddetails}><b>Type of Services:</b> {typeOfServices}</Text>
+                <Text style={styles.refunddetails}><b>Orignial Price:</b> {price}</Text>
                 <Text style={styles.refunddetails}><b>Refund Amount: </b>{refundAmount}</Text>
                 <Text style={styles.refunddetails}><b>Refund Method: </b>{refundMethod}</Text>
                 <Text style={styles.refunddetails}><b>Refund Details:</b> {refundDetails}</Text>
