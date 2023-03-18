@@ -86,14 +86,15 @@ export default function OrderPage(props) {
       const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
         const orderItemsList = [];
         querySnapshot.forEach((doc) => {
-          const { laundryItemName, price, typeOfServices } = doc.data();
+          const { laundryItemName, price, typeOfServices, quantity } = doc.data();
           //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
           orderItemsList.push({
             id: doc.id,
             laundryItemName,
             price,
             orderId,
-            typeOfServices
+            typeOfServices,
+            quantity
           });
         });
         setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
@@ -164,6 +165,7 @@ export default function OrderPage(props) {
       //typeOfServices: selectedItem.split(' ')[1],
       typeOfServices: selectedItem.split("--")[0],
       price: price,
+      quantity: 1,
       orderId: orderId,
     }).then((docRef) => {
       console.log('Order item created with ID: ', docRef.id);
@@ -268,6 +270,7 @@ export default function OrderPage(props) {
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
       <Text style={styles.itemName}>{item.laundryItemName}</Text>
       <Text style={styles.itemName}>S$ {item.price}</Text>
+      <Text style={styles.itemName}>{item.quantity}</Text>
       <View style={styles.cardButtons}>
         <FontAwesome
           style={styles.outletIcon}
@@ -318,6 +321,7 @@ export default function OrderPage(props) {
             <Text style={styles.tableHeaderText}>Service</Text>
             <Text style={styles.tableHeaderText}>Item Name</Text>
             <Text style={styles.tableHeaderText}>Price</Text>
+            <Text style={styles.tableHeaderText}>Qty</Text>
             <Text style={styles.tableHeaderText}>Action</Text>
           </View>
           <FlatList
