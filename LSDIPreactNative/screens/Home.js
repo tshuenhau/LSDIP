@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
-import { Entypo } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons'; 
+import { MaterialIcons } from '@expo/vector-icons'; 
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
@@ -129,11 +131,54 @@ export default function Home({ navigation }) {
                 }
                 {user?.role === "Customer" ?
                 <View>
-                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.name}</Text>
+                
+                    
                     <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-                    <Text>Email: {auth.currentUser?.email}</Text>
+                    {/* <Text>Email: {auth.currentUser?.email}</Text> */}   
+                      
+                        <Text style={[
+                            {
+                              // Try setting `flexDirection` to `"row"`.
+                              flexDirection: 'row',
+                              flex:2,
+                              margin: 5,
+                              fontSize: 24, 
+                              fontWeight: "800"
+                              
+                            },
+                          ]}><Ionicons name="ios-person-outline" size={24}  onPress={() => alert("clicked")}/> <FontAwesome5 name="coins" size={24}/> 100 ($1) {}</Text>
+                      
                     </View>
-                    <Text> </Text>
+                    <Text>  </Text>
+                    <View style={[
+                          {
+                            // Try setting `flexDirection` to `"row"`.
+                            flexDirection: 'row',
+                            alignSelf: 'center',
+                            
+                          },
+                        ]}>
+                      <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                        <Text style={styles.NavButtonText}>Delivery</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                        <Text style={styles.NavButtonText}>Pick Up</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={[
+                          {
+                            // Try setting `flexDirection` to `"row"`.
+                            flexDirection: 'row',
+                            alignSelf: 'center',
+                          },
+                        ]}>
+                      <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                        <Text style={styles.NavButtonText}>Order History</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                        <Text style={styles.NavButtonText}>Rewards</Text>
+                      </TouchableOpacity>
+                    </View>
                     <Text style={styles.listtext}>My Orders</Text>
                     <CustomerOrderList curUser={user} />
                     <Text style={styles.listtext}>Available for Delivery</Text>
@@ -316,5 +361,18 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
+      },
+      NavButton: {
+        backgroundColor: colors.primary,
+        padding: 20,
+        borderRadius: 5,
+        margin: 2,
+        alignSelf: 'center',
+      },
+      NavButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 20,
+        alignSelf: 'center',
       },
 });
