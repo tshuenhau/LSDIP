@@ -23,29 +23,40 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function OrderPage(props) {
-
-  const { orderId } = props.route.params;
+export default function Invoice(props) {
   const [order, setOrder] = useState(null);
+  const { orderId } = props.route.params;
+
+  console.log(props);
+  console.log(orderId);
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [staffDetails, setStaffDetails] = useState({});
   const [outletDetails, setOutletDetails] = useState({});
   const users = firebase.firestore().collection('users');
   const outlets = firebase.firestore().collection('outlet');
+  const orderList = firebase.firestore().collection('orders')
+  const orderItem = firebase.firestore().collection('orderItem');
+
 
   //for order, staff, and outlet
-  useEffect(() => {
-    // Fetch the order document using the orderId prop
-    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+  //unable to work well in refreshing
+  /*useEffect(() => {
+    console.log("hello? are you working?")
+    // Fetch the order document using the orderId prop   
+    const orderID = orderId;
+    console.log(orderID)
+    const orderRef = firebase.firestore().collection('orders').doc(orderID);
     orderRef
       .get()
       .then(doc => {
         if (doc.exists) {
-          console.log("Document data:", doc.data().staffID);
-          setOrder({ id: doc.id, staffID: doc.staffID, ...doc.data() });
+          console.log("Document data exist");
+          setOrder({ id: doc.id, ...doc.data() });
         } else {
           console.log("No such document!");
         }
+        setOrder({ id: doc.id, ...doc.data() });
+        console.log("hello?: "+ doc.data())
         const staffId = doc.data().staffID;
         const outletId = doc.data().outletId;
 
@@ -63,11 +74,25 @@ export default function OrderPage(props) {
           .get()
           .then(doc => {
             setOutletDetails({ id: doc.id, ...doc.data() })
-            console.log(doc.data())
           })
 
       })
-  }, []);
+  }, []);*/
+
+  //for order
+  useEffect(() => {
+    // Fetch the order document using the orderId prop
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    const unsubscribe = orderRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        setOrder({ id: doc.id, ...doc.data() });
+        console.log('order', order);
+      } else {
+        console.log('No such order document!');
+      }
+    });
+    return () => unsubscribe();
+  }, [orderId]);
 
   //for orderItem
   useEffect(() => {
@@ -76,7 +101,7 @@ export default function OrderPage(props) {
       const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
         const orderItemsList = [];
         querySnapshot.forEach((doc) => {
-          const { description, laundryItemName, price, typeOfServices, quantity, weight } = doc.data();
+          const { description, laundryItemName, price, typeOfServices, quantity, weight, pricingMethod } = doc.data();
           //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
           orderItemsList.push({
             id: doc.id,
@@ -85,13 +110,58 @@ export default function OrderPage(props) {
             price,
             typeOfServices,
             quantity,
+            weight,
+            pricingMethod,
             orderId,
-            weight
           });
         });
-        setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
+        setOrderItemsList(orderItemsList); // Filter the order items based on the orderItemIds array
       });
       return () => unsubscribe();
+    }
+  }, [order]);
+
+  //for outlet
+  useEffect(() => {
+    if(order){
+    outlets
+      .get()
+      .then(querySnapshot => {
+        const temp = [];
+        querySnapshot.forEach(doc => {
+          const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
+          temp.push({
+            outletID: doc.id,
+            outletAddress: outletAddress,
+            outletName: outletName,
+            outletEmail: outletEmail,
+            outletNumber: outletNumber
+          });
+        });
+        setOutletDetails(temp.find(o => o.outletID === order.outletId))
+      })
+    }
+  }, [order]);
+
+  //for staff
+  useEffect(() => {
+    if(order){
+    users
+      .get()
+      .then(querySnapshot => {
+        const temp = [];
+        querySnapshot.forEach(doc => {
+          const { name, number, email, role } = doc.data();
+          temp.push({
+            userID: doc.id,
+            name: name,
+            number: number,
+            email: email,
+            role: role
+          });
+        });
+        setStaffDetails(temp.find(o => o.userID === order.staffID))
+      })
     }
   }, [order]);
 
@@ -112,7 +182,7 @@ export default function OrderPage(props) {
 
   //printing function
   const [selectedPrinter, setSelectedPrinter] = React.useState();
-  const html = () => OrderPage(props);
+  const html = () => Invoice(props);
   const print = async () => {
     console.log("order:" + order.customerName);
     // On iOS/android prints the given html. On web prints the HTML from the current page.
@@ -159,6 +229,7 @@ export default function OrderPage(props) {
           </View>
         </View>
         <View style={styles.tableHeader}>
+          <Text style={styles.tableHeaderText}>No.</Text>
           <Text style={styles.tableHeaderText}>Item Name</Text>
           <Text style={styles.tableHeaderText}>Service</Text>
           <Text style={styles.tableHeaderText}>Qty</Text>
@@ -167,14 +238,17 @@ export default function OrderPage(props) {
         <FlatList
           style={styles.cardBody}
           data={data}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => index.toString()}
           ItemSeparatorComponent={renderSeparator}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <View>
               < View style={styles.itemContainer}>
+                <Text style={styles.itemIndex}>{index + 1}</Text>
                 <Text style={styles.itemName}>{item.laundryItemName}</Text>
                 <Text style={styles.itemService}>{item.typeOfServices}</Text>
-                <Text style={styles.itemQuantity}> {item.quantity}</Text>
+                {item.pricingMethod === 'Weight'
+                  ? <Text style={styles.itemQuantity}> {item.weight} kg</Text>
+                  : <Text style={styles.itemQuantity}> {item.quantity}</Text>}
                 <Text style={styles.itemPrice}>S$ {item.price}</Text>
               </View>
             </View>
@@ -183,7 +257,7 @@ export default function OrderPage(props) {
         />
         <div style={styles.bottomContainer}>
           <div style={styles.totalPrice}>
-            <Text style={styles.totalPrice}><b>Total Price: </b>{order?.totalPrice}</Text>
+            <Text style={styles.totalPrice}><b>Total Price: </b>S$ {order?.totalPrice}</Text>
           </div>
           <div style={styles.description}>
             <Text style={styles.itemDescription}><b>Description:</b> <br></br>{order?.description.replace(/\./g, "\n")}</Text>
@@ -193,10 +267,10 @@ export default function OrderPage(props) {
 
       </View >
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "50%",alignContent:'center',marginLeft:"25%",marginBottom:20  }}>
-          <Btn onClick={() => print()} title="Print" style={{ width: "48%"}} />
-          <Btn onClick={() => props.navigation.goBack()} title="Back" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
-        </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "50%", alignContent: 'center', marginLeft: "25%", marginBottom: 20 }}>
+        <Btn onClick={() => print()} title="Print" style={{ width: "48%" }} />
+        <Btn onClick={() => props.navigation.navigate('Home')} title="Back" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+      </View>
     </ScrollView>
   );
 }
@@ -232,23 +306,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white
   },
-  itemName: {
+  itemIndex: {
     fontSize: 15,
     width: "15%",
     textAlign: "left",
     marginLeft: 20
   },
+  itemName: {
+    fontSize: 15,
+    width: "15%",
+    textAlign: "left",
+    marginLeft: "7%"
+  },
   itemService: {
     fontSize: 15,
     width: "16%",
-    textAlign: "right",
-    marginLeft: "8%"
+    textAlign: "left",
+    marginLeft: "12%"
   },
   itemQuantity: {
     fontSize: 15,
-    width: "15%",
-    textAlign: "right",
-    marginLeft: 20
+    width: "13%",
+    textAlign: "left",
+    marginLeft: "9%",
   },
   itemDescription: {
     fontSize: 20,
@@ -258,13 +338,14 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginTop: 5,
     flex: "left",
-    float: "left"
+    float: "left",
+    marginTop: "1%",
+    marginBottom: "3%",
   },
   itemPrice: {
     fontSize: 15,
-    width: "15%",
-    textAlign: "right",
-    marginLeft: 20
+    width: "19%",
+    textAlign: "center",
   },
   noDataText: {
     alignSelf: 'center',
@@ -305,6 +386,8 @@ const styles = StyleSheet.create({
   tableHeaderText: {
     fontWeight: "bold",
     fontSize: 20,
+    marginRight: 80,
+    marginLeft: 20
   },
   outletHeaderText: {
     fontWeight: "bold",
@@ -344,9 +427,11 @@ const styles = StyleSheet.create({
     alignContent: 'space-between',
     flex: 'right',
     float: "right",
-    marginRight: 40,
+    marginRight: 50,
     backgroundColor: colors.white,
-    fontSize: 20
+    fontSize: 20,
+    marginTop: "1%",
+    marginBottom: "3%",
   },
   bottomContainer: {
     backgroundColor: colors.white,
