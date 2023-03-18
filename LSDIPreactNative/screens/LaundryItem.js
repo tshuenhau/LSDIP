@@ -30,11 +30,6 @@ if (
 
 export default function LaundryItem({ navigation }) {
 
-    const [modalVisible, setModalVisible] = useState(false);
-    const [values, setValues] = useState({});
-    const laundryItem = firebase.firestore().collection('laundryItem');
-    const laundryCItem = firebase.firestore().collection('laundryCategory');
-    const [data, setData] = useState([]);
     const [user, setUser] = useState(false);
     const db = firebase.firestore()
 
@@ -62,134 +57,13 @@ export default function LaundryItem({ navigation }) {
         }
     }, [])
 
-    const pricingMethods = [
-        { key: '1', value: 'Flat' },
-        { key: '2', value: 'Range' },
-        { key: '3', value: 'Weight' },
-    ]
 
-    useEffect(() => {
-        laundryCItem.onSnapshot(querySnapshot => {
-            const data = [];
-            querySnapshot.forEach(doc => {
-                const { serviceName } = doc.data();
-                data.push({
-                    key: doc.id,
-                    value: serviceName,
-                });
-            });
-            setData(data);
-        });
-    }, []);
-
-    //for laundry items
-    function handleChange(text, eventName) {
-        setValues(prev => {
-            return {
-                ...prev,
-                [eventName]: text
-            }
-        })
-    }
-
-    function createLaundryItem() {
-        laundryItem.add(values)
-            .then(() => {
-                setModalVisible(false);
-                setValues({});
-                Toast.show({
-                    type: 'success',
-                    text1: 'Laundry item created',
-                });
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
-    }
 
     return (
         <ScrollView>
-            <View>
-                {/*for create laundry item*/}
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Laundry Item</Text>
-                                <TextBox placeholder="Laundry Item Name" onChangeText={text => handleChange(text, "laundryItemName")} />
-                                <View style={{
-                                    // height: 42,
-                                    width: "92%",
-                                    borderRadius: 25,
-                                    marginTop: 20
-                                }}>
-                                    <SelectList
-                                        data={data}
-                                        placeholder="Choose service"
-                                        searchPlaceholder="Search service"
-                                        search={false}
-                                        setSelected={(val) => handleChange(val, "typeOfServices")}
-                                        save="value"
-                                    />
-                                </View>
-                                <View style={{
-                                    // height: 42,
-                                    width: "92%",
-                                    borderRadius: 25,
-                                    marginTop: 20
-                                }}>
-                                    <SelectList
-                                        data={pricingMethods}
-                                        placeholder="Choose pricing method"
-                                        searchPlaceholder="Search pricing method"
-                                        search={false}
-                                        setSelected={(val) => handleChange(val, "pricingMethod")}
-                                        save="value"
-                                    />
-                                </View>
-                                {values != undefined && values.pricingMethod === "Range" &&
-                                    <View style={styles.rangeText}>
-                                        <View style={styles.rangeTextContainer}>
-                                            <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} />
-                                        </View>
-                                        <View style={styles.rangeTextContainer}>
-                                            <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} />
-                                        </View>
-                                    </View>
-                                }
-                                {values != undefined && values.pricingMethod == "Flat" &&
-                                    <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
-                                }
-                                {values != undefined && values.pricingMethod === "Weight" &&
-                                    <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} />
-                                }
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                    <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                </Modal >
-
-                <View style={styles.view2}>
-                    <TouchableOpacity
-                        onPress={() => setModalVisible(!modalVisible)}
-                        style={styles.btn}>
-                        <Text style={styles.text}>Create Laundry Item</Text>
-                    </TouchableOpacity>
-                </View>
-
                 <View>
-                    <Text style={styles.listtext}>Laundry Item List</Text>
                     <LaundryList />
                 </View>
-
-            </View >
         </ScrollView >
     )
 }
