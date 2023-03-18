@@ -20,6 +20,7 @@ import Btn from "../components/Button";
 import alert from "../components/Alert";
 import QR from "../components/QR";
 import Toast from 'react-native-toast-message';
+import { AntDesign } from '@expo/vector-icons';
 
 if (
   Platform.OS === "android" &&
@@ -93,18 +94,18 @@ export default function OrdersList({ navigation }) {
       const refundList = [];
       querySnapshot.forEach(doc => {
         const { customerName, orderId, orderItemId, refundAmount, refundDetails, refundMethod, orderItemName, typeOfServices, price } = doc.data();
-          refundList.push({
-            id: doc.id,
-            customerName,
-            orderId,
-            orderItemId,
-            refundAmount,
-            refundDetails,
-            refundMethod,
-            orderItemName,
-            typeOfServices,
-            price
-          })
+        refundList.push({
+          id: doc.id,
+          customerName,
+          orderId,
+          orderItemId,
+          refundAmount,
+          refundDetails,
+          refundMethod,
+          orderItemName,
+          typeOfServices,
+          price
+        })
       });
       setRefundList(refundList);
     });
@@ -380,6 +381,11 @@ export default function OrdersList({ navigation }) {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
+              <TouchableOpacity
+                onPress={() => setUpdateModal1Visible(false)}
+                >
+                <AntDesign style={styles.closeModal}name="closecircleo" size={24} color="black" />
+              </TouchableOpacity>
               <View style={styles.dview}>
                 <Text
                   style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
@@ -400,11 +406,11 @@ export default function OrdersList({ navigation }) {
                     width: "92%",
                   }}
                 >
-                  <Btn
+                  {/*<Btn
                     onClick={() => setUpdateModal1Visible(false)}
                     title="Dismiss"
                     style={{ width: "48%", backgroundColor: "#344869" }}
-                  />
+                />*/}
                 </View>
               </View>
             </View>
@@ -607,6 +613,14 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     padding: 10,
     color: "#fff",
+  },
+  closeModal: {
+    marginRight: 0,
+    marginLeft: 250,
+    marginTop: -20,
+    //backgroundColor: colors.blue100,
+    justifyContent: "right",
+    alignItems: "right"
   },
   buttonView: {
     justifyContent: "center",
