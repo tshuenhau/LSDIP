@@ -38,6 +38,7 @@ import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
 
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 

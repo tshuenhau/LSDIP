@@ -20,6 +20,7 @@ import Btn from "../components/Button";
 import alert from "../components/Alert";
 import QR from "../components/QR";
 import Toast from 'react-native-toast-message';
+import { AntDesign } from '@expo/vector-icons';
 
 if (
   Platform.OS === "android" &&
@@ -43,6 +44,9 @@ export default function OrdersList({ navigation }) {
   const [refundAmount, setRefundAmount] = useState("");
   const [refundDetails, setRefundDetails] = useState("");
   const [refundMethod, setRefundMethod] = useState("");
+  const [orderItemName, setOrderItemName] = useState("");
+  const [typeOfServices, setTypeOfServices] = useState("");
+  const [price, setPrice] = useState("");
 
   useEffect(() => {
     const query = orders.orderBy('orderDate', 'desc');
@@ -89,16 +93,19 @@ export default function OrdersList({ navigation }) {
     refunds.onSnapshot(querySnapshot => {
       const refundList = [];
       querySnapshot.forEach(doc => {
-        const { customerName, orderId, orderItemId, refundAmount, refundDetails, refundMethod } = doc.data();
-          refundList.push({
-            id: doc.id,
-            customerName,
-            orderId,
-            orderItemId,
-            refundAmount,
-            refundDetails,
-            refundMethod
-          })
+        const { customerName, orderId, orderItemId, refundAmount, refundDetails, refundMethod, orderItemName, typeOfServices, price } = doc.data();
+        refundList.push({
+          id: doc.id,
+          customerName,
+          orderId,
+          orderItemId,
+          refundAmount,
+          refundDetails,
+          refundMethod,
+          orderItemName,
+          typeOfServices,
+          price
+        })
       });
       setRefundList(refundList);
     });
@@ -190,6 +197,9 @@ export default function OrdersList({ navigation }) {
     setRefundAmount(refund.refundAmount);
     setRefundDetails(refund.refundDetails);
     setRefundMethod(refund.refundMethod);
+    setOrderItemName(refund.orderItemName);
+    setTypeOfServices(refund.typeOfServices);
+    setPrice(refund.price);
     //console.log(refund);
   }
 
@@ -371,12 +381,20 @@ export default function OrdersList({ navigation }) {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
+              <TouchableOpacity
+                onPress={() => setUpdateModal1Visible(false)}
+                >
+                <AntDesign style={styles.closeModal}name="closecircleo" size={24} color="black" />
+              </TouchableOpacity>
               <View style={styles.dview}>
                 <Text
                   style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
                 >
                   Refund Details
                 </Text>
+                <Text style={styles.refunddetails}><b>Refund Item:</b> {orderItemName}</Text>
+                <Text style={styles.refunddetails}><b>Type of Services:</b> {typeOfServices}</Text>
+                <Text style={styles.refunddetails}><b>Orignial Price:</b> {price}</Text>
                 <Text style={styles.refunddetails}><b>Refund Amount: </b>{refundAmount}</Text>
                 <Text style={styles.refunddetails}><b>Refund Method: </b>{refundMethod}</Text>
                 <Text style={styles.refunddetails}><b>Refund Details:</b> {refundDetails}</Text>
@@ -388,11 +406,11 @@ export default function OrdersList({ navigation }) {
                     width: "92%",
                   }}
                 >
-                  <Btn
+                  {/*<Btn
                     onClick={() => setUpdateModal1Visible(false)}
                     title="Dismiss"
                     style={{ width: "48%", backgroundColor: "#344869" }}
-                  />
+                />*/}
                 </View>
               </View>
             </View>
@@ -595,6 +613,14 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     padding: 10,
     color: "#fff",
+  },
+  closeModal: {
+    marginRight: 0,
+    marginLeft: 250,
+    marginTop: -20,
+    //backgroundColor: colors.blue100,
+    justifyContent: "right",
+    alignItems: "right"
   },
   buttonView: {
     justifyContent: "center",
