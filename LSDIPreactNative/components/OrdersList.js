@@ -40,13 +40,8 @@ export default function OrdersList({ navigation }) {
   const orders = firebase.firestore().collection("orders");
   const refunds = firebase.firestore().collection("refunds");
   const [refundList, setRefundList] = useState([]);
-  const [refund, setRefund] = useState(null);
-  const [refundAmount, setRefundAmount] = useState("");
-  const [refundDetails, setRefundDetails] = useState("");
-  const [refundMethod, setRefundMethod] = useState("");
-  const [orderItemName, setOrderItemName] = useState("");
-  const [typeOfServices, setTypeOfServices] = useState("");
-  const [price, setPrice] = useState("");
+  const [orderRefunds, setOrderRefunds] = useState([]);
+
 
   useEffect(() => {
     const query = orders.orderBy('orderDate', 'desc');
@@ -192,15 +187,9 @@ export default function OrdersList({ navigation }) {
 
   const showRefundDetails = (orderid) => {
     console.log(orderid);
-    const refund = refundList.find(element => element.orderId === orderid);
-    setRefund(refund);
-    setRefundAmount(refund.refundAmount);
-    setRefundDetails(refund.refundDetails);
-    setRefundMethod(refund.refundMethod);
-    setOrderItemName(refund.orderItemName);
-    setTypeOfServices(refund.typeOfServices);
-    setPrice(refund.price);
-    //console.log(refund);
+    const refundlist = refundList.filter(element => element.orderId === orderid);
+    setOrderRefunds(refundlist);
+    // console.log('refund list', refundlist);
   }
 
   const renderItem = ({ item: order }) => (
@@ -296,7 +285,7 @@ export default function OrdersList({ navigation }) {
           <TouchableOpacity
             onPress={() => setUpdateModalVisible(true)}
             style={styles.btn}>
-            <Text style={styles.text}>Update Order</Text>
+            <Text style={styles.text}>Update Order Status</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -383,21 +372,30 @@ export default function OrdersList({ navigation }) {
             <View style={styles.modalView}>
               <TouchableOpacity
                 onPress={() => setUpdateModal1Visible(false)}
-                >
-                <AntDesign style={styles.closeModal}name="closecircleo" size={24} color="black" />
+              >
+                <AntDesign style={styles.closeModal} name="closecircleo" size={24} color="black" />
               </TouchableOpacity>
               <View style={styles.dview}>
                 <Text
-                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
                 >
                   Refund Details
                 </Text>
-                <Text style={styles.refunddetails}><b>Refund Item:</b> {orderItemName}</Text>
-                <Text style={styles.refunddetails}><b>Type of Services:</b> {typeOfServices}</Text>
-                <Text style={styles.refunddetails}><b>Orignial Price:</b> {price}</Text>
-                <Text style={styles.refunddetails}><b>Refund Amount: </b>{refundAmount}</Text>
-                <Text style={styles.refunddetails}><b>Refund Method: </b>{refundMethod}</Text>
-                <Text style={styles.refunddetails}><b>Refund Details:</b> {refundDetails}</Text>
+                <FlatList
+                  //style={styles.list}
+                  data={orderRefunds}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View>
+                      <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
+                      <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
+                      <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
+                    </View>
+                  )}
+                />
                 <View
                   style={{
                     flexDirection: "row",
