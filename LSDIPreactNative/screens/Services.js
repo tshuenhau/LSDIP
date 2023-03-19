@@ -10,6 +10,7 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
@@ -163,19 +164,21 @@ export default function Services({ navigation }) {
                 transparent={true}
                 visible={modalVisible}
             >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
-                            <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
+                                <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
 
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal >
             {/*to view service list */}
             <View style={styles.header}>
@@ -353,7 +356,7 @@ const styles = StyleSheet.create({
     header: {
         width: "97%",
         flexDirection: "row",
-        marginTop:40
+        marginTop: 40
     },
     centeredView: {
         flex: 1,
@@ -364,6 +367,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         backgroundColor: 'white',
+        width:"50%",
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',

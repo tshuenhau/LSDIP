@@ -217,54 +217,59 @@ export default function Pickup({ navigation }) {
 
         return (
             <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
-                <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Available Timings on {date}</Text>
-                    <ScrollView>
-                        {console.log(availableTimings)}
-                        {availableTimings.map((timing) => {
-                            const isDisabled = selectedTime !== null && selectedTime !== timing;
-                            return (
-                                <TouchableOpacity
-                                    key={timing}
-                                    style={[
-                                        styles.timingButton,
-                                        selectedTime === timing && styles.selectedTimingButton,
-                                        isDisabled && styles.disabledTimingButton,
-                                    ]}
-                                    onPress={() => handleTimeSelect(timing)}
-                                    disabled={isDisabled}
-                                >
-                                    <Text
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={styles.modalTitle}>Available Timings on {date}</Text>
+
+                                {console.log(availableTimings)}
+                                {availableTimings.map((timing) => {
+                                    const isDisabled = selectedTime !== null && selectedTime !== timing;
+                                    return (
+                                        <TouchableOpacity
+                                            key={timing}
+                                            style={[
+                                                styles.timingButton,
+                                                selectedTime === timing && styles.selectedTimingButton,
+                                                isDisabled && styles.disabledTimingButton,
+                                            ]}
+                                            onPress={() => handleTimeSelect(timing)}
+                                            disabled={isDisabled}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.timingText,
+                                                    isDisabled && styles.disabledTimingText,
+                                                ]}
+                                            >
+                                                {timing}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                                <View style={styles.modalButtons}>
+                                    <TouchableOpacity
                                         style={[
-                                            styles.timingText,
-                                            isDisabled && styles.disabledTimingText,
+                                            styles.confirmButton,
+                                            selectedTime === null && styles.disabledConfirmButton,
                                         ]}
+                                        onPress={() => handleConfirm(date, selectedTime)}
+                                        disabled={selectedTime === null}
                                     >
-                                        {timing}
-                                    </Text>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </ScrollView>
-                    <View style={styles.modalButtons}>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={handleClose}
-                        >
-                            <Text style={styles.closeButtonText}>Cancel</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.confirmButton,
-                                selectedTime === null && styles.disabledConfirmButton,
-                            ]}
-                            onPress={() => handleConfirm(date, selectedTime)}
-                            disabled={selectedTime === null}
-                        >
-                            <Text style={styles.confirmButtonText}>Confirm</Text>
-                        </TouchableOpacity>
+                                        <Text style={styles.confirmButtonText}>Confirm</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.closeButton}
+                                        onPress={handleClose}
+                                    >
+                                        <Text style={styles.closeButtonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal>
         );
     };
@@ -322,100 +327,164 @@ export default function Pickup({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
-            <Btn onClick={() => navigation.navigate("Home")} title="Back" style={{ width: "30%", marginBottom: 20, backgroundColor: colors.dismissBlue }} />
-            <CalendarList
-                onDayPress={handleDayPress}
-                minDate={today}
-                markedDates={{
-                    ...(selectedDate && {
-                        [selectedDate]: {
-                            selected: true,
-                        },
-                    }),
-                    ...currentMonthDays.reduce(
-                        (acc, day) => ({ ...acc, [day]: { disabled: true } }),
-                        {}
-                    ),
-                }}
-                pastScrollRange={0}
-                futureScrollRange={1}
-                scrollEnabled={true}
-                horizontal={true}
-                pagingEnabled={true}
-                calendarWidth={350}
-                calendarHeight={350}
-                theme={{
-                    selectedDayBackgroundColor: '#007aff',
-                    selectedDayTextColor: '#ffffff',
-                    todayTextColor: '#00adf5',
-                    textDisabledColor: '#d9e1e8',
-                    arrowColor: 'gray',
-                }}
-            />
-            <Text style={styles.scrollMessage}>Scroll right to see more dates</Text>
-
-            {selectedDate && (
-                <View style={styles.selectedDateContent}>
-                    <Text style={styles.selectedDateText}>
-                        Selected date: {selectedDate}
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.viewTimingsButton}
-                        onPress={() => setIsModalOpen(true)}
-                    >
-                        <Text style={styles.viewTimingsButtonText}>View timings</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-            {selectedTimesList.length > 0 && (
-                <View style={styles.selectedTimesContainer}>
-                    <Text style={styles.selectedTimesTitle}>Selected Times</Text>
-                    <ScrollView style={styles.selectedTimesList}>
-                        {selectedTimesList.map((item) => (
-                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
-                                <Text style={styles.selectedTimeText}>
-                                    {item.date} - {item.time}
+        <ScrollView>
+            <View style={styles.mainContainer}>
+                <View style={styles.container}>
+                    <View style={styles.leftcontainer}>
+                        <View style={styles.calendarcontainer}>
+                            <CalendarList
+                                onDayPress={handleDayPress}
+                                minDate={today}
+                                markedDates={{
+                                    ...(selectedDate && {
+                                        [selectedDate]: {
+                                            selected: true,
+                                        },
+                                    }),
+                                    ...currentMonthDays.reduce(
+                                        (acc, day) => ({ ...acc, [day]: { disabled: true } }),
+                                        {}
+                                    ),
+                                }}
+                                pastScrollRange={0}
+                                futureScrollRange={1}
+                                scrollEnabled={true}
+                                horizontal={true}
+                                pagingEnabled={true}
+                                calendarWidth={480}
+                                theme={{
+                                    selectedDayBackgroundColor: colors.blue800,
+                                    selectedDayTextColor: colors.white,
+                                    todayTextColor: colors.blue700,
+                                    textDisabledColor: colors.blue100,
+                                    arrowColor: colors.shadowGray,
+                                    todayButtonFontWeight: "bold",
+                                }}
+                            />
+                        </View>
+                        <View style={styles.selectedDateContent}>
+                            <View>
+                                <Text style={styles.selectedDateText}>
+                                    Selected date:
                                 </Text>
-                                <Text style={styles.pickupText}>Pick up scheduled for this timeslot</Text>
-                                <TouchableOpacity
-                                    style={styles.deleteButton}
-                                    onPress={() => handleDelete(item)}
-                                >
-                                    <Text style={styles.deleteButtonText}>X</Text>
-                                </TouchableOpacity>
+
                             </View>
-                        ))}
 
-                    </ScrollView>
+                            {selectedDate && (
+                                <View style={styles.dateContent}>
+                                    <Text style={styles.dateText}>
+                                        {selectedDate}
+                                    </Text>
+                                    <TouchableOpacity
+                                        style={styles.viewTimingsButton}
+                                        onPress={() => setIsModalOpen(true)}
+                                    >
+                                        <Text style={styles.viewTimingsButtonText}>View timings</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+                    <View style={styles.detailContainer}>
+                        {selectedTimesList.length > 0 && (
+                            <View style={styles.selectedTimesContainer}>
+                                <Text style={styles.selectedTimesTitle}>Selected Pick Up Times</Text>
+                                <ScrollView style={styles.selectedTimesList}>
+                                    {selectedTimesList.map((item) => (
+                                        <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                                            <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
+                                            <Text style={styles.cardText}>
+                                                <b>Time: </b>{item.time}
+                                            </Text>
+                                            <Text style={styles.pickupText}>Pick up scheduled for this timeslot</Text>
+                                            <TouchableOpacity
+                                                style={styles.removeButton}
+                                                onPress={() => handleDelete(item)}
+                                            >
+                                                <Text style={styles.removeButtonText}> Remove</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+
+                                </ScrollView>
+                            </View>
+
+                        )}
+                        <AvailableTimingsModal
+                            date={selectedDate}
+                            onClose={() => setIsModalOpen(false)}
+                            isModalOpen={isModalOpen}
+                        />
+                        <DuplicateAlert
+                            message={duplicateMessage}
+                            isOpen={isDuplicateOpen}
+                            onClose={() => setIsDuplicateOpen(false)}
+                        />
+                    </View>
                 </View>
-
-            )}
-            <AvailableTimingsModal
-                date={selectedDate}
-                onClose={() => setIsModalOpen(false)}
-                isModalOpen={isModalOpen}
-            />
-            <DuplicateAlert
-                message={duplicateMessage}
-                isOpen={isDuplicateOpen}
-                onClose={() => setIsDuplicateOpen(false)}
-            />
-
-        </View>
+            </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 20,
-    },
-    modalContent: {
+    mainContainer: {
         flex: 1,
         padding: 20,
+    },
+    container: {
+        flex: 1,
+        padding: 20,
+        alignContent: "space-between",
+        flexDirection: "row"
+    },
+    leftcontainer: {
+        flex: "left",
+        padding: 20,
+        width: "50%",
+        borderRadius: 5,
+        alignContent: "center",
+    },
+    calendarcontainer: {
+        flex: "left",
+        padding: 20,
+        borderRadius: 5,
+        alignContent: "center",
+        backgroundColor: colors.white,
+        borderRadius: 10
+    },
+    detailContainer: {
+        flex: "right",
+        padding: 20,
+        width: "48%",
+        marginLeft: "2%"
+    },
+    view: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    centeredView: {
+        flex: 1,
         justifyContent: 'center',
-        alignItems: 'stretch',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        width: '50%',
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: colors.shadowGray,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
     modalTitle: {
         fontSize: 20,
@@ -428,18 +497,33 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 5,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.gray,
+        shadowColor: colors.shadowGray,
+        shadowOpacity: 0.2,
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        elevation: 3,
+        width: "92%",
     },
     selectedTimingButton: {
-        backgroundColor: 'blue',
+        backgroundColor: colors.blue600,
+        width: "92%",
+        alignItems: "center",
+        color: colors.white,
     },
     disabledTimingButton: {
-        backgroundColor: 'lightgray',
+        backgroundColor: colors.gray,
+        width: "92%",
+        alignItems: "center",
     },
     timingText: {
         fontSize: 16,
     },
     disabledTimingText: {
-        color: 'gray',
+        color: colors.lightGray,
     },
     noTimingsText: {
         fontStyle: 'italic',
@@ -453,7 +537,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     closeButton: {
-        backgroundColor: 'red',
+        backgroundColor: colors.dismissBlue,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
@@ -465,7 +549,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     confirmButton: {
-        backgroundColor: 'blue',
+        backgroundColor: colors.blue600,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
@@ -480,17 +564,28 @@ const styles = StyleSheet.create({
         marginVertical: 20,
         flexDirection: 'row',
         alignItems: 'center',
+        marginLeft: 2
     },
     selectedDateText: {
-        fontSize: 18,
+        fontSize: 25,
         fontWeight: 'bold',
         marginRight: 10,
     },
+    dateText: {
+        fontSize: 25,
+        marginRight: 10,
+    },
+    dateContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     viewTimingsButton: {
-        backgroundColor: '#007aff',
+        backgroundColor: colors.blue600,
+        shadowColor: colors.shadowGray,
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
+        marginLeft: 50,
     },
     viewTimingsButtonText: {
         color: 'white',
@@ -505,34 +600,32 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     selectedTimesTitle: {
-        fontSize: 18,
+        fontSize: 25,
         fontWeight: 'bold',
         marginBottom: 10,
+        marginLeft: 5
     },
     selectedTimeCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f1f1f1',
+        width: "95%",
+        alignItems: 'left',
+        backgroundColor: colors.white,
         borderRadius: 5,
         padding: 10,
         marginTop: 10,
-        borderWidth: 1,
-        borderColor: 'gray',
+        marginLeft: 5
     },
     selectedTimeText: {
         flex: 1,
         fontSize: 16,
     },
-    deleteButton: {
-        backgroundColor: 'red',
-        borderRadius: 5,
-        padding: 10,
-        marginLeft: 10,
+    removeButton: {
+        alignSelf: 'flex-end',
+        marginTop: 8,
+        marginRight: 10
     },
-    deleteButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
+    removeButtonText: {
+        color: 'red',
+        fontSize: 15
     },
     header: {
         flexDirection: 'row',
@@ -584,14 +677,26 @@ const styles = StyleSheet.create({
     selectedTimesContainer: {
         marginTop: 20,
         marginBottom: 20,
-        height: 300,
+        height: 380,
     },
     selectedTimesList: {
         flex: 1,
     },
     pickupText: {
-        textAlign: 'center',
-        marginVertical: 10,
+        fontSize: 16,
+        color: '#333333',
+        marginLeft: 10
+    },
+    cardText: {
+        fontSize: 20,
+        color: '#333333',
+        marginBottom: 15,
+        marginLeft: 10
+    },
+    cardTitle: {
+        fontSize: 20,
+        marginBottom: 4,
+        marginLeft: 10
     },
 
 });
