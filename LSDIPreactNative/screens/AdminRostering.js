@@ -13,8 +13,10 @@ export default function AdminRostering() {
                 { headerShown: false }
             }
         >
+
             <Stack.Screen name="Roster Outlet" component={AdminRosterOutlet} />
             <Stack.Screen name="Outlet Scheduling" component={AdminOutletScheduling} />
+            
         </Stack.Navigator>
     )
 }

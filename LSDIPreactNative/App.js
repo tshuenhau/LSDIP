@@ -37,7 +37,8 @@ import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
-
+import AdminRosterOutlet from './screens/AdminRosterOutlet';
+import AdminOutletScheduling from './screens//AdminOutletScheduling';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -148,7 +149,12 @@ function RootNavigator() {
           <Drawer.Screen name='Laundry Item' component={LaundryItems} />
           <Drawer.Screen name='Account Management' component={Account} />
           <Drawer.Screen name='Outlet Management' component={OutletManagement} />
-          <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
+          <Drawer.Screen name='Admin Rostering' component={AdminRosterOutlet} />
+          <Drawer.Screen name='Admin Outlet Scheduling' component={AdminOutletScheduling}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
           <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
           <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
           <Drawer.Screen name='Driver' component={Driver} />
@@ -176,7 +182,10 @@ function RootNavigator() {
             options={{
               drawerItemStyle: { display: "none" }
             }}
+            
           />
+
+          
         </Drawer.Navigator>
       </NavigationContainer >
     );

@@ -36,7 +36,7 @@ export default function AdminRosterOutlet({ navigation }) {
         <TouchableOpacity
             style={styles.card}
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('Outlet Scheduling', { item })}
+            onPress={() => navigation.navigate('Admin Outlet Scheduling', { item })}
         >
             <View style={styles.cardHeader}>
                 <Text style={styles.outletName}>{item.outletName} </Text>
