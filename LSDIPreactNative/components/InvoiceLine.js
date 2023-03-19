@@ -5,7 +5,7 @@ import {
 } from 'react-native'
 import React from 'react'
 
-export default function InvoiceLine({ label, value, total }) {
+export default function InvoiceLine({ label, value, total, discount }) {
     const formatCurrency = value.toFixed(2);
     return (
         <View style={styles.container}>
@@ -13,7 +13,8 @@ export default function InvoiceLine({ label, value, total }) {
             <Text style={
                 total == true
                     ? styles.totalValue
-                    : styles.value}>{formatCurrency}</Text>
+                    : styles.value}>{discount == true && "-"}{formatCurrency}
+            </Text>
         </View>
     )
 }

@@ -342,38 +342,53 @@ const DeliveryScreen = ({ navigation, route }) => {
     };
     //for modal
     return (
-      <Modal visible={isModalOpen}
-        animationType="slide"
-        onRequestClose={onClose}
-      >
-        <ScrollView>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
-                <Text style={styles.modalTitle}>Available Timings on {date}</Text>
-                {console.log(availableTimings)}
-                {availableTimings.map((timing) => {
-                  const isDisabled = selectedTime !== null && selectedTime !== timing;
-                  return (
-                    <TouchableOpacity
-                      key={timing}
-                      style={[
-                        styles.timingButton,
-                        selectedTime === timing && styles.selectedTimingButton,
-                        isDisabled && styles.disabledTimingButton,
-                      ]}
-                      onPress={() => handleTimeSelect(timing)}
-                      disabled={isDisabled}
-                    >
-                      <Text
+      <View style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+        <Modal visible={isModalOpen}
+          animationType="slide"
+          onRequestClose={onClose}
+        >
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
+                  <Text style={styles.modalTitle}>Available Timings on {date}</Text>
+                  {console.log(availableTimings)}
+                  {availableTimings.map((timing) => {
+                    const isDisabled = selectedTime !== null && selectedTime !== timing;
+                    return (
+                      <TouchableOpacity
+                        key={timing}
                         style={[
-                          styles.timingText,
-                          isDisabled && styles.disabledTimingText,
+                          styles.timingButton,
+                          selectedTime === timing && styles.selectedTimingButton,
+                          isDisabled && styles.disabledTimingButton,
                         ]}
+                        onPress={() => handleTimeSelect(timing)}
+                        disabled={isDisabled}
                       >
-                        {timing}
-                      </Text>
+                        <Text
+                          style={[
+                            styles.timingText,
+                            isDisabled && styles.disabledTimingText,
+                          ]}
+                        >
+                          {timing}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  <View style={styles.modalButtons}>
+                    <TouchableOpacity
+                      style={[
+                        styles.confirmButton,
+                        selectedTime === null && styles.disabledConfirmButton,
+                      ]}
+                      onPress={() => handleConfirm(date, selectedTime)}
+                      disabled={selectedTime === null}
+                    >
+                      <Text style={styles.confirmButtonText}>Confirm</Text>
                     </TouchableOpacity>
+<<<<<<< HEAD
                   );
                 })}
                 <View style={styles.modalButtons}>
@@ -401,12 +416,21 @@ const DeliveryScreen = ({ navigation, route }) => {
                   >
                     <Text style={styles.closeButtonText}>Cancel</Text>
                   </TouchableOpacity>
+=======
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={handleClose}
+                    >
+                      <Text style={styles.closeButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+>>>>>>> ce27ea18f172049466761225c2e0d4113a91f473
                 </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
-      </Modal>
+          </ScrollView>
+        </Modal>
+      </View>
     );
   };
 
@@ -583,7 +607,7 @@ const DeliveryScreen = ({ navigation, route }) => {
           <View style={styles.detailContainer}>
             {selectedTimesList.length > 0 && (
               <View style={styles.selectedTimesContainer}>
-                <Text style={styles.selectedTimesTitle}>Delivery Dates</Text>
+                <Text style={styles.selectedTimesTitle}>Selected Delivery Dates</Text>
                 <ScrollView style={styles.selectedTimesList}>
                   {selectedTimesList.map((item) => (
                     <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
@@ -679,9 +703,17 @@ const styles = StyleSheet.create({
     margin: 20,
     width: '50%',
     backgroundColor: colors.white,
+    borderRadius: 20,
     padding: 35,
     alignItems: 'center',
-
+    shadowColor: colors.shadowGray,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalTitle: {
     fontSize: 20,
@@ -694,8 +726,8 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     alignItems: 'center',
-    borderWidth:1,
-    borderColor:colors.gray,
+    borderWidth: 1,
+    borderColor: colors.gray,
     shadowColor: colors.shadowGray,
     shadowOpacity: 0.2,
     shadowOffset: {

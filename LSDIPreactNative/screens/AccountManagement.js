@@ -393,35 +393,37 @@ export default function AccountManagement() {
                     transparent={true}
                     visible={updateModalVisible}
                 >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update User</Text>
-                                <TextBox placeholder={updateModalData.name} onChangeText={text => handleChange(text, "name")} />
-                                <View style={{
-                                    width: "92%",
-                                    borderRadius: 25,
-                                    marginTop: 20
-                                }}>
-                                    <SelectList
-                                        data={roles}
-                                        placeholder="Change role to?"
-                                        searchPlaceholder="Search role"
-                                        setSelected={(val) => handleChange(val, "role")}
-                                        save="value"
-                                    />
-                                </View>
-                                <TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
-                                <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
-                                <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
-                                <TextBox placeholder={updateModalData.address} onChangeText={text => handleChange(text, "address")} />
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                                    <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update User</Text>
+                                    <TextBox placeholder={updateModalData.name} onChangeText={text => handleChange(text, "name")} />
+                                    <View style={{
+                                        width: "92%",
+                                        borderRadius: 25,
+                                        marginTop: 20
+                                    }}>
+                                        <SelectList
+                                            data={roles}
+                                            placeholder="Change role to?"
+                                            searchPlaceholder="Search role"
+                                            setSelected={(val) => handleChange(val, "role")}
+                                            save="value"
+                                        />
+                                    </View>
+                                    <TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
+                                    <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
+                                    <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
+                                    <TextBox placeholder={updateModalData.address} onChangeText={text => handleChange(text, "address")} />
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                                        <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
+                                        <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
                 </Modal>
 
                 {/*create user modal*/}
@@ -430,38 +432,40 @@ export default function AccountManagement() {
                     transparent={true}
                     visible={createModalVisible}
                 >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create User</Text>
-                                <TextBox placeholder="Full Name" onChangeText={text => handleCreateChange(text, "name")} />
-                                <TextBox placeholder="Email Address" onChangeText={text => handleCreateChange(text, "email")} />
-                                <TextBox placeholder="Phone Number" onChangeText={text => handleCreateChange(text, "number")} />
-                                <TextBox placeholder="Address" onChangeText={text => handleCreateChange(text, "address")} />
-                                <View style={{
-                                    width: "92%",
-                                    borderRadius: 25,
-                                    marginTop: 20
-                                }}>
-                                    <SelectList
-                                        data={createRoles}
-                                        placeholder="What is their role?"
-                                        searchPlaceholder="Search role"
-                                        setSelected={(val) => handleCreateChange(val, "role")}
-                                        save="value"
-                                    />
-                                </View>
-                                <TextBox placeholder="Salary ($/h)" onChangeText={text => handleCreateChange(text, "salary")} />
-                                <TextBox placeholder="Overtime Rate" onChangeText={text => handleCreateChange(text, "overtimeRate")} />
-                                <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd")} />
-                                <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd2")} />
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
-                                    <Btn onClick={() => SignUp()} title="Create User" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create User</Text>
+                                    <TextBox placeholder="Full Name" onChangeText={text => handleCreateChange(text, "name")} />
+                                    <TextBox placeholder="Email Address" onChangeText={text => handleCreateChange(text, "email")} />
+                                    <TextBox placeholder="Phone Number" onChangeText={text => handleCreateChange(text, "number")} />
+                                    <TextBox placeholder="Address" onChangeText={text => handleCreateChange(text, "address")} />
+                                    <View style={{
+                                        width: "92%",
+                                        borderRadius: 25,
+                                        marginTop: 20
+                                    }}>
+                                        <SelectList
+                                            data={createRoles}
+                                            placeholder="What is their role?"
+                                            searchPlaceholder="Search role"
+                                            setSelected={(val) => handleCreateChange(val, "role")}
+                                            save="value"
+                                        />
+                                    </View>
+                                    <TextBox placeholder="Salary ($/h)" onChangeText={text => handleCreateChange(text, "salary")} />
+                                    <TextBox placeholder="Overtime Rate" onChangeText={text => handleCreateChange(text, "overtimeRate")} />
+                                    <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd")} />
+                                    <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleCreateChange(text, "pwd2")} />
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
+                                        <Btn onClick={() => SignUp()} title="Create User" style={{ width: "48%" }} />
+                                        <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
                 </Modal>
 
             </View>

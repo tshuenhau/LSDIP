@@ -355,84 +355,88 @@ export default function AdminOutletScheduling({ route, navigation }) {
 
                 {/* weekday modal */}
                 <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.modalHeader}>{selectedDate}</Text>
-                            <Text style={styles.modalTitle}>Roster</Text>
-                            <FlatList
-                                data={selectedDateSchedule}
-                                keyExtractor={(item) => item.id}
-                                renderItem={renderStaffModal}
-                                
-                                ListEmptyComponent={
-                                    <Text style={styles.noDatesText}>No staff allocated</Text>
-                                }
-                            />
-                            <Text style={styles.modalTitle}>Allocate Staff</Text>
-                            <View style={styles.modalDropdown}>
-                                <SelectList
-                                    data={staffDetails}
-                                    setSelected={(val) => handleChange(val, "staffID")}
-                                    save="key"
-                                    search={false}
+                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <Text style={styles.modalHeader}>{selectedDate}</Text>
+                                <Text style={styles.modalTitle}>Roster</Text>
+                                <FlatList
+                                    data={selectedDateSchedule}
+                                    keyExtractor={(item) => item.id}
+                                    renderItem={renderStaffModal}
+
+                                    ListEmptyComponent={
+                                        <Text style={styles.noDatesText}>No staff allocated</Text>
+                                    }
                                 />
-                            </View>
-                            <View style={styles.modalDropdown}>
-                           
-                                <SelectList
-                                    data={shiftDetails.filter(s => s.type === "weekday")}
-                                    setSelected={(val) => handleChange(val, "shiftID")}
-                                    save="key"
-                                    search={false}
-                                />
-                            </View>
-                            <View style={styles.modalButtons}>
-                                <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                                <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <Text style={styles.modalTitle}>Allocate Staff</Text>
+                                <View style={styles.modalDropdown}>
+                                    <SelectList
+                                        data={staffDetails}
+                                        setSelected={(val) => handleChange(val, "staffID")}
+                                        save="key"
+                                        search={false}
+                                    />
+                                </View>
+                                <View style={styles.modalDropdown}>
+
+                                    <SelectList
+                                        data={shiftDetails.filter(s => s.type === "weekday")}
+                                        setSelected={(val) => handleChange(val, "shiftID")}
+                                        save="key"
+                                        search={false}
+                                    />
+                                </View>
+                                <View style={styles.modalButtons}>
+                                    <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
                 </Modal >
 
                 {/* weekend modal */}
                 <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.modalHeader}>Date: {selectedDate}</Text>
-                            <Text style={styles.modalTitle}>Roster</Text>
-                            <FlatList
-                                data={selectedDateSchedule}
-                                keyExtractor={(item) => item.id}
-                                renderItem={renderStaffModal}
-                                ListEmptyComponent={
-                                    <Text style={styles.noDatesText}>No staff allocated</Text>
-                                }
-                            />
-                            <Text style={styles.modalTitle}>Allocate Staff</Text>
-                            <View style={styles.modalDropdown}>
-
-                                <SelectList
-                                    data={staffDetails}
-                                    setSelected={(val) => handleChange(val, "staffID")}
-                                    save="key"
-                                    search={false}
+                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <Text style={styles.modalHeader}>Date: {selectedDate}</Text>
+                                <Text style={styles.modalTitle}>Roster</Text>
+                                <FlatList
+                                    data={selectedDateSchedule}
+                                    keyExtractor={(item) => item.id}
+                                    renderItem={renderStaffModal}
+                                    ListEmptyComponent={
+                                        <Text style={styles.noDatesText}>No staff allocated</Text>
+                                    }
                                 />
-                            </View>
-                            <View style={styles.modalDropdown}>
+                                <Text style={styles.modalTitle}>Allocate Staff</Text>
+                                <View style={styles.modalDropdown}>
 
-                                <SelectList
-                                    data={shiftDetails.filter(s => s.type === "weekend")}
-                                    setSelected={(val) => handleChange(val, "shiftID")}
-                                    save="key"
-                                    search={false}
-                                />
-                            </View>
-                            <View style={styles.modalButtons}>
-                                <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                                <Btn onClick={() => setWeekendModalVisible(!weekendModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                    <SelectList
+                                        data={staffDetails}
+                                        setSelected={(val) => handleChange(val, "staffID")}
+                                        save="key"
+                                        search={false}
+                                    />
+                                </View>
+                                <View style={styles.modalDropdown}>
+
+                                    <SelectList
+                                        data={shiftDetails.filter(s => s.type === "weekend")}
+                                        setSelected={(val) => handleChange(val, "shiftID")}
+                                        save="key"
+                                        search={false}
+                                    />
+                                </View>
+                                <View style={styles.modalButtons}>
+                                    <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setWeekendModalVisible(!weekendModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
                 </Modal >
 
 
@@ -602,9 +606,9 @@ const styles = StyleSheet.create({
     },
     modalDropdown: {
         marginBottom: 20,
-            width: "92%",
-            borderRadius: 25,
-            marginTop: 20
-    
+        width: "92%",
+        borderRadius: 25,
+        marginTop: 20
+
     }
 });

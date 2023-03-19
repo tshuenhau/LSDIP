@@ -7,6 +7,7 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
@@ -75,7 +76,7 @@ export default function VehicleModule() {
         })
         clearState();
         setModalVisible(!modalVisible);
-	}
+    }
 
     //create data method 2
     /*function createVehicle() {
@@ -302,27 +303,29 @@ export default function VehicleModule() {
                     Alert.alert('Modal has been closed.');
                     setModalVisible(!modalVisible);
                 }}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
 
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Vehicle</Text>
-                            <TextBox value={numberPlate} onChangeText={(numberPlate) => { setNumberPlate(numberPlate) }} placeholder="Number Plate"></TextBox>
-                            <View style={styles.statusSelectList}>
-                                <SelectList
-                                    data={vehicleStatuses}
-                                    setSelected={(vehicleStatus) => { setVehicleStatus(vehicleStatus) }}
-                                    save="key"
-                                    search={false}
-                                />
-                            </View>
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createVehicle()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Vehicle</Text>
+                                <TextBox value={numberPlate} onChangeText={(numberPlate) => { setNumberPlate(numberPlate) }} placeholder="Number Plate"></TextBox>
+                                <View style={styles.statusSelectList}>
+                                    <SelectList
+                                        data={vehicleStatuses}
+                                        setSelected={(vehicleStatus) => { setVehicleStatus(vehicleStatus) }}
+                                        save="key"
+                                        search={false}
+                                    />
+                                </View>
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createVehicle()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal >
 
             <View style={styles.view}>
@@ -363,26 +366,30 @@ export default function VehicleModule() {
                 animationType="slide"
                 transparent={true}
                 visible={updateModalVisible}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Vehicle</Text>
-                            <TextBox placeholder={upvalues.numberPlate} onChangeText={text => handleUpdate(text, "numberPlate")} />
-                            {/* <TextBox placeholder={upvalues.vehicleStatus} onChangeText={text => handleUpdate(text, "vehicleStatus")} /> */}
-                            <View style={styles.statusSelectList}>
-                                <SelectList
-                                    placeholder={upvalues.vehicleStatus}
-                                    data={vehicleStatuses}
-                                    setSelected={(vehicleStatus) => { setVehicleStatus(vehicleStatus) }}
-                                    save="key"
-                                    search={false}
-                                />
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Vehicle</Text>
+                                <TextBox placeholder={upvalues.numberPlate} onChangeText={text => handleUpdate(text, "numberPlate")} />
+                                {/* <TextBox placeholder={upvalues.vehicleStatus} onChangeText={text => handleUpdate(text, "vehicleStatus")} /> */}
+                                <View style={styles.statusSelectList}>
+                                    <SelectList
+                                        placeholder={upvalues.vehicleStatus}
+                                        data={vehicleStatuses}
+                                        setSelected={(vehicleStatus) => { setVehicleStatus(vehicleStatus) }}
+                                        save="key"
+                                        search={false}
+                                    />
+                                </View>
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => updateVehicle(upvalues.id)} title="Update" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
-                            <Btn onClick={() => updateVehicle(upvalues.id)} title="Update" style={{ width: "48%" }} />
-                            <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal>
         </View >
 
@@ -501,6 +508,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: "50%",
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
