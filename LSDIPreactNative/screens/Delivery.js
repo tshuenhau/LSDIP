@@ -562,7 +562,7 @@ const DeliveryScreen = ({ navigation, route }) => {
           <View style={styles.detailContainer}>
             {selectedTimesList.length > 0 && (
               <View style={styles.selectedTimesContainer}>
-                <Text style={styles.selectedTimesTitle}>Delivery Dates</Text>
+                <Text style={styles.selectedTimesTitle}>Selected Delivery Dates</Text>
                 <ScrollView style={styles.selectedTimesList}>
                   {selectedTimesList.map((item) => (
                     <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
