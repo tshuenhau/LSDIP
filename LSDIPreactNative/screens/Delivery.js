@@ -378,6 +378,14 @@ const DeliveryScreen = ({ navigation, route }) => {
                     );
                   })}
                   <View style={styles.modalButtons}>
+                  <Text style={styles.checkoutDetails}>Do you need delivery services? ($10) 
+                    <Checkbox
+                    style={{marginLeft: 12, }}
+                    disabled={false}
+                    value={requireDelivery}
+                    onValueChange={() => {handleCheck(), handleDeliveryFeeChange()}}
+                    />
+                  </Text>
                     <TouchableOpacity
                       style={[
                         styles.confirmButton,
@@ -388,35 +396,6 @@ const DeliveryScreen = ({ navigation, route }) => {
                     >
                       <Text style={styles.confirmButtonText}>Confirm</Text>
                     </TouchableOpacity>
-<<<<<<< HEAD
-                  );
-                })}
-                <View style={styles.modalButtons}>
-                <Text style={styles.checkoutDetails}>Do you need delivery services? ($10) 
-                  <Checkbox
-                  style={{marginLeft: 12, }}
-                  disabled={false}
-                  value={requireDelivery}
-                  onValueChange={() => {handleCheck(), handleDeliveryFeeChange()}}
-                  />
-                </Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.confirmButton,
-                      selectedTime === null && styles.disabledConfirmButton,
-                    ]}
-                    onPress={() => handleConfirm(date, selectedTime)}
-                    disabled={selectedTime === null}
-                  >
-                    <Text style={styles.confirmButtonText}>Confirm</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={handleClose}
-                  >
-                    <Text style={styles.closeButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-=======
                     <TouchableOpacity
                       style={styles.closeButton}
                       onPress={handleClose}
@@ -424,7 +403,6 @@ const DeliveryScreen = ({ navigation, route }) => {
                       <Text style={styles.closeButtonText}>Cancel</Text>
                     </TouchableOpacity>
                   </View>
->>>>>>> ce27ea18f172049466761225c2e0d4113a91f473
                 </View>
               </View>
             </View>

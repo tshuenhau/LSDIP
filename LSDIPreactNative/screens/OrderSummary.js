@@ -16,7 +16,6 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
-import Checkbox from "expo-checkbox";
 import { sub } from 'react-native-reanimated';
 import { pick } from 'lodash';
 import * as Print from 'expo-print';
@@ -252,14 +251,17 @@ export default function OrderSummary(props) {
                             <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
-                            <Text style={styles.checkoutDetails}>Do you need laundry pick up? ($10) 
+                            <View style={styles.checkboxContainer}>
+                            <Text style={styles.checkboxLabel}>Do you need laundry pick up? ($10)</Text>
                                 <Checkbox
-                                style={{marginLeft: 12, }}
+                                style={{marginLeft: 20, marginBottom: 2 }}
                                 disabled={false}
                                 value={orderValues.pickup}
                                 onValueChange={() => {handleCheck(), handlePickUpChange()}}
                                 />
-                            </Text>
+
+                            </View >
+                                
                             <View style={styles.checkboxContainer}>
                                 <Text style={styles.checkboxLabel}>Express</Text>
                                 <Checkbox
