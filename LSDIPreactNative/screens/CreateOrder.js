@@ -283,7 +283,6 @@ export default function CreateOrder({ navigation }) {
                 transparent={true}
                 visible={createModalVisible}
             >
-<<<<<<< HEAD
                 <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
@@ -297,31 +296,8 @@ export default function CreateOrder({ navigation }) {
                                         ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
                                         : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
                                     }
-=======
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-
-                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
-                            <View style={styles.textView}>
-                                <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
-                                <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
-                                {createModalData != undefined && createModalData.pricingMethod !== "Weight"
-                                    ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
-                                    : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
-                                }
-                            </View>
-                            {createModalData != undefined && createModalData.pricingMethod === "Range" &&
-                                <View style={styles.rangeText}>
-                                    <Slider
-                                        onValueChange={text => handleChange(text, "price")}
-                                        minimumValue={parseInt(createModalData.fromPrice)}
-                                        maximumValue={parseInt(createModalData.toPrice)}
-                                        value={parseInt(createModalData.fromPrice)}
-                                        step={1}
-                                    />
->>>>>>> createOrder
                                 </View>
+
                                 {createModalData != undefined && createModalData.pricingMethod === "Range" &&
                                     <View style={styles.rangeText}>
                                         <Slider
