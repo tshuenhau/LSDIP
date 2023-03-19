@@ -8,7 +8,8 @@ import {
   UIManager,
   Platform,
   Modal,
-  ScrollView
+  ScrollView,
+  TextInput
 } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list'
 import TextBox from "../components/TextBox";
@@ -31,7 +32,7 @@ export default function OrderPage(props) {
   console.log(props);
   const { orderId } = props.route.params;
   console.log(orderId);
-  const [description, setDescription] = useState("");
+  const [orderDescription, setOrderDescription] = useState("");
   const refunds = firebase.firestore().collection('refunds');
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   //const [customerName, setCustomerName] = useState("");
@@ -43,8 +44,8 @@ export default function OrderPage(props) {
     const unsubscribe = orderRef.onSnapshot((doc) => {
       if (doc.exists) {
         setOrder({ id: doc.id, ...doc.data() });
-        setDescription(doc.data().description);
-        console.log('order', order);
+        setOrderDescription(doc.data().description);
+        //console.log('order', order);
       } else {
         console.log('No such order document!');
       }
@@ -76,6 +77,7 @@ export default function OrderPage(props) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModal1Visible, setIsModal1Visible] = useState(false);
+  const [isModal2Visible, setIsModal2Visible] = useState(false);
 
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [laundryItemsData, setLaundryItemsData] = useState([]);
@@ -148,6 +150,7 @@ export default function OrderPage(props) {
   };
 
   function handleChange(text, eventName) {
+    console.log("handle chage");
     setModalData(prev => {
       return {
         ...prev,
@@ -265,6 +268,37 @@ export default function OrderPage(props) {
     setIsModal1Visible(!isModal1Visible);
   }
 
+  const updateDescription = () => {
+    //console.log("udate description");
+    setIsModal2Visible(true);
+  }
+
+  const updateDescription1 = () => {
+    console.log("here");
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    const odescription = modalData.orderDescription;
+    //console.log(orderRef);
+
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log('No such User document!');
+        throw new Error('No such User document!'); //should not occur normally as the notification is a "child" of the user
+      } else {
+        //console.log('Document data:', doc.data());
+        console.log("description now", orderDescription);
+        orderRef.update({
+          description: orderDescription,
+        });
+      }
+    })
+      .catch(err => {
+        console.log('Error getting document', err);
+        return false;
+      });
+
+      setIsModal2Visible(false);
+  }
+
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
@@ -331,8 +365,61 @@ export default function OrderPage(props) {
             ItemSeparatorComponent={renderSeparator}
             renderItem={renderItem}
           />
-          <Text style={styles.orderNumber}>Order Description</Text>
-          <Text style={styles.orderDescription}>{description}</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={styles.orderNumber}>Order Description</Text>
+            <FontAwesome
+              style={styles.outletIcon}
+              name="edit"
+              color='green'
+              onPress={updateDescription}
+            />
+          </View>
+          <Text style={styles.orderDescription}>{orderDescription}</Text>
+          <Modal
+            visible={isModal2Visible}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
+                  <Text
+                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
+                  >
+                    Update Order Description
+                  </Text>
+                  <TextInput
+                    editable
+                    multiline
+                    //numberOfLines={4}
+                    //onChangeText={text => handleChange(text, 'orderDescription')}
+                    onChangeText={text => setOrderDescription(text)}
+                    value={orderDescription}
+                    style={{ padding: 10, width: "80%", height: 80 }}
+                  />
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "92%",
+                    }}
+                  >
+                    <Btn
+                      onClick={() => updateDescription1()}
+                      title="Update"
+                      style={{ width: "48%" }}
+                    />
+                    <Btn
+                      onClick={() => setIsModal2Visible(false)}
+                      title="Dismiss"
+                      style={{ width: "48%", backgroundColor: "#344869" }}
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
 
         <Modal

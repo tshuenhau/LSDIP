@@ -41,13 +41,8 @@ export default function OrdersList({ navigation }) {
   const orders = firebase.firestore().collection("orders");
   const refunds = firebase.firestore().collection("refunds");
   const [refundList, setRefundList] = useState([]);
-  const [refund, setRefund] = useState(null);
-  const [refundAmount, setRefundAmount] = useState("");
-  const [refundDetails, setRefundDetails] = useState("");
-  const [refundMethod, setRefundMethod] = useState("");
-  const [orderItemName, setOrderItemName] = useState("");
-  const [typeOfServices, setTypeOfServices] = useState("");
-  const [price, setPrice] = useState("");
+  const [orderRefunds, setOrderRefunds] = useState([]);
+
 
   useEffect(() => {
     const query = orders.orderBy('orderDate', 'desc');
@@ -193,15 +188,9 @@ export default function OrdersList({ navigation }) {
 
   const showRefundDetails = (orderid) => {
     console.log(orderid);
-    const refund = refundList.find(element => element.orderId === orderid);
-    setRefund(refund);
-    setRefundAmount(refund.refundAmount);
-    setRefundDetails(refund.refundDetails);
-    setRefundMethod(refund.refundMethod);
-    setOrderItemName(refund.orderItemName);
-    setTypeOfServices(refund.typeOfServices);
-    setPrice(refund.price);
-    //console.log(refund);
+    const refundlist = refundList.filter(element => element.orderId === orderid);
+    setOrderRefunds(refundlist);
+    // console.log('refund list', refundlist);
   }
 
   const renderItem = ({ item: order }) => (
@@ -297,7 +286,7 @@ export default function OrdersList({ navigation }) {
           <TouchableOpacity
             onPress={() => setUpdateModalVisible(true)}
             style={styles.btn}>
-            <Text style={styles.text}>Update Order</Text>
+            <Text style={styles.text}>Update Order Status</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -392,6 +381,44 @@ export default function OrdersList({ navigation }) {
           <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
+                  <TouchableOpacity
+                    onPress={() => setUpdateModal1Visible(false)}
+                  >
+                    <AntDesign style={styles.closebutton} name="closecircleo" size={24} color="black" />
+                  </TouchableOpacity>
+                  <View style={styles.dview}>
+                    <Text
+                      style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
+                    >
+                      Refund Details
+                    </Text>
+                    <FlatList
+                      //style={styles.list}
+                      data={orderRefunds}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <View>
+                          <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
+                          <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
+                          <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
+                          <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
+                          <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
+                          <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
+                        </View>
+                      )}
+                    />
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "92%",
+                      }}
+                    >
+                      {/*<Btn
+          
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
                 <View style={styles.closeModal}>
                 <TouchableOpacity
                   onPress={() => setUpdateModal1Visible(false)}
@@ -424,10 +451,10 @@ export default function OrdersList({ navigation }) {
                     title="Dismiss"
                     style={{ width: "48%", backgroundColor: "#344869" }}
                 />*/}
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
           </ScrollView>
         </Modal>
       </View>
@@ -678,6 +705,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  closebutton: {
+    marginLeft: 500,
+    marginTop: -25
   },
   ordersListContainer: {
     flex: 1,
