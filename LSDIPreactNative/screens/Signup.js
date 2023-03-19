@@ -11,18 +11,13 @@ export default function SignUpScreen({ navigation }) {
     const firestore = firebase.firestore;
     const auth1 = firebase.auth;
 
-    const roles = [
-        { key: '1', value: 'Admin' },
-        { key: '2', value: 'Staff' },
-        { key: '3', value: 'Driver' },
-        { key: '4', value: 'Customer' }
-    ]
-
     const [values, setValues] = useState({
         name: "",
-        role: "",
+        role: "Customer",
         email: "",
         number: "",
+        address: "",
+        points: 0,
         pwd: "",
         pwd2: ""
     })
@@ -37,7 +32,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     function SignUp() {
-        const { email, pwd, pwd2, name, role, number } = values
+        const { email, pwd, pwd2, name, role, number, address, points } = values
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -46,13 +41,14 @@ export default function SignUpScreen({ navigation }) {
                         name,
                         role,
                         email,
+                        address,
+                        points,
                         number
                     })
                 })
                 .catch((error) => {
                     alert(error.message)
                 });
-            // alert("account created") 
             Toast.show({
                 type: 'success',
                 text1: 'Account created',
@@ -68,19 +64,7 @@ export default function SignUpScreen({ navigation }) {
         <TextBox placeholder="Full Name" onChangeText={text => handleChange(text, "name")} />
         <TextBox placeholder="Email Address" onChangeText={text => handleChange(text, "email")} />
         <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} />
-        <View style={{
-            width: "92%",
-            borderRadius: 25,
-            marginTop: 20
-        }}>
-            <SelectList
-                data={roles}
-                placeholder="Signing up as?"
-                searchPlaceholder="Search role"
-                setSelected={(val) => handleChange(val, "role")}
-                save="value"
-            />
-        </View>
+        <TextBox placeholder="Address" onChangeText={text => handleChange(text, "address")} />
         <TextBox placeholder="Password" secureTextEntry={true} onChangeText={text => handleChange(text, "pwd")} />
         <TextBox placeholder="Confirm Password" secureTextEntry={true} onChangeText={text => handleChange(text, "pwd2")} />
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
