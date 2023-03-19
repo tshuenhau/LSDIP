@@ -301,48 +301,52 @@ export default function StaffAvailability() {
 
                 {/* weekday modal */}
                 <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={styles.modalHeader}>Indicate Availability</Text>
-                                <Text style={styles.modalTitle}>{selectedDate}</Text>
-                                <SelectList
-                                    data={shiftTimings.filter(x => x.type === "weekday")}
-                                    setSelected={(val) => handleChange(val, "shiftID")}
-                                    save="key"
-                                    search={false}
-                                />
-                                {/* xxx */}
-                                <View style={styles.modalButtons}>
-                                    <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
+                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={styles.modalHeader}>Indicate Availability</Text>
+                                    <Text style={styles.modalTitle}>{selectedDate}</Text>
+                                    <SelectList
+                                        data={shiftTimings.filter(x => x.type === "weekday")}
+                                        setSelected={(val) => handleChange(val, "shiftID")}
+                                        save="key"
+                                        search={false}
+                                    />
+                                    {/* xxx */}
+                                    <View style={styles.modalButtons}>
+                                        <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
+                                        <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
                 </Modal >
 
                 {/* weekend modal */}
                 <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={styles.modalHeader}>Indicate Availability</Text>
-                                <Text style={styles.modalTitle}>{selectedDate}</Text>
+                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={styles.modalHeader}>Indicate Availability</Text>
+                                    <Text style={styles.modalTitle}>{selectedDate}</Text>
 
-                                <SelectList
-                                    data={shiftTimings.filter(x => x.type === "weekend")}
-                                    setSelected={(val) => handleChange(val, "shiftID")}
-                                    save="key"
-                                    search={false}
-                                />
-                                <View style={styles.modalButtons}>
-                                    <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
-                                    <Btn onClick={() => () => setWeekendModalVisible(!weekendModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                    <SelectList
+                                        data={shiftTimings.filter(x => x.type === "weekend")}
+                                        setSelected={(val) => handleChange(val, "shiftID")}
+                                        save="key"
+                                        search={false}
+                                    />
+                                    <View style={styles.modalButtons}>
+                                        <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
+                                        <Btn onClick={() => () => setWeekendModalVisible(!weekendModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
                 </Modal >
             </ScrollView>
 
@@ -366,6 +370,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         backgroundColor: 'white',
+        width:"50%",
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',

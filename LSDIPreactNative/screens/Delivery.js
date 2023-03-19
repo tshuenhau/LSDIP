@@ -332,7 +332,7 @@ const DeliveryScreen = ({ navigation, route }) => {
           animationType="slide"
           onRequestClose={onClose}
         >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.1)' }}>
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>

@@ -9,6 +9,7 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
@@ -184,21 +185,23 @@ export default function OutletList({ navigation }) {
                 animationType="slide"
                 transparent={true}
                 visible={createModalVisible}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
-                            <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
-                            <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
-                            <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
-                            <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
+                                <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
+                                <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
+                                <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
+                                <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal>
         </View>
     )

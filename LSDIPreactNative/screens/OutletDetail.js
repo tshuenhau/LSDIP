@@ -253,21 +253,23 @@ export default function OutletDetail({ route, navigation }) {
           animationType="slide"
           transparent={true}
           visible={updateModalVisible}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
-                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Outlet</Text>
-                <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} defaultValue={updateModalData.outletName} />
-                <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
-                <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
-                <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                  <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
-                  <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
+                  <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Outlet</Text>
+                  <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} defaultValue={updateModalData.outletName} />
+                  <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
+                  <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
+                  <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                    <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
+                    <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
 
         {/* Allocate Staff Modal */}
@@ -275,29 +277,31 @@ export default function OutletDetail({ route, navigation }) {
           animationType="slide"
           transparent={true}
           visible={allocateModalVisible}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
-                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
-                <View style={{
-                  width: "92%",
-                  borderRadius: 25,
-                  marginTop: 20
-                }}>
-                  <MultipleSelectList
-                    setSelected={(val) => setSelectedStaff(val)}
-                    data={staffList}
-                    save="key"
-                    label='Staff'
-                  />
-                </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                  <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                  <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
+                  <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
+                  <View style={{
+                    width: "92%",
+                    borderRadius: 25,
+                    marginTop: 20
+                  }}>
+                    <MultipleSelectList
+                      setSelected={(val) => setSelectedStaff(val)}
+                      data={staffList}
+                      save="key"
+                      label='Staff'
+                    />
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                    <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                    <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
 
       </ScrollView>
