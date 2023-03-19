@@ -20,181 +20,181 @@ import Toast from 'react-native-toast-message';
 
 export default function OutletDetail({ route, navigation }) {
 
-    const [updateModalVisible, setUpdateModalVisible] = useState(false);
-    const [allocateModalVisible, setAllocateModalVisible] = useState(false);
-    const [updateModalData, setUpdateModalData] = useState(route.params.item);
-    const [selectedStaff, setSelectedStaff] = useState([]);
-    const [staffList, setStaffList] = useState([]);
-    const [allocatedStaffList, setAllocateStaffList] = useState([]);
-    const outlets = firebase.firestore().collection('outlet');
-    const users = firebase.firestore().collection('users');
-    const outletStaff = firebase.firestore().collection('outlet_staff');
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [allocateModalVisible, setAllocateModalVisible] = useState(false);
+  const [updateModalData, setUpdateModalData] = useState(route.params.item);
+  const [selectedStaff, setSelectedStaff] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  const [allocatedStaffList, setAllocateStaffList] = useState([]);
+  const outlets = firebase.firestore().collection('outlet');
+  const users = firebase.firestore().collection('users');
+  const outletStaff = firebase.firestore().collection('outlet_staff');
 
-    useEffect(() => {
-        users.where("role", "==", "Staff")
-            .get()
-            .then(querySnapshot => {
-                const staffList = [];
-                querySnapshot.forEach(doc => {
-                    staffList.push({
-                        key: doc.id,
-                        value: doc.data().name,
-                        number: doc.data().number
-                    });
-                });
-                setStaffList(staffList);
-                outletStaff.where("outletID", "==", updateModalData.id)
-                    .get()
-                    .then(querySnapshot => {
-                        const allocatedStaffList = [];
-                        querySnapshot.forEach(doc => {
-                            allocatedStaffList.push({
-                                id: doc.id,
-                                staffID: doc.data().staffID,
-                                name: staffList.find(s => s.key === doc.data().staffID).value,
-                                number: staffList.find(s => s.key === doc.data().staffID).number
-                            })
-                        })
-                        setAllocateStaffList(allocatedStaffList);
-                    })
-            });
-    }, []);
-
-    function handleChange(text, eventName) {
-        setUpdateModalData(prev => {
-            return {
-                ...prev,
-                [eventName]: text
-            }
-        })
-    }
-
-    const updateOutlet = () => {
-        if (updateModalData.outletName.length > 0 &&
-            updateModalData.outletAddress.length > 0 &&
-            updateModalData.outletNumber.length > 0 &&
-            updateModalData.outletEmail.length > 0) {
-            outlets.doc(updateModalData.id)
-                .update({
-                    outletName: updateModalData.outletName,
-                    outletAddress: updateModalData.outletAddress,
-                    outletNumber: updateModalData.outletNumber,
-                    outletEmail: updateModalData.outletEmail
-                }).then(() => {
-                    console.log("Update Success")
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Outlet Updated',
-                    });
-                    setUpdateModalVisible(!updateModalVisible);
-                }).catch((err) => {
-                    console.log(err)
-                })
-        }
-    }
-
-    const allocateStaff = () => {
-        let allocateArr = [];
-        for (let i = 0; i < selectedStaff.length; i++) {
-            allocateArr.push({ outletID: updateModalData.id, staffID: selectedStaff[i] });
-        }
-        console.log(allocateArr);
-        const batch = firebase.firestore().batch();
-        allocateArr.forEach((doc) => {
-            const newDocRef = outletStaff.doc();
-            batch.set(newDocRef, doc);
-        })
-        batch.commit()
-            .then(() => {
-                console.log("Allocated Staff");
-                setAllocateModalVisible(!allocateModalVisible);
-                outletStaff.where("outletID", "==", updateModalData.id)
-                    .get()
-                    .then(querySnapshot => {
-                        const allocatedStaffList = [];
-                        querySnapshot.forEach(doc => {
-                            allocatedStaffList.push({
-                                id: doc.id,
-                                staffID: doc.data().staffID,
-                                name: staffList.find(s => s.key === doc.data().staffID).value,
-                                number: staffList.find(s => s.key === doc.data().staffID).number
-                            })
-                        })
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Staff Allocated',
-                        });
-                        setAllocateStaffList(allocatedStaffList);
-                    })
-            }).catch((err) => {
-                console.log(err);
+  useEffect(() => {
+    users.where("role", "==", "Staff")
+      .get()
+      .then(querySnapshot => {
+        const staffList = [];
+        querySnapshot.forEach(doc => {
+          staffList.push({
+            key: doc.id,
+            value: doc.data().name,
+            number: doc.data().number
+          });
+        });
+        setStaffList(staffList);
+        outletStaff.where("outletID", "==", updateModalData.id)
+          .get()
+          .then(querySnapshot => {
+            const allocatedStaffList = [];
+            querySnapshot.forEach(doc => {
+              allocatedStaffList.push({
+                id: doc.id,
+                staffID: doc.data().staffID,
+                name: staffList.find(s => s.key === doc.data().staffID).value,
+                number: staffList.find(s => s.key === doc.data().staffID).number
+              })
             })
+            setAllocateStaffList(allocatedStaffList);
+          })
+      });
+  }, []);
+
+  function handleChange(text, eventName) {
+    setUpdateModalData(prev => {
+      return {
+        ...prev,
+        [eventName]: text
+      }
+    })
+  }
+
+  const updateOutlet = () => {
+    if (updateModalData.outletName.length > 0 &&
+      updateModalData.outletAddress.length > 0 &&
+      updateModalData.outletNumber.length > 0 &&
+      updateModalData.outletEmail.length > 0) {
+      outlets.doc(updateModalData.id)
+        .update({
+          outletName: updateModalData.outletName,
+          outletAddress: updateModalData.outletAddress,
+          outletNumber: updateModalData.outletNumber,
+          outletEmail: updateModalData.outletEmail
+        }).then(() => {
+          console.log("Update Success")
+          Toast.show({
+            type: 'success',
+            text1: 'Outlet Updated',
+          });
+          setUpdateModalVisible(!updateModalVisible);
+        }).catch((err) => {
+          console.log(err)
+        })
     }
+  }
 
-    const showConfirmDiaglog = (item) => {
-        return alert("Confirmation", "Are you sure you want to remove staff from this outlet?",
-            [
-                {
-                    text: "Yes",
-                    onPress: () => {
-                        outletStaff.doc(item.id)
-                            .delete()
-                            .then(() => {
-                                console.log("Deallocated")
-                                const temp = allocatedStaffList.filter(x => x.id != item.id)
-                                Toast.show({
-                                    type: 'success',
-                                    text1: 'Removed',
-                                });
-                                setAllocateStaffList(temp);
-                            }).catch((err) => {
-                                console.log(err)
-                            })
-                    }
-                },
-                {
-                    text: "Cancel",
-                    onPress: () => {
-                        console.log("Cancelled");
-                    }
-                }
-            ])
+  const allocateStaff = () => {
+    let allocateArr = [];
+    for (let i = 0; i < selectedStaff.length; i++) {
+      allocateArr.push({ outletID: updateModalData.id, staffID: selectedStaff[i] });
     }
+    console.log(allocateArr);
+    const batch = firebase.firestore().batch();
+    allocateArr.forEach((doc) => {
+      const newDocRef = outletStaff.doc();
+      batch.set(newDocRef, doc);
+    })
+    batch.commit()
+      .then(() => {
+        console.log("Allocated Staff");
+        setAllocateModalVisible(!allocateModalVisible);
+        outletStaff.where("outletID", "==", updateModalData.id)
+          .get()
+          .then(querySnapshot => {
+            const allocatedStaffList = [];
+            querySnapshot.forEach(doc => {
+              allocatedStaffList.push({
+                id: doc.id,
+                staffID: doc.data().staffID,
+                name: staffList.find(s => s.key === doc.data().staffID).value,
+                number: staffList.find(s => s.key === doc.data().staffID).number
+              })
+            })
+            Toast.show({
+              type: 'success',
+              text1: 'Staff Allocated',
+            });
+            setAllocateStaffList(allocatedStaffList);
+          })
+      }).catch((err) => {
+        console.log(err);
+      })
+  }
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.card}
-            activeOpacity={0.8}
-        >
-            <View style={styles.cardHeader}>
-                <Text style={styles.outletName}>{item.name} </Text>
-            </View>
-            <View style={styles.itemContainer}>
-                <View style={styles.cardBody}>
-                    <Text style={styles.itemText}>Number: {item.number} </Text>
-                </View>
-                <View style={styles.cardButtons}>
-                    <FontAwesome
-                        style={styles.staffIcon}
-                        color="red"
-                        name="remove"
-                        onPress={() => showConfirmDiaglog(item)}
-                    />
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
+  const showConfirmDiaglog = (item) => {
+    return alert("Confirmation", "Are you sure you want to remove staff from this outlet?",
+      [
+        {
+          text: "Yes",
+          onPress: () => {
+            outletStaff.doc(item.id)
+              .delete()
+              .then(() => {
+                console.log("Deallocated")
+                const temp = allocatedStaffList.filter(x => x.id != item.id)
+                Toast.show({
+                  type: 'success',
+                  text1: 'Removed',
+                });
+                setAllocateStaffList(temp);
+              }).catch((err) => {
+                console.log(err)
+              })
+          }
+        },
+        {
+          text: "Cancel",
+          onPress: () => {
+            console.log("Cancelled");
+          }
+        }
+      ])
+  }
 
-    const OutletDetail = ({ label, text }) => {
-        return (
-            <View style={styles.outletDetailContainer}>
-                <Text style={styles.itemLabel}>{label}</Text>
-                <Text style={styles.itemText}>{text}</Text>
-            </View >
-        );
-    }
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.8}
+    >
+      <View style={styles.cardHeader}>
+        <Text style={styles.outletName}>{item.name} </Text>
+      </View>
+      <View style={styles.itemContainer}>
+        <View style={styles.cardBody}>
+          <Text style={styles.itemText}>Number: {item.number} </Text>
+        </View>
+        <View style={styles.cardButtons}>
+          <FontAwesome
+            style={styles.staffIcon}
+            color="red"
+            name="remove"
+            onPress={() => showConfirmDiaglog(item)}
+          />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
+  const OutletDetail = ({ label, text }) => {
     return (
+      <View style={styles.outletDetailContainer}>
+        <Text style={styles.itemLabel}>{label}</Text>
+        <Text style={styles.itemText}>{text}</Text>
+      </View >
+    );
+  }
+
+  return (
     <View style={{ backgroundColor: colors.background, flex: 1 }}>
       <ScrollView>
         <View style={styles.topButtons}>

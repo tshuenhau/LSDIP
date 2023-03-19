@@ -56,8 +56,8 @@ export default function OrderSummary(props) {
         console.log("order:" + orderValues.customerName);
         // On iOS/android prints the given html. On web prints the HTML from the current page.
         await Print.printAsync({
-          html,
-          printerUrl: selectedPrinter?.url, // iOS only
+            html,
+            printerUrl: selectedPrinter?.url, // iOS only
         });
     };
 
@@ -80,12 +80,16 @@ export default function OrderSummary(props) {
         // Creating orderItem Ids
         cart.forEach((item) => {
             if (item.pricingMethod !== "Weight") {
-                const { laundryItemName, typeOfServices, pricingMethod, price } = item;
+                const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = item;
+                /*
                 for (let i = 0; i < item.quantity; i++) {
                     const docRef = orderItem.doc();
                     batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price });
                     orderItemIds.push(docRef.id);
-                }
+                */
+                const docRef = orderItem.doc();
+                batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, quantity });
+                orderItemIds.push(docRef.id);
             } else {
                 const docRef = orderItem.doc();
                 const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;

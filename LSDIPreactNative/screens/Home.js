@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
-import { Entypo } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
@@ -11,179 +13,223 @@ import colors from '../colors';
 
 export default function Home({ navigation }) {
 
-    const auth1 = firebase.auth;
+  const auth1 = firebase.auth;
 
-    const [user, setUser] = useState(null) // This user
-    const users = firebase.firestore().collection('users');
-    const [selectedTimesList, setSelectedTimesList] = useState([]);
+  const [user, setUser] = useState(null) // This user
+  const users = firebase.firestore().collection('users');
+  const [selectedTimesList, setSelectedTimesList] = useState([]);
 
-    useEffect(() => {
-        users.doc(auth1().currentUser.uid)
-            .get()
-            .then(user => {
-                setUser(user.data())
-                console.log(user)
-            })
-    }, [])
+  useEffect(() => {
+    users.doc(auth1().currentUser.uid)
+      .get()
+      .then(user => {
+        setUser(user.data())
+        console.log(user)
+      })
+  }, [])
 
-    useEffect(() => {
-        const db = firebase.firestore();
-        const user = firebase.auth().currentUser;
-        if (user) {
-          const docRef = db.collection('user_timings').doc(user.uid);
-          docRef.onSnapshot((doc) => {
-            if (doc.exists) {
-              const selectedTimes = doc.data().selected_times || [];
-              console.log(selectedTimes);
-              setSelectedTimesList(selectedTimes);
-            } else {
-              setSelectedTimesList([]);
-            }
-          });
+  useEffect(() => {
+    const db = firebase.firestore();
+    const user = firebase.auth().currentUser;
+    if (user) {
+      const docRef = db.collection('user_timings').doc(user.uid);
+      docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          const selectedTimes = doc.data().selected_times || [];
+          console.log(selectedTimes);
+          setSelectedTimesList(selectedTimes);
+        } else {
+          setSelectedTimesList([]);
         }
-      }, []);
+      });
+    }
+  }, []);
 
-    useEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <Image
-                    source={require('../assets/washin.jpg')}
-                    style={{
-                        width: 40,
-                        height: 40,
-                        marginRight: 15,
-                    }}
-                />
-            ),
-        });
-    }, [navigation]);
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Image
+          source={require('../assets/washin.jpg')}
+          style={{
+            width: 40,
+            height: 40,
+            marginRight: 15,
+          }}
+        />
+      ),
+    });
+  }, [navigation]);
 
-    const handleDelete = (id) => {
-        const db = firebase.firestore();
-        const user = firebase.auth().currentUser;
-        
-        if (user) {
-          const docRef = db.collection('user_timings').doc(user.uid);
-          docRef.get().then((doc) => {
-            if (doc.exists) {
-              const selectedTime = doc.data().selected_times.find(
-                (time) => time.date === id.date && time.time === id.time
-              );
-              const selectedTimes = doc.data().selected_times.filter(
-                (time) => time.date !== id.date || time.time !== id.time
-              );
-              
-              return docRef.set({
-                selected_times: selectedTimes,
-              }).then(() => {
-                console.log('Selected time deleted for user with UID: ', user.uid);
-                
-                const newSelectedTimesList = selectedTimesList.filter(
-                  (item) => item.date !== id.date || item.time !== id.time
-                );
-                
-                setSelectedTimesList(newSelectedTimesList);
-                
-                const batch = db.batch();
-                
-                selectedTime.orders.forEach((order) => {
-                  const orderRef = db.collection('orders').doc(order.id);
-                  batch.update(orderRef, { orderStatus: 'Back from Wash' });
-                });
-                
-                return batch.commit();
-              });
-            }
+  const handleDelete = (id) => {
+    const db = firebase.firestore();
+    const user = firebase.auth().currentUser;
+
+    if (user) {
+      const docRef = db.collection('user_timings').doc(user.uid);
+      docRef.get().then((doc) => {
+        if (doc.exists) {
+          const selectedTime = doc.data().selected_times.find(
+            (time) => time.date === id.date && time.time === id.time
+          );
+          const selectedTimes = doc.data().selected_times.filter(
+            (time) => time.date !== id.date || time.time !== id.time
+          );
+
+          return docRef.set({
+            selected_times: selectedTimes,
           }).then(() => {
-            console.log('Orders updated successfully');
-          }).catch((error) => {
-            console.error(error);
+            console.log('Selected time deleted for user with UID: ', user.uid);
+
+            const newSelectedTimesList = selectedTimesList.filter(
+              (item) => item.date !== id.date || item.time !== id.time
+            );
+
+            setSelectedTimesList(newSelectedTimesList);
+
+            const batch = db.batch();
+
+            selectedTime.orders.forEach((order) => {
+              const orderRef = db.collection('orders').doc(order.id);
+              batch.update(orderRef, { orderStatus: 'Back from Wash' });
+            });
+
+            return batch.commit();
           });
         }
-      };
-      
+      }).then(() => {
+        console.log('Orders updated successfully');
+      }).catch((error) => {
+        console.error(error);
+      });
+    }
+  };
 
-    return (
-        <View style={{ flex: 1 }}>
-            <ScrollView>
-                {user?.role === "Staff" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
+
+  return (
+    <View style={{ flex: 1 }}>
+      <ScrollView>
+        {user?.role === "Staff" ?
+          <View>
+            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+              <Text>Email: {auth.currentUser?.email}</Text>
+            </View>
+            <OrdersList navigation={navigation} />
+          </View>
+          : null
+        }
+        {user?.role === "Admin" ?
+          <View>
+            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+              <Text>Email: {auth.currentUser?.email}</Text>
+            </View>
+            <OrdersList navigation={navigation} />
+
+          </View>
+          : null
+        }
+        {user?.role === "Customer" ?
+          <View>
+
+
+            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+              {/* <Text>Email: {auth.currentUser?.email}</Text> */}
+
+              <Text style={[
+                {
+                  // Try setting `flexDirection` to `"row"`.
+                  flexDirection: 'row',
+                  flex: 2,
+                  margin: 5,
+                  fontSize: 24,
+                  fontWeight: "800"
+
+                },
+              ]}><Ionicons name="ios-person-outline" size={24} onPress={() => alert("clicked")} /> <FontAwesome5 name="coins" size={24} /> 100 ($1) { }</Text>
+
+            </View>
+            <Text>  </Text>
+            <View style={[
+              {
+                // Try setting `flexDirection` to `"row"`.
+                flexDirection: 'row',
+                alignSelf: 'center',
+
+              },
+            ]}>
+              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                <Text style={styles.NavButtonText}>Delivery</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                <Text style={styles.NavButtonText}>Pick Up</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[
+              {
+                // Try setting `flexDirection` to `"row"`.
+                flexDirection: 'row',
+                alignSelf: 'center',
+              },
+            ]}>
+              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                <Text style={styles.NavButtonText}>Order History</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                <Text style={styles.NavButtonText}>Rewards</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.listtext}>My Orders</Text>
+            <CustomerOrderList curUser={user} />
+            <Text style={styles.listtext}>Available for Delivery</Text>
+            <CustomerAvailableOrderList navigation={navigation} curUser={user} />
+            {selectedTimesList.length > 0 && (
+              <View style={styles.selectedTimesContainer}>
+                <Text style={styles.listtext}>Selected Delivery Times</Text>
+                <ScrollView style={styles.selectedTimesList}>
+                  {selectedTimesList.map((item) => (
+                    <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                      <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
+                      <Text style={styles.cardText}>
+                        <b>Time: </b>{item.time}
+                      </Text>
+                      {item.orders ? (
+                        <View>
+                          {/*<Text style={styles.orderTitle}>Order IDs:</Text>*/}
+                          <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.map((order) => order.id).join(", ")}</Text>
                         </View>
-                        <OrdersList navigation={navigation} />
+                      ) : (
+                        <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
+                      )}
+
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() => handleDelete(item)}
+                      >
+                        <Text style={styles.removeButtonText}> Remove </Text>
+                      </TouchableOpacity>
                     </View>
-                    : null
-                }
-                {user?.role === "Admin" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-                        <OrdersList navigation={navigation} />
+                  ))}
 
-                    </View>
-                    : null
-                }
-                {user?.role === "Customer" ?
-                <View>
-                    <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.name}</Text>
-                    <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-                    <Text>Email: {auth.currentUser?.email}</Text>
-                    </View>
-                    <Text> </Text>
-                    <Text style={styles.listtext}>My Orders</Text>
-                    <CustomerOrderList curUser={user} />
-                    <Text style={styles.listtext}>Available for Delivery</Text>
-                    <CustomerAvailableOrderList navigation={navigation} curUser={user} />
-                    {selectedTimesList.length > 0 && (
-                        <View style={styles.selectedTimesContainer}>
-                        <Text style={styles.selectedTimesTitle}>Selected Delivery Times</Text>
-                        <ScrollView style={styles.selectedTimesList}>
-                        {selectedTimesList.map((item) => (
-                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
-                            <Text style={styles.selectedTimeText}>
-                                {item.date} - {item.time}
-                            </Text>
-                            {item.orders ? (
-                                <View>
-                                <Text style={styles.orderTitle}>Order IDs:</Text>
-                                <Text style={styles.orderText}>{item.orders.map((order) => order.id).join(", ")}</Text>
-                                </View>
-                            ) : (
-                                <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
-                            )}
+                </ScrollView>
+              </View>
 
-                            <TouchableOpacity
-                                style={styles.deleteButton}
-                                onPress={() => handleDelete(item)}
-                            >
-                                <Text style={styles.deleteButtonText}>X</Text>
-                            </TouchableOpacity>
-                            </View>
-                        ))}
+            )}
+          </View>
+          : null
+        }
+        {user?.role === "Driver" ?
+          <View>
+            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+              <Text>Email: {auth.currentUser?.email}</Text>
+            </View>
+            <Text>Hi im Driver</Text>
+          </View>
+          : null
+        }
 
-                        </ScrollView>
-                        </View>
-
-                    )}
-                </View>
-                : null
-                }
-                {user?.role === "Driver" ?
-                    <View>
-                        <Text style={{ fontSize: 24, fontWeight: "800", padding: 5,marginLeft:10 }}>Welcome {user?.role} {user?.name}</Text>
-                        <View style={{ paddingLeft: 5,marginLeft:10 }}>
-                            <Text>Email: {auth.currentUser?.email}</Text>
-                        </View>
-                        <Text>Hi im Driver</Text>
-                    </View>
-                    : null
-                }
-
-                {/* <View style={styles.chatContainer}>
+        {/* <View style={styles.chatContainer}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Chat")}
                     style={styles.chatButton}
@@ -192,129 +238,160 @@ export default function Home({ navigation }) {
                 </TouchableOpacity>
             </View> */}
 
-            </ScrollView>
-        </View>
+      </ScrollView>
+    </View>
 
-    )
+  )
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  ordersListContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  chatButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+  },
+  chatButton: {
+    backgroundColor: colors.primary,
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    ordersListContainer: {
-        flex: 1,
-        padding: 10,
+    shadowOpacity: .9,
+    shadowRadius: 8,
+  },
+  button: {
+    marginTop: "20"
+  },
+  createOrderContainer: {
+    alignSelf: "center",
+  },
+  list: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: '#fff',
+    marginVertical: 10,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: {
+      width: 0,
+      height: 3,
     },
-    chatButtonContainer: {
-        position: "absolute",
-        bottom: 20,
-        right: 20,
-    },
-    chatButton: {
-        backgroundColor: colors.primary,
-        height: 50,
-        width: 50,
-        borderRadius: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: colors.primary,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: .9,
-        shadowRadius: 8,
-    },
-    button: {
-        marginTop: "20"
-    },
-    createOrderContainer: {
-        alignSelf: "center",
-    },
-    list: {
-        flex: 1,
-    },
-    card: {
-        backgroundColor: '#fff',
-        marginVertical: 10,
-        marginHorizontal: 16,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        elevation: 3,
-    },
-    orderNumber: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    orderDate: {
-        fontSize: 14,
-        color: colors.gray,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 16,
-    },
-    cardBody: {
-        backgroundColor: colors.lightGray,
-        padding: 16,
-    },
-    listtext: {
-        paddingLeft: 20,
-        fontSize: 20,
-        fontWeight: "600",
-        color: "black"
-    },
-      selectedTimesContent: {
-        marginTop: 20,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: 'gray',
-        paddingVertical: 10,
-      },
-      selectedTimesTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-      },
-      selectedTimeCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f1f1f1',
-        borderRadius: 5,
-        padding: 10,
-        marginTop: 10,
-        borderWidth: 1,
-        borderColor: 'gray',
-      },
-      selectedTimeText: {
-        flex: 1,
-        fontSize: 16,
-      },
-      selectedTimesContainer: {
-        marginTop: 20,
-        marginBottom: 20,
-        height: 300,
-      },
-      selectedTimesList: {
-        flex: 1,
-      },
-      deleteButton: {
-        backgroundColor: 'red',
-        borderRadius: 5,
-        padding: 10,
-        marginLeft: 10,
-      },
-      deleteButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-      },
+    elevation: 3,
+  },
+  orderNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  orderDate: {
+    fontSize: 14,
+    color: colors.gray,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  cardBody: {
+    backgroundColor: colors.lightGray,
+    padding: 16,
+  },
+  listtext: {
+    paddingLeft: 20,
+    fontSize: 20,
+    fontWeight: "600",
+    color: "black"
+  },
+  selectedTimesContent: {
+    marginTop: 20,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'gray',
+    paddingVertical: 10,
+  },
+  selectedTimesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  selectedTimeCard: {
+    width: "97%",
+    alignItems: 'left',
+    backgroundColor: colors.white,
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 10,
+    marginLeft: 15
+  },
+  selectedTimeText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  selectedTimesContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+    height: 300,
+  },
+  selectedTimesList: {
+    flex: 1,
+  },
+  removeButton: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+    marginRight: 10
+  },
+  removeButtonText: {
+    color: 'red',
+    fontSize: 15
+  },
+  NavButton: {
+    backgroundColor: colors.primary,
+    padding: 20,
+    borderRadius: 5,
+    margin: 2,
+    alignSelf: 'center',
+  },
+  NavButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
+    alignSelf: 'center',
+  },
+  cardText: {
+    fontSize: 20,
+    color: '#333333',
+    marginBottom: 15,
+    marginLeft: 10
+  },
+  cardTitle: {
+    fontSize: 20,
+    marginBottom: 4,
+    marginLeft: 10
+  },
+  noOrdersText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 10
+  },
+  orderText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 10
+  }
 });
