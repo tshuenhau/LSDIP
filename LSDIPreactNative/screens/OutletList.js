@@ -9,6 +9,8 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView,
+    TextInput
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
@@ -39,6 +41,7 @@ export default function OutletList({ navigation }) {
     const [values, setValues] = useState(initialValues);
     const [expandedOutlet, setExpandedOutlet] = useState(null);
     const outlets = firebase.firestore().collection('outlet');
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         outlets.onSnapshot(querySnapshot => {
@@ -122,6 +125,10 @@ export default function OutletList({ navigation }) {
         );
     }
 
+    const filteredOutletList = outletList.filter((outlet) =>
+        outlet.outletName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
@@ -160,17 +167,34 @@ export default function OutletList({ navigation }) {
 
     return (
         <View>
-            <View style={styles.view}>
+            <View style={styles.header}>
+                <View style={styles.searchnfilter}>
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by Outlet Name"
+                        />
+                    </View>
+                </View>
+                <TouchableOpacity
+                    onPress={() => setCreateModalVisible(!createModalVisible)}
+                    style={styles.createBtn}>
+                    <Text style={styles.text}>Create Outlet</Text>
+                </TouchableOpacity>
+            </View>
+            {/*<View style={styles.view}>
                 <TouchableOpacity
                     onPress={() => setCreateModalVisible(!createModalVisible)}
                     style={styles.btn}>
                     <Text style={styles.text}>Create Outlet</Text>
                 </TouchableOpacity>
-            </View>
-
+    </View>*/}
+            <Text style={styles.listtext}>Outlet List </Text>
             <View>
                 <FlatList
-                    data={outletList}
+                    data={filteredOutletList}
                     keyExtractor={outlet => outlet.id}
                     renderItem={renderItem}
                     ListEmptyComponent={
@@ -184,21 +208,23 @@ export default function OutletList({ navigation }) {
                 animationType="slide"
                 transparent={true}
                 visible={createModalVisible}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
-                            <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
-                            <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
-                            <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
-                            <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
+                                <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
+                                <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
+                                <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
+                                <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal>
         </View>
     )
@@ -295,5 +321,49 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    }
+    },
+    header: {
+        width: "97%",
+        flexDirection: "row",
+        marginTop: 40
+    },
+    searchnfilter: {
+        flexDirection: 'row',
+        marginLeft: 10,
+        width: "78%",
+    },
+    searchContainer: {
+        marginVertical: 15,
+        marginLeft: 30,
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: '#f5f5f5',
+        backgroundColor: colors.white,
+        justifyContent: "center",
+        alignContent: "center",
+        width: "96%",
+        marginLeft: 10,
+        height: 50
+    },
+    searchInput: {
+        height: 40,
+        fontSize: 18,
+        paddingHorizontal: 10,
+    },
+    createBtn: {
+        borderRadius: 5,
+        backgroundColor: colors.blue600,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 30,
+        marginTop: 13,
+        width: '23%',
+        height: '68%'
+    },
+    listtext: {
+        paddingLeft: 20,
+        fontSize: 20,
+        fontWeight: "600",
+        color: "black"
+    },
 })

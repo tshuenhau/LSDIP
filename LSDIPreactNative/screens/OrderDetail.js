@@ -427,88 +427,92 @@ export default function OrderPage(props) {
           transparent={true}
           animationType="slide"
         >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
 
-                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item</Text>
-                <View
-                  style={{
-                    width: '100%',
-                    borderRadius: 20,
-                    marginTop: 20,
-                    backgroundColor: 'white',
-                  }}>
-                  <SelectList
-                    data={laundryItemsData.map(
-                      (item) => item.typeOfServices + "--" + item.laundryItemName
-                      //(item) => item.typeOfServices
-                    )}
-                    setSelected={(val) => handleChange(val, 'typeOfServices')}
-                    save="value"
+                  <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Add Item</Text>
+                  <View
+                    style={{
+                      width: '92%',
+                      borderRadius: 20,
+                      marginTop: 20,
+                      backgroundColor: 'white',
+                    }}>
+                    <SelectList
+                      data={laundryItemsData.map(
+                        (item) => item.typeOfServices + "--" + item.laundryItemName
+                        //(item) => item.typeOfServices
+                      )}
+                      setSelected={(val) => handleChange(val, 'typeOfServices')}
+                      save="value"
+                    />
+                  </View>
+                  <TextBox
+                    style={styles.textBox}
+                    placeholder="Price"
+                    onChangeText={(text) => handleChange(text, 'price')}
                   />
-                </View>
-                <TextBox
-                  style={styles.textBox}
-                  placeholder="Price"
-                  onChangeText={(text) => handleChange(text, 'price')}
-                />
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                  <Btn
-                    onClick={() => addOrderItem1()}
-                    title="Update"
-                    style={{ width: "48%" }}
-                  />
-                  <Btn
-                    onClick={() => toggleModal()}
-                    title="Close"
-                    style={{ width: "48%", backgroundColor: "#344869" }}
-                  />
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                    <Btn
+                      onClick={() => addOrderItem1()}
+                      title="Update"
+                      style={{ width: "48%" }}
+                    />
+                    <Btn
+                      onClick={() => toggleModal()}
+                      title="Close"
+                      style={{ width: "48%", backgroundColor: "#344869" }}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          </View >
+            </View >
+          </ScrollView>
         </Modal>
         <Modal
           visible={isModal1Visible}
           transparent={true}
           animationType="slide"
         >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
 
-                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Refund Item</Text>
-                <TextBox
-                  style={styles.textBox}
-                  placeholder="Refund Amount"
-                  onChangeText={(text) => handleChange(text, 'refundAmount')}
-                />
-                <TextBox
-                  style={styles.textBox}
-                  placeholder="Refund Method"
-                  onChangeText={(text) => handleChange(text, 'refundMethod')}
-                />
-                <TextBox
-                  style={styles.textBox}
-                  placeholder="Refund Details"
-                  onChangeText={(text) => handleChange(text, 'refundDetails')}
-                />
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                  <Btn
-                    onClick={() => refund1()}
-                    title="Refund"
-                    style={{ width: "48%" }}
+                  <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Refund Item</Text>
+                  <TextBox
+                    style={styles.textBox}
+                    placeholder="Refund Amount"
+                    onChangeText={(text) => handleChange(text, 'refundAmount')}
                   />
-                  <Btn
-                    onClick={() => toggleModal1()}
-                    title="Close"
-                    style={{ width: "48%", backgroundColor: "#344869" }}
+                  <TextBox
+                    style={styles.textBox}
+                    placeholder="Refund Method"
+                    onChangeText={(text) => handleChange(text, 'refundMethod')}
                   />
+                  <TextBox
+                    style={styles.textBox}
+                    placeholder="Refund Details"
+                    onChangeText={(text) => handleChange(text, 'refundDetails')}
+                  />
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                    <Btn
+                      onClick={() => refund1()}
+                      title="Refund"
+                      style={{ width: "48%" }}
+                    />
+                    <Btn
+                      onClick={() => toggleModal1()}
+                      title="Close"
+                      style={{ width: "48%", backgroundColor: "#344869" }}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          </View >
+            </View >
+          </ScrollView>
         </Modal>
       </View>
     </ScrollView>

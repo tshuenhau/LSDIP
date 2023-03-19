@@ -6,9 +6,11 @@ import {
     StyleSheet,
     Modal,
     FlatList,
+    TextInput,
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView
 } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import TextBox from "../components/TextBox";
@@ -30,8 +32,9 @@ export default function Services({ navigation }) {
     const [modalVisible, setmodalVisible] = useState(false);
     const laundryCItem = firebase.firestore().collection('laundryCategory');
     const [cvalues, setCValues] = useState(initialCategoryValues);
-    const [serviceList, setServiceList] = useState('');
+    const [serviceList, setServiceList] = useState([]);
     const [expandedService, setExpandedService] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     //for services
     const initialCategoryValues = {
@@ -149,6 +152,10 @@ export default function Services({ navigation }) {
         </TouchableOpacity>
     );
 
+    const filteredServiceList = serviceList.filter((service) =>
+        service.serviceName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <View>
             {/*for create services */}
@@ -157,33 +164,53 @@ export default function Services({ navigation }) {
                 transparent={true}
                 visible={modalVisible}
             >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
-                            <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
+                                <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
 
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
-                                <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal >
             {/*to view service list */}
+            <View style={styles.header}>
+                <View style={styles.searchnfilter}>
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by Name"
+                        />
+                    </View>
+                </View>
+                <TouchableOpacity
+                    onPress={() => setmodalVisible(!modalVisible)}
+                    style={styles.createBtn}>
+                    <Text style={styles.text}>Create Service</Text>
+                </TouchableOpacity>
+            </View>
+            {/*
             <View style={styles.view}>
                 <TouchableOpacity
                     onPress={() => setmodalVisible(!modalVisible)}
                     style={styles.btn}>
                     <Text style={styles.text}>Create Service</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <View>
                 <Text style={styles.listtext}>Service List </Text>
 
                 <FlatList
-                    data={serviceList}
+                    data={filteredServiceList}
                     keyExtractor={service => service.id}
                     renderItem={renderItem}
                     ListEmptyComponent={
@@ -256,12 +283,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    btn: {
-        padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
+    createBtn: {
+        borderRadius: 5,
+        backgroundColor: colors.blue600,
         justifyContent: "center",
         alignItems: "center",
+        marginRight: 30,
+        marginTop: 6,
+        width: '23%',
+        height: '74%'
     },
     btn2: {
         padding: 5,
@@ -277,11 +307,56 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: "#fff",
     },
+    searchnfilter: {
+        flexDirection: 'row',
+        marginLeft: 10,
+        width: "78%",
+    },
+    searchContainer: {
+        marginVertical: 15,
+        marginLeft: 30,
+        borderWidth: 1,
+        borderRadius: 20,
+        borderColor: '#f5f5f5',
+        backgroundColor: '#f5f5f5',
+        alignItems: "center",
+        flexDirection: "row",
+        alignContent: "space-between"
+    },
+    searchInput: {
+        height: 40,
+        fontSize: 18,
+        marginLeft: 60,
+        paddingHorizontal: 10
+    },
+    searchbaricon: {
+        height: 40
+    }, searchInput: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: colors.gray,
+        paddingHorizontal: 10,
+        fontSize: 18,
+        backgroundColor: colors.white,
+        marginVertical: 10,
+    },
+    searchContainer: {
+        justifyContent: "center",
+        alignContent: "center",
+        width: "96%",
+        marginLeft: 10
+    },
     listtext: {
         paddingLeft: 20,
         fontSize: 20,
         fontWeight: "600",
         color: "black"
+    },
+    header: {
+        width: "97%",
+        flexDirection: "row",
+        marginTop: 40
     },
     centeredView: {
         flex: 1,
@@ -292,6 +367,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         backgroundColor: 'white',
+        width:"50%",
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',

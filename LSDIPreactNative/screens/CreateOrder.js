@@ -280,60 +280,62 @@ export default function CreateOrder({ navigation }) {
                 transparent={true}
                 visible={createModalVisible}
             >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            
-                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
-                            <View style={styles.textView}>
-                            <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
-                            <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
-                            {createModalData != undefined && createModalData.pricingMethod !== "Weight"
-                                ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
-                                : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
-                            }
-                            </View>
-                            {createModalData != undefined && createModalData.pricingMethod === "Range" &&
-                                <View style={styles.rangeText}>
-                                    <Slider
-                                        onValueChange={text => handleChange(text, "price")}
-                                        minimumValue={parseInt(createModalData.fromPrice)}
-                                        maximumValue={parseInt(createModalData.toPrice)}
-                                        value={parseInt(createModalData.fromPrice)}
-                                        step={1}
-                                    />
-                                </View>
-                            }
-                            {createModalData != undefined && createModalData.pricingMethod == "Flat" &&
-                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
-                            }
-                            {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
-                                <TextBox placeholder="kg" onChangeText={text => handleChange(text, "weight")} defaultValue={createModalData.weight} />
-                            }
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
 
-                            {createModalData != undefined && createModalData.pricingMethod !== "Weight" &&
-                                <View style={styles.quantityContainer}>
-                                    <TouchableOpacity
-                                        onPress={() => handleMinus()}>
-                                        <Entypo name="minus" size={24} color="black" />
-                                    </TouchableOpacity>
-                                    <View style={styles.quantityBorder}>
-                                        <TextInput style={styles.quantityTextBox} placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} value={createModalData.quantity} />
+                                <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
+                                <View style={styles.textView}>
+                                    <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
+                                    <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
+                                    {createModalData != undefined && createModalData.pricingMethod !== "Weight"
+                                        ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
+                                        : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
+                                    }
+                                </View>
+                                {createModalData != undefined && createModalData.pricingMethod === "Range" &&
+                                    <View style={styles.rangeText}>
+                                        <Slider
+                                            onValueChange={text => handleChange(text, "price")}
+                                            minimumValue={parseInt(createModalData.fromPrice)}
+                                            maximumValue={parseInt(createModalData.toPrice)}
+                                            value={parseInt(createModalData.fromPrice)}
+                                            step={1}
+                                        />
                                     </View>
-                                    <TouchableOpacity
-                                        onPress={() => handlePlus()}>
-                                        <Entypo name="plus" size={24} color="black" />
-                                    </TouchableOpacity>
-                                </View>
-                            }
+                                }
+                                {createModalData != undefined && createModalData.pricingMethod == "Flat" &&
+                                    <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
+                                }
+                                {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
+                                    <TextBox placeholder="kg" onChangeText={text => handleChange(text, "weight")} defaultValue={createModalData.weight} />
+                                }
 
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                {createModalData != undefined && createModalData.pricingMethod !== "Weight" &&
+                                    <View style={styles.quantityContainer}>
+                                        <TouchableOpacity
+                                            onPress={() => handleMinus()}>
+                                            <Entypo name="minus" size={24} color="black" />
+                                        </TouchableOpacity>
+                                        <View style={styles.quantityBorder}>
+                                            <TextInput style={styles.quantityTextBox} placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} value={createModalData.quantity} />
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={() => handlePlus()}>
+                                            <Entypo name="plus" size={24} color="black" />
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => addToCart()} title="Add" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setCreateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal>
         </View>
     )
@@ -425,7 +427,7 @@ const styles = StyleSheet.create({
         width: "100%",
         justifyContent: 'space-evenly',
         alignItems: 'stretch',
-        marginLeft:40
+        marginLeft: 40
     },
     itemText: {
         flex: 1,

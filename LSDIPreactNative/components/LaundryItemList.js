@@ -10,6 +10,7 @@ import {
     LayoutAnimation,
     UIManager,
     Platform,
+    ScrollView
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
@@ -36,6 +37,10 @@ export default function LaundryItemList() {
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [upvalues, setUpValues] = useState({});
     const [data, setData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [values, setValues] = useState({});
+    const [modalVisible, setModalVisible] = useState(false);
+
 
     const pricingMethods = [
         { key: '1', value: 'Flat' },
@@ -84,6 +89,10 @@ export default function LaundryItemList() {
             setData(data);
         });
     }, []);
+
+    const filteredLaundryItemList = laundryItemList.filter((laundry) =>
+        laundry.laundryItemName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const toggleExpand = (id) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -138,6 +147,16 @@ export default function LaundryItemList() {
         })
     }
 
+
+    function handleChange(text, eventName) {
+        setValues(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
     const updateLaundry = () => {
         if (upvalues.typeOfServices.length > 0 &&
             upvalues.laundryItemName.length > 0 &&
@@ -183,6 +202,21 @@ export default function LaundryItemList() {
         }
     }
 
+    function createLaundryItem() {
+        laundryItem.add(values)
+            .then(() => {
+                setModalVisible(false);
+                setValues({});
+                Toast.show({
+                    type: 'success',
+                    text1: 'Laundry item created',
+                });
+                console.log("Success");
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
@@ -192,8 +226,9 @@ export default function LaundryItemList() {
             <View style={styles.cardHeader}>
                 <View style={styles.cardHeader2}>
                     <Text style={styles.outletName}>{item.laundryItemName} </Text>
-                    <Text style={styles.itemText}> /Service: {item.typeOfServices} </Text>
+                    <Text style={styles.smallText}>Service: {item.typeOfServices} </Text>
                 </View>
+
                 <View style={styles.cardHeaderIcon}>
                     <FontAwesome
                         style={styles.outletIcon}
@@ -212,17 +247,17 @@ export default function LaundryItemList() {
             {expandedLaundryItem === item.id && (
                 <View style={styles.itemContainer}>
                     <View style={styles.cardBody}>
-                        <Text style={styles.itemText}>Laundry Item Name: {item.laundryItemName} </Text>
-                        <Text style={styles.itemText}>Laundry Category: {item.typeOfServices} </Text>
-                        <Text style={styles.itemText}>Pricing Method: {item.pricingMethod} </Text>
+                        <Text style={styles.itemText}><b>Laundry Item Name: </b>{item.laundryItemName} </Text>
+                        <Text style={styles.itemText}><b>Laundry Category: </b>{item.typeOfServices} </Text>
+                        <Text style={styles.itemText}><b>Pricing Method: </b>{item.pricingMethod} </Text>
                         {item.pricingMethod === "Range"
                             ?
                             <View>
-                                <Text style={styles.itemText}>From Price: S${item.fromPrice} </Text>
-                                <Text style={styles.itemText}>To Price: S${item.toPrice} </Text>
+                                <Text style={styles.itemText}><b>From Price: </b>S${item.fromPrice} </Text>
+                                <Text style={styles.itemText}><b>To Price: </b>S${item.toPrice} </Text>
                             </View>
                             :
-                            <Text style={styles.itemText}>Price: S${item.price} </Text>
+                            <Text style={styles.itemText}><b>Price: </b>S${item.price} </Text>
                         }
                     </View>
 
@@ -233,69 +268,158 @@ export default function LaundryItemList() {
 
     return (
         <View>
-            <View style={styles.container}>
-                <View>
-                    <FlatList
-                        data={laundryItemList}
-                        keyExtractor={laundryItem => laundryItem.id}
-                        renderItem={renderItem}
-                        ListEmptyComponent={
-                            <Text style={styles.noDataText}>No Data Found!</Text>
-                        }
-                    />
-                </View >
+            <View style={styles.header}>
+                <View style={styles.searchnfilter}>
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by Name"
+                        />
+                    </View>
+                </View>
+                <TouchableOpacity
+                    onPress={() => setModalVisible(!modalVisible)}
+                    style={styles.createBtn}>
+                    <Text style={styles.text}>Create Laundry Item</Text>
+                </TouchableOpacity>
             </View>
+            <Text style={styles.listtext}>Laundry Item List</Text>
+
+            <View>
+                <FlatList
+                    data={filteredLaundryItemList}
+                    keyExtractor={laundryItem => laundryItem.id}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noDataText}>No Data Found!</Text>
+                    }
+                />
+            </View >
+
+            {/*for create laundry item*/}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+            >
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Laundry Item</Text>
+                                <TextBox placeholder="Laundry Item Name" onChangeText={text => handleChange(text, "laundryItemName")} />
+                                <View style={{
+                                    // height: 42,
+                                    width: "92%",
+                                    borderRadius: 25,
+                                    marginTop: 20
+                                }}>
+                                    <SelectList
+                                        data={data}
+                                        placeholder="Choose service"
+                                        searchPlaceholder="Search service"
+                                        search={false}
+                                        setSelected={(val) => handleChange(val, "typeOfServices")}
+                                        save="value"
+                                    />
+                                </View>
+                                <View style={{
+                                    // height: 42,
+                                    width: "92%",
+                                    borderRadius: 25,
+                                    marginTop: 20
+                                }}>
+                                    <SelectList
+                                        data={pricingMethods}
+                                        placeholder="Choose pricing method"
+                                        searchPlaceholder="Search pricing method"
+                                        search={false}
+                                        setSelected={(val) => handleChange(val, "pricingMethod")}
+                                        save="value"
+                                    />
+                                </View>
+                                {values != undefined && values.pricingMethod === "Range" &&
+                                    <View style={styles.rangeText}>
+                                        <View style={styles.rangeTextContainer}>
+                                            <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} />
+                                        </View>
+                                        <View style={styles.rangeTextContainer}>
+                                            <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} />
+                                        </View>
+                                    </View>
+                                }
+                                {values != undefined && values.pricingMethod == "Flat" &&
+                                    <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} />
+                                }
+                                {values != undefined && values.pricingMethod === "Weight" &&
+                                    <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} />
+                                }
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </Modal >
 
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={updateModalVisible}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
-                            <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Laundry Item</Text>
-                            <TextBox placeholder={upvalues.laundryItemName} onChangeText={text => handleChange(text, "laundryItemName")} />
-                            <View style={styles.selectList}>
-                                <SelectList
-                                    placeholder={upvalues.typeOfServices}
-                                    data={data}
-                                    setSelected={(val) => handleChange(val, "typeOfServices")}
-                                    save="value"
-                                />
-                            </View>
-                            <View style={styles.selectList}>
-                                <SelectList
-                                    data={pricingMethods}
-                                    placeholder={upvalues.pricingMethod}
-                                    setSelected={(val) => handleChange(val, "pricingMethod")}
-                                    save="value"
-                                />
-                            </View>
-                            {upvalues != undefined && upvalues.pricingMethod === "Range" &&
-                                <View style={styles.rangeText}>
-                                    <View style={styles.rangeTextContainer}>
-                                        <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} defaultValue={upvalues.fromPrice} />
-                                    </View>
-                                    <View style={styles.rangeTextContainer}>
-                                        <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} defaultValue={upvalues.toPrice} />
-                                    </View>
+                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Laundry Item</Text>
+                                <TextBox placeholder={upvalues.laundryItemName} onChangeText={text => handleChange(text, "laundryItemName")} />
+                                <View style={styles.selectList}>
+                                    <SelectList
+                                        placeholder={upvalues.typeOfServices}
+                                        data={data}
+                                        setSelected={(val) => handleChange(val, "typeOfServices")}
+                                        save="value"
+                                    />
                                 </View>
-                            }
-                            {upvalues != undefined && upvalues.pricingMethod == "Flat" &&
-                                <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
-                            }
-                            {upvalues != undefined && upvalues.pricingMethod === "Weight" &&
-                                <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
-                            }
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => updateLaundry()} title="Update" style={{ width: "48%" }} />
-                                <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                <View style={styles.selectList}>
+                                    <SelectList
+                                        data={pricingMethods}
+                                        placeholder={upvalues.pricingMethod}
+                                        setSelected={(val) => handleChange(val, "pricingMethod")}
+                                        save="value"
+                                    />
+                                </View>
+                                {upvalues != undefined && upvalues.pricingMethod === "Range" &&
+                                    <View style={styles.rangeText}>
+                                        <View style={styles.rangeTextContainer}>
+                                            <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} defaultValue={upvalues.fromPrice} />
+                                        </View>
+                                        <View style={styles.rangeTextContainer}>
+                                            <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} defaultValue={upvalues.toPrice} />
+                                        </View>
+                                    </View>
+                                }
+                                {upvalues != undefined && upvalues.pricingMethod == "Flat" &&
+                                    <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
+                                }
+                                {upvalues != undefined && upvalues.pricingMethod === "Weight" &&
+                                    <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
+                                }
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => updateLaundry()} title="Update" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal >
-        </View >
+        </View>
+
+
     );
 }
 
@@ -345,6 +469,10 @@ const styles = StyleSheet.create({
         fontWeight: 'light',
         paddingTop: 4
     },
+    smallText: {
+        fontSize: 15,
+        fontWeight: 'light',
+    },
     card: {
         backgroundColor: '#fff',
         marginVertical: 10,
@@ -372,7 +500,6 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     cardHeader2: {
-        flexDirection: 'row',
         padding: 20,
     },
     cardHeaderIcon: {
@@ -387,12 +514,15 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
-    btn: {
-        padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
+    createBtn: {
+        borderRadius: 5,
+        backgroundColor: colors.blue600,
         justifyContent: "center",
         alignItems: "center",
+        marginRight: 30,
+        marginTop: 6,
+        width: '23%',
+        height: '74%'
     },
     text: {
         fontSize: 20,
@@ -407,6 +537,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
+        width: '50%',
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
@@ -419,5 +550,56 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+    },
+    searchnfilter: {
+        flexDirection: 'row',
+        marginLeft: 10,
+        width: "78%",
+    },
+    searchContainer: {
+        marginVertical: 15,
+        marginLeft: 30,
+        borderWidth: 1,
+        borderRadius: 20,
+        borderColor: '#f5f5f5',
+        backgroundColor: '#f5f5f5',
+        alignItems: "center",
+        flexDirection: "row",
+        alignContent: "space-between"
+    },
+    searchInput: {
+        height: 40,
+        fontSize: 18,
+        marginLeft: 60,
+        paddingHorizontal: 10
+    },
+    searchbaricon: {
+        height: 40
+    }, searchInput: {
+        height: 40,
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: colors.gray,
+        paddingHorizontal: 10,
+        fontSize: 18,
+        backgroundColor: colors.white,
+        marginVertical: 10,
+    },
+    searchContainer: {
+        justifyContent: "center",
+        alignContent: "center",
+        width: "96%",
+        marginLeft: 10
+    },
+    listtext: {
+        paddingLeft: 20,
+        fontSize: 20,
+        fontWeight: "600",
+        color: "black"
+    },
+    header: {
+        width: "97%",
+        flexDirection: "row",
+        marginTop: 40
     }
 });

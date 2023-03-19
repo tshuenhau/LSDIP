@@ -9,7 +9,8 @@ import {
   UIManager,
   Platform,
   Modal,
-  TextInput
+  TextInput,
+  ScrollView
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
@@ -326,93 +327,135 @@ export default function OrdersList({ navigation }) {
           animationType="slide"
           transparent={true}
         >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
-                <Text
-                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
-                >
-                  Update Status
-                </Text>
-                <SelectList
-                  data={statuses}
-                  setSelected={(val) => setSelectedStatus(val)}
-                  save="value"
-                  search={false}
-                />
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.view}>
+                  <Text
+                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                  >
+                    Update Status
+                  </Text>
+                  <View style={{
+                    // height: 42,
                     width: "92%",
-                  }}
-                >
-                  <Btn
-                    onClick={() => updateStatus()}
-                    title="Update"
-                    style={{ width: "48%" }}
-                  />
-                  <Btn
-                    onClick={() => setUpdateModalVisible(false)}
-                    title="Dismiss"
-                    style={{ width: "48%", backgroundColor: "#344869" }}
-                  />
+                    borderRadius: 25,
+                    marginTop: 20
+                  }}>
+                    <SelectList
+                      data={statuses}
+                      setSelected={(val) => setSelectedStatus(val)}
+                      save="value"
+                      search={false}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "92%",
+                    }}
+                  >
+                    <Btn
+                      onClick={() => updateStatus()}
+                      title="Update"
+                      style={{ width: "48%" }}
+                    />
+                    <Btn
+                      onClick={() => setUpdateModalVisible(false)}
+                      title="Dismiss"
+                      style={{ width: "48%", backgroundColor: "#344869" }}
+                    />
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
         <Modal
           visible={udpateModal1Visible}
           animationType="slide"
           transparent={true}
         >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <TouchableOpacity
-                onPress={() => setUpdateModal1Visible(false)}
-              >
-                <AntDesign style={styles.closeModal} name="closecircleo" size={24} color="black" />
-              </TouchableOpacity>
-              <View style={styles.dview}>
-                <Text
-                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
+          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                  <TouchableOpacity
+                    onPress={() => setUpdateModal1Visible(false)}
+                  >
+                    <AntDesign style={styles.closebutton} name="closecircleo" size={24} color="black" />
+                  </TouchableOpacity>
+                  <View style={styles.dview}>
+                    <Text
+                      style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
+                    >
+                      Refund Details
+                    </Text>
+                    <FlatList
+                      //style={styles.list}
+                      data={orderRefunds}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <View>
+                          <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
+                          <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
+                          <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
+                          <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
+                          <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
+                          <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
+                        </View>
+                      )}
+                    />
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "92%",
+                      }}
+                    >
+                      {/*<Btn
+          
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.closeModal}>
+                <TouchableOpacity
+                  onPress={() => setUpdateModal1Visible(false)}
                 >
-                  Refund Details
-                </Text>
-                <FlatList
-                  //style={styles.list}
-                  data={orderRefunds}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <View>
-                      <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
-                      <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
-                      <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
-                      <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
-                      <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
-                      <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
-                    </View>
-                  )}
-                />
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    width: "92%",
-                  }}
-                >
-                  {/*<Btn
+                  <AntDesign name="closecircleo" size={30} color="black" />
+                </TouchableOpacity>
+                </View>
+                <View style={styles.dview}>
+                  <Text
+                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                  >
+                    Refund Details
+                  </Text>
+                  <Text style={styles.refunddetails}><b>Refund Item:</b> {orderItemName}</Text>
+                  <Text style={styles.refunddetails}><b>Type of Services:</b> {typeOfServices}</Text>
+                  <Text style={styles.refunddetails}><b>Orignial Price:</b> {price}</Text>
+                  <Text style={styles.refunddetails}><b>Refund Amount: </b>{refundAmount}</Text>
+                  <Text style={styles.refunddetails}><b>Refund Method: </b>{refundMethod}</Text>
+                  <Text style={styles.refunddetails}><b>Refund Details:</b> {refundDetails}</Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "92%",
+                    }}
+                  >
+                    {/*<Btn
                     onClick={() => setUpdateModal1Visible(false)}
                     title="Dismiss"
                     style={{ width: "48%", backgroundColor: "#344869" }}
                 />*/}
+                    </View>
+                  </View>
                 </View>
               </View>
-            </View>
-          </View>
+          </ScrollView>
         </Modal>
       </View>
     </View>
@@ -613,12 +656,10 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   closeModal: {
-    marginRight: 0,
-    marginLeft: 250,
-    marginTop: -20,
+    marginLeft: "90%",
     //backgroundColor: colors.blue100,
     justifyContent: "right",
-    alignItems: "right"
+    alignItems: "right",
   },
   buttonView: {
     justifyContent: "center",
@@ -651,6 +692,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
+    width: '50%',
     backgroundColor: colors.white,
     borderRadius: 20,
     padding: 35,
@@ -663,6 +705,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  closebutton: {
+    marginLeft: 500,
+    marginTop: -25
   },
   ordersListContainer: {
     flex: 1,
