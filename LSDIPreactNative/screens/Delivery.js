@@ -65,7 +65,7 @@ const DeliveryScreen = ({ navigation, route }) => {
 
     return days;
   };
-
+  const todayCalendar = moment().format("YYYY-MM-DD");
   const today = new Date();
   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1);
   const lastDay = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
@@ -124,14 +124,14 @@ const DeliveryScreen = ({ navigation, route }) => {
     }, [selectedDate]);
 
     const timings = [
-      '12:00am - 1:00am',
+      /*'12:00am - 1:00am',
       '1:00am - 2:00am',
       '2:00am - 3:00am',
       '3:00am - 4:00am',
       '4:00am - 5:00am',
       '5:00am - 6:00am',
       '6:00am - 7:00am',
-      '7:00am - 8:00am',
+      '7:00am - 8:00am',*/
       '8:00am - 9:00am',
       '9:00am - 10:00am',
       '10:00am - 11:00am',
@@ -146,8 +146,8 @@ const DeliveryScreen = ({ navigation, route }) => {
       '7:00pm - 8:00pm',
       '8:00pm - 9:00pm',
       '9:00pm - 10:00pm',
-      '10:00pm - 11:00pm',
-      '11:00pm - 12:00am',
+      /*'10:00pm - 11:00pm',
+      '11:00pm - 12:00am',*/
     ];
 
     const filterAvailableTimings = (timings, blockedTimings) => {
@@ -376,15 +376,18 @@ const DeliveryScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   );
                 })}
+                {availableTimings.length === 0
+                  && <Text style={styles.selectedDateText}>No Available Timeslot</Text>}
+                <Text style={styles.checkoutDetails}>Do you need delivery services? ($10)
+                  <Checkbox
+                    style={{ marginLeft: 12, marginTop: "6%" }}
+                    disabled={false}
+                    value={requireDelivery}
+                    onValueChange={() => { handleCheck(), handleDeliveryFeeChange() }}
+                  />
+                </Text>
                 <View style={styles.modalButtons}>
-                  <Text style={styles.checkoutDetails}>Do you need delivery services? ($10)
-                    <Checkbox
-                      style={{ marginLeft: 12, }}
-                      disabled={false}
-                      value={requireDelivery}
-                      onValueChange={() => { handleCheck(), handleDeliveryFeeChange() }}
-                    />
-                  </Text>
+
                   <TouchableOpacity
                     style={[
                       styles.confirmButton,
@@ -540,7 +543,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                     {}
                   ),
                 }}
-                minDate={today}
+                minDate={todayCalendar}
                 markingType="simple"
                 pastScrollRange={0}
                 futureScrollRange={3}
@@ -908,6 +911,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333333',
     marginLeft: 10
+  },
+  checkoutDetails: {
+    fontSize: 18,
+    color: '#333333',
+    marginTop: 10
+
   }
 
 });

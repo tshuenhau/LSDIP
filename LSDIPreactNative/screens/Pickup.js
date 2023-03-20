@@ -73,14 +73,14 @@ export default function Pickup({ navigation }) {
         }, [selectedDate]);
 
         const timings = [
-            '12:00am - 1:00am',
+            /*'12:00am - 1:00am',
             '1:00am - 2:00am',
             '2:00am - 3:00am',
             '3:00am - 4:00am',
             '4:00am - 5:00am',
             '5:00am - 6:00am',
             '6:00am - 7:00am',
-            '7:00am - 8:00am',
+            '7:00am - 8:00am',*/
             '8:00am - 9:00am',
             '9:00am - 10:00am',
             '10:00am - 11:00am',
@@ -95,8 +95,8 @@ export default function Pickup({ navigation }) {
             '7:00pm - 8:00pm',
             '8:00pm - 9:00pm',
             '9:00pm - 10:00pm',
-            '10:00pm - 11:00pm',
-            '11:00pm - 12:00am',
+            /*'10:00pm - 11:00pm',
+            '11:00pm - 12:00am',*/
         ];
 
         const filterAvailableTimings = (timings, blockedTimings) => {
@@ -248,6 +248,8 @@ export default function Pickup({ navigation }) {
                                         </TouchableOpacity>
                                     );
                                 })}
+                                {availableTimings.length === 0
+                                    && <Text style={styles.selectedDateText}>No Available Timeslot</Text>}
                                 <View style={styles.modalButtons}>
                                     <TouchableOpacity
                                         style={[
@@ -698,5 +700,11 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         marginLeft: 10
     },
+    checkoutDetails: {
+        fontSize: 18,
+        color: '#333333',
+        marginTop: 10
+
+    }
 
 });
