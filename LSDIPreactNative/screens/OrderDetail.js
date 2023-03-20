@@ -19,6 +19,7 @@ import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import Checkbox from "expo-checkbox";
 
 if (
   Platform.OS === 'android' &&
@@ -35,6 +36,8 @@ export default function OrderPage(props) {
   const [orderDescription, setOrderDescription] = useState("");
   const refunds = firebase.firestore().collection('refunds');
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
+  const [pickup, setPickUp] = useState(Boolean);
+  const [requireDelivery, setRequireDelivery] = useState(Boolean);
   //const [customerName, setCustomerName] = useState("");
 
 
@@ -45,6 +48,8 @@ export default function OrderPage(props) {
       if (doc.exists) {
         setOrder({ id: doc.id, ...doc.data() });
         setOrderDescription(doc.data().description);
+        setPickUp(doc.data().pickup);
+        setRequireDelivery(doc.data().requireDelivery);
         //console.log('order', order);
       } else {
         console.log('No such order document!');
@@ -299,6 +304,52 @@ export default function OrderPage(props) {
     setIsModal2Visible(false);
   }
 
+  const handlePickUpChange = () => {
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log("No such User document!");
+        throw new Error("No such User document!")
+      } else {
+        if (pickup) { //true change to false
+          orderRef.update({
+            pickup: !pickup,
+            totalPrice: order.totalPrice - 10
+          })
+        } else { //false change to true
+          orderRef.update({
+            pickup: !pickup,
+            totalPrice: order.totalPrice + 10
+          })
+        }
+      }
+    })
+    setPickUp(!pickup);
+  }
+
+  const handleDeliveryChange = () => {
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log("No such User document!");
+        throw new Error("No such User document!")
+      } else {
+        if (requireDelivery) { //true change to false
+          orderRef.update({
+            requireDelivery: !requireDelivery,
+            totalPrice: order.totalPrice - 10
+          })
+        } else { //false change to true
+          orderRef.update({
+            requireDelivery: !requireDelivery,
+            totalPrice: order.totalPrice + 10
+          })
+        }
+      }
+    })
+    setPickUp(!requireDelivery);
+  }
+
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
@@ -351,6 +402,24 @@ export default function OrderPage(props) {
         <View style={styles.checkoutCard}>
           <Text style={styles.sectionText}>Order Details</Text>
           <Text style={styles.orderNumber}>Order #{orderId}</Text>
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxLabel}>Laundry Pick Up ($10)</Text>
+            <Checkbox
+                style={{ marginLeft: 20, marginBottom: 2 }}
+                disabled={false}
+                value={pickup}
+                onValueChange={() => handlePickUpChange()}
+            />
+          </View >
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxLabel}>Laundry Delivery ($10)</Text>
+            <Checkbox
+                style={{ marginLeft: 20, marginBottom: 2 }}
+                disabled={false}
+                value={requireDelivery}
+                onValueChange={() => handleDeliveryChange()}
+            />
+          </View >
           <View style={styles.tableHeader}>
             <Text style={styles.tableHeaderText}>Service</Text>
             <Text style={styles.tableHeaderText}>Item Name</Text>
@@ -756,8 +825,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 800,
   },
-
-
   text: {
     fontSize: 20,
     fontWeight: "600",
@@ -767,6 +834,17 @@ const styles = StyleSheet.create({
   outletIcon: {
     fontSize: 25,
     margin: 10,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    marginLeft: "2%",
+    marginBottom: 10,
+    alignItems: 'flex-end'
+  },
+  checkboxLabel: {
+      fontWeight: 'bold',
+      fontSize: 18,
   },
 
 });

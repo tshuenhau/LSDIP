@@ -257,7 +257,6 @@ export default function OrderSummary(props) {
                                     value={orderValues.pickup}
                                     onValueChange={() => handlePickUpChange()}
                                 />
-
                             </View >
 
                             <View style={styles.checkboxContainer}>
