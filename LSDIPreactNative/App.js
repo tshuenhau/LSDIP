@@ -25,6 +25,8 @@ import MyProfile from './screens/MyProfile';
 import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
 import Payment from './screens/Payment';
+import CRM from './screens/CRM';
+import CustomerRewards from './screens/CustomerRewards';
 import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
 import VehicleModule from './screens/VehicleModule';
@@ -153,6 +155,8 @@ function RootNavigator() {
           <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
           <Drawer.Screen name='Driver' component={Driver} />
           <Drawer.Screen name='Vehicle' component={VehicleModule} />
+          <Drawer.Screen name='Reward System' component={CRM} />
+          <Drawer.Screen name='Customer Rewards' component={CustomerRewards} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Service' component={Service} />
           <Drawer.Screen name='Payment' component={Payment} />

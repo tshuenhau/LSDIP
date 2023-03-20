@@ -18,6 +18,7 @@ export default function SignUpScreen({ navigation }) {
         number: "",
         address: "",
         points: 0,
+        expenditure: 0,
         pwd: "",
         pwd2: ""
     })
@@ -32,7 +33,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     function SignUp() {
-        const { email, pwd, pwd2, name, role, number, address, points } = values
+        const { email, pwd, pwd2, name, role, number, address, points, expenditure } = values
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -43,6 +44,7 @@ export default function SignUpScreen({ navigation }) {
                         email,
                         address,
                         points,
+                        expenditure,
                         number
                     })
                 })

@@ -153,6 +153,20 @@ export default function OrdersList({ navigation }) {
     setOrderList(updatedArray);
   };
 
+  const convertToPoints = async (totalPrice) => {
+    try {
+      const crmRef = firebase.firestore().collection('crm');
+      const cashPointDoc = await crmRef.doc('cash_point').get();
+      const cashToPoint = cashPointDoc.data().value;
+      const points = Math.floor(totalPrice / cashToPoint); // Round down to nearest integer
+      return points;
+    } catch (error) {
+      console.log(error);
+      return 0;
+    }
+  };
+  
+
   const updateStatus = () => {
     const selectedOrders = orderList.filter((s) => s.isSelected);
     if (selectedOrders.length === 0 || selectedStatus === "") {
@@ -165,6 +179,27 @@ export default function OrdersList({ navigation }) {
         },
       ]);
     } else {
+      if (selectedStatus === "Closed") {
+        const users = firebase.firestore().collection("users");
+        selectedOrders.forEach((o) => {
+          const customerNumber = o.customerNumber;
+          const query = users.where("number", "==", customerNumber);
+          query.get().then((snapshot) => {
+            if (!snapshot.empty) {
+              snapshot.forEach(async(doc) => {
+                const user = doc.data();
+                const expenditure = user.expenditure || 0;
+                const totalPrice = o.totalPrice;
+                const newExpenditure = expenditure + totalPrice;
+                const points = user.points || 0;
+                const newPoints = points + await convertToPoints(o.totalPrice);
+                users.doc(doc.id).update({ expenditure: newExpenditure, points: newPoints });
+              });
+            }
+          });
+        });
+      }
+      
       selectedOrders.forEach((o) => {
         orders
           .doc(o.id)
