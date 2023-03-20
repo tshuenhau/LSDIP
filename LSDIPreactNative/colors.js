@@ -1,5 +1,6 @@
 export default {
     background: '#F5F5F5',
+    modalBackground: 'rgba(52, 52, 52, 0.8)',
     primary: '#0782F9',
     gray: '#C5C5C7',
     mediumGray: '#F6F7FB',
@@ -29,5 +30,5 @@ export default {
     teal400: '#2dd4bf',
     teal500: '#14b8a6',
     violet400: '#a78bfa',
-    warning500: '#f97316'
+    warning500: '#f97316',
 };

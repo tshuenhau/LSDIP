@@ -296,14 +296,14 @@ export default function VehicleModule() {
         <View>
             {/*for create vehicleitem*/}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => {
                     Alert.alert('Modal has been closed.');
                     setModalVisible(!modalVisible);
                 }}>
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -325,7 +325,7 @@ export default function VehicleModule() {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal >
 
             <View style={styles.view}>
@@ -363,10 +363,10 @@ export default function VehicleModule() {
             </View>
 
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={updateModalVisible}>
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -389,7 +389,7 @@ export default function VehicleModule() {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal>
         </View >
 

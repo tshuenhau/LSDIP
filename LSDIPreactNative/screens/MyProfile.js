@@ -222,14 +222,11 @@ export default function MyProfile() {
 
             {/* Update Modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={updateModalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setUpdateModalVisible(!updateModalVisible);
-                }}>
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            >
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -244,15 +241,15 @@ export default function MyProfile() {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal>
 
             {/* Change Password Modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={passwordModalVisible}>
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -267,9 +264,9 @@ export default function MyProfile() {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal>
-        </View>
+        </View >
     )
 }
 

@@ -250,10 +250,10 @@ export default function OutletDetail({ route, navigation }) {
 
         {/* Update Modal */}
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={true}
           visible={updateModalVisible}>
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -269,15 +269,15 @@ export default function OutletDetail({ route, navigation }) {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </View>
         </Modal>
 
         {/* Allocate Staff Modal */}
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={true}
           visible={allocateModalVisible}>
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -301,7 +301,7 @@ export default function OutletDetail({ route, navigation }) {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </View>
         </Modal>
 
       </ScrollView>

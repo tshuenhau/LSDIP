@@ -205,10 +205,10 @@ export default function OutletList({ navigation }) {
 
             {/* Create Modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={createModalVisible}>
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -224,7 +224,7 @@ export default function OutletList({ navigation }) {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal>
         </View>
     )

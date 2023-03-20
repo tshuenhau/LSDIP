@@ -160,11 +160,11 @@ export default function Services({ navigation }) {
         <View>
             {/*for create services */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={modalVisible}
             >
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -178,7 +178,7 @@ export default function Services({ navigation }) {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal >
             {/*to view service list */}
             <View style={styles.header}>

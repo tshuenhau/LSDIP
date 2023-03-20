@@ -3,7 +3,7 @@ import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const DuplicateAlert = ({ message, isOpen, onClose }) => {
   return (
-    <Modal visible={isOpen} animationType="slide" onRequestClose={onClose}>
+    <Modal visible={isOpen} animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalContent}>
         <Text style={styles.modalTitle}>Duplicate Entry</Text>
         <Text style={styles.message}>{message}</Text>

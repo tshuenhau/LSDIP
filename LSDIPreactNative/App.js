@@ -203,7 +203,7 @@ function RootNavigator() {
                 drawerItemStyle: { display: "none" }
               }}
             />
-            <Drawer.Screen name='OrderSummary' component={OrderSummary}
+            <Drawer.Screen name='Order Summary' component={OrderSummary}
               options={{
                 drawerItemStyle: { display: "none" }
               }}

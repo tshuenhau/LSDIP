@@ -180,7 +180,7 @@ const DeliveryScreen = ({ navigation, route }) => {
     function handleDeliveryFeeChange() {
       setDeliveryFee(!requireDelivery * 10)
     }
-  
+
     function handleCheck() {
       setRequireDelivery(!requireDelivery)
     }
@@ -318,7 +318,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                     const batch = db.batch();
                     matchingOrders.forEach((order) => {
                       const orderRef = db.collection('orders').doc(order.id);
-                      updateDoc(orderRef, {requireDelivery: requireDelivery, totalPrice: order.totalPrice + deliveryfee});
+                      updateDoc(orderRef, { requireDelivery: requireDelivery, totalPrice: order.totalPrice + deliveryfee });
                       batch.update(orderRef, { orderStatus: 'Pending Delivery' });
                     });
                     batch.commit()
@@ -342,73 +342,71 @@ const DeliveryScreen = ({ navigation, route }) => {
     };
     //for modal
     return (
-      <View style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
-        <Modal visible={isModalOpen}
-          animationType="slide"
-          onRequestClose={onClose}
-        >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text style={styles.modalTitle}>Available Timings on {date}</Text>
-                  {console.log(availableTimings)}
-                  {availableTimings.map((timing) => {
-                    const isDisabled = selectedTime !== null && selectedTime !== timing;
-                    return (
-                      <TouchableOpacity
-                        key={timing}
+      <Modal visible={isModalOpen}
+        animationType="fade"
+        onRequestClose={onClose}
+      >
+        <ScrollView style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={styles.modalTitle}>Available Timings on {date}</Text>
+                {console.log(availableTimings)}
+                {availableTimings.map((timing) => {
+                  const isDisabled = selectedTime !== null && selectedTime !== timing;
+                  return (
+                    <TouchableOpacity
+                      key={timing}
+                      style={[
+                        styles.timingButton,
+                        selectedTime === timing && styles.selectedTimingButton,
+                        isDisabled && styles.disabledTimingButton,
+                      ]}
+                      onPress={() => handleTimeSelect(timing)}
+                      disabled={isDisabled}
+                    >
+                      <Text
                         style={[
-                          styles.timingButton,
-                          selectedTime === timing && styles.selectedTimingButton,
-                          isDisabled && styles.disabledTimingButton,
+                          styles.timingText,
+                          isDisabled && styles.disabledTimingText,
                         ]}
-                        onPress={() => handleTimeSelect(timing)}
-                        disabled={isDisabled}
                       >
-                        <Text
-                          style={[
-                            styles.timingText,
-                            isDisabled && styles.disabledTimingText,
-                          ]}
-                        >
-                          {timing}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  <View style={styles.modalButtons}>
-                  <Text style={styles.checkoutDetails}>Do you need delivery services? ($10) 
+                        {timing}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+                <View style={styles.modalButtons}>
+                  <Text style={styles.checkoutDetails}>Do you need delivery services? ($10)
                     <Checkbox
-                    style={{marginLeft: 12, }}
-                    disabled={false}
-                    value={requireDelivery}
-                    onValueChange={() => {handleCheck(), handleDeliveryFeeChange()}}
+                      style={{ marginLeft: 12, }}
+                      disabled={false}
+                      value={requireDelivery}
+                      onValueChange={() => { handleCheck(), handleDeliveryFeeChange() }}
                     />
                   </Text>
-                    <TouchableOpacity
-                      style={[
-                        styles.confirmButton,
-                        selectedTime === null && styles.disabledConfirmButton,
-                      ]}
-                      onPress={() => handleConfirm(date, selectedTime)}
-                      disabled={selectedTime === null}
-                    >
-                      <Text style={styles.confirmButtonText}>Confirm</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={handleClose}
-                    >
-                      <Text style={styles.closeButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity
+                    style={[
+                      styles.confirmButton,
+                      selectedTime === null && styles.disabledConfirmButton,
+                    ]}
+                    onPress={() => handleConfirm(date, selectedTime)}
+                    disabled={selectedTime === null}
+                  >
+                    <Text style={styles.confirmButtonText}>Confirm</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={handleClose}
+                  >
+                    <Text style={styles.closeButtonText}>Cancel</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
-          </ScrollView>
-        </Modal>
-      </View>
+          </View>
+        </ScrollView>
+      </Modal>
     );
   };
 

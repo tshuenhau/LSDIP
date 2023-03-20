@@ -279,25 +279,25 @@ export default function CreateOrder({ navigation }) {
 
             {/* Add to cart modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={createModalVisible}
             >
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
 
-                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
-                            <View style={styles.textView}>
-                                <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
-                                <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
-                                {createModalData != undefined && createModalData.pricingMethod !== "Weight"
-                                    ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
-                                    : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
-                                }
-                            </View>
-                            
+                                <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Add to Cart</Text>
+                                <View style={styles.textView}>
+                                    <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
+                                    <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
+                                    {createModalData != undefined && createModalData.pricingMethod !== "Weight"
+                                        ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
+                                        : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
+                                    }
+                                </View>
+
                                 {createModalData != undefined && createModalData.pricingMethod === "Range" &&
                                     <View style={styles.rangeText}>
                                         <Slider
@@ -339,26 +339,28 @@ export default function CreateOrder({ navigation }) {
                             </View>
                         </View>
                     </View>
-                </ScrollView>
+                </View>
             </Modal>
 
             {/* Customer Number */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={checkoutModalVisible}
             >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.view}>
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
 
-                            <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Customer Details</Text>
+                                <Text style={{ fontSize: 38, fontWeight: "800", marginBottom: 20 }}>Customer Details</Text>
 
-                            <TextBox placeholder="Phone number" onChangeText={text => setCustomerNumber(text)} defaultValue={customerNumber} />
+                                <TextBox placeholder="Phone number" onChangeText={text => setCustomerNumber(text)} defaultValue={customerNumber} />
 
-                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                <Btn onClick={() => handleNavigateToSummary()} title="Checkout" style={{ width: "48%" }} />
-                                <Btn onClick={() => setCheckoutModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => handleNavigateToSummary()} title="Checkout" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setCheckoutModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                </View>
                             </View>
                         </View>
                     </View>

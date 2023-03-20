@@ -296,7 +296,7 @@ export default function OrderPage(props) {
         return false;
       });
 
-      setIsModal2Visible(false);
+    setIsModal2Visible(false);
   }
 
   const renderItem = ({ item }) => (
@@ -377,44 +377,46 @@ export default function OrderPage(props) {
           <Text style={styles.orderDescription}>{orderDescription}</Text>
           <Modal
             visible={isModal2Visible}
-            animationType="slide"
+            animationType="fade"
             transparent={true}
           >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text
-                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
-                  >
-                    Update Order Description
-                  </Text>
-                  <TextInput
-                    editable
-                    multiline
-                    //numberOfLines={4}
-                    //onChangeText={text => handleChange(text, 'orderDescription')}
-                    onChangeText={text => setOrderDescription(text)}
-                    value={orderDescription}
-                    style={{ padding: 10, width: "80%", height: 80 }}
-                  />
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "92%",
-                    }}
-                  >
-                    <Btn
-                      onClick={() => updateDescription1()}
-                      title="Update"
-                      style={{ width: "48%" }}
+            <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <View style={styles.view}>
+                    <Text
+                      style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
+                    >
+                      Update Order Description
+                    </Text>
+                    <TextInput
+                      editable
+                      multiline
+                      //numberOfLines={4}
+                      //onChangeText={text => handleChange(text, 'orderDescription')}
+                      onChangeText={text => setOrderDescription(text)}
+                      value={orderDescription}
+                      style={{ padding: 10, width: "80%", height: 80 }}
                     />
-                    <Btn
-                      onClick={() => setIsModal2Visible(false)}
-                      title="Dismiss"
-                      style={{ width: "48%", backgroundColor: "#344869" }}
-                    />
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "92%",
+                      }}
+                    >
+                      <Btn
+                        onClick={() => updateDescription1()}
+                        title="Update"
+                        style={{ width: "48%" }}
+                      />
+                      <Btn
+                        onClick={() => setIsModal2Visible(false)}
+                        title="Dismiss"
+                        style={{ width: "48%", backgroundColor: "#344869" }}
+                      />
+                    </View>
                   </View>
                 </View>
               </View>
@@ -425,9 +427,9 @@ export default function OrderPage(props) {
         <Modal
           visible={isModalVisible}
           transparent={true}
-          animationType="slide"
+          animationType="fade"
         >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -468,15 +470,15 @@ export default function OrderPage(props) {
                   </View>
                 </View>
               </View>
-            </View >
-          </ScrollView>
+            </View>
+          </View>
         </Modal>
         <Modal
           visible={isModal1Visible}
           transparent={true}
-          animationType="slide"
+          animationType="fade"
         >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -512,7 +514,7 @@ export default function OrderPage(props) {
                 </View>
               </View>
             </View >
-          </ScrollView>
+          </View>
         </Modal>
       </View>
     </ScrollView>
