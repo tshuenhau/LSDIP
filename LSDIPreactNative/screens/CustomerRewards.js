@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
+import Btn from "../components/Button";
+import TextBox from "../components/TextBox";
+
 
 const CustomersScreen = () => {
   const [customers, setCustomers] = useState([]);
@@ -27,23 +30,24 @@ const CustomersScreen = () => {
     });
   }, []);
 
-  const renderCustomer = ({ item }) => {
-    return (
-      <TouchableOpacity
-        style={styles.customer}
-        onPress={() => {
-          setSelectedCustomer(item);
-          setExpenditure(item.expenditure.toString());
-          setPoints(item.points.toString());
-          setModalVisible(true);
-        }}
-      >
-        <Text style={styles.customerName}>{item.name}</Text>
-        <Text style={styles.customerExpenditure}>Expenditure: ${item.expenditure.toFixed(2)}</Text>
-        <Text style={styles.customerPoints}>Points: {item.points}</Text>
-      </TouchableOpacity>
-    );
-  };
+  const renderCustomer = ({ item }) => (
+
+    <TouchableOpacity
+      style={styles.customer}
+      onPress={() => {
+        setSelectedCustomer(item);
+        setExpenditure(item.expenditure.toString());
+        setPoints(item.points.toString());
+        setModalVisible(true);
+      }}
+    >
+      <Text style={styles.customerName}>{item.name}</Text>
+      <Text style={styles.customerExpenditure}><b>Expenditure: </b>${item.expenditure.toFixed(2)}</Text>
+      <Text style={styles.customerPoints}><b>Points: </b>{item.points}</Text>
+    </TouchableOpacity>
+
+  );
+
 
   const filteredCustomers = customers.filter(
     (customer) =>
@@ -70,44 +74,72 @@ const CustomersScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.searchBox}
-        onChangeText={setSearchText}
-        value={searchText}
-        placeholder="Search customer by name..."
-      />
+    <ScrollView >
+      <View style={styles.searchnfilter}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            onChangeText={setSearchText}
+            value={searchText}
+            placeholder="Search customer by name..."
+          />
+        </View>
+      </View>
       <FlatList
         data={filteredCustomers}
         renderItem={renderCustomer}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+      /*contentContainerStyle={styles.list}*/
       />
-      {selectedCustomer && (
-        <Modal visible={modalVisible} animationType="slide">
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedCustomer.name}</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Expenditure"
-              keyboardType="numeric"
-              value={expenditure}
-              onChangeText={setExpenditure}
-            />
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Points"
-              keyboardType="numeric"
-              value={points}
-              onChangeText={setPoints}
-            />
-            <TouchableOpacity style={styles.modalButton} onPress={updateCustomer}>
-              <Text style={styles.modalButtonText}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      )}
-    </View>
+      {
+        selectedCustomer && (
+          <Modal visible={modalVisible} animationType="slide">
+            <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <View style={styles.view}>
+                    <Text style={styles.modalTitle}>Edit {selectedCustomer.name} Points</Text>
+                    <TextBox
+                      placeholder="Expenditure"
+                      keyboardType="numeric"
+                      onChangeText={setExpenditure}
+                      value={expenditure}
+                    />
+                    <TextBox
+                      placeholder="Points"
+                      keyboardType="numeric"
+                      onChangeText={setPoints}
+                      value={points}
+                    />
+                    {/*
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="Expenditure"
+                      keyboardType="numeric"
+                      value={expenditure}
+                      onChangeText={setExpenditure}
+                    />
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="Points"
+                      keyboardType="numeric"
+                      value={points}
+                      onChangeText={setPoints}
+        />*/}
+
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                      <Btn onClick={() => updateCustomer()} title="Save" style={{ width: "48%" }} />
+                      <Btn onClick={() => setModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )
+      }
+    </ScrollView >
   );
 };
 
@@ -122,69 +154,94 @@ const styles = StyleSheet.create({
   list: {
     alignItems: 'center',
     paddingBottom: 20,
+    width: "96%"
   },
   customer: {
-    width: '100%',
-    height: 120,
     backgroundColor: '#fff',
+    marginVertical: 10,
+    marginHorizontal: 16,
     borderRadius: 10,
     shadowColor: '#000',
+    shadowOpacity: 0.2,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 3,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 10,
-    paddingHorizontal: 20,
+    elevation: 3,
+    alignContent: "center",
+    width: "96%"
   },
   customerName: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 10,
+    marginTop: 10,
+    marginLeft: 20
   },
   customerExpenditure: {
     fontSize: 16,
     marginBottom: 5,
+    marginLeft: 20
   },
   customerPoints: {
     fontSize: 16,
+    marginLeft: 20,
+    marginBottom: 10
   },
-  searchBox: {
-    width: '80%',
+  searchnfilter: {
+    flexDirection: 'row',
+    marginLeft: 10,
+
+  },
+  searchContainer: {
+    marginVertical: 15,
+    marginLeft: 16,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#f5f5f5',
+    backgroundColor: colors.white,
+    justifyContent: "center",
+    alignContent: "center",
+    width: "96%",
+    marginLeft: 10,
+    height: 50
+  },
+  searchInput: {
     height: 40,
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    fontSize: 18,
+    paddingHorizontal: 10,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    width: '50%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
-    paddingHorizontal: 10,
-    marginBottom: 20,
   },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: colors.modalBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    width: '80%',
+  view: {
+    marginTop: 10,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center"
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontWeight: "800",
     marginBottom: 20,
   },
   inputContainer: {
