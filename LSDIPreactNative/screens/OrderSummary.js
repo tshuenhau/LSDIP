@@ -66,6 +66,7 @@ export default function OrderSummary(props) {
                     const updatedOrderValues = {
                         ...orderValues,
                         customerName: name,
+                        customerNumber: customerNumber,
                         customerAddress: address,
                         // need to update when admin point management is implemented
                         points,
@@ -176,10 +177,15 @@ export default function OrderSummary(props) {
                     console.log(newPointValue);
                     users
                         .where("number", "==", customerNumber)
-                        .update({
-                            points: newPointValue,
+                        .get()
+                        .then(querySnapshot => {
+                            querySnapshot.forEach((doc) => {
+                                users.doc(doc.id)
+                                    .update({
+                                        points: newPointValue,
+                                    })
+                            })
                         })
-
                 }
                 setOrderValues(initialOrderValues);
                 navigation.navigate('Home');
@@ -187,8 +193,6 @@ export default function OrderSummary(props) {
                     type: 'success',
                     text1: 'Order Created',
                 });
-
-                navigation.navigate("Orders");
             }).catch((err) => {
                 console.error(err);
                 Toast.show({
@@ -266,15 +270,17 @@ export default function OrderSummary(props) {
                                 />
                             </View>
 
-                            <View style={styles.checkboxContainer}>
-                                <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
-                                <Checkbox
-                                    disabled={false}
-                                    style={{ marginLeft: 20, marginBottom: 2 }}
-                                    value={orderValues.redeemPoints}
-                                    onValueChange={() => handleRedeemPoints()}
-                                />
-                            </View>
+                            {orderValues.customerAddress > 0 &&
+                                <View style={styles.checkboxContainer}>
+                                    <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
+                                    <Checkbox
+                                        disabled={false}
+                                        style={{ marginLeft: 20, marginBottom: 2 }}
+                                        value={orderValues.redeemPoints}
+                                        onValueChange={() => handleRedeemPoints()}
+                                    />
+                                </View>
+                            }
                         </View>
                         <View style={styles.orderDetails}>
                             <Text style={styles.subTotal}>Order Details</Text>
