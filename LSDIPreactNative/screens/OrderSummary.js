@@ -16,8 +16,6 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
-import { sub } from 'react-native-reanimated';
-import { pick } from 'lodash';
 import * as Print from 'expo-print';
 
 if (
@@ -30,9 +28,6 @@ if (
 export default function OrderSummary(props) {
 
     const { cart, subTotal, customerNumber } = props.route.params;
-    const [pickupfee, setPickUpFee] = useState(0);
-
-    
 
     const initialOrderValues = {
         orderDate: firebase.firestore.FieldValue.serverTimestamp(),
@@ -50,6 +45,8 @@ export default function OrderSummary(props) {
     }
 
     const [totalPrice, setTotalPrice] = useState(subTotal);
+    // pending pickup price calculation, flat $10 for now
+    const [pickupfee, setPickUpFee] = useState(10);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
@@ -78,7 +75,7 @@ export default function OrderSummary(props) {
                     setOrderValues(updatedOrderValues);
                 }
             })
-    }, [])
+    }, [customerNumber])
 
     const html = () => OrderPage(props);
 
@@ -104,21 +101,29 @@ export default function OrderSummary(props) {
 
     const handleExpressCheck = () => {
         if (orderValues.express) {
-            setTotalPrice(totalPrice / 2);
+            setTotalPrice(totalPrice - subTotal);
         } else {
-            setTotalPrice(totalPrice * 2);
+            setTotalPrice(totalPrice + subTotal);
         }
         setOrderValues({ ...orderValues, express: !orderValues.express })
     }
 
     const handleRedeemPoints = () => {
-
         if (orderValues.redeemPoints) {
             setTotalPrice(totalPrice + orderValues.pointsDiscount);
         } else {
             setTotalPrice(totalPrice - orderValues.pointsDiscount);
         }
         setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints })
+    }
+
+    const handlePickUpChange = () => {
+        if (orderValues.pickup) {
+            setTotalPrice(totalPrice - 10);
+        } else {
+            setTotalPrice(totalPrice + 10);
+        }
+        setOrderValues({ ...orderValues, pickup: !orderValues.pickup })
     }
 
     const createOrder = async () => {
@@ -156,7 +161,7 @@ export default function OrderSummary(props) {
                     // customerNumber: orderValues.customerNumber,
                     description: orderValues.description,
                     endDate: null,
-                    totalPrice: subTotal + pickupfee,
+                    totalPrice: subTotal,
                     orderStatus: "Pending Wash",
                     receiveFromWasherDate: null,
                     sendFromWasherDate: null,
@@ -166,7 +171,7 @@ export default function OrderSummary(props) {
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
 
-                if (orderValues.customerAddress.length > 0) { //customer is a member
+                if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0) { //customer is a member
                     const newPointValue = Number(orderValues.redeemPoints ? 0 : orderValues.points) + Math.floor(totalPrice);
                     console.log(newPointValue);
                     users
@@ -192,17 +197,6 @@ export default function OrderSummary(props) {
                 });
             })
     };
-
-    function handleCheck(){
-        setOrderValues({...orderValues, pickup : !orderValues.pickup})
-    };
-
-    function handlePickUpChange() {
-        setPickUpFee(!orderValues.pickup * 10)
-    }
-
-
-    
 
     const renderItem = ({ item }) => (
         <View style={styles.cardHeader}>
@@ -252,16 +246,16 @@ export default function OrderSummary(props) {
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
                             <View style={styles.checkboxContainer}>
-                            <Text style={styles.checkboxLabel}>Do you need laundry pick up? ($10)</Text>
+                                <Text style={styles.checkboxLabel}>Laundry pick up ($10)</Text>
                                 <Checkbox
-                                style={{marginLeft: 20, marginBottom: 2 }}
-                                disabled={false}
-                                value={orderValues.pickup}
-                                onValueChange={() => {handleCheck(), handlePickUpChange()}}
+                                    style={{ marginLeft: 20, marginBottom: 2 }}
+                                    disabled={false}
+                                    value={orderValues.pickup}
+                                    onValueChange={() => handlePickUpChange()}
                                 />
 
                             </View >
-                                
+
                             <View style={styles.checkboxContainer}>
                                 <Text style={styles.checkboxLabel}>Express</Text>
                                 <Checkbox
@@ -286,18 +280,19 @@ export default function OrderSummary(props) {
                             <Text style={styles.subTotal}>Order Details</Text>
                             <View style={styles.orderDetailsBreakdown}>
                                 <InvoiceLine label={"Subtotal"} value={subTotal} />
-                                {
-                                    orderValues.express &&
+                                {orderValues.express &&
                                     <InvoiceLine label={"Express"} value={subTotal} />
                                 }
                                 {/* pending CRM module */}
-                                <InvoiceLine label={"Membership Discount"} value={0} />
-                                {/* pending CRM module */}
-                                <InvoiceLine label={"Voucher Discount"} value={0} />
-                                <InvoiceLine label={"Pick up Fee"} value={pickupfee} />
+                                {orderValues.customerAddress &&
+                                    <InvoiceLine label={"Membership Discount"} value={0} />
+                                }
+                                {/* flat $10 charge for now */}
+                                {orderValues.pickup &&
+                                    <InvoiceLine label={"Pick up Fee"} value={10} />
+                                }
                             </View>
-                            <View >
-                                <InvoiceLine label={"Amount Due"} value={subTotal + pickupfee} total={true} />
+                            <View>
                                 {orderValues.redeemPoints &&
                                     <InvoiceLine label={"Redeem Points"} value={orderValues.pointsDiscount} discount={true} />
                                 }
@@ -313,7 +308,6 @@ export default function OrderSummary(props) {
                             </View>
                         </View>
                     </View>
-
                 </View>
             </View>
         </ScrollView >
