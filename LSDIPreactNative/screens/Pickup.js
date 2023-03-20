@@ -217,7 +217,7 @@ export default function Pickup({ navigation }) {
 
         return (
             <Modal visible={isModalOpen} animationType="fade" onRequestClose={onClose}>
-                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                <ScrollView style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -269,7 +269,7 @@ export default function Pickup({ navigation }) {
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </Modal>
         );
     };
