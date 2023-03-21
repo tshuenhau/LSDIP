@@ -197,6 +197,7 @@ export default function AccountManagement() {
             <View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
+                        autoFocus="autoFocus"
                         style={styles.searchInputWithBtn}
                         value={searchQuery}
                         onChangeText={setSearchQuery}

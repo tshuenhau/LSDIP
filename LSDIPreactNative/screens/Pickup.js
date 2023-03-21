@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 import { firebase } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
