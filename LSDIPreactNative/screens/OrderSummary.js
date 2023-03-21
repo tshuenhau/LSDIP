@@ -46,12 +46,27 @@ export default function OrderSummary(props) {
 
     const [totalPrice, setTotalPrice] = useState(subTotal);
     // pending pickup price calculation, flat $10 for now
+    const [CRMValues, setCRMValues] = useState({});
     const [pickupfee, setPickUpFee] = useState(10);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const [selectedPrinter, setSelectedPrinter] = React.useState();
     const users = firebase.firestore().collection('users');
+    const crm = firebase.firestore().collection('crm');
+
+    useEffect(() => {
+        crm.doc('point_cash')
+            .get()
+            .then(doc => {
+                setCRMValues({ pointCash: doc.data().value })
+                crm.doc('cash_point')
+                    .get()
+                    .then(doc => {
+                        setCRMValues(prev => ({ ...prev, cashPoint: doc.data().value }))
+                    })
+            })
+    }, [])
 
     useEffect(() => {
         users
@@ -68,9 +83,7 @@ export default function OrderSummary(props) {
                         customerName: name,
                         customerNumber: customerNumber,
                         customerAddress: address,
-                        // need to update when admin point management is implemented
                         points,
-                        pointsDiscount: points * 0.01,
                     }
                     console.log(updatedOrderValues);
                     setOrderValues(updatedOrderValues);
@@ -110,10 +123,11 @@ export default function OrderSummary(props) {
     }
 
     const handleRedeemPoints = () => {
+        const discountValue = CRMValues.pointCash * orderValues.points;
         if (orderValues.redeemPoints) {
-            setTotalPrice(totalPrice + orderValues.pointsDiscount);
+            setTotalPrice(totalPrice + discountValue);
         } else {
-            setTotalPrice(totalPrice - orderValues.pointsDiscount);
+            setTotalPrice(totalPrice - discountValue);
         }
         setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints })
     }
@@ -173,7 +187,10 @@ export default function OrderSummary(props) {
                 });
 
                 if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0) { //customer is a member
-                    const newPointValue = Number(orderValues.redeemPoints ? 0 : orderValues.points) + Math.floor(totalPrice);
+                    console.log(totalPrice);
+                    console.log(CRMValues.cashPoint);
+                    console.log(Math.floor(totalPrice * CRMValues.cashPoint));
+                    const newPointValue = Number(orderValues.redeemPoints ? 0 : orderValues.points) + Math.floor(totalPrice * CRMValues.cashPoint);
                     console.log(newPointValue);
                     users
                         .where("number", "==", customerNumber)
@@ -269,7 +286,7 @@ export default function OrderSummary(props) {
                                 />
                             </View>
 
-                            {orderValues.customerAddress > 0 &&
+                            {orderValues.customerAddress.length > 0 &&
                                 <View style={styles.checkboxContainer}>
                                     <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
                                     <Checkbox
@@ -299,7 +316,7 @@ export default function OrderSummary(props) {
                             </View>
                             <View>
                                 {orderValues.redeemPoints &&
-                                    <InvoiceLine label={"Redeem Points"} value={orderValues.pointsDiscount} discount={true} />
+                                    <InvoiceLine label={"Redeem Points"} value={CRMValues.pointCash * orderValues.points} discount={true} />
                                 }
                             </View>
                             <View >
@@ -316,7 +333,7 @@ export default function OrderSummary(props) {
                 </View>
             </View>
         </ScrollView >
-    );
+    )
 }
 
 const styles = StyleSheet.create({
