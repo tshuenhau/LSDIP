@@ -93,7 +93,7 @@ const CustomersScreen = () => {
       />
       {
         selectedCustomer && (
-          <Modal visible={modalVisible} animationType="slide">
+          <Modal visible={modalVisible} animationType="fade" transparent={true}>
             <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
 
               <View style={styles.centeredView}>

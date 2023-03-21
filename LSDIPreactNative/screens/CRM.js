@@ -22,16 +22,23 @@ const CrmSettingsScreen = () => {
   }, []);
 
   const handleSubmit = () => {
-    if (cashToPoint.trim() === '' || pointToCash.trim() === '') {
+    const crmRef = firebase.firestore().collection('crm');
+    if (cashToPoint.trim() !== '') {
+      crmRef.doc('cash_point').update({ value: Number(cashToPoint) });
+      Toast.show({
+        type: 'success',
+        text1: 'Settings Updated',
+      });
+    } else if (pointToCash.trim() !== '') {
+      crmRef.doc('point_cash').update({ value: Number(pointToCash) });
+      Toast.show({
+        type: 'success',
+        text1: 'Settings Updated',
+      });
+    } else {
       return;
     }
-    const crmRef = firebase.firestore().collection('crm');
-    crmRef.doc('cash_point').update({ value: Number(cashToPoint) });
-    crmRef.doc('point_cash').update({ value: Number(pointToCash) });
-    Toast.show({
-      type: 'success',
-      text1: 'Settings Updated',
-    });
+
     setCashToPoint('');
     setPointToCash('');
   };
@@ -41,7 +48,7 @@ const CrmSettingsScreen = () => {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Cash to Point Conversion</Text>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>1 Cash = </Text>
+          <Text style={styles.inputLabel}>1 Dollar = </Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Point Value"
@@ -69,9 +76,6 @@ const CrmSettingsScreen = () => {
       </View>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Save Changes</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Customers')}>
-        <Text style={styles.buttonText}>View Customers</Text>
       </TouchableOpacity>
     </View>
   );
