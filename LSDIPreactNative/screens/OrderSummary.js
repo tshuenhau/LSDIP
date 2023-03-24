@@ -324,7 +324,14 @@ export default function OrderSummary(props) {
                                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                                     <Text style={styles.checkoutButtonText}>Create Order</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.checkoutButton} onPress={print}>
+                                {/*<TouchableOpacity style={styles.checkoutButton} onPress={props.navigation.navigate('Customer Invoice', { customerNumber: customerNumber, 
+                                    customerName: orderValues.customerName, cart: cart, })}>
+                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
+                                </TouchableOpacity>*/}
+                                <TouchableOpacity style={styles.checkoutButton} onPress={() => {props.navigation.navigate('Customer Invoice', { customerNumber: customerNumber, 
+                                    customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
+                                    redeempt: orderValues.redeemPoints, totalPrice: totalPrice})}}
+                                    >
                                     <Text style={styles.checkoutButtonText}>Print Invoice</Text>
                                 </TouchableOpacity>
                             </View>

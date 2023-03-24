@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         borderRadius: 10,
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue600,
         justifyContent: "center",
         alignItems: "center",
         marginRight: 30,

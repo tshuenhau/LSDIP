@@ -14,7 +14,7 @@ import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import { ScrollView } from 'react-native-gesture-handler';
-import QR from "../components/QR";
+import { doc } from 'firebase/firestore';
 
 if (
   Platform.OS === 'android' &&
@@ -23,107 +23,16 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function Invoice(props) {
-  const [order, setOrder] = useState(null);
-  const { orderId } = props.route.params;
-
-  console.log(props);
-  console.log(orderId);
-  const [orderItemsList, setOrderItemsList] = useState([]);
-  const [staffDetails, setStaffDetails] = useState({});
+export default function CustomerInvoice(props) {
   const [outletDetails, setOutletDetails] = useState({});
-  const users = firebase.firestore().collection('users');
   const outlets = firebase.firestore().collection('outlet');
-  const orderList = firebase.firestore().collection('orders')
-  const orderItem = firebase.firestore().collection('orderItem');
+
+  const { customerNumber, customerName, cart, subTotal, express, pickup, redeempt, totalPrice } = props.route.params;
+  console.log('customer no', customerNumber);
+  console.log(totalPrice);
 
 
-  //for order, staff, and outlet
-  //unable to work well in refreshing
-  /*useEffect(() => {
-    console.log("hello? are you working?")
-    // Fetch the order document using the orderId prop   
-    const orderID = orderId;
-    console.log(orderID)
-    const orderRef = firebase.firestore().collection('orders').doc(orderID);
-    orderRef
-      .get()
-      .then(doc => {
-        if (doc.exists) {
-          console.log("Document data exist");
-          setOrder({ id: doc.id, ...doc.data() });
-        } else {
-          console.log("No such document!");
-        }
-        setOrder({ id: doc.id, ...doc.data() });
-        console.log("hello?: "+ doc.data())
-        const staffId = doc.data().staffID;
-        const outletId = doc.data().outletId;
-
-        //get specific staff
-        users
-          .doc(staffId)
-          .get()
-          .then(doc => {
-            setStaffDetails({ id: doc.id, ...doc.data() })
-          })
-
-        //get specific outlet
-        outlets
-          .doc(outletId)
-          .get()
-          .then(doc => {
-            setOutletDetails({ id: doc.id, ...doc.data() })
-          })
-
-      })
-  }, []);*/
-
-  //for order
   useEffect(() => {
-    // Fetch the order document using the orderId prop
-    const orderRef = firebase.firestore().collection('orders').doc(orderId);
-    const unsubscribe = orderRef.onSnapshot((doc) => {
-      if (doc.exists) {
-        setOrder({ id: doc.id, ...doc.data() });
-        console.log('order', order);
-      } else {
-        console.log('No such order document!');
-      }
-    });
-    return () => unsubscribe();
-  }, [orderId]);
-
-  //for orderItem
-  useEffect(() => {
-    if (order) {
-      const orderItem = firebase.firestore().collection('orderItem');
-      const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
-        const orderItemsList = [];
-        querySnapshot.forEach((doc) => {
-          const { description, laundryItemName, price, typeOfServices, quantity, weight, pricingMethod } = doc.data();
-          //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
-          orderItemsList.push({
-            id: doc.id,
-            description,
-            laundryItemName,
-            price,
-            typeOfServices,
-            quantity,
-            weight,
-            pricingMethod,
-            orderId,
-          });
-        });
-        setOrderItemsList(orderItemsList); // Filter the order items based on the orderItemIds array
-      });
-      return () => unsubscribe();
-    }
-  }, [order]);
-
-  //for outlet
-  useEffect(() => {
-    if(order){
     outlets
       .get()
       .then(querySnapshot => {
@@ -131,42 +40,17 @@ export default function Invoice(props) {
         querySnapshot.forEach(doc => {
           const { outletAddress, outletEmail, outletName, outletNumber } = doc.data();
           temp.push({
-            outletID: doc.id,
+            id: doc.id,
             outletAddress: outletAddress,
-            outletName: outletName,
             outletEmail: outletEmail,
+            outletName: outletName,
             outletNumber: outletNumber
           });
         });
-        console.log("order", order.outletId);
-        setOutletDetails(temp.find(o => o.outletID === order.outletId))
+        //setOutletDetails(temp.find(o => o.id === 'bTvPBNfMLkBmF9IKEQ3n'));
+        setOutletDetails(temp.find(o => o.id === 'cwhUIRsr6wqV2YGNIdWl'));
       })
-    }
-  }, [order]);
-
-  //for staff
-  useEffect(() => {
-    if(order){
-    users
-      .get()
-      .then(querySnapshot => {
-        const temp = [];
-        querySnapshot.forEach(doc => {
-          const { name, number, email, role } = doc.data();
-          temp.push({
-            userID: doc.id,
-            name: name,
-            number: number,
-            email: email,
-            role: role
-          });
-        });
-        setStaffDetails(temp.find(o => o.userID === order.staffID))
-      })
-    }
-  }, [order]);
-
-  const data = orderItemsList.filter((item) => order.orderItemIds.includes(item.id));
+  }, []);
 
   const renderSeparator = () => {
     return (
@@ -185,7 +69,6 @@ export default function Invoice(props) {
   const [selectedPrinter, setSelectedPrinter] = React.useState();
   const html = () => Invoice(props);
   const print = async () => {
-    console.log("order:" + order.customerName);
     // On iOS/android prints the given html. On web prints the HTML from the current page.
     await Print.printAsync({
       html,
@@ -213,20 +96,14 @@ export default function Invoice(props) {
             <Text style={styles.outletHeaderText}>{outletDetails.outletName}</Text> <br></br>
             <Text style={styles.outletDetailsText}>{outletDetails.outletAddress}</Text><br></br>
             <Text style={styles.outletDetailsText}><b>TEL: </b>(+65){outletDetails.outletNumber}</Text><br></br>
-            <Text style={styles.outletDetailsText}><b>Served by: </b>{staffDetails.name}</Text><br></br>
-            {/*<QR orderID={order?.id}></QR>*/}
-          </div>
-          <div style={styles.qrCodeContainer}>
-            <QR orderID={order?.id}></QR>
+            {/*<Text style={styles.outletDetailsText}><b>Served by: </b>{staffDetails.name}</Text><br></br>*/}
           </div>
 
         </div>
         <View style={styles.cardHeader}>
-          {/*<Text style={styles.orderNumber}>Order #{orderId}</Text>
-           <Text style={styles.orderNumber}>Name: {order.customerName}</Text> */}
           <View style={{ marginLeft: 7, flexDirection: 'row', alignContent: 'space-between' }}>
-            <Text style={styles.customerName}><b>Customer: </b>{order?.customerName}</Text>
-            <Text style={styles.customerNumber}><b>TEL: </b>{order?.customerNumber}</Text>
+            <Text style={styles.customerName}><b>Customer: </b>{customerName}</Text>
+            <Text style={styles.customerNumber}><b>TEL: </b>{customerNumber}</Text>
           </View>
         </View>
         <View style={styles.tableHeader}>
@@ -238,7 +115,7 @@ export default function Invoice(props) {
         </View>
         <FlatList
           style={styles.cardBody}
-          data={data}
+          data={cart}
           keyExtractor={(item, index) => index.toString()}
           ItemSeparatorComponent={renderSeparator}
           renderItem={({ item, index }) => (
@@ -258,22 +135,30 @@ export default function Invoice(props) {
         />
         <div style={styles.bottomContainer}>
           <div style={styles.totalPrice}>
-            <Text style={styles.totalPrice}><b>Total Price: </b>S$ {order?.totalPrice}</Text>
+            <Text style={styles.totalPrice}><b>Subtotal: </b>S$ {subTotal}</Text>
           </div>
-          <div style={styles.description}>
-            <Text style={styles.itemDescription}><b>Description:</b> <br></br>{order?.description.replace(/\./g, "\n")}</Text>
-          </div>
-
         </div>
+        <div style={styles.bottomContainer}>
+          <div style={styles.tPrice}>
+            <Text style={styles.tPrice}><b>Total Price: </b>S$ {totalPrice}</Text>
+          </div>
+          <div style={styles.tPrice}>
+            {express && <Text style={styles.additionalservice}>Express</Text>}
+            {pickup && <Text style={styles.additionalservice}>Pick up</Text>}
+            {redeempt && <Text style={styles.additionalservice}>Redeem points</Text>}
+          </div>
+        </div>
+
 
       </View >
 
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "50%", alignContent: 'center', marginLeft: "25%", marginBottom: 20 }}>
         <Btn onClick={() => print()} title="Print" style={{ width: "48%" }} />
-        <Btn onClick={() => props.navigation.navigate('Home')} title="Back" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+        <Btn onClick={() => props.navigation.navigate('Order Summary', { cart, subTotal, customerNumber })} title="Back" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
       </View>
     </ScrollView>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -434,7 +319,24 @@ const styles = StyleSheet.create({
     marginTop: "1%",
     marginBottom: "3%",
   },
+  tPrice: {
+    alignItems: "right",
+    flex: 'right',
+    float: "right",
+    marginRight: 50,
+    backgroundColor: colors.white,
+    fontSize: 20,
+    marginTop: 0,
+    marginBottom: "3%",
+  },
   bottomContainer: {
     backgroundColor: colors.white,
+  },
+  additionalservice: {
+    alignItems: "left",
+    color: colors.blue700,
+    marginRight: 50,
+    fontSize: 20,
+    marginBottom: "3%",
   }
 });

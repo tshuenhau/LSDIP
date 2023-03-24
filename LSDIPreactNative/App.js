@@ -39,6 +39,7 @@ import Invoice from './screens/Invoice';
 import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
+import CustomerInvoice from './screens/CustomerInvoice';
 
 
 const Stack = createStackNavigator();
@@ -177,6 +178,11 @@ function RootNavigator() {
             }}
           />
           <Drawer.Screen name='Order Summary' component={OrderSummary}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
+          <Drawer.Screen name='Customer Invoice' component={CustomerInvoice}
             options={{
               drawerItemStyle: { display: "none" }
             }}
