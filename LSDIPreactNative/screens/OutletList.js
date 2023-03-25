@@ -42,6 +42,7 @@ export default function OutletList({ navigation }) {
     const [expandedOutlet, setExpandedOutlet] = useState(null);
     const outlets = firebase.firestore().collection('outlet');
     const [searchQuery, setSearchQuery] = useState("");
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         outlets.onSnapshot(querySnapshot => {
@@ -83,17 +84,23 @@ export default function OutletList({ navigation }) {
     }
 
     function createOutlet() {
-        outlets.add(values)
-            .then(() => {
-                setCreateModalVisible(!createModalVisible);
-                clearState;
-                Toast.show({
-                    type: 'success',
-                    text1: 'Outlet Created',
-                });
-            }).catch((err) => {
-                console.log(err);
-            })
+        const { outletName, outletAddress, outletNumber, outletEmail } = values;
+        if (outletName, outletAddress, outletNumber, outletEmail) {
+            outlets.add(values)
+                .then(() => {
+                    setCreateModalVisible(!createModalVisible);
+                    clearState;
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Outlet Created',
+                    });
+                    setErrorMessage("");
+                }).catch((err) => {
+                    console.log(err);
+                })
+        } else {
+            setErrorMessage("Please fill up all fields");
+        }
     }
 
     const deleteOutlet = (outlet) => {
@@ -217,6 +224,11 @@ export default function OutletList({ navigation }) {
                                 <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
                                 <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
                                 <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
                                     <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -231,6 +243,17 @@ export default function OutletList({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    errorMessageContainer: {
+        padding: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        width: '100%',
+    },
+    errorMessage: {
+        color: colors.red,
+        fontStyle: 'italic',
+        fontSize: 16,
+    },
     cardBody: {
         padding: 16,
     },

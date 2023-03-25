@@ -313,7 +313,7 @@ export default function StaffAvailability() {
                                         save="key"
                                         search={false}
                                     />
-                                    {/* xxx */}
+
                                     <View style={styles.modalButtons}>
                                         <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
                                         <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />

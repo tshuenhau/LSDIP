@@ -34,6 +34,7 @@ export default function Services({ navigation }) {
     const [cvalues, setCValues] = useState(initialCategoryValues);
     const [serviceList, setServiceList] = useState([]);
     const [expandedService, setExpandedService] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState("");
 
     //for services
@@ -111,14 +112,23 @@ export default function Services({ navigation }) {
     }
 
     function createLaundryCategory() {
-        laundryCItem.add(cvalues)
-            .then(() => {
-                setmodalVisible(!modalVisible);
-                clearCState;
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
+        if (cvalues.serviceName) {
+            laundryCItem.add(cvalues)
+                .then(() => {
+                    setmodalVisible(!modalVisible);
+                    clearCState;
+                    console.log("Success");
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Service Created',
+                    });
+                    setErrorMessage("");
+                }).catch((err) => {
+                    console.log(err);
+                })
+        } else {
+            setErrorMessage("Please fill up all fields");
+        }
     }
 
     const renderItem = ({ item }) => (
@@ -170,7 +180,11 @@ export default function Services({ navigation }) {
                             <View style={styles.view}>
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
                                 <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
-
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
                                     <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -223,6 +237,17 @@ export default function Services({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    errorMessageContainer: {
+        padding: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        width: '100%',
+    },
+    errorMessage: {
+        color: colors.red,
+        fontStyle: 'italic',
+        fontSize: 16,
+    },
     cardBody: {
         padding: 16,
     },
@@ -367,7 +392,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         backgroundColor: 'white',
-        width:"50%",
+        width: "50%",
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
