@@ -413,8 +413,12 @@ export default function AccountManagement() {
                                             save="value"
                                         />
                                     </View>
-                                    <TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
-                                    <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
+                                    {updateModalData.role !== "Customer" &&
+                                        < TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
+                                    }
+                                    {updateModalData.role !== "Customer" &&
+                                        <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
+                                    }
                                     <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
                                     <TextBox placeholder={updateModalData.address} onChangeText={text => handleChange(text, "address")} />
                                     <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>

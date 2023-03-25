@@ -281,6 +281,12 @@ function RootNavigator() {
                   <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
+            <Drawer.Screen name='My Profile' component={MyProfile}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
             <Drawer.Screen name='Create Order' component={CreateOrder}
               options={{
                 drawerIcon: ({ focused }) => (
