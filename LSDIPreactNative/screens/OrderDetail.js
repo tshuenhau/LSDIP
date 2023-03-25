@@ -20,6 +20,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import Checkbox from "expo-checkbox";
+import { fonts } from 'react-native-elements/dist/config';
 
 if (
   Platform.OS === 'android' &&
@@ -38,6 +39,7 @@ export default function OrderPage(props) {
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   const [pickup, setPickUp] = useState(Boolean);
   const [requireDelivery, setRequireDelivery] = useState(Boolean);
+  const [totalPrice, setTotalPrice] = useState("");
   //const [customerName, setCustomerName] = useState("");
 
 
@@ -50,6 +52,7 @@ export default function OrderPage(props) {
         setOrderDescription(doc.data().description);
         setPickUp(doc.data().pickup);
         setRequireDelivery(doc.data().requireDelivery);
+        setTotalPrice(doc.data().totalPrice);
         //console.log('order', order);
       } else {
         console.log('No such order document!');
@@ -93,7 +96,7 @@ export default function OrderPage(props) {
       const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
         const orderItemsList = [];
         querySnapshot.forEach((doc) => {
-          const { laundryItemName, price, typeOfServices, quantity } = doc.data();
+          const { laundryItemName, price, typeOfServices, quantity, pricingMethod, weight } = doc.data();
           //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
           orderItemsList.push({
             id: doc.id,
@@ -101,7 +104,9 @@ export default function OrderPage(props) {
             price,
             orderId,
             typeOfServices,
-            quantity
+            quantity,
+            pricingMethod,
+            weight
           });
         });
         setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
@@ -167,28 +172,59 @@ export default function OrderPage(props) {
     const selectedItem = modalData.typeOfServices;
     // Create a new order item document in the 'orderItem' collection
     // Get the values of description and price from the state modalData
-    const { price } = modalData;
-    firebase.firestore().collection('orderItem').add({
-      laundryItemName: selectedItem.split("--")[1],
-      //typeOfServices: selectedItem.split(' ')[1],
-      typeOfServices: selectedItem.split("--")[0],
-      price: price,
-      quantity: 1,
-      orderId: orderId,
-    }).then((docRef) => {
-      console.log('Order item created with ID: ', docRef.id);
-      // Add the new order item ID to the 'items' array in the order document
-      const orderRef = firebase.firestore().collection('orders').doc(orderId);
-      orderRef.update({
-        orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
-      }).then(() => {
-        console.log('Order item added to order successfully');
+    const { quantity, price, pricingMethod } = modalData;
+    if (pricingMethod === "Weight") {
+      const weight = modalData.weight;
+      firebase.firestore().collection('orderItem').add({
+        laundryItemName: selectedItem.split("--")[1],
+        //typeOfServices: selectedItem.split(' ')[1],
+        typeOfServices: selectedItem.split("--")[0],
+        price: price,
+        //quantity: quantity,
+        orderId: orderId,
+        pricingMethod: pricingMethod,
+        weight: weight
+      }).then((docRef) => {
+        console.log('Order item created with ID: ', docRef.id);
+        // Add the new order item ID to the 'items' array in the order document
+        const orderRef = firebase.firestore().collection('orders').doc(orderId);
+        orderRef.update({
+          orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+          totalPrice: order.totalPrice + parseInt(price)
+        }).then(() => {
+          console.log('Order item added to order successfully');
+        }).catch((error) => {
+          console.error('Error adding order item to order: ', error);
+        });
       }).catch((error) => {
-        console.error('Error adding order item to order: ', error);
+        console.error('Error creating order item: ', error);
       });
-    }).catch((error) => {
-      console.error('Error creating order item: ', error);
-    });
+    } else {
+      firebase.firestore().collection('orderItem').add({
+        laundryItemName: selectedItem.split("--")[1],
+        //typeOfServices: selectedItem.split(' ')[1],
+        typeOfServices: selectedItem.split("--")[0],
+        price: price,
+        quantity: quantity,
+        orderId: orderId,
+        pricingMethod: pricingMethod,
+        //weight: weight
+      }).then((docRef) => {
+        console.log('Order item created with ID: ', docRef.id);
+        // Add the new order item ID to the 'items' array in the order document
+        const orderRef = firebase.firestore().collection('orders').doc(orderId);
+        orderRef.update({
+          orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+          totalPrice: order.totalPrice + price * quantity
+        }).then(() => {
+          console.log('Order item added to order successfully');
+        }).catch((error) => {
+          console.error('Error adding order item to order: ', error);
+        });
+      }).catch((error) => {
+        console.error('Error creating order item: ', error);
+      });
+    }
     toggleModal();
   }
 
@@ -355,7 +391,8 @@ export default function OrderPage(props) {
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
       <Text style={styles.itemName}>{item.laundryItemName}</Text>
       <Text style={styles.itemName}>S$ {item.price}</Text>
-      <Text style={styles.itemName}>{item.quantity}</Text>
+      {item.pricingMethod === "Weight" && <Text style={styles.itemName}>{item.weight} kg</Text>}
+      {item.pricingMethod !== "Weight" && <Text style={styles.itemName}>{item.quantity}</Text>}
       <View style={styles.cardButtons}>
         <FontAwesome
           style={styles.outletIcon}
@@ -405,19 +442,19 @@ export default function OrderPage(props) {
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxLabel}>Laundry Pick Up ($10)</Text>
             <Checkbox
-                style={{ marginLeft: 20, marginBottom: 2 }}
-                disabled={false}
-                value={pickup}
-                onValueChange={() => handlePickUpChange()}
+              style={{ marginLeft: 20, marginBottom: 2 }}
+              disabled={false}
+              value={pickup}
+              onValueChange={() => handlePickUpChange()}
             />
           </View >
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxLabel}>Laundry Delivery ($10)</Text>
             <Checkbox
-                style={{ marginLeft: 20, marginBottom: 2 }}
-                disabled={false}
-                value={requireDelivery}
-                onValueChange={() => handleDeliveryChange()}
+              style={{ marginLeft: 20, marginBottom: 2 }}
+              disabled={false}
+              value={requireDelivery}
+              onValueChange={() => handleDeliveryChange()}
             />
           </View >
           <View style={styles.tableHeader}>
@@ -434,6 +471,9 @@ export default function OrderPage(props) {
             ItemSeparatorComponent={renderSeparator}
             renderItem={renderItem}
           />
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={{ fontSize: 20, paddingLeft: 15 }}><b>Total Price: </b>{totalPrice}</Text>
+          </View>
           <View style={{ flexDirection: 'row' }}>
             <Text style={styles.orderNumber}>Order Description</Text>
             <FontAwesome
@@ -516,15 +556,39 @@ export default function OrderPage(props) {
                         (item) => item.typeOfServices + "--" + item.laundryItemName
                         //(item) => item.typeOfServices
                       )}
+                      placeholder="Select Item"
                       setSelected={(val) => handleChange(val, 'typeOfServices')}
                       save="value"
                     />
                   </View>
-                  <TextBox
-                    style={styles.textBox}
-                    placeholder="Price"
-                    onChangeText={(text) => handleChange(text, 'price')}
-                  />
+                  <View
+                    style={{
+                      width: '92%',
+                      borderRadius: 20,
+                      marginTop: 20,
+                      backgroundColor: 'white',
+                    }}>
+                    <SelectList
+                      data={laundryItemsData.map(
+                        (item) => item.pricingMethod
+                      )}
+                      placeholder="Pricing Method"
+                      setSelected={(val) => handleChange(val, 'pricingMethod')}
+                      save="value"
+                    />
+                  </View>
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod === "Weight" &&
+                    <TextBox placeholder="Total Price" onChangeText={text => handleChange(text, "price")} />
+                  }
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod === "Weight" &&
+                    <TextBox placeholder="Weight" onChangeText={text => handleChange(text, "weight")} />
+                  }
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod !== "Weight" &&
+                    <TextBox placeholder="Price per piece" onChangeText={text => handleChange(text, "price")} />
+                  }
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod !== "Weight" &&
+                    <TextBox placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} />
+                  }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <Btn
                       onClick={() => addOrderItem1()}
@@ -843,8 +907,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end'
   },
   checkboxLabel: {
-      fontWeight: 'bold',
-      fontSize: 18,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 
 });
