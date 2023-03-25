@@ -40,6 +40,8 @@ import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
 import CustomerInvoice from './screens/CustomerInvoice';
+import colors from './colors';
+import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
 
 
 const Stack = createStackNavigator();
@@ -145,22 +147,97 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
-          <Drawer.Screen name='Home' component={Home} />
-          <Drawer.Screen name='My Profile' component={MyProfile} />
-          <Drawer.Screen name='Create Order' component={CreateOrder} />
-          <Drawer.Screen name='Laundry Item' component={LaundryItems} />
-          <Drawer.Screen name='Account Management' component={Account} />
-          <Drawer.Screen name='Outlet Management' component={OutletManagement} />
-          <Drawer.Screen name='Admin Rostering' component={AdminRostering} />
-          <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
-          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
-          <Drawer.Screen name='Driver' component={Driver} />
-          <Drawer.Screen name='Vehicle' component={VehicleModule} />
-          <Drawer.Screen name='Reward System' component={CRM} />
-          <Drawer.Screen name='Customer Rewards' component={CustomerRewards} />
+          <Drawer.Screen name='Home' component={Home}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='My Profile' component={MyProfile}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Create Order' component={CreateOrder}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Ionicons name="create" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Laundry Item' component={LaundryItems}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="local-laundry-service" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Account Management' component={Account}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="person-search" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Outlet Management' component={OutletManagement}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Entypo name="shop" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Admin Rostering' component={AdminRostering}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Ionicons name="people" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Entypo name="calendar" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Driver' component={Driver}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <AntDesign name="user" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Vehicle' component={VehicleModule}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Reward System' component={CRM}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialCommunityIcons name="wallet-giftcard" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Customer Rewards' component={CustomerRewards}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
-          <Drawer.Screen name='Service' component={Service} />
-          <Drawer.Screen name='Payment' component={Payment} />
+          <Drawer.Screen name='Service' component={Service}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Payment' component={Payment}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
 
           {/* hidden screens */}
           {/* <Drawer.Screen name='Create Admin' component={CreateAdmin}
@@ -198,11 +275,36 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Group>
-            <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Create Order' component={CreateOrder} />
-            <Drawer.Screen name='Staff Rostering' component={StaffRostering} />
-            <Drawer.Screen name='Vehicle' component={VehicleModule} />
-            <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots} />
+            <Drawer.Screen name='Home' component={Home}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Create Order' component={CreateOrder}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Ionicons name="create" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Staff Rostering' component={StaffRostering}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Ionicons name="people" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="calendar" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
             <Drawer.Screen name='Order Page' component={OrderDetail}
               options={{
                 drawerItemStyle: { display: "none" }
@@ -214,6 +316,11 @@ function RootNavigator() {
               }}
             />
             <Drawer.Screen name='Order Summary' component={OrderSummary}
+              options={{
+                drawerItemStyle: { display: "none" }
+              }}
+            />
+            <Drawer.Screen name='Customer Invoice' component={CustomerInvoice}
               options={{
                 drawerItemStyle: { display: "none" }
               }}
@@ -231,9 +338,24 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Group>
-            <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Driver' component={Driver} />
-            <Drawer.Screen name='Vehicle' component={VehicleModule} />
+            <Drawer.Screen name='Home' component={Home}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Driver' component={Driver}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <AntDesign name="user" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
@@ -247,10 +369,30 @@ function RootNavigator() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Group>
-            <Drawer.Screen name='Home' component={Home} />
-            <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }} />
-            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
-            <Drawer.Screen name='Payment' component={Payment} />
+            <Drawer.Screen name='Home' component={Home}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="shopping-basket" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Payment' component={Payment}
+              options={{
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>
         </Drawer.Navigator>
