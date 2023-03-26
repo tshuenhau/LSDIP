@@ -111,7 +111,7 @@ export default function Home({ navigation }) {
       <ScrollView>
         {user?.role === "Staff" ?
           <View>
-            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
               <Text>Email: {auth.currentUser?.email}</Text>
             </View>
@@ -121,7 +121,7 @@ export default function Home({ navigation }) {
         }
         {user?.role === "Admin" ?
           <View>
-            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
               <Text>Email: {auth.currentUser?.email}</Text>
             </View>
@@ -133,15 +133,15 @@ export default function Home({ navigation }) {
         {user?.role === "Customer" ?
           <View>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Hello, {user.name}</Text>
+              <Text style={styles.welcomeMessage}>Hello, {user.name}</Text>
             </View>
-            <CustomerHome user={user} />
+            <CustomerHome user={user} navigation={navigation} />
           </View>
           : null
         }
         {user?.role === "Driver" ?
           <View>
-            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
+            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
               <Text>Email: {auth.currentUser?.email}</Text>
             </View>
@@ -166,6 +166,12 @@ export default function Home({ navigation }) {
 };
 
 const styles = StyleSheet.create({
+  welcomeMessage: {
+    fontSize: 24,
+    fontWeight: "800",
+    padding: 5,
+    marginLeft: 10
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",

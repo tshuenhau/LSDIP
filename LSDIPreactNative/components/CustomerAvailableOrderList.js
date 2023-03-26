@@ -13,40 +13,40 @@ import colors from '../colors';
 import OrderDetails from "./OrderDetails";
 import Delivery from '../screens/Delivery';
 
-export default function CustomerOrderList({ curUser, navigation }) {
-    console.log(curUser);
+export default function CustomerOrderList({ orderList, navigation }) {
+    // console.log(curUser);
 
     const [expandedOrder, setExpandedOrder] = useState(null);
-    const [orderList, setOrderList] = useState([]);
-    const orders = firebase.firestore().collection('orders');
+    // const [orderList, setOrderList] = useState([]);
+    // const orders = firebase.firestore().collection('orders');
 
-    useEffect(() => {
-        if (curUser) {
-            orders
-                .where("customerNumber", "==", curUser.number)
-                .where("orderStatus", "==", "Back from Wash")
-                .get()
-                .then(querySnapshot => {
-                    const orderList = [];
-                    console.log(curUser);
-                    querySnapshot.forEach((doc) => {
-                        const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
-                        orderList.push({
-                            id: doc.id,
-                            customerName,
-                            customerNumber,
-                            date,
-                            orderItems,
-                            outletId,
-                            orderStatus,
-                            totalPrice,
-                        });
-                    });
-                    setOrderList(orderList);
-                    console.log(orderList);
-                }).then(console.log(orderList));
-        }
-    }, [curUser]);
+    // useEffect(() => {
+    //     if (curUser) {
+    //         orders
+    //             .where("customerNumber", "==", curUser.number)
+    //             .where("orderStatus", "==", "Back from Wash")
+    //             .get()
+    //             .then(querySnapshot => {
+    //                 const orderList = [];
+    //                 console.log(curUser);
+    //                 querySnapshot.forEach((doc) => {
+    //                     const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+    //                     orderList.push({
+    //                         id: doc.id,
+    //                         customerName,
+    //                         customerNumber,
+    //                         date,
+    //                         orderItems,
+    //                         outletId,
+    //                         orderStatus,
+    //                         totalPrice,
+    //                     });
+    //                 });
+    //                 setOrderList(orderList);
+    //                 console.log(orderList);
+    //             }).then(console.log(orderList));
+    //     }
+    // }, [curUser]);
 
 
     const formatOrderNumber = (id) => {
@@ -94,11 +94,11 @@ export default function CustomerOrderList({ curUser, navigation }) {
     return (
         <View>
             <ScrollView>
-                {orderList.length > 0 && (
+                {/* {orderList.length > 0 && (
                     <TouchableOpacity style={styles.deliveryButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
                         <Text style={styles.deliveryButtonText}>Delivery</Text>
                     </TouchableOpacity>
-                )}
+                )} */}
                 <View style={styles.container}>
                     <FlatList
                         style={styles.list}

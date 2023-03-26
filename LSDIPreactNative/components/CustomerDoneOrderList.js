@@ -24,7 +24,7 @@ export default function CustomerOrderList({ curUser, navigation }) {
         if (curUser) {
             orders
                 .where("customerNumber", "==", curUser.number)
-                .where("orderStatus", "==", "Done")
+                // .where("orderStatus", "==", "Done")
                 .get()
                 .then(querySnapshot => {
                     const orderList = [];
@@ -106,11 +106,11 @@ export default function CustomerOrderList({ curUser, navigation }) {
                 />
             </View>
         </ScrollView>
-        {orderList.length > 0 && (
+        {/* {orderList.length > 0 && (
              <TouchableOpacity style={styles.deliveryButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
                 <Text style={styles.deliveryButtonText}>Delivery</Text>
             </TouchableOpacity>
-         )}
+         )} */}
         </View>
     )
 }

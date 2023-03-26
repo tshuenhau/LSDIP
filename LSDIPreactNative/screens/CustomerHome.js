@@ -11,7 +11,39 @@ import CustomerOrderList from "../components/CustomerOrderList";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
 
-export default function CustomerHome({ user }) {
+export default function CustomerHome({ user, navigation }) {
+
+    const [orderList, setOrderList] = useState([]);
+    const orders = firebase.firestore().collection('orders');
+
+    useEffect(() => {
+        if (user) {
+            orders
+                .where("customerNumber", "==", user.number)
+                // .where("orderStatus", "==", "Back from Wash")
+                .get()
+                .then(querySnapshot => {
+                    const orderList = [];
+                    console.log(user);
+                    querySnapshot.forEach((doc) => {
+                        const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+                        orderList.push({
+                            id: doc.id,
+                            customerName,
+                            customerNumber,
+                            date,
+                            orderItems,
+                            outletId,
+                            orderStatus,
+                            totalPrice,
+                        });
+                    });
+                    setOrderList(orderList);
+                    console.log(orderList);
+                }).then(console.log(orderList));
+        }
+    }, [user]);
+
     return (
         <View>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
@@ -19,7 +51,7 @@ export default function CustomerHome({ user }) {
                     {
                         flexDirection: 'row',
                         flex: 2,
-                        margin: 5,
+                        margin: 10,
                         fontSize: 24,
                         fontWeight: "800"
 
@@ -37,24 +69,26 @@ export default function CustomerHome({ user }) {
 
                 }
             }>
-                <TouchableOpacity style={styles.NavButton} >
+                <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate('Order History')}>
                     <Text style={styles.NavButtonText}>Order History</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.NavButton} >
+                <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate('Pick up')}>
                     <Text style={styles.NavButtonText}>Pick Up</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.NavButton} >
-                    <Text style={styles.NavButtonText}>Membership</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.NavButton} >
                     <Text style={styles.NavButtonText}>Rewards</Text>
                 </TouchableOpacity>
+                {orderList.length > 0 && (
+                    <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
+                        <Text style={styles.NavButtonText}>Delivery</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* <Text style={styles.listtext}>My Orders</Text>
             <CustomerOrderList curUser={user} /> */}
             <Text style={styles.listtext}>Available for Delivery</Text>
-            <CustomerAvailableOrderList navigation={navigation} curUser={user} />
+            <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} />
         </View>
     )
 }
