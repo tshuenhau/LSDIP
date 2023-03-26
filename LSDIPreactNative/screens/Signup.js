@@ -47,17 +47,27 @@ export default function SignUpScreen({ navigation }) {
                         expenditure,
                         number
                     })
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Account created',
+                    });
+                    navigation.navigate("Login")
                 })
                 .catch((error) => {
-                    alert(error.message)
+                    //alert(error.message)
+                    Toast.show({
+                        type: 'error',
+                        text1: error.message,
+                    });
                 });
-            Toast.show({
-                type: 'success',
-                text1: 'Account created',
-            });
-            navigation.navigate("Login")
+
+            
         } else {
-            alert("Passwords are different!")
+            //alert("Passwords are different!")
+            Toast.show({
+                type: 'error',
+                text1: 'Passwords are different!',
+            });
         }
     }
 
