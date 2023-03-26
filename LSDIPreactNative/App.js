@@ -40,6 +40,9 @@ import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
 import CustomerInvoice from './screens/CustomerInvoice';
+import CustomerViewOrderHistory from './screens/CustomerViewOrderHistory';
+import CustomerViewMembership from './screens/CustomerViewMembership';
+import CustomerViewReward from './screens/CustomerViewReward';
 import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
 
@@ -393,6 +396,24 @@ function RootNavigator() {
                   <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
+            <Drawer.Screen name='Rewards' component={CustomerViewReward}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+            <Drawer.Screen name='Membership' component={CustomerViewMembership}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="loyalty" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+            <Drawer.Screen name='Order History' component={CustomerViewOrderHistory}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
             <Drawer.Screen name='Payment' component={Payment}
               options={{
                 drawerIcon: ({ focused }) => (
