@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
@@ -10,8 +10,10 @@ export default function CustomerHome({ user, navigation }) {
 
     const [orderList, setOrderList] = useState([]);
     const [pointCash, setPointCash] = useState(0);
+    const [selectedTimesList, setSelectedTimesList] = useState([]);
     const orders = firebase.firestore().collection('orders');
     const crm = firebase.firestore().collection('crm');
+    const userTimings = firebase.firestore().collection('user_timings');
 
     useEffect(() => {
         if (user) {
@@ -44,6 +46,18 @@ export default function CustomerHome({ user, navigation }) {
                 .then(querySnapshot => {
                     setPointCash(querySnapshot.data().value);
                 })
+
+            userTimings
+                .doc(user.uid)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const selectedTimes = doc.data().selected_times || [];
+                        console.log(selectedTimes);
+                        setSelectedTimesList(selectedTimes);
+                    } else {
+                        setSelectedTimesList([]);
+                    }
+                });
         }
     }, [user]);
 
@@ -91,6 +105,37 @@ export default function CustomerHome({ user, navigation }) {
 
             {/* <Text style={styles.listtext}>My Orders</Text>
             <CustomerOrderList curUser={user} /> */}
+            {selectedTimesList.length > 0 && (
+                <View style={styles.selectedTimesContainer}>
+                    <Text style={styles.listtext}>Selected Delivery Times</Text>
+                    <View style={styles.selectedTimesList}>
+                        {selectedTimesList.map((item) => (
+                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                                <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
+                                <Text style={styles.cardText}>
+                                    <b>Time: </b>{item.time}
+                                </Text>
+                                {item.orders ? (
+                                    <View>
+                                        {/*<Text style={styles.orderTitle}>Order IDs:</Text>*/}
+                                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.map((order) => order.id).join(", ")}</Text>
+                                    </View>
+                                ) : (
+                                    <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
+                                )}
+
+                                <TouchableOpacity
+                                    style={styles.removeButton}
+                                    onPress={() => handleDelete(item)}
+                                >
+                                    <Text style={styles.removeButtonText}> Remove </Text>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+
+            )}
             <Text style={styles.listtext}>Available for Delivery</Text>
             <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} />
         </View>
@@ -98,6 +143,52 @@ export default function CustomerHome({ user, navigation }) {
 }
 
 const styles = StyleSheet.create({
+    selectedTimesContainer: {
+        marginTop: 20,
+        marginBottom: 20,
+    },
+    selectedTimesList: {
+        flex: 1,
+    },
+    selectedTimeCard: {
+        width: "97%",
+        alignItems: 'left',
+        backgroundColor: colors.white,
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 10,
+        marginLeft: 15
+    },
+    cardText: {
+        fontSize: 20,
+        color: '#333333',
+        marginBottom: 15,
+        marginLeft: 10
+    },
+    cardTitle: {
+        fontSize: 20,
+        marginBottom: 4,
+        marginLeft: 10
+    },
+    orderText: {
+        fontSize: 16,
+        color: '#333333',
+        marginLeft: 10
+    },
+    noOrdersText: {
+        fontSize: 16,
+        color: '#333333',
+        marginLeft: 10
+    },
+    removeButton: {
+        alignSelf: 'flex-end',
+        marginTop: 8,
+        marginRight: 10
+    },
+    removeButtonText: {
+        color: 'red',
+        fontSize: 15
+    },
     container: {
         flex: 1,
         backgroundColor: "#fff",
