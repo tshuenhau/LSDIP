@@ -331,7 +331,6 @@ export default function Pickup({ navigation }) {
     return (
         <ScrollView>
             <View style={styles.mainContainer}>
-                <View style={styles.container}>
                     <View style={styles.leftcontainer}>
                         <View style={styles.calendarcontainer}>
                             <CalendarList
@@ -353,7 +352,7 @@ export default function Pickup({ navigation }) {
                                 scrollEnabled={true}
                                 horizontal={true}
                                 pagingEnabled={true}
-                                calendarWidth={480}
+                                calendarWidth={290}
                                 theme={{
                                     selectedDayBackgroundColor: colors.blue800,
                                     selectedDayTextColor: colors.white,
@@ -377,6 +376,11 @@ export default function Pickup({ navigation }) {
                                     <Text style={styles.dateText}>
                                         {selectedDate}
                                     </Text>
+                                </View>
+                            )}
+                        </View>
+                        {selectedDate && (
+                                <View>
                                     <TouchableOpacity
                                         style={styles.viewTimingsButton}
                                         onPress={() => setIsModalOpen(true)}
@@ -385,7 +389,6 @@ export default function Pickup({ navigation }) {
                                     </TouchableOpacity>
                                 </View>
                             )}
-                        </View>
                     </View>
                     <View style={styles.detailContainer}>
                         {selectedTimesList.length > 0 && (
@@ -424,7 +427,6 @@ export default function Pickup({ navigation }) {
                         />
                     </View>
                 </View>
-            </View>
         </ScrollView>
     )
 }
@@ -443,7 +445,7 @@ const styles = StyleSheet.create({
     leftcontainer: {
         flex: "left",
         padding: 20,
-        width: "50%",
+        width: "100%",
         borderRadius: 5,
         alignContent: "center",
     },
@@ -456,10 +458,8 @@ const styles = StyleSheet.create({
         borderRadius: 10
     },
     detailContainer: {
-        flex: "right",
         padding: 20,
-        width: "48%",
-        marginLeft: "2%"
+        width: "100%",
     },
     view: {
         width: "100%",
@@ -474,7 +474,6 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
-        width: '50%',
         backgroundColor: colors.white,
         borderRadius: 20,
         padding: 35,
@@ -585,9 +584,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.blue600,
         shadowColor: colors.shadowGray,
         borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        marginLeft: 50,
+        paddingVertical: 15,
+        paddingHorizontal: "33%",
+        marginLeft: 2,
     },
     viewTimingsButtonText: {
         color: 'white',

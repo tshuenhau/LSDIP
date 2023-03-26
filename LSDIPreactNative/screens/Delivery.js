@@ -512,7 +512,6 @@ const DeliveryScreen = ({ navigation, route }) => {
   return (
     <ScrollView>
       <View style={styles.mainContainer}>
-        <View style={styles.container}>
           <View style={styles.leftcontainer}>
             <View style={styles.calendarcontainer}>
               <CalendarList
@@ -535,7 +534,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                 scrollEnabled={true}
                 horizontal={true}
                 pagingEnabled={true}
-                calendarWidth={480}
+                calendarWidth={290}
                 theme={{
                   selectedDayBackgroundColor: colors.blue800,
                   selectedDayTextColor: colors.white,
@@ -558,6 +557,17 @@ const DeliveryScreen = ({ navigation, route }) => {
                   <Text style={styles.dateText}>
                     {selectedDate}
                   </Text>
+                  {/*<TouchableOpacity
+                    style={styles.viewTimingsButton}
+                    onPress={() => setIsModalOpen(true)}
+                  >
+                    <Text style={styles.viewTimingsButtonText}>View timings</Text>
+              </TouchableOpacity>*/}
+                </View>
+              )}
+            </View>
+            {selectedDate && (
+                <View style={styles.dateContent}>
                   <TouchableOpacity
                     style={styles.viewTimingsButton}
                     onPress={() => setIsModalOpen(true)}
@@ -565,8 +575,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                     <Text style={styles.viewTimingsButtonText}>View timings</Text>
                   </TouchableOpacity>
                 </View>
-              )}
-            </View>
+            )}
           </View>
           <View style={styles.detailContainer}>
             {selectedTimesList.length > 0 && (
@@ -615,7 +624,6 @@ const DeliveryScreen = ({ navigation, route }) => {
             />
           </View>
         </View>
-      </View>
     </ScrollView>
   )
 }
@@ -634,23 +642,21 @@ const styles = StyleSheet.create({
   leftcontainer: {
     flex: "left",
     padding: 20,
-    width: "50%",
+    width: "100%",
     borderRadius: 5,
     alignContent: "center",
   },
   calendarcontainer: {
     flex: "left",
-    padding: 20,
+    padding: 10,
     borderRadius: 5,
     alignContent: "center",
     backgroundColor: colors.white,
     borderRadius: 10
   },
   detailContainer: {
-    flex: "right",
     padding: 20,
-    width: "48%",
-    marginLeft: "2%"
+    width:"100%"
   },
   view: {
     width: "100%",
@@ -665,7 +671,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    width: '50%',
     backgroundColor: colors.white,
     borderRadius: 20,
     padding: 35,
@@ -776,9 +781,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blue600,
     shadowColor: colors.shadowGray,
     borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginLeft: 50,
+    paddingVertical: 15,
+    paddingHorizontal: "33%",
+    marginLeft: 2,
   },
   viewTimingsButtonText: {
     color: 'white',
