@@ -61,6 +61,50 @@ export default function CustomerHome({ user, navigation }) {
         }
     }, [user]);
 
+    const handleDelete = (id) => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+
+        if (user) {
+            const docRef = db.collection('user_timings').doc(user.uid);
+            docRef.get().then((doc) => {
+                if (doc.exists) {
+                    const selectedTime = doc.data().selected_times.find(
+                        (time) => time.date === id.date && time.time === id.time
+                    );
+                    const selectedTimes = doc.data().selected_times.filter(
+                        (time) => time.date !== id.date || time.time !== id.time
+                    );
+
+                    return docRef.set({
+                        selected_times: selectedTimes,
+                    }).then(() => {
+                        console.log('Selected time deleted for user with UID: ', user.uid);
+
+                        const newSelectedTimesList = selectedTimesList.filter(
+                            (item) => item.date !== id.date || item.time !== id.time
+                        );
+
+                        setSelectedTimesList(newSelectedTimesList);
+
+                        const batch = db.batch();
+
+                        selectedTime.orders.forEach((order) => {
+                            const orderRef = db.collection('orders').doc(order.id);
+                            batch.update(orderRef, { orderStatus: 'Back from Wash' });
+                        });
+
+                        return batch.commit();
+                    });
+                }
+            }).then(() => {
+                console.log('Orders updated successfully');
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
+    };
+
     return (
         <View>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>

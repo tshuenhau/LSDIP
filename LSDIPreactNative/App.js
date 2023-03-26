@@ -43,6 +43,7 @@ import CustomerInvoice from './screens/CustomerInvoice';
 import CustomerViewOrderHistory from './screens/CustomerViewOrderHistory';
 import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
+import CustomerProfile from './screens/CustomerProfile';
 
 
 const Stack = createStackNavigator();
@@ -379,6 +380,12 @@ function RootNavigator() {
             options={{
               drawerIcon: ({ focused }) => (
                 <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='My Profile' component={CustomerProfile}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }}
