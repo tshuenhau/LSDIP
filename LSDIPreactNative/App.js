@@ -40,7 +40,9 @@ import Account from './screens/AccountManagement'
 import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
 import CustomerInvoice from './screens/CustomerInvoice';
-
+import CustomerViewOrderHistory from './screens/CustomerViewOrderHistory';
+import CustomerViewMembership from './screens/CustomerViewMembership';
+import CustomerViewReward from './screens/CustomerViewReward';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -250,6 +252,9 @@ function RootNavigator() {
             <Drawer.Screen name='Home' component={Home} />
             <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }} />
             <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }} />
+            <Drawer.Screen name='Order History' component={CustomerViewOrderHistory} initialParams={{ curuser: null }} />
+            <Drawer.Screen name='Membership' component={CustomerViewMembership} initialParams={{ curuser: null }} />
+            <Drawer.Screen name='Rewards' component={CustomerViewReward} initialParams={{ curuser: null }} />
             <Drawer.Screen name='Payment' component={Payment} />
             {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           </Drawer.Group>

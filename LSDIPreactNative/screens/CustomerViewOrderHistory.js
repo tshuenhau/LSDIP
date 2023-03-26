@@ -8,10 +8,11 @@ import { firebase } from "../config/firebase";
 import { auth } from '../config/firebase';
 import OrdersList from "../components/OrdersList";
 import CustomerOrderList from "../components/CustomerOrderList";
+import CustomerDoneOrderList from "../components/CustomerDoneOrderList";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
 
-export default function Home({ navigation }) {
+export default function CustomerViewOrderHistory({ navigation }) {
 
   const auth1 = firebase.auth;
 
@@ -108,28 +109,7 @@ export default function Home({ navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView>
-        {user?.role === "Staff" ?
-          <View>
-            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
-            <OrdersList navigation={navigation} />
-          </View>
-          : null
-        }
-        {user?.role === "Admin" ?
-          <View>
-            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
-            <OrdersList navigation={navigation} />
-
-          </View>
-          : null
-        }
-        {user?.role === "Customer" ?
+        
           <View>
 
 
@@ -149,94 +129,11 @@ export default function Home({ navigation }) {
               ]}><Ionicons name="ios-person-outline" size={24} onPress={() => alert("clicked")} /> <FontAwesome5 name="coins" size={24} /> 100 ($1) { }</Text>
 
             </View>
-            <Text>  </Text>
-            <View style={[
-              {
-                // Try setting `flexDirection` to `"row"`.
-                flexDirection: 'row',
-                alignSelf: 'center',
-
-              },
-            ]}>
-              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Order History", { curuser: {user} })}>
-                <Text style={styles.NavButtonText}>Order History</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Pick Up", { curuser: {user} })}>
-                <Text style={styles.NavButtonText}>Pick Up</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={[
-              {
-                // Try setting `flexDirection` to `"row"`.
-                flexDirection: 'row',
-                alignSelf: 'center',
-              },
-            ]}>
-              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Membership", { curuser: {user} })}>
-                <Text style={styles.NavButtonText}>Membership</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Rewards", { curuser: {user} })}>
-                <Text style={styles.NavButtonText}>Rewards</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.listtext}>My Orders</Text>
-            <CustomerOrderList curUser={user} />
-            <Text style={styles.listtext}>Available for Delivery</Text>
-            <CustomerAvailableOrderList navigation={navigation} curUser={user} />
-            {selectedTimesList.length > 0 && (
-              <View style={styles.selectedTimesContainer}>
-                <Text style={styles.listtext}>Selected Delivery Times</Text>
-                <ScrollView style={styles.selectedTimesList}>
-                  {selectedTimesList.map((item) => (
-                    <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
-                      <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
-                      <Text style={styles.cardText}>
-                        <b>Time: </b>{item.time}
-                      </Text>
-                      {item.orders ? (
-                        <View>
-                          {/*<Text style={styles.orderTitle}>Order IDs:</Text>*/}
-                          <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.map((order) => order.id).join(", ")}</Text>
-                        </View>
-                      ) : (
-                        <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
-                      )}
-
-                      <TouchableOpacity
-                        style={styles.removeButton}
-                        onPress={() => handleDelete(item)}
-                      >
-                        <Text style={styles.removeButtonText}> Remove </Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-
-                </ScrollView>
-              </View>
-
-            )}
+           
+            <Text style={styles.listtext}>My Order History</Text>
+            <CustomerDoneOrderList curUser={user} />
+            
           </View>
-          : null
-        }
-        {user?.role === "Driver" ?
-          <View>
-            <Text style={{ fontSize: 24, fontWeight: "800", padding: 5, marginLeft: 10 }}>Welcome {user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
-            <Text>Hi im Driver</Text>
-          </View>
-          : null
-        }
-
-        {/* <View style={styles.chatContainer}>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Chat")}
-                    style={styles.chatButton}
-                >
-                    <Entypo name="chat" size={24} color={colors.lightGray} />
-                </TouchableOpacity>
-            </View> */}
 
       </ScrollView>
     </View>
