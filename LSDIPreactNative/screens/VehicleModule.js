@@ -19,7 +19,7 @@ import TextBox from "../components/TextBox";
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import alert from '../components/Alert'
+import Toast from 'react-native-toast-message';
 
 
 if (
@@ -40,6 +40,7 @@ export default function VehicleModule() {
     const db = firebase.firestore()
     const [expandedVehicle, setExpandedVehicle] = useState(null);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [upvalues, setUpValues] = useState('');
     const [user, setUser] = useState(false);
 
@@ -62,20 +63,28 @@ export default function VehicleModule() {
     //console.log(values)
     //Create data method 1
     function createVehicle() {
-        addDoc(collection(db, "vehicles"), {
-            driver: "",
-            location: new firebase.firestore.GeoPoint(0, 0),
-            mileage: 0,
-            numberPlate: numberPlate,
-            vehicleStatus: vehicleStatus,
+        if (numberPlate, vehicleStatus) {
+            addDoc(collection(db, "vehicles"), {
+                driver: "",
+                location: new firebase.firestore.GeoPoint(0, 0),
+                mileage: 0,
+                numberPlate: numberPlate,
+                vehicleStatus: vehicleStatus,
 
-        }).then(() => {
-            console.log("Creation Success");
-        }).catch((error) => {
-            console.log(error);
-        })
-        clearState();
-        setModalVisible(!modalVisible);
+            }).then(() => {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Account created',
+                });
+                setErrorMessage("");
+            }).catch((error) => {
+                console.log(error);
+            })
+            clearState();
+            setModalVisible(!modalVisible);
+        } else {
+            setErrorMessage("Please fill up all fields");
+        }
     }
 
     //create data method 2
@@ -318,6 +327,11 @@ export default function VehicleModule() {
                                         search={false}
                                     />
                                 </View>
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => createVehicle()} title="Create" style={{ width: "48%" }} />
                                     <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -398,6 +412,17 @@ export default function VehicleModule() {
 }
 
 const styles = StyleSheet.create({
+    errorMessageContainer: {
+        padding: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        width: '100%',
+    },
+    errorMessage: {
+        color: colors.red,
+        fontStyle: 'italic',
+        fontSize: 16,
+    },
     statusSelectList: {
         // flex: 1,
         marginTop: 20,

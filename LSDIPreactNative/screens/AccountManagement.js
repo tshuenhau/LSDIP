@@ -38,6 +38,7 @@ export default function AccountManagement() {
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [values, setValues] = useState(initialValues);
+    const [errorMessage, setErrorMessage] = useState('');
     const auth1 = firebase.auth;
     const firestore = firebase.firestore;
 
@@ -62,33 +63,39 @@ export default function AccountManagement() {
     //Customer only limit to customer signup on their own
     function SignUp() {
         const { email, pwd, pwd2, name, role, number, salary, overtimeRate, address } = values
-        if (pwd == pwd2) {
-            auth1().createUserWithEmailAndPassword(email, pwd)
-                .then(() => {
-                    firestore().collection("users").doc(auth1().currentUser.uid).set({
-                        uid: auth1().currentUser.uid,
-                        name,
-                        role,
-                        email,
-                        number,
-                        salary,
-                        overtimeRate,
-                        address
+        if (email && pwd && pwd2 && name && role && number && salary && overtimeRate && address) {
+            if (pwd == pwd2) {
+                auth1().createUserWithEmailAndPassword(email, pwd)
+                    .then(() => {
+                        firestore().collection("users").doc(auth1().currentUser.uid).set({
+                            uid: auth1().currentUser.uid,
+                            name,
+                            role,
+                            email,
+                            number,
+                            salary,
+                            overtimeRate,
+                            address
+                        })
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Account created',
+                        });
+                        setErrorMessage("");
+                        setValues(initialValues);
+                        setCreateModalVisible(false);
                     })
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Account created',
+                    .catch((error) => {
+                        alert(error.message)
                     });
-                    setValues(initialValues);
-                    setCreateModalVisible(false);
-                })
-                .catch((error) => {
-                    alert(error.message)
-                });
+            } else {
+                alert("Passwords are different!")
+            }
         } else {
-            alert("Passwords are different!")
+            setErrorMessage("Please fill up all fields")
         }
     }
+
 
     const roles = [
         { key: '1', value: 'Admin' },
@@ -338,8 +345,8 @@ export default function AccountManagement() {
         })
     }
 
-    const updateRole = () => {
-        if (updateModalData.role.length > 0) {
+    const updateAccount = () => {
+        if (updateModalData.name && updateModalData.role && updateModalData.number && updateModalData.address) {
             userDatabase.doc(updateModalData.id)
                 .update({
                     name: updateModalData.name,
@@ -353,11 +360,14 @@ export default function AccountManagement() {
                         type: 'success',
                         text1: 'User updated',
                     });
+                    setErrorMessage("");
                     console.log("Update Success")
                     setUpdateModalVisible(false);
                 }).catch((err) => {
                     console.log(err)
                 })
+        } else {
+            setErrorMessage("Please fill up all fields")
         }
     }
 
@@ -413,12 +423,21 @@ export default function AccountManagement() {
                                             save="value"
                                         />
                                     </View>
-                                    <TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
-                                    <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
+                                    {updateModalData.role !== "Customer" &&
+                                        < TextBox placeholder={updateModalData.salary} onChangeText={text => handleChange(text, "salary")} />
+                                    }
+                                    {updateModalData.role !== "Customer" &&
+                                        <TextBox placeholder={updateModalData.overtimeRate} onChangeText={text => handleChange(text, "overtimeRate")} />
+                                    }
                                     <TextBox placeholder={updateModalData.number} onChangeText={text => handleChange(text, "number")} />
                                     <TextBox placeholder={updateModalData.address} onChangeText={text => handleChange(text, "address")} />
+                                    {errorMessage &&
+                                        <View style={styles.errorMessageContainer}>
+                                            <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                        </View>
+                                    }
                                     <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                                        <Btn onClick={() => updateRole()} title="Update" style={{ width: "48%" }} />
+                                        <Btn onClick={() => updateAccount()} title="Update" style={{ width: "48%" }} />
                                         <Btn onClick={() => setUpdateModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
                                     </View>
                                 </View>
@@ -475,6 +494,17 @@ export default function AccountManagement() {
 }
 
 const styles = StyleSheet.create({
+    errorMessageContainer: {
+        padding: 10,
+        marginBottom: 10,
+        alignItems: "center",
+        width: '100%',
+    },
+    errorMessage: {
+        color: colors.red,
+        fontStyle: 'italic',
+        fontSize: 16,
+    },
     searchInput: {
         height: 40,
         borderWidth: 1,

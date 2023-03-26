@@ -40,7 +40,7 @@ export default function LaundryItemList() {
     const [searchQuery, setSearchQuery] = useState("");
     const [values, setValues] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
-
+    const [errorMessage, setErrorMessage] = useState('');
 
     const pricingMethods = [
         { key: '1', value: 'Flat' },
@@ -158,9 +158,7 @@ export default function LaundryItemList() {
     }
 
     const updateLaundry = () => {
-        if (upvalues.typeOfServices.length > 0 &&
-            upvalues.laundryItemName.length > 0 &&
-            upvalues.pricingMethod.length > 0) {
+        if (upvalues.laundryItemName && upvalues.typeOfServices && upvalues.pricingMethod && ((upvalues.fromPrice && upvalues.toPrice) || upvalues.price)) {
             if (upvalues.pricingMethod === "Range") {
                 laundryItem.doc(upvalues.id)
                     .update({
@@ -199,22 +197,30 @@ export default function LaundryItemList() {
                         console.log(err)
                     })
             }
+            setErrorMessage("");
+        } else {
+            setErrorMessage("Please fill up all fields.")
         }
     }
 
     function createLaundryItem() {
-        laundryItem.add(values)
-            .then(() => {
-                setModalVisible(false);
-                setValues({});
-                Toast.show({
-                    type: 'success',
-                    text1: 'Laundry item created',
-                });
-                console.log("Success");
-            }).catch((err) => {
-                console.log(err);
-            })
+        if (values.laundryItemName && values.typeOfServices && values.pricingMethod && ((values.fromPrice && values.toPrice) || values.price)) {
+            laundryItem.add(values)
+                .then(() => {
+                    setModalVisible(false);
+                    setValues({});
+                    setErrorMessage("");
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Laundry item created',
+                    });
+                    console.log("Success");
+                }).catch((err) => {
+                    console.log(err);
+                })
+        } else {
+            setErrorMessage("Please fill up all fields.");
+        }
     }
 
     const renderItem = ({ item }) => (
@@ -356,6 +362,11 @@ export default function LaundryItemList() {
                                 {values != undefined && values.pricingMethod === "Weight" &&
                                     <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} />
                                 }
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => createLaundryItem()} title="Create" style={{ width: "48%" }} />
                                     <Btn onClick={() => setModalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -409,6 +420,11 @@ export default function LaundryItemList() {
                                 {upvalues != undefined && upvalues.pricingMethod === "Weight" &&
                                     <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
                                 }
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => updateLaundry()} title="Update" style={{ width: "48%" }} />
                                     <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -425,6 +441,17 @@ export default function LaundryItemList() {
 }
 
 const styles = StyleSheet.create({
+    errorMessageContainer: {
+        padding: 10,
+        alignItems: "center",
+        marginBottom: 10,
+        width: '100%',
+    },
+    errorMessage: {
+        color: colors.red,
+        fontStyle: 'italic',
+        fontSize: 16,
+    },
     rangeText: {
         flexDirection: "row",
         justifyContent: 'space-between',

@@ -36,6 +36,7 @@ export default function MyProfile() {
     const [updateModalData, setUpdateModalData] = useState(initialValues);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const users = firebase.firestore().collection('users');
     const auth = firebase.auth;
 
@@ -71,7 +72,8 @@ export default function MyProfile() {
 
     const updateDetails = () => {
         if (updateModalData.name &&
-            updateModalData.number) {
+            updateModalData.number &&
+            updateModalData.email) {
             users.doc(updateModalData.uid)
                 .update({
                     email: updateModalData.email,
@@ -89,20 +91,13 @@ export default function MyProfile() {
                         type: 'success',
                         text1: 'Profile Updated',
                     });
+                    setErrorMessage("");
                     setUpdateModalVisible(!updateModalVisible);
                 }).catch((err) => {
                     console.log(err)
                 })
         } else {
-            alert(
-                "Information", "All the fields are required",
-                [
-                    {
-                        text: "Yes",
-                        onPress: () => { }
-                    }
-                ]
-            )
+            setErrorMessage("Please fill up all fields");
         }
     }
 
@@ -118,7 +113,7 @@ export default function MyProfile() {
 
     const changePassword = () => {
         let alertMsg = "";
-        if (passwordDetails.currentPassword === "" || passwordDetails.newPassword === "") {
+        if (passwordDetails.currentPassword === "" || passwordDetails.newPassword === "" || passwordDetails.confirmNewPassword === "") {
             alertMsg = "All the fields are required";
         } else if (passwordDetails.newPassword.length <= 5) {
             alertMsg = "Password must contains more than 5 characters";
@@ -126,15 +121,7 @@ export default function MyProfile() {
             alertMsg = "Passwords do not match";
         }
         if (alertMsg.length > 0) {
-            alert(
-                "Information", alertMsg,
-                [
-                    {
-                        text: "Yes",
-                        onPress: () => { }
-                    }
-                ]
-            )
+            setErrorMessage(alertMsg);
         } else {
             try {
                 reauthenticate(passwordDetails.currentPassword).then(() => {
@@ -144,6 +131,7 @@ export default function MyProfile() {
                         type: 'success',
                         text1: 'Password updated',
                     });
+                    setErrorMessage("");
                     setPasswordModalVisible(!passwordModalVisible);
                     setPasswordDetails(initialPassword);
                 })
@@ -234,6 +222,11 @@ export default function MyProfile() {
                                 <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={userDetails.name} />
                                 <TextBox placeholder="laundry@email.com" onChangeText={text => handleChange(text, "email")} defaultValue={userDetails.email} />
                                 <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} defaultValue={userDetails.number} />
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => updateDetails()} title="Update" style={{ width: "48%" }} />
                                     <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -257,6 +250,11 @@ export default function MyProfile() {
                                 <TextBox placeholder="Current Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "currentPassword")} />
                                 <TextBox placeholder="New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "newPassword")} />
                                 <TextBox placeholder="Confirm New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "confirmNewPassword")} />
+                                {errorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                    </View>
+                                }
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                                     <Btn onClick={() => changePassword()} title="Update" style={{ width: "48%" }} />
                                     <Btn onClick={() => setPasswordModalVisible(!passwordModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -271,6 +269,17 @@ export default function MyProfile() {
 }
 
 const styles = StyleSheet.create({
+    errorMessageContainer: {
+        padding: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        width: '100%',
+    },
+    errorMessage: {
+        color: colors.red,
+        fontStyle: 'italic',
+        fontSize: 16,
+    },
     profileDetailRow: {
         flex: 1,
         flexDirection: 'row',

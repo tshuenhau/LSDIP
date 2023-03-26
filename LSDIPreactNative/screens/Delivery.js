@@ -24,7 +24,6 @@ const DeliveryScreen = ({ navigation, route }) => {
   const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
   const [deliveryfee, setDeliveryFee] = useState(0);
-  const [requireDelivery, setRequireDelivery] = useState(false);
   const orderList = firebase.firestore().collection('orders');
 
   const [matchingOrders, setMatchingOrders] = useState([]);
@@ -145,8 +144,8 @@ const DeliveryScreen = ({ navigation, route }) => {
       '6:00pm - 7:00pm',
       '7:00pm - 8:00pm',
       '8:00pm - 9:00pm',
-      '9:00pm - 10:00pm',
-      /*'10:00pm - 11:00pm',
+      /*'9:00pm - 10:00pm',
+      '10:00pm - 11:00pm',
       '11:00pm - 12:00am',*/
     ];
 
@@ -176,14 +175,6 @@ const DeliveryScreen = ({ navigation, route }) => {
       setSelectedDate(null);
       onClose();
     };
-
-    function handleDeliveryFeeChange() {
-      setDeliveryFee(!requireDelivery * 10)
-    }
-
-    function handleCheck() {
-      setRequireDelivery(!requireDelivery)
-    }
 
     // const handleConfirm = () => {
     //   if (selectedTime) {
@@ -318,6 +309,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                     const batch = db.batch();
                     matchingOrders.forEach((order) => {
                       const orderRef = db.collection('orders').doc(order.id);
+                      // deliveryfee hardcoded for now
                       updateDoc(orderRef, { requireDelivery: requireDelivery, totalPrice: order.totalPrice + deliveryfee });
                       batch.update(orderRef, { orderStatus: 'Pending Delivery' });
                     });
@@ -378,14 +370,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                 })}
                 {availableTimings.length === 0
                   && <Text style={styles.selectedDateText}>No Available Timeslot</Text>}
-                <Text style={styles.checkoutDetails}>Do you need delivery services? ($10)
-                  <Checkbox
-                    style={{ marginLeft: 12, marginTop: "6%" }}
-                    disabled={false}
-                    value={requireDelivery}
-                    onValueChange={() => { handleCheck(), handleDeliveryFeeChange() }}
-                  />
-                </Text>
+
                 <View style={styles.modalButtons}>
 
                   <TouchableOpacity

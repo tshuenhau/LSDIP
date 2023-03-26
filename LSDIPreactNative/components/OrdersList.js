@@ -36,7 +36,7 @@ export default function OrdersList({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
-  const [udpateModal1Visible, setUpdateModal1Visible] = useState(false);
+  const [refundModalVisible, setRefundModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const orders = firebase.firestore().collection("orders");
   const refunds = firebase.firestore().collection("refunds");
@@ -298,7 +298,7 @@ export default function OrdersList({ navigation }) {
             <TouchableOpacity
               onPress={() => {
                 showRefundDetails(order.id);
-                setUpdateModal1Visible(true)
+                setRefundModalVisible(true)
               }}>
               <Text style={styles.refunddetailsbtn}>Refund Details</Text>
             </TouchableOpacity>)}
@@ -410,7 +410,7 @@ export default function OrdersList({ navigation }) {
         </Modal>
 
         <Modal
-          visible={udpateModal1Visible}
+          visible={refundModalVisible}
           animationType="fade"
           transparent={true}
         >
@@ -418,7 +418,7 @@ export default function OrdersList({ navigation }) {
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <TouchableOpacity
-                  onPress={() => setUpdateModal1Visible(false)}
+                  onPress={() => setRefundModalVisible(false)}
                 >
                   <AntDesign style={styles.closebutton} name="closecircleo" size={24} color="black" />
                 </TouchableOpacity>
@@ -457,7 +457,7 @@ export default function OrdersList({ navigation }) {
               <View style={styles.modalView}>
                 <View style={styles.closeModal}>
                 <TouchableOpacity
-                  onPress={() => setUpdateModal1Visible(false)}
+                  onPress={() => setRefundModalVisible(false)}
                 >
                   <AntDesign name="closecircleo" size={30} color="black" />
                 </TouchableOpacity>
@@ -483,7 +483,7 @@ export default function OrdersList({ navigation }) {
                     }}
                   >
                     {/*<Btn
-                    onClick={() => setUpdateModal1Visible(false)}
+                    onClick={() => setRefundModalVisible(false)}
                     title="Dismiss"
                     style={{ width: "48%", backgroundColor: "#344869" }}
                 />*/}
