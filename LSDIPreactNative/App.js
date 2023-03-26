@@ -396,6 +396,24 @@ function RootNavigator() {
                   <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
+            <Drawer.Screen name='Rewards' component={CustomerViewReward}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+            <Drawer.Screen name='Membership' component={CustomerViewMembership}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="loyalty" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+            <Drawer.Screen name='Order History' component={CustomerViewOrderHistory}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
             <Drawer.Screen name='Payment' component={Payment}
               options={{
                 drawerIcon: ({ focused }) => (
