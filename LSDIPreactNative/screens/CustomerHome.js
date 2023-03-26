@@ -1,26 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
-import { auth } from '../config/firebase';
-import OrdersList from "../components/OrdersList";
-import CustomerOrderList from "../components/CustomerOrderList";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
 
 export default function CustomerHome({ user, navigation }) {
 
     const [orderList, setOrderList] = useState([]);
+    const [pointCash, setPointCash] = useState(0);
     const orders = firebase.firestore().collection('orders');
+    const crm = firebase.firestore().collection('crm');
 
     useEffect(() => {
         if (user) {
             orders
                 .where("customerNumber", "==", user.number)
-                // .where("orderStatus", "==", "Back from Wash")
                 .get()
                 .then(querySnapshot => {
                     const orderList = [];
@@ -41,22 +37,29 @@ export default function CustomerHome({ user, navigation }) {
                     setOrderList(orderList);
                     console.log(orderList);
                 }).then(console.log(orderList));
+
+            crm
+                .doc("point_cash")
+                .get()
+                .then(querySnapshot => {
+                    setPointCash(querySnapshot.data().value);
+                })
         }
     }, [user]);
 
     return (
         <View>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-                <Text style={[
+                <Text style={
                     {
                         flexDirection: 'row',
                         flex: 2,
                         margin: 10,
                         fontSize: 24,
                         fontWeight: "800"
-
-                    },
-                ]}><Ionicons name="ios-person-outline" size={24} onPress={() => alert("clicked")} /> <FontAwesome5 name="coins" size={24} /> 100 ($1) { }</Text>
+                    }
+                }>
+                    <Ionicons name="ios-person-outline" size={24} onPress={() => alert("clicked")} /> <FontAwesome5 name="coins" size={24} /> {user.points} (${user.points * pointCash})</Text>
 
             </View>
 
@@ -66,6 +69,7 @@ export default function CustomerHome({ user, navigation }) {
                     // alignSelf: 'center',
                     justifyContent: "center",
                     flexWrap: 'wrap',
+                    padding: 10,
 
                 }
             }>
