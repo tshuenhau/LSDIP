@@ -91,7 +91,7 @@ export default function CustomerOrderList({ curUser }) {
             <View style={styles.container}>
                 <FlatList
                     style={styles.list}
-                    data={orderList}
+                    data={orderList.slice(0,3)}
                     keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     ListEmptyComponent={
@@ -106,6 +106,7 @@ export default function CustomerOrderList({ curUser }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        height:"10%"
     },
     card: {
         backgroundColor: '#fff',
@@ -139,6 +140,7 @@ const styles = StyleSheet.create({
     },
     list: {
         flex: 1,
+        height:"10%"
     },
     noDataText: {
         fontStyle: 'italic',

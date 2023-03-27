@@ -394,7 +394,7 @@ function RootNavigator() {
                 <Entypo name="shopping-basket" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-          <Drawer.Screen name='Delivery' component={Delivery}
+          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: user1 }}
             options={{
               drawerIcon: ({ focused }) => (
                 <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />

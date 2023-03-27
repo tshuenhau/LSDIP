@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     selectedTimeCard: {
-        width: "97%",
+        width: "92%",
         alignItems: 'left',
         backgroundColor: colors.white,
         borderRadius: 5,
@@ -299,6 +299,20 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 20,
+        alignSelf: 'center',
+    },
+    ViewAllButton: {
+        backgroundColor: colors.primary,
+        padding: 5,
+        borderRadius: 5,
+        margin: 2,
+        alignSelf: 'center',
+        marginBottom: 30
+    },
+    ViewAllButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 15,
         alignSelf: 'center',
     },
 });
