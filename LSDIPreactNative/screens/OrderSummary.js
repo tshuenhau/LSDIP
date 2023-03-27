@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
 import * as Print from 'expo-print';
+import { SelectList } from 'react-native-dropdown-select-list';
 
 if (
     Platform.OS === 'android' &&
@@ -54,6 +55,18 @@ export default function OrderSummary(props) {
     const [selectedPrinter, setSelectedPrinter] = React.useState();
     const users = firebase.firestore().collection('users');
     const crm = firebase.firestore().collection('crm');
+
+    const [selectedOutlet, setSelectedOutlet] = useState("");
+    const [outletList, setOutletList] = useState([]);
+
+    useEffect(() => {
+        firebase.firestore().collection("outlet").get()
+          .then((querySnapshot) => {
+            const data = querySnapshot.docs.map((doc) => doc.data().outletName + ' (' + doc.id + ')');
+            setOutletList(data);
+          });
+      }, []);
+      
 
     useEffect(() => {
         crm.doc('point_cash')
@@ -142,6 +155,14 @@ export default function OrderSummary(props) {
     }
 
     const createOrder = async () => {
+        if (!selectedOutlet) {
+            Toast.show({
+              type: "error",
+              text1: "Please select an outlet",
+            });
+            return;
+          }
+          
         console.log(cart);
         const batch = firebase.firestore().batch();
         const orderItemIds = [];
@@ -181,7 +202,7 @@ export default function OrderSummary(props) {
                     receiveFromWasherDate: null,
                     sendFromWasherDate: null,
                     staffID: await getUserId(),
-                    outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+                    outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
                     orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
@@ -260,6 +281,20 @@ export default function OrderSummary(props) {
                 <View style={styles.checkoutCard}>
                     <View style={{ flexDirection: 'row' }}>
                         <View style={styles.checkoutDetailsContainer}>
+                            <View style={styles.checkoutDetailsContainer}>
+                                <Text style={styles.checkoutDetails}>Outlet</Text>
+                                <SelectList
+                                    data={outletList}
+                                    placeholder="Select Outlet"
+                                    //setSelected={(val) => handleChange(val, "typeOfServices")}
+                                    setSelected={(selectedOutlet) => {
+                                        const id = selectedOutlet.split(' ')[1].slice(1, -1);
+                                        setOrderValues({ ...orderValues, outletId: id });
+                                        setSelectedOutlet(selectedOutlet)
+                                    }}
+                                    />
+
+                            </View>
                             <Text style={styles.checkoutDetails}>Customer Name</Text>
                             <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
                             <Text style={styles.checkoutDetails}>Customer Number</Text>

@@ -47,7 +47,7 @@ export default function CustomerInvoice(props) {
             outletNumber: outletNumber
           });
         });
-        setOutletDetails(temp.find(o => o.id === 'bTvPBNfMLkBmF9IKEQ3n'));
+        setOutletDetails(temp);
         //setOutletDetails(temp.find(o => o.id === 'cwhUIRsr6wqV2YGNIdWl'));
       })
   }, []);
