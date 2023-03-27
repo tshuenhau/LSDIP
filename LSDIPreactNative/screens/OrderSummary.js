@@ -365,7 +365,7 @@ export default function OrderSummary(props) {
                                 </TouchableOpacity>*/}
                                 <TouchableOpacity style={styles.checkoutButton} onPress={() => {props.navigation.navigate('Customer Invoice', { customerNumber: customerNumber, 
                                     customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
-                                    redeempt: orderValues.redeemPoints, totalPrice: totalPrice})}}
+                                    redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet})}}
                                     >
                                     <Text style={styles.checkoutButtonText}>Print Invoice</Text>
                                 </TouchableOpacity>

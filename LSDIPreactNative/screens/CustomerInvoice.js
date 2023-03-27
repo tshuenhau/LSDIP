@@ -26,10 +26,21 @@ if (
 export default function CustomerInvoice(props) {
   const [outletDetails, setOutletDetails] = useState({});
   const outlets = firebase.firestore().collection('outlet');
+  //const temp = useState([]);
 
-  const { customerNumber, customerName, cart, subTotal, express, pickup, redeempt, totalPrice } = props.route.params;
-  console.log('customer no', customerNumber);
-  console.log(totalPrice);
+  const { customerNumber, customerName, cart, subTotal, express, pickup, redeempt, totalPrice, selectedOutlet } = props.route.params;
+  console.log(selectedOutlet);
+  /*
+  if (outletDetails.id !== undefined && selectedOutlet.split('(')[1].slice(0, -1) !== outletDetails.id) {
+    console.log('outlet', outletDetails.id);
+    console.log('new id', selectedOutlet.split('(')[1].slice(0, -1));
+    setOutletDetails(temp.find(o => o.id === selectedOutlet.split('(')[1].slice(0, -1)));
+    console.log(temp.find(o => o.id === selectedOutlet.split('(')[1].slice(0, -1))); //undefined
+    console.log('new outlet', outletDetails.id); 
+  }
+  */
+  //console.log('customer no', customerNumber);
+  //console.log(totalPrice);
 
 
   useEffect(() => {
@@ -48,7 +59,10 @@ export default function CustomerInvoice(props) {
           });
         });
         setOutletDetails(temp);
-        //setOutletDetails(temp.find(o => o.id === 'cwhUIRsr6wqV2YGNIdWl'));
+        //const id = selectedOutlet.split(' ')[1].slice(1, -1);
+        let id = selectedOutlet.split('(')[1].slice(0, -1);
+        console.log('id', id);
+        setOutletDetails(temp.find(o => o.id === id));
       })
   }, []);
 
