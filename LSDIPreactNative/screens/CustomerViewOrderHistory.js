@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
-import { auth } from '../config/firebase';
-import OrdersList from "../components/OrdersList";
-import CustomerOrderList from "../components/CustomerOrderList";
-import CustomerDoneOrderList from "../components/CustomerDoneOrderList";
-import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
 
 export default function CustomerViewOrderHistory({ navigation }) {
@@ -17,8 +8,10 @@ export default function CustomerViewOrderHistory({ navigation }) {
   const auth1 = firebase.auth;
 
   const [user, setUser] = useState(null) // This user
+  const [expandedOrder, setExpandedOrder] = useState(null);
+  const [orderList, setOrderList] = useState([]);
   const users = firebase.firestore().collection('users');
-  const [selectedTimesList, setSelectedTimesList] = useState([]);
+  const orders = firebase.firestore().collection('orders');
 
   useEffect(() => {
     users.doc(auth1().currentUser.uid)
@@ -28,23 +21,6 @@ export default function CustomerViewOrderHistory({ navigation }) {
         console.log(user)
       })
   }, [])
-
-  useEffect(() => {
-    const db = firebase.firestore();
-    const user = firebase.auth().currentUser;
-    if (user) {
-      const docRef = db.collection('user_timings').doc(user.uid);
-      docRef.onSnapshot((doc) => {
-        if (doc.exists) {
-          const selectedTimes = doc.data().selected_times || [];
-          console.log(selectedTimes);
-          setSelectedTimesList(selectedTimes);
-        } else {
-          setSelectedTimesList([]);
-        }
-      });
-    }
-  }, []);
 
   useEffect(() => {
     navigation.setOptions({
@@ -61,90 +37,98 @@ export default function CustomerViewOrderHistory({ navigation }) {
     });
   }, [navigation]);
 
-  const handleDelete = (id) => {
-    const db = firebase.firestore();
-    const user = firebase.auth().currentUser;
-
+  useEffect(() => {
     if (user) {
-      const docRef = db.collection('user_timings').doc(user.uid);
-      docRef.get().then((doc) => {
-        if (doc.exists) {
-          const selectedTime = doc.data().selected_times.find(
-            (time) => time.date === id.date && time.time === id.time
-          );
-          const selectedTimes = doc.data().selected_times.filter(
-            (time) => time.date !== id.date || time.time !== id.time
-          );
-
-          return docRef.set({
-            selected_times: selectedTimes,
-          }).then(() => {
-            console.log('Selected time deleted for user with UID: ', user.uid);
-
-            const newSelectedTimesList = selectedTimesList.filter(
-              (item) => item.date !== id.date || item.time !== id.time
-            );
-
-            setSelectedTimesList(newSelectedTimesList);
-
-            const batch = db.batch();
-
-            selectedTime.orders.forEach((order) => {
-              const orderRef = db.collection('orders').doc(order.id);
-              batch.update(orderRef, { orderStatus: 'Back from Wash' });
+      orders
+        .where("customerNumber", "==", user.number)
+        .get()
+        .then(querySnapshot => {
+          const orderList = [];
+          console.log(user);
+          querySnapshot.forEach((doc) => {
+            const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+            orderList.push({
+              id: doc.id,
+              customerName,
+              customerNumber,
+              date,
+              orderItems,
+              outletId,
+              orderStatus,
+              totalPrice,
             });
-
-            return batch.commit();
           });
-        }
-      }).then(() => {
-        console.log('Orders updated successfully');
-      }).catch((error) => {
-        console.error(error);
-      });
+          setOrderList(orderList);
+          console.log(orderList);
+        }).then(console.log(orderList));
+    }
+  }, [user]);
+
+
+  const formatOrderNumber = (id) => {
+    return '#' + id.slice(0, 4).toUpperCase();
+  };
+
+  const formatOrderDate = (date) => {
+    //return date.toDate().toLocaleString();
+    return date;
+  };
+
+  const toggleExpand = (id) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (expandedOrder === id) {
+      setExpandedOrder(null);
+    } else {
+      setExpandedOrder(id);
     }
   };
 
+  const renderItem = ({ item: order }) => (
+    <View>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => toggleExpand(order.id)}
+        activeOpacity={0.8}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+          <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
+          <Text style={styles.orderNumber}>{order.orderStatus}</Text>
+        </View>
+        {expandedOrder === order.id && (
+          <View style={styles.cardBody}>
+            <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
+            <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
+            <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+            <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View>
       <ScrollView>
-        
-          <View>
-
-
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              {/* <Text>Email: {auth.currentUser?.email}</Text> */}
-
-              <Text style={[
-                {
-                  // Try setting `flexDirection` to `"row"`.
-                  flexDirection: 'row',
-                  flex: 2,
-                  margin: 5,
-                  fontSize: 24,
-                  fontWeight: "800"
-
-                },
-              ]}><Ionicons name="ios-person-outline" size={24} onPress={() => alert("clicked")} /> <FontAwesome5 name="coins" size={24} /> 100 ($1) { }</Text>
-
-            </View>
-           
-            <Text style={styles.listtext}>My Order History</Text>
-            <CustomerDoneOrderList curUser={user} />
-            
-          </View>
-
+        <View style={styles.container}>
+          <FlatList
+            style={styles.list}
+            data={orderList}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+              <Text style={styles.noDataText}>No Data Found!</Text>
+            }
+          />
+        </View>
       </ScrollView>
     </View>
-
   )
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
   ordersListContainer: {
     flex: 1,
@@ -245,9 +229,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     height: 300,
   },
-  selectedTimesList: {
-    flex: 1,
-  },
+  // selectedTimesList: {
+  //   flex: 1,
+  // },
   removeButton: {
     alignSelf: 'flex-end',
     marginTop: 8,

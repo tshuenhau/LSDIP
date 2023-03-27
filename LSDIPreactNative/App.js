@@ -41,10 +41,9 @@ import OrderSummary from './screens/OrderSummary';
 import Pickup from './screens/Pickup';
 import CustomerInvoice from './screens/CustomerInvoice';
 import CustomerViewOrderHistory from './screens/CustomerViewOrderHistory';
-import CustomerViewMembership from './screens/CustomerViewMembership';
-import CustomerViewReward from './screens/CustomerViewReward';
 import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
+import CustomerProfile from './screens/CustomerProfile';
 
 
 const Stack = createStackNavigator();
@@ -377,26 +376,31 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
-          <Drawer.Group>
-            <Drawer.Screen name='Home' component={Home}
-              options={{
-                drawerIcon: ({ focused }) => (
-                  <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
-                ),
-              }} />
-            <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }}
-              options={{
-                drawerIcon: ({ focused }) => (
-                  <Entypo name="shopping-basket" size={24} color={focused ? colors.lightBlue : colors.gray} />
-                ),
-              }} />
-            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}
-              options={{
-                drawerIcon: ({ focused }) => (
-                  <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
-                ),
-              }} />
-            <Drawer.Screen name='Rewards' component={CustomerViewReward}
+          <Drawer.Screen name='Home' component={Home}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='My Profile' component={CustomerProfile}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <Entypo name="shopping-basket" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: user1 }}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          {/* <Drawer.Screen name='Rewards' component={CustomerViewReward}
             options={{
               drawerIcon: ({ focused }) => (
                 <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
@@ -407,21 +411,20 @@ function RootNavigator() {
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="loyalty" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
-            }} />
-            <Drawer.Screen name='Order History' component={CustomerViewOrderHistory}
+            }} /> */}
+          <Drawer.Screen name='Order History' component={CustomerViewOrderHistory}
             options={{
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-            <Drawer.Screen name='Payment' component={Payment}
-              options={{
-                drawerIcon: ({ focused }) => (
-                  <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
-                ),
-              }} />
-            {/* <Drawer.Screen name='Chat' component={Chat} /> */}
-          </Drawer.Group>
+          <Drawer.Screen name='Payment' component={Payment}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
         </Drawer.Navigator>
       </NavigationContainer>
     );
