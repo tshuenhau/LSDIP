@@ -4,6 +4,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
+import CustomerOrderList from "../components/CustomerOrderList";
 import colors from '../colors';
 
 export default function CustomerHome({ user, navigation }) {
@@ -121,7 +122,7 @@ export default function CustomerHome({ user, navigation }) {
 
             </View>
 
-            <View style={
+            {/*<View style={
                 {
                     flexDirection: 'row',
                     // alignSelf: 'center',
@@ -145,10 +146,20 @@ export default function CustomerHome({ user, navigation }) {
                         <Text style={styles.NavButtonText}>Delivery</Text>
                     </TouchableOpacity>
                 )}
-            </View>
+                </View>*/}
 
-            {/* <Text style={styles.listtext}>My Orders</Text>
-            <CustomerOrderList curUser={user} /> */}
+            <Text style={styles.listtext}>My Orders</Text>
+            <CustomerOrderList curUser={user} />
+            <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate('Order History')}>
+                <Text style={styles.ViewAllButtonText}>View All Orders</Text>
+            </TouchableOpacity>
+            <Text style={styles.listtext}>Available for Delivery</Text>
+            <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} />
+            {orderList.length > 0 && (
+                <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
+                    <Text style={styles.ViewAllButtonText}>View My Delivery</Text>
+                </TouchableOpacity>
+            )}
             {selectedTimesList.length > 0 && (
                 <View style={styles.selectedTimesContainer}>
                     <Text style={styles.listtext}>Selected Delivery Times</Text>
@@ -180,8 +191,6 @@ export default function CustomerHome({ user, navigation }) {
                 </View>
 
             )}
-            <Text style={styles.listtext}>Available for Delivery</Text>
-            <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} />
         </View>
     )
 }
@@ -195,7 +204,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     selectedTimeCard: {
-        width: "97%",
+        width: "92%",
         alignItems: 'left',
         backgroundColor: colors.white,
         borderRadius: 5,
@@ -258,6 +267,20 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 20,
+        alignSelf: 'center',
+    },
+    ViewAllButton: {
+        backgroundColor: colors.primary,
+        padding: 5,
+        borderRadius: 5,
+        margin: 2,
+        alignSelf: 'center',
+        marginBottom: 30
+    },
+    ViewAllButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 15,
         alignSelf: 'center',
     },
 });
