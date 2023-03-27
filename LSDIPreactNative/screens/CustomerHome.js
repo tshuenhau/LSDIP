@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
+import alert from '../components/Alert'
 
 export default function CustomerHome({ user, navigation }) {
 
@@ -75,7 +76,27 @@ export default function CustomerHome({ user, navigation }) {
         }
     }, [user]);
 
-    const handleDelete = (id) => {
+    const handleDeliveryDelete = (id) => {
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete this delivery?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        deleteDelivery(id);
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    };
+
+    const deleteDelivery = (id) => {
         const db = firebase.firestore();
         const user = firebase.auth().currentUser;
 
@@ -117,10 +138,29 @@ export default function CustomerHome({ user, navigation }) {
                 console.error(error);
             });
         }
-    };
+    }
 
     const handlePickupDelete = (id) => {
-        const db = firebase.firestore();
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete this pickup?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        deletePickup(id);
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
+    const deletePickup = (id) => {
         const user = firebase.auth().currentUser;
         if (user) {
             pickupTimings
@@ -187,7 +227,7 @@ export default function CustomerHome({ user, navigation }) {
 
                                 <TouchableOpacity
                                     style={styles.removeButton}
-                                    onPress={() => handleDelete(item)}
+                                    onPress={() => handleDeliveryDelete(item)}
                                 >
                                     <Text style={styles.removeButtonText}> Remove </Text>
                                 </TouchableOpacity>
