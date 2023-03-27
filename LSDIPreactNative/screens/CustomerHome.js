@@ -11,9 +11,11 @@ export default function CustomerHome({ user, navigation }) {
     const [orderList, setOrderList] = useState([]);
     const [pointCash, setPointCash] = useState(0);
     const [selectedTimesList, setSelectedTimesList] = useState([]);
+    const [selectedPickupTimesList, setSelectedPickupTimesList] = useState([]);
     const orders = firebase.firestore().collection('orders');
     const crm = firebase.firestore().collection('crm');
     const userTimings = firebase.firestore().collection('user_timings');
+    const pickupTimings = firebase.firestore().collection('pickup_timings');
 
     useEffect(() => {
         if (user) {
@@ -56,6 +58,18 @@ export default function CustomerHome({ user, navigation }) {
                         setSelectedTimesList(selectedTimes);
                     } else {
                         setSelectedTimesList([]);
+                    }
+                });
+
+            pickupTimings
+                .doc(user.uid)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const selectedPickupTimesList = doc.data().selected_times || [];
+                        console.log(selectedPickupTimesList);
+                        setSelectedPickupTimesList(selectedPickupTimesList);
+                    } else {
+                        selectedPickupTimesList({});
                     }
                 });
         }
@@ -105,6 +119,37 @@ export default function CustomerHome({ user, navigation }) {
         }
     };
 
+    const handlePickupDelete = (id) => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+        if (user) {
+            pickupTimings
+                .doc(user.uid)
+                .get().then((doc) => {
+                    if (doc.exists) {
+                        const selectedTimes = doc.data().selected_times.filter(
+                            (time) => time.date !== id.date || time.time !== id.time
+                        );
+                        return pickupTimings
+                            .doc(user.uid).set({
+                                selected_times: selectedTimes,
+                            }).then(() => {
+                                console.log('Selected time deleted for user with UID: ', user.uid);
+
+                                const newSelectedTimesList = selectedTimesList.filter(
+                                    (item) => item.date !== id.date || item.time !== id.time
+                                );
+                                setSelectedPickupTimesList(newSelectedTimesList);
+                            });
+                    }
+                }).then(() => {
+                    console.log('Pickup removed successfully');
+                }).catch((error) => {
+                    console.error(error);
+                });
+        }
+    }
+
     return (
         <View>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
@@ -121,34 +166,6 @@ export default function CustomerHome({ user, navigation }) {
 
             </View>
 
-            <View style={
-                {
-                    flexDirection: 'row',
-                    // alignSelf: 'center',
-                    justifyContent: "center",
-                    flexWrap: 'wrap',
-                    padding: 10,
-
-                }
-            }>
-                <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate('Order History')}>
-                    <Text style={styles.NavButtonText}>Order History</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate('Pick up')}>
-                    <Text style={styles.NavButtonText}>Pick Up</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.NavButton} >
-                    <Text style={styles.NavButtonText}>Rewards</Text>
-                </TouchableOpacity>
-                {orderList.length > 0 && (
-                    <TouchableOpacity style={styles.NavButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
-                        <Text style={styles.NavButtonText}>Delivery</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-
-            {/* <Text style={styles.listtext}>My Orders</Text>
-            <CustomerOrderList curUser={user} /> */}
             {selectedTimesList.length > 0 && (
                 <View style={styles.selectedTimesContainer}>
                     <Text style={styles.listtext}>Selected Delivery Times</Text>
@@ -180,6 +197,30 @@ export default function CustomerHome({ user, navigation }) {
                 </View>
 
             )}
+
+            {selectedPickupTimesList.length > 0 && (
+                <View style={styles.selectedTimesContainer}>
+                    <Text style={styles.listtext}>Pickup Times</Text>
+                    <View style={styles.selectedTimesList}>
+                        {selectedPickupTimesList.map((item) => (
+                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                                <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
+                                <Text style={styles.cardText}>
+                                    <b>Time: </b>{item.time}
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.removeButton}
+                                    onPress={() => handlePickupDelete(item)}
+                                >
+                                    <Text style={styles.removeButtonText}> Remove </Text>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+
+            )}
+
             <Text style={styles.listtext}>Available for Delivery</Text>
             <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} />
         </View>
