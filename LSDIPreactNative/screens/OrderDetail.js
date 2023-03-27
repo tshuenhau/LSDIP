@@ -468,7 +468,7 @@ export default function OrderPage(props) {
             renderItem={renderItem}
           />
           <View style={{ flexDirection: 'row' }}>
-            <Text style={{ fontSize: 20, paddingLeft: 15 }}><b>Total Price: </b>{totalPrice}</Text>
+            <Text style={{ fontSize: 20, paddingLeft: 15 }}><b>Total Price: </b>$ {totalPrice}</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
             <Text style={styles.orderNumber}>Order Description</Text>
