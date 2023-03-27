@@ -7,6 +7,7 @@ import { firebase } from "../config/firebase";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
 import alert from '../components/Alert'
+import { ProgressBar } from "react-milestone";
 
 export default function CustomerHome({ user, navigation }) {
 
@@ -193,20 +194,22 @@ export default function CustomerHome({ user, navigation }) {
 
     return (
         <View>
-            <View style={{ paddingLeft: 5, marginLeft: 10, flexDirection: "row" }}>
+            <View style={styles.customerPointContainer}>
                 <View>
-                    <Text style={{
-                        marginHorizontal: 10,
-                        fontSize: 24,
-                        fontWeight: "600"
-                    }}>
+                    <Text style={styles.customerPointDisplay}>
                         {user.points} (${user.points * pointCash})
                     </Text>
-                    <Text style={{ marginHorizontal: 10, fontWeight: "400" }}>Point balance</Text>
+                    <Text style={styles.customerPointLabel}>Point balance</Text>
                 </View>
                 <AntDesign name="star" size={24} color="#0782F9" />
             </View>
-
+            <View style={{ padding: 30 }}>
+                <ProgressBar
+                    percentage={20}
+                    color="#0782F9"
+                    transitionSpeed={1000}
+                    milestoneCount={4} />
+            </View>
             {selectedTimesList.length > 0 && (
                 <View style={styles.selectedTimesContainer}>
                     <Text style={styles.listtext}>Selected Delivery Times</Text>
@@ -269,6 +272,20 @@ export default function CustomerHome({ user, navigation }) {
 }
 
 const styles = StyleSheet.create({
+    customerPointContainer: {
+        paddingLeft: 5,
+        marginLeft: 10,
+        flexDirection: "row"
+    },
+    customerPointDisplay: {
+        marginHorizontal: 10,
+        fontSize: 24,
+        fontWeight: "600"
+    },
+    customerPointLabel: {
+        marginHorizontal: 10,
+        fontWeight: "400"
+    },
     selectedTimesContainer: {
         marginTop: 20,
         marginBottom: 20,
