@@ -18,7 +18,6 @@ export default function Home({ navigation }) {
 
   const [user, setUser] = useState(null) // This user
   const users = firebase.firestore().collection('users');
-  const [selectedTimesList, setSelectedTimesList] = useState([]);
 
   useEffect(() => {
     users.doc(auth1().currentUser.uid)
@@ -28,23 +27,6 @@ export default function Home({ navigation }) {
         console.log(user)
       })
   }, [])
-
-  useEffect(() => {
-    const db = firebase.firestore();
-    const user = firebase.auth().currentUser;
-    if (user) {
-      const docRef = db.collection('user_timings').doc(user.uid);
-      docRef.onSnapshot((doc) => {
-        if (doc.exists) {
-          const selectedTimes = doc.data().selected_times || [];
-          console.log(selectedTimes);
-          setSelectedTimesList(selectedTimes);
-        } else {
-          setSelectedTimesList([]);
-        }
-      });
-    }
-  }, []);
 
   useEffect(() => {
     navigation.setOptions({
@@ -60,55 +42,6 @@ export default function Home({ navigation }) {
       ),
     });
   }, [navigation]);
-
-  const handleDelete = (id) => {
-    const db = firebase.firestore();
-    const user = firebase.auth().currentUser;
-
-    if (user) {
-      const docRef = db.collection('user_timings').doc(user.uid);
-      docRef.get().then((doc) => {
-        if (doc.exists) {
-          const selectedTime = doc.data().selected_times.find(
-            (time) => time.date === id.date && time.time === id.time
-          );
-          const selectedTimes = doc.data().selected_times.filter(
-            (time) => time.date !== id.date || time.time !== id.time
-          );
-
-          return docRef.set({
-            selected_times: selectedTimes,
-          }).then(() => {
-            console.log('Selected time deleted for user with UID: ', user.uid);
-
-            const newSelectedTimesList = selectedTimesList.filter(
-              (item) => item.date !== id.date || item.time !== id.time
-            );
-
-            setSelectedTimesList(newSelectedTimesList);
-
-            const batch = db.batch();
-
-            selectedTime.orders.forEach((order) => {
-              const orderRef = db.collection('orders').doc(order.id);
-              batch.update(orderRef, { orderStatus: 'Back from Wash' });
-            });
-
-            return batch.commit();
-          });
-        }
-      }).then(() => {
-        console.log('Orders updated successfully');
-        alert('Selected delivery has been removed');
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }).catch((error) => {
-        console.error(error);
-      });
-    }
-  };
-
 
   return (
     <View style={{ flex: 1 }}>
@@ -136,7 +69,7 @@ export default function Home({ navigation }) {
         }
         {user?.role === "Customer" ?
           <View>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+            <View style={{ marginLeft: 10 }}>
               <Text style={styles.welcomeMessage}>Hello, {user.name}</Text>
             </View>
             <CustomerHome user={user} navigation={navigation} />
@@ -171,7 +104,7 @@ export default function Home({ navigation }) {
 
 const styles = StyleSheet.create({
   welcomeMessage: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "800",
     padding: 5,
     marginLeft: 10

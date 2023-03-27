@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
@@ -70,7 +71,7 @@ export default function CustomerHome({ user, navigation }) {
                         console.log(selectedPickupTimesList);
                         setSelectedPickupTimesList(selectedPickupTimesList);
                     } else {
-                        selectedPickupTimesList({});
+                        setSelectedPickupTimesList({});
                     }
                 });
         }
@@ -116,11 +117,11 @@ export default function CustomerHome({ user, navigation }) {
                     }).then(() => {
                         console.log('Selected time deleted for user with UID: ', user.uid);
 
-                        const newSelectedTimesList = selectedTimesList.filter(
-                            (item) => item.date !== id.date || item.time !== id.time
-                        );
+                        // const newSelectedTimesList = selectedTimesList.filter(
+                        //     (item) => item.date !== id.date || item.time !== id.time
+                        // );
 
-                        setSelectedTimesList(newSelectedTimesList);
+                        // setSelectedTimesList(newSelectedTimesList);
 
                         const batch = db.batch();
 
@@ -192,18 +193,18 @@ export default function CustomerHome({ user, navigation }) {
 
     return (
         <View>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-                <Text style={
-                    {
-                        flexDirection: 'row',
-                        flex: 2,
-                        margin: 10,
+            <View style={{ paddingLeft: 5, marginLeft: 10, flexDirection: "row" }}>
+                <View>
+                    <Text style={{
+                        marginHorizontal: 10,
                         fontSize: 24,
-                        fontWeight: "800"
-                    }
-                }>
-                    <Ionicons name="ios-person-outline" size={24} onPress={() => alert("clicked")} /> <FontAwesome5 name="coins" size={24} /> {user.points} (${user.points * pointCash})</Text>
-
+                        fontWeight: "600"
+                    }}>
+                        {user.points} (${user.points * pointCash})
+                    </Text>
+                    <Text style={{ marginHorizontal: 10, fontWeight: "400" }}>Point balance</Text>
+                </View>
+                <AntDesign name="star" size={24} color="#0782F9" />
             </View>
 
             {selectedTimesList.length > 0 && (
