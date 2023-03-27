@@ -310,15 +310,19 @@ const DeliveryScreen = ({ navigation, route }) => {
                     matchingOrders.forEach((order) => {
                       const orderRef = db.collection('orders').doc(order.id);
                       // deliveryfee hardcoded for now
-                      updateDoc(orderRef, { requireDelivery: requireDelivery, totalPrice: order.totalPrice + deliveryfee });
+                      updateDoc(orderRef, { requireDelivery: 'true', totalPrice: order.totalPrice + deliveryfee });
                       batch.update(orderRef, { orderStatus: 'Pending Delivery' });
                     });
                     batch.commit()
                       .then(() => {
-                        console.log('Orders updated successfully');
+                        alert('Selection for delivery is confirmed');
+                        navigation.navigate("Home")
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 2000);
                       })
                       .catch((error) => {
-                        console.error('Error updating orders:', error);
+                        console.error('Error:', error);
                       });
                   })
                   .catch((error) => {
@@ -460,7 +464,6 @@ const DeliveryScreen = ({ navigation, route }) => {
             selected_times: selectedTimes,
           }).then(() => {
             console.log('Selected time deleted for user with UID: ', user.uid);
-
             const newSelectedTimesList = selectedTimesList.filter(
               (item) => item.date !== id.date || item.time !== id.time
             );
@@ -490,6 +493,10 @@ const DeliveryScreen = ({ navigation, route }) => {
               })
               .then(() => {
                 console.log('Orders updated successfully');
+                alert('Selected delivery has been removed');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 2000);
               })
               .catch((error) => {
                 console.error(error);
@@ -530,7 +537,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                 minDate={todayCalendar}
                 markingType="simple"
                 pastScrollRange={0}
-                futureScrollRange={3}
+                futureScrollRange={1}
                 scrollEnabled={true}
                 horizontal={true}
                 pagingEnabled={true}

@@ -98,6 +98,10 @@ export default function Home({ navigation }) {
         }
       }).then(() => {
         console.log('Orders updated successfully');
+        alert('Selected delivery has been removed');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }).catch((error) => {
         console.error(error);
       });
