@@ -90,6 +90,7 @@ export default function OrderPage(props) {
 
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [laundryItemsData, setLaundryItemsData] = useState([]);
+  
   useEffect(() => {
     if (order) {
       const orderItem = firebase.firestore().collection('orderItem');
@@ -174,7 +175,7 @@ export default function OrderPage(props) {
     // Create a new order item document in the 'orderItem' collection
     // Get the values of description and price from the state modalData
     const { quantity, price, pricingMethod } = modalData;
-    if (quantity && pricingMethod && price) {
+    if (pricingMethod && price) {
       if (pricingMethod === "Weight") {
         const weight = modalData.weight;
         firebase.firestore().collection('orderItem').add({
