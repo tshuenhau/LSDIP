@@ -36,9 +36,17 @@ export default function Login({ navigation }) {
           const errorCode = err.code;
           console.log(errorCode);
           if (errorCode === 'auth/wrong-password') {
-            alert('Wrong Password');
+            //alert('Wrong Password');
+            Toast.show({
+              type: 'error',
+              text1: 'Wrong Password',
+          });
           } else {
-            alert("Login error", err)
+            //alert("Login error", err)
+            Toast.show({
+              type: 'error',
+              text1: 'Login error',
+          });
           }
         });
     }

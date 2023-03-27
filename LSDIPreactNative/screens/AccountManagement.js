@@ -20,6 +20,7 @@ import { SelectList } from 'react-native-dropdown-select-list'
 import Toast from 'react-native-toast-message';
 import { ScrollView } from "react-native-gesture-handler";
 import TextBox from "../components/TextBox";
+import alert from '../components/Alert';
 
 if (
     Platform.OS === "android" &&
@@ -86,10 +87,18 @@ export default function AccountManagement() {
                         setCreateModalVisible(false);
                     })
                     .catch((error) => {
-                        alert(error.message)
+                        //alert(error.message)
+                        Toast.show({
+                            type: 'error',
+                            text1: error.message,
+                        });
                     });
             } else {
-                alert("Passwords are different!")
+                //alert("Passwords are different!")
+                Toast.show({
+                    type: 'error',
+                    text1: 'Passwords are different!',
+                });
             }
         } else {
             setErrorMessage("Please fill up all fields")
@@ -143,18 +152,33 @@ export default function AccountManagement() {
 
     //directly change the user role to disabled
     const deleteUser = (users) => {
-        userDatabase.doc(users.id)
-            .update({
-                role: "Disabled"
-            }).then(() => {
-                Toast.show({
-                    type: 'success',
-                    text1: 'User Disabled',
-                });
-                console.log("Update Success")
-            }).catch((err) => {
-                console.log(err)
-            })
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete this User?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        userDatabase.doc(users.id)
+                            .update({
+                                role: "Disabled"
+                            }).then(() => {
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'User Disabled',
+                                });
+                            }).catch((err) => {
+                                console.log(err);
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
     }
 
     //for list
