@@ -38,54 +38,63 @@ export default function OrdersList({ navigation }) {
   const [udpateModalVisible, setUpdateModalVisible] = useState(false);
   const [refundModalVisible, setRefundModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
-  const orders = firebase.firestore().collection("orders");
-  const refunds = firebase.firestore().collection("refunds");
   const [refundList, setRefundList] = useState([]);
   const [orderRefunds, setOrderRefunds] = useState([]);
-
+  const [lastDocument, setLastDocument] = useState(null);
+  const orders = firebase.firestore().collection("orders");
+  const refunds = firebase.firestore().collection("refunds");
+  const PAGE_SIZE = 30;
 
   useEffect(() => {
-    const query = orders.orderBy('orderDate', 'desc');
-    const unsubscribe = query.onSnapshot((querySnapshot) => {
-      const orderList = [];
-      querySnapshot.forEach((doc) => {
-        const {
-          customerName,
-          customerNumber,
-          orderDate,
-          orderItems,
-          outletId,
-          orderStatus,
-          totalPrice,
-          deliveryDate,
-          pickupDate,
-          sendFromWasherDate,
-          receiveFromWasherDate,
-          endDate,
-          invoiceNumber
-        } = doc.data();
-        orderList.push({
-          isSelected: false,
-          id: doc.id,
-          invoiceNumber,
-          customerName,
-          customerNumber,
-          orderDate,
-          orderItems,
-          outletId,
-          orderStatus,
-          totalPrice,
-          deliveryDate,
-          pickupDate,
-          sendFromWasherDate,
-          receiveFromWasherDate,
-          endDate
-        });
-      });
-      setOrderList(orderList);
-    });
-    return () => unsubscribe();
+    fetchData();
   }, []);
+
+  const fetchData = () => {
+    let query = orders.orderBy('orderDate', 'desc').limit(PAGE_SIZE);
+
+    if (searchQuery) {
+      query = query.where("invoiceNumber", "==", searchQuery);
+    }
+
+    query.onSnapshot((querySnapshot) => {
+      const orderList = querySnapshot.docs.map(doc => ({ id: doc.id, isSelected: false, ...doc.data() }));
+      // querySnapshot.forEach((doc) => {
+      //   const {
+      //     customerName,
+      //     customerNumber,
+      //     orderDate,
+      //     orderItems,
+      //     outletId,
+      //     orderStatus,
+      //     totalPrice,
+      //     deliveryDate,
+      //     pickupDate,
+      //     sendFromWasherDate,
+      //     receiveFromWasherDate,
+      //     endDate,
+      //     invoiceNumber
+      //   } = doc.data();
+      // orderList.push({
+      //   isSelected: false,
+      //   id: doc.id,
+      //   invoiceNumber,
+      //   customerName,
+      //   customerNumber,
+      //   orderDate,
+      //   orderItems,
+      //   outletId,
+      //   orderStatus,
+      //   totalPrice,
+      //   deliveryDate,
+      //   pickupDate,
+      //   sendFromWasherDate,
+      //   receiveFromWasherDate,
+      //   endDate
+      // });
+      setOrderList(orderList);
+      setLastDocument(querySnapshot.docs[querySnapshot.docs.length - 1]);
+    });
+  }
 
   useEffect(() => {
     refunds.onSnapshot(querySnapshot => {
@@ -214,15 +223,34 @@ export default function OrdersList({ navigation }) {
     }
   };
 
-  const filteredOrderList = orderList.filter((order) =>
-    String(order.invoiceNumber).toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredOrderList = orderList.filter((order) =>
+  // String(order.invoiceNumber).toLowerCase().includes(searchQuery.toLowerCase())
+  // );
 
   const showRefundDetails = (orderid) => {
     console.log(orderid);
     const refundlist = refundList.filter(element => element.orderId === orderid);
     setOrderRefunds(refundlist);
     // console.log('refund list', refundlist);
+  }
+
+  const handleSearch = () => {
+    setLastDocument(null);
+    fetchData();
+  }
+
+  const handleLoadMore = () => {
+    console.log("here");
+    let query = orders.orderBy('orderDate', 'desc').startAfter(lastDocument).limit(PAGE_SIZE)
+    if (searchQuery) {
+      query = query.where("invoiceNumber", "==", searchQuery);
+    }
+
+    query.onSnapshot((querySnapshot) => {
+      const documents = querySnapshot.docs.map(doc => ({ id: doc.id, isSelected: false, ...doc.data() }));
+      setOrderList([...orderList, ...documents]);
+      setLastDocument(querySnapshot.docs[querySnapshot.docs.length - 1]);
+    });
   }
 
   const renderItem = ({ item: order }) => (
@@ -328,7 +356,8 @@ export default function OrdersList({ navigation }) {
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search by Order ID"
+            onSubmitEditing={handleSearch}
+            placeholder="Search by Invoice Number"
           />
           <FontAwesome name="search" size={20} color="black" />
         </View>
@@ -345,13 +374,21 @@ export default function OrdersList({ navigation }) {
         </View>
         <FlatList
           style={styles.list}
-          data={filteredOrderList}
+          data={orderList}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderItem}
+          // onEndReachedThreshold={0}
+          // onEndReached={handleLoadMore}
           ListEmptyComponent={
             <Text style={styles.noDataText}>No Data Found!</Text>
           }
         />
+
+        <TouchableOpacity
+          onPress={() => handleLoadMore()}
+          style={styles.btn}>
+          <Text style={styles.text}>Load More</Text>
+        </TouchableOpacity>
 
         {/* update modal */}
         <Modal
@@ -426,7 +463,7 @@ export default function OrdersList({ navigation }) {
                     Refund Details
                   </Text>
                   <FlatList
-                    //style={styles.list}
+                    style={styles.list}
                     data={orderRefunds}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
@@ -501,7 +538,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignSelf: 'center',
     marginTop: '2%',
-    width: '95%'
+    width: '95%',
+    marginBottom: 50,
   },
   searchnfilter: {
     flexDirection: 'row',
@@ -530,7 +568,7 @@ const styles = StyleSheet.create({
   },
   orders: {
     marginHorizontal: "auto",
-    width: '95%'
+    width: '95%',
   },
   tableHeader: {
     flexDirection: "row",
@@ -771,7 +809,7 @@ const styles = StyleSheet.create({
     marginTop: "20"
   },
   list: {
-    flex: 1,
+    // flex: 1,
   },
   listtext: {
     paddingLeft: 20,
