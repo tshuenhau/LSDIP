@@ -61,11 +61,13 @@ export default function OrdersList({ navigation }) {
           pickupDate,
           sendFromWasherDate,
           receiveFromWasherDate,
-          endDate
+          endDate,
+          invoiceNumber
         } = doc.data();
         orderList.push({
           isSelected: false,
           id: doc.id,
+          invoiceNumber,
           customerName,
           customerNumber,
           orderDate,
@@ -129,10 +131,6 @@ export default function OrdersList({ navigation }) {
     }
   };
 
-  const formatOrderNumber = (id) => {
-    return "#" + id.slice(0, 4).toUpperCase();
-  };
-
   const formatOrderDate = (date) => {
     //return date.toDate().toLocaleString();
     var convertedDate = date.toDate();
@@ -165,7 +163,6 @@ export default function OrdersList({ navigation }) {
       return 0;
     }
   };
-  
 
   const updateStatus = () => {
     const selectedOrders = orderList.filter((s) => s.isSelected);
@@ -186,7 +183,7 @@ export default function OrdersList({ navigation }) {
           const query = users.where("number", "==", customerNumber);
           query.get().then((snapshot) => {
             if (!snapshot.empty) {
-              snapshot.forEach(async(doc) => {
+              snapshot.forEach(async (doc) => {
                 const user = doc.data();
                 const expenditure = user.expenditure || 0;
                 const totalPrice = o.totalPrice;
@@ -199,7 +196,7 @@ export default function OrdersList({ navigation }) {
           });
         });
       }
-      
+
       selectedOrders.forEach((o) => {
         orders
           .doc(o.id)
@@ -218,7 +215,7 @@ export default function OrdersList({ navigation }) {
   };
 
   const filteredOrderList = orderList.filter((order) =>
-    order.id.toLowerCase().includes(searchQuery.toLowerCase())
+    String(order.invoiceNumber).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const showRefundDetails = (orderid) => {
@@ -245,7 +242,7 @@ export default function OrdersList({ navigation }) {
           />
         </TouchableOpacity>
         <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
-        <Text style={styles.orderId}>{formatOrderNumber(order.id)}</Text>
+        <Text style={styles.orderId}>{order.invoiceNumber}</Text>
         <Text style={styles.orderCustomerName}>{order.customerName}</Text>
         <Text style={styles.orderNum}>${order.totalPrice}</Text>
         {order.orderStatus === "Pending Wash" && (<Text style={styles.pendingwash}>{order.orderStatus}</Text>)}
@@ -340,7 +337,7 @@ export default function OrdersList({ navigation }) {
         <View style={styles.tableHeader}>
           <Text style={styles.tableHeaderText}>Select</Text>
           <Text style={styles.tableHeaderText}>Date</Text>
-          <Text style={styles.tableHeaderText}>Order Id</Text>
+          <Text style={styles.tableHeaderText}>Invoice Number</Text>
           <Text style={styles.tableHeaderText}>Customer</Text>
           <Text style={styles.tableHeaderText}>Price</Text>
           <Text style={styles.tableHeaderText}>Status</Text>
