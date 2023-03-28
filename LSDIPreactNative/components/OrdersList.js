@@ -53,7 +53,8 @@ export default function OrdersList({ navigation }) {
     let query = orders.orderBy('orderDate', 'desc').limit(PAGE_SIZE);
 
     if (searchQuery) {
-      query = query.where("invoiceNumber", "==", searchQuery);
+      console.log(searchQuery);
+      query = query.where("invoiceNumber", "==", String(searchQuery));
     }
 
     query.onSnapshot((querySnapshot) => {
@@ -240,7 +241,7 @@ export default function OrdersList({ navigation }) {
   }
 
   const handleLoadMore = () => {
-    console.log("here");
+    // console.log("here");
     let query = orders.orderBy('orderDate', 'desc').startAfter(lastDocument).limit(PAGE_SIZE)
     if (searchQuery) {
       query = query.where("invoiceNumber", "==", searchQuery);
@@ -383,109 +384,104 @@ export default function OrdersList({ navigation }) {
             <Text style={styles.noDataText}>No Data Found!</Text>
           }
         />
+      </View>
 
-        <TouchableOpacity
-          onPress={() => handleLoadMore()}
-          style={styles.btn}>
-          <Text style={styles.text}>Load More</Text>
-        </TouchableOpacity>
-
-        {/* update modal */}
-        <Modal
-          visible={udpateModalVisible}
-          animationType="fade"
-          transparent={true}
-        >
-          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text
-                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
-                  >
-                    Update Status
-                  </Text>
-                  <View style={{
-                    // height: 42,
+      {/* update modal */}
+      <Modal
+        visible={udpateModalVisible}
+        animationType="fade"
+        transparent={true}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text
+                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}
+                >
+                  Update Status
+                </Text>
+                <View style={{
+                  // height: 42,
+                  width: "92%",
+                  borderRadius: 25,
+                  marginTop: 20
+                }}>
+                  <SelectList
+                    data={statuses}
+                    setSelected={(val) => setSelectedStatus(val)}
+                    save="value"
+                    search={false}
+                  />
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     width: "92%",
-                    borderRadius: 25,
-                    marginTop: 20
-                  }}>
-                    <SelectList
-                      data={statuses}
-                      setSelected={(val) => setSelectedStatus(val)}
-                      save="value"
-                      search={false}
-                    />
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "92%",
-                    }}
-                  >
-                    <Btn
-                      onClick={() => updateStatus()}
-                      title="Update"
-                      style={{ width: "48%" }}
-                    />
-                    <Btn
-                      onClick={() => setUpdateModalVisible(false)}
-                      title="Dismiss"
-                      style={{ width: "48%", backgroundColor: "#344869" }}
-                    />
-                  </View>
+                  }}
+                >
+                  <Btn
+                    onClick={() => updateStatus()}
+                    title="Update"
+                    style={{ width: "48%" }}
+                  />
+                  <Btn
+                    onClick={() => setUpdateModalVisible(false)}
+                    title="Dismiss"
+                    style={{ width: "48%", backgroundColor: "#344869" }}
+                  />
                 </View>
               </View>
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        <Modal
-          visible={refundModalVisible}
-          animationType="fade"
-          transparent={true}
-        >
-          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <TouchableOpacity
-                  onPress={() => setRefundModalVisible(false)}
+      <Modal
+        visible={refundModalVisible}
+        animationType="fade"
+        transparent={true}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                onPress={() => setRefundModalVisible(false)}
+              >
+                <AntDesign style={styles.closebutton} name="closecircleo" size={24} color="black" />
+              </TouchableOpacity>
+              <View style={styles.dview}>
+                <Text
+                  style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
                 >
-                  <AntDesign style={styles.closebutton} name="closecircleo" size={24} color="black" />
-                </TouchableOpacity>
-                <View style={styles.dview}>
-                  <Text
-                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
-                  >
-                    Refund Details
-                  </Text>
-                  <FlatList
-                    style={styles.list}
-                    data={orderRefunds}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <View>
-                        <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
-                        <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
-                        <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
-                        <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
-                        <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
-                        <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
-                      </View>
-                    )}
-                  />
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "92%",
-                    }}
-                  >
-                    {/*<Btn
+                  Refund Details
+                </Text>
+                <FlatList
+                  style={styles.list}
+                  data={orderRefunds}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View>
+                      <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
+                      <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
+                      <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
+                    </View>
+                  )}
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "92%",
+                  }}
+                >
+                  {/*<Btn
           
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
@@ -521,13 +517,18 @@ export default function OrdersList({ navigation }) {
                     title="Dismiss"
                     style={{ width: "48%", backgroundColor: "#344869" }}
                 />*/}
-                  </View>
                 </View>
               </View>
             </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
+
+      <TouchableOpacity
+        onPress={() => handleLoadMore()}
+        style={styles.btn}>
+        <Text style={styles.text}>Load More</Text>
+      </TouchableOpacity>
     </View>
   );
 }

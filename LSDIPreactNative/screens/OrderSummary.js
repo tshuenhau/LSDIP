@@ -208,7 +208,7 @@ export default function OrderSummary(props) {
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
 
-                invoice_number.doc("invoiceNumber").update({ invoiceNumber: invoiceNumber + 1 });
+                invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
 
                 if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0 && orderValues.redeemPoints) { // member redeemed points
                     users
