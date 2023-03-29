@@ -20,7 +20,7 @@ import { firebase } from "../config/firebase";
 import alert from "../components/Alert";
 
 const SCREEN_WIDTH = Dimensions.get('window').width * 0.8;
-const SCREEN_HEIGHT = Dimensions.get('window').height - 100;
+const SCREEN_HEIGHT = Dimensions.get('window').height - 120;
 
 export default function CreateOrder({ navigation }) {
 
@@ -43,7 +43,6 @@ export default function CreateOrder({ navigation }) {
                 const laundryItems = [];
                 querySnapshot.forEach(doc => {
                     const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice, url } = doc.data();
-                    console.log(url);
                     if (pricingMethod === "Range") {
                         laundryItems.push({
                             id: doc.id,
@@ -131,12 +130,12 @@ export default function CreateOrder({ navigation }) {
 
     const handleItemClick = (laundryItem) => {
         if (laundryItem.pricingMethod === "Range") {
-            setCreateModalData({ ...laundryItem, ["price"]: laundryItem.fromPrice, ["quantity"]: 1 });
+            setCreateModalData({ ...laundryItem, ["price"]: laundryItem.fromPrice, ["quantity"]: 1, ["edit"]: false });
         } else if (laundryItem.pricingMethod === "Weight") {
             // minimum load for weight is 3kg
             setCreateModalData({ ...laundryItem, ["weight"]: 3, ["quantity"]: 1 });
         } else {
-            setCreateModalData({ ...laundryItem, ["quantity"]: 1 });
+            setCreateModalData({ ...laundryItem, ["quantity"]: 1, ["edit"]: false });
         }
         setCreateModalVisible(true);
     }
@@ -249,7 +248,7 @@ export default function CreateOrder({ navigation }) {
                         {/* cart headers */}
                         <View style={styles.tableHeader}>
                             <Text style={styles.tableHeaderText}>Service</Text>
-                            <Text style={styles.tableHeaderText}>Item Name</Text>
+                            <Text style={styles.tableHeaderText}>Name</Text>
                             <Text style={styles.tableHeaderText}>Price</Text>
                             <Text style={styles.tableHeaderText}>Qty</Text>
                             <Text style={styles.tableHeaderText}>Action</Text>
@@ -295,13 +294,23 @@ export default function CreateOrder({ navigation }) {
                                 <View style={styles.textView}>
                                     <Text style={styles.itemText}><b>Item Name:</b> {createModalData.typeOfServices} {createModalData.laundryItemName} </Text>
                                     <Text style={styles.itemText}><b>Pricing Method:</b> {createModalData.pricingMethod} </Text>
-                                    {createModalData != undefined && createModalData.pricingMethod !== "Weight"
-                                        ? <Text style={styles.itemText}><b>Input price:</b> {createModalData.price}</Text>
-                                        : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
-                                    }
+                                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+                                        {createModalData != undefined && createModalData.pricingMethod !== "Weight"
+                                            ? <Text style={styles.itemText}><b>Price:</b> {createModalData.price}</Text>
+                                            : <Text style={styles.itemText}><b>Input weight:</b> {createModalData.weight} kg</Text>
+                                        }
+                                        {createModalData != undefined && createModalData.pricingMethod !== "Weight" &&
+                                            < FontAwesome
+                                                style={styles.editIcon}
+                                                name="edit"
+                                                color='green'
+                                                onPress={() => handleChange(true, "edit")}
+                                            />
+                                        }
+                                    </View>
                                 </View>
 
-                                {createModalData != undefined && createModalData.pricingMethod === "Range" &&
+                                {createModalData != undefined && createModalData.pricingMethod === "Range" && createModalData.edit &&
                                     <View style={styles.rangeText}>
                                         <Slider
                                             onValueChange={text => handleChange(text, "price")}
@@ -312,7 +321,7 @@ export default function CreateOrder({ navigation }) {
                                         />
                                     </View>
                                 }
-                                {createModalData != undefined && createModalData.pricingMethod == "Flat" &&
+                                {createModalData != undefined && createModalData.pricingMethod == "Flat" && createModalData.edit &&
                                     <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={createModalData.price} />
                                 }
                                 {createModalData != undefined && createModalData.pricingMethod === "Weight" &&
@@ -374,6 +383,10 @@ export default function CreateOrder({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    editIcon: {
+        fontSize: 25,
+        marginLeft: 20,
+    },
     rangeText: {
         flexDirection: "row",
         justifyContent: 'space-between',
@@ -420,19 +433,19 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     card_template: {
-        width: 250,
-        height: 250,
+        width: 200,
+        height: 200,
         boxShadow: "10px 10px 17px -12px rgba(0,0,0,0.75)"
     },
     card_image: {
-        width: 250,
-        height: 250,
+        width: 200,
+        height: 200,
         borderRadius: 10
     },
     text_container: {
         position: "absolute",
-        width: 250,
-        height: 30,
+        width: 200,
+        height: 50,
         bottom: 0,
         padding: 5,
         backgroundColor: "rgba(0,0,0, 0.3)",
@@ -462,7 +475,7 @@ const styles = StyleSheet.create({
         marginLeft: 40
     },
     itemText: {
-        flex: 1,
+        // flex: 1,
         fontSize: 20,
     },
     centeredView: {
@@ -493,7 +506,7 @@ const styles = StyleSheet.create({
     },
     filterContainer: {
         flexDirection: 'row',
-        flex: 5,
+        flex: 4,
         flexWrap: 'wrap',
         margin: 10,
         justifyContent: 'space-evenly',
@@ -549,7 +562,8 @@ const styles = StyleSheet.create({
     },
     tableHeaderText: {
         fontWeight: "bold",
-        fontSize: 14,
+        flex: 1,
+        fontSize: 12
     },
     tableRow: {
         flexDirection: "row",
@@ -562,6 +576,7 @@ const styles = StyleSheet.create({
     },
     tableRowText: {
         marginTop: 8,
+        flex: 1,
         fontSize: 12
     },
     image: {
