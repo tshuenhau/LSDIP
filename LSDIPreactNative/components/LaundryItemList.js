@@ -138,7 +138,7 @@ export default function LaundryItemList() {
 
     }
 
-    function handleChange(text, eventName) {
+    function handleUpdateChange(text, eventName) {
         setUpValues(prev => {
             return {
                 ...prev,
@@ -387,12 +387,12 @@ export default function LaundryItemList() {
                         <View style={styles.modalView}>
                             <View style={styles.view}>
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Laundry Item</Text>
-                                <TextBox placeholder={upvalues.laundryItemName} onChangeText={text => handleChange(text, "laundryItemName")} />
+                                <TextBox placeholder={upvalues.laundryItemName} onChangeText={text => handleUpdateChange(text, "laundryItemName")} />
                                 <View style={styles.selectList}>
                                     <SelectList
                                         placeholder={upvalues.typeOfServices}
                                         data={data}
-                                        setSelected={(val) => handleChange(val, "typeOfServices")}
+                                        setSelected={(val) => handleUpdateChange(val, "typeOfServices")}
                                         save="value"
                                     />
                                 </View>
@@ -400,25 +400,25 @@ export default function LaundryItemList() {
                                     <SelectList
                                         data={pricingMethods}
                                         placeholder={upvalues.pricingMethod}
-                                        setSelected={(val) => handleChange(val, "pricingMethod")}
+                                        setSelected={(val) => handleUpdateChange(val, "pricingMethod")}
                                         save="value"
                                     />
                                 </View>
                                 {upvalues != undefined && upvalues.pricingMethod === "Range" &&
                                     <View style={styles.rangeText}>
                                         <View style={styles.rangeTextContainer}>
-                                            <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleChange(text, "fromPrice")} defaultValue={upvalues.fromPrice} />
+                                            <TextInput style={styles.rangeTextBox} placeholder="From price" onChangeText={text => handleUpdateChange(text, "fromPrice")} defaultValue={upvalues.fromPrice} />
                                         </View>
                                         <View style={styles.rangeTextContainer}>
-                                            <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleChange(text, "toPrice")} defaultValue={upvalues.toPrice} />
+                                            <TextInput style={styles.rangeTextBox} placeholder="To price" onChangeText={text => handleUpdateChange(text, "toPrice")} defaultValue={upvalues.toPrice} />
                                         </View>
                                     </View>
                                 }
                                 {upvalues != undefined && upvalues.pricingMethod == "Flat" &&
-                                    <TextBox placeholder="Price" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
+                                    <TextBox placeholder="Price" onChangeText={text => handleUpdateChange(text, "price")} defaultValue={upvalues.price} />
                                 }
                                 {upvalues != undefined && upvalues.pricingMethod === "Weight" &&
-                                    <TextBox placeholder="Price per kg" onChangeText={text => handleChange(text, "price")} defaultValue={upvalues.price} />
+                                    <TextBox placeholder="Price per kg" onChangeText={text => handleUpdateChange(text, "price")} defaultValue={upvalues.price} />
                                 }
                                 {errorMessage &&
                                     <View style={styles.errorMessageContainer}>
