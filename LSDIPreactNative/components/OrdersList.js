@@ -19,7 +19,6 @@ import Checkbox from "expo-checkbox";
 import { SelectList } from "react-native-dropdown-select-list";
 import Btn from "../components/Button";
 import alert from "../components/Alert";
-import QR from "../components/QR";
 import Toast from 'react-native-toast-message';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -50,7 +49,7 @@ export default function OrdersList({ navigation }) {
   }, []);
 
   const fetchData = () => {
-    let query = orders.orderBy('orderDate', 'desc').limit(PAGE_SIZE);
+    let query = orders.orderBy('orderDate', 'desc').limit(PAGE_SIZE);;
 
     if (searchQuery) {
       console.log(searchQuery);
@@ -59,39 +58,6 @@ export default function OrdersList({ navigation }) {
 
     query.onSnapshot((querySnapshot) => {
       const orderList = querySnapshot.docs.map(doc => ({ id: doc.id, isSelected: false, ...doc.data() }));
-      // querySnapshot.forEach((doc) => {
-      //   const {
-      //     customerName,
-      //     customerNumber,
-      //     orderDate,
-      //     orderItems,
-      //     outletId,
-      //     orderStatus,
-      //     totalPrice,
-      //     deliveryDate,
-      //     pickupDate,
-      //     sendFromWasherDate,
-      //     receiveFromWasherDate,
-      //     endDate,
-      //     invoiceNumber
-      //   } = doc.data();
-      // orderList.push({
-      //   isSelected: false,
-      //   id: doc.id,
-      //   invoiceNumber,
-      //   customerName,
-      //   customerNumber,
-      //   orderDate,
-      //   orderItems,
-      //   outletId,
-      //   orderStatus,
-      //   totalPrice,
-      //   deliveryDate,
-      //   pickupDate,
-      //   sendFromWasherDate,
-      //   receiveFromWasherDate,
-      //   endDate
-      // });
       setOrderList(orderList);
       setLastDocument(querySnapshot.docs[querySnapshot.docs.length - 1]);
     });
@@ -224,10 +190,6 @@ export default function OrdersList({ navigation }) {
     }
   };
 
-  // const filteredOrderList = orderList.filter((order) =>
-  // String(order.invoiceNumber).toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-
   const showRefundDetails = (orderid) => {
     console.log(orderid);
     const refundlist = refundList.filter(element => element.orderId === orderid);
@@ -241,7 +203,6 @@ export default function OrdersList({ navigation }) {
   }
 
   const handleLoadMore = () => {
-    // console.log("here");
     let query = orders.orderBy('orderDate', 'desc').startAfter(lastDocument).limit(PAGE_SIZE)
     if (searchQuery) {
       query = query.where("invoiceNumber", "==", searchQuery);
@@ -285,16 +246,6 @@ export default function OrdersList({ navigation }) {
         {order.orderStatus === "Void" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
         {order.orderStatus === "" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
         <View style={styles.cardButtons}>
-
-          {/*<TouchableOpacity
-                    style={{ paddingTop: 12, marginRight: 15 }}
-                    onPress={() => handleCheck(order)}>
-                    <Checkbox
-                        disabled={false}
-                        value={order.isSelected}
-                        onValueChange={() => handleCheck(order)}
-                    />
-                 </TouchableOpacity>*/}
           <FontAwesome
             style={styles.outletIcon}
             name="edit"
@@ -328,62 +279,63 @@ export default function OrdersList({ navigation }) {
               }}>
               <Text style={styles.refunddetailsbtn}>Refund Details</Text>
             </TouchableOpacity>)}
-          {/* <QR orderID={order.id}></QR>*/}
-          {/*<OrderDetails data={order.id}></OrderDetails>*/}
         </View>
       )}
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.createOrderContainer}>
-        <View style={styles.buttonView}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Create Order")}
-            style={styles.btn}>
-            <Text style={styles.text}>Create Order</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setUpdateModalVisible(true)}
-            style={styles.btn}>
-            <Text style={styles.text}>Update Order Status</Text>
-          </TouchableOpacity>
+    <View style={{ marginBottom: 20 }}>
+      <View style={styles.container}>
+        <View style={styles.createOrderContainer}>
+          <View style={styles.buttonView}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Create Order")}
+              style={styles.btn}>
+              <Text style={styles.text}>Create Order</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setUpdateModalVisible(true)}
+              style={styles.btn}>
+              <Text style={styles.text}>Update Order Status</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <View style={styles.searchnfilter}>
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
-            placeholder="Search by Invoice Number"
+        <View style={styles.searchnfilter}>
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={handleSearch}
+              placeholder="Search by Invoice Number"
+            />
+            <FontAwesome name="search" size={20} color="black" />
+          </View>
+        </View>
+        <View style={styles.orders}>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText}>Select</Text>
+            <Text style={styles.tableHeaderText}>Date</Text>
+            <Text style={styles.tableHeaderText}>Invoice Number</Text>
+            <Text style={styles.tableHeaderText}>Customer</Text>
+            <Text style={styles.tableHeaderText}>Price</Text>
+            <Text style={styles.tableHeaderText}>Status</Text>
+            <Text style={styles.tableHeaderText}>Action</Text>
+          </View>
+          <FlatList
+            style={styles.list}
+            data={orderList}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={renderItem}
+            // onEndReachedThreshold={0}
+            // onEndReached={handleLoadMore}
+            ListEmptyComponent={
+              <Text style={styles.noDataText}>No Data Found!</Text>
+            }
           />
-          <FontAwesome name="search" size={20} color="black" />
         </View>
-      </View>
-      <View style={styles.orders}>
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText}>Select</Text>
-          <Text style={styles.tableHeaderText}>Date</Text>
-          <Text style={styles.tableHeaderText}>Invoice Number</Text>
-          <Text style={styles.tableHeaderText}>Customer</Text>
-          <Text style={styles.tableHeaderText}>Price</Text>
-          <Text style={styles.tableHeaderText}>Status</Text>
-          <Text style={styles.tableHeaderText}>Action</Text>
-        </View>
-        <FlatList
-          style={styles.list}
-          data={orderList}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderItem}
-          // onEndReachedThreshold={0}
-          // onEndReached={handleLoadMore}
-          ListEmptyComponent={
-            <Text style={styles.noDataText}>No Data Found!</Text>
-          }
-        />
+
       </View>
 
       {/* update modal */}
@@ -529,6 +481,7 @@ export default function OrdersList({ navigation }) {
         style={styles.btn}>
         <Text style={styles.text}>Load More</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -540,7 +493,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: '2%',
     width: '95%',
-    marginBottom: 50,
+    marginBottom: 20,
   },
   searchnfilter: {
     flexDirection: 'row',
