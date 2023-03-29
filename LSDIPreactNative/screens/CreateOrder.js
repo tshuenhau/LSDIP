@@ -42,7 +42,8 @@ export default function CreateOrder({ navigation }) {
             .then(querySnapshot => {
                 const laundryItems = [];
                 querySnapshot.forEach(doc => {
-                    const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice } = doc.data();
+                    const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice, url } = doc.data();
+                    console.log(url);
                     if (pricingMethod === "Range") {
                         laundryItems.push({
                             id: doc.id,
@@ -51,6 +52,7 @@ export default function CreateOrder({ navigation }) {
                             pricingMethod,
                             fromPrice,
                             toPrice,
+                            url,
                         })
                     } else {
                         laundryItems.push({
@@ -59,6 +61,7 @@ export default function CreateOrder({ navigation }) {
                             laundryItemName,
                             pricingMethod,
                             price,
+                            url,
                         })
                     }
                 })
@@ -234,7 +237,7 @@ export default function CreateOrder({ navigation }) {
                             <View key={key} style={styles.container} >
                                 <TouchableOpacity style={styles.card_template} onPress={() => handleItemClick(laundryItem)}>
                                     {/* to store url of icon in db */}
-                                    <Image source={'https://picsum.photos/200'} style={styles.card_image} />
+                                    <Image source={laundryItem.url} style={styles.card_image} />
                                     <View style={styles.text_container}>
                                         <Text style={styles.card_title}>{laundryItem.typeOfServices} {laundryItem.laundryItemName}</Text>
                                     </View>
