@@ -31,8 +31,8 @@ export default class Paypal extends Component {
                 }
             }],
             "redirect_urls": {
-                "return_url": "https://example.com",
-                "cancel_url": "https://example.com"
+                "return_url": "http://localhost:19006/",
+                "cancel_url": "http://localhost:19006/"
             }
         }
 
@@ -41,7 +41,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAIgukavsoitiYarGvyr0JjnypUbh-UVO-aMo0l7aOtHU6nfaC63tPYuHQjVNIJMntYopgw0xG0MVEOsqrUMNqg4mrgAXQ`
+                    'Authorization': `Bearer A21AAJ6VsuslNpyltsPNiQH5dFvF6YVNOekthQ9NaXo-bDZXCZZfFHdL-NKi_A5HVOPbdXmHOe88uIPEnZ1ndu5Hzdvy5PGmA`
                 },
                 body: 'grant_type=client_credentials'
             }
@@ -83,7 +83,7 @@ export default class Paypal extends Component {
 
     _onNavigationStateChange = (webViewState) => {
         console.log("webViewstate", webViewState);
-        if (webViewState.url.includes('https://example.com/')) {
+        if (webViewState.url.includes('http://localhost:19006/')) {
             this.setState({
                 approvalUrl: null
             })
@@ -109,14 +109,22 @@ export default class Paypal extends Component {
                         })
                         this.props.navigation.pop();
                     }
+                    if (response.state === "approved") {
+                        console.log("create delivery");
+                    }
                 }).catch(err => {
                     console.log(...err)
                 })
         }
     }
-
     render() {
         const { approvalUrl } = this.state;
+        const { route } = this.props;
+        const { deliveryfee, matchingOrders, curuser } = route.params;
+
+        console.log(deliveryfee)
+        console.log(matchingOrders)
+        console.log(curuser);
         return (
             <View style={{ flex: 1 }}>
                 {
