@@ -5,10 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 import { firebase } from '../config/firebase';
 import { auth } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
+import { updateDoc } from "firebase/firestore";
 import moment from 'moment';
 import Btn from "../components/Button"
+import Checkbox from "expo-checkbox";
 import colors from '../colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as geolib from 'geolib';
+import { getLatLng } from 'geolib';
+import axios from 'axios';
 
 
 
@@ -21,9 +26,10 @@ const DeliveryScreen = ({ navigation, route }) => {
   const [selectedTimesList, setSelectedTimesList] = useState([]);
   const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
+  const [deliveryfee, setDeliveryFee] = useState(0);
+  const orderList = firebase.firestore().collection('orders');
 
   const [matchingOrders, setMatchingOrders] = useState([]);
-
   useEffect(() => {
     if (curuser) {
       const db = firebase.firestore();
@@ -38,6 +44,7 @@ const DeliveryScreen = ({ navigation, route }) => {
             orders.push({ id: doc.id, ...doc.data() });
           });
           setMatchingOrders(orders);
+          //console.log(orders)
         })
         .catch((error) => {
           console.error(error);
@@ -46,6 +53,14 @@ const DeliveryScreen = ({ navigation, route }) => {
       setMatchingOrders([]);
     }
   }, [curuser]);
+
+  // const location1 = 'New York City, NY';
+  // const location2 = 'Los Angeles, CA';
+  // const coords1 = getLatLng(location1);
+  // const coords2 = getLatLng(location2);
+  // const distanceInMeters = Geolib.getDistance(coords1, coords2);
+  // console.log(distanceInMeters);
+  
 
   const getMonthDays = (month, year) => {
 
@@ -59,7 +74,7 @@ const DeliveryScreen = ({ navigation, route }) => {
 
     return days;
   };
-
+  const todayCalendar = moment().format("YYYY-MM-DD");
   const today = new Date();
   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1);
   const lastDay = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
@@ -118,14 +133,14 @@ const DeliveryScreen = ({ navigation, route }) => {
     }, [selectedDate]);
 
     const timings = [
-      '12:00am - 1:00am',
+      /*'12:00am - 1:00am',
       '1:00am - 2:00am',
       '2:00am - 3:00am',
       '3:00am - 4:00am',
       '4:00am - 5:00am',
       '5:00am - 6:00am',
       '6:00am - 7:00am',
-      '7:00am - 8:00am',
+      '7:00am - 8:00am',*/
       '8:00am - 9:00am',
       '9:00am - 10:00am',
       '10:00am - 11:00am',
@@ -139,9 +154,9 @@ const DeliveryScreen = ({ navigation, route }) => {
       '6:00pm - 7:00pm',
       '7:00pm - 8:00pm',
       '8:00pm - 9:00pm',
-      '9:00pm - 10:00pm',
+      /*'9:00pm - 10:00pm',
       '10:00pm - 11:00pm',
-      '11:00pm - 12:00am',
+      '11:00pm - 12:00am',*/
     ];
 
     const filterAvailableTimings = (timings, blockedTimings) => {
@@ -246,8 +261,16 @@ const DeliveryScreen = ({ navigation, route }) => {
           setIsDuplicateOpen(true);
           setIsModalOpen(false);
         } else {
+          if (matchingOrders.length === 0) {
+            alert('No matching orders found');
+            navigation.navigate('Delivery');
+            setIsModalOpen(false);
+            return;
+          } 
           const db = firebase.firestore();
           const user = firebase.auth().currentUser;
+          console.log(user);
+
           const selectedOrders = matchingOrders.map((order) => order.id);
 
           if (user) {
@@ -296,6 +319,71 @@ const DeliveryScreen = ({ navigation, route }) => {
                     });
                   })
                   .then(() => {
+                    let address = "";
+                    db.collection('users')
+                    .where('email', '==', user.email)
+                    .get()
+                    .then(querySnapshot => {
+                      if (querySnapshot.empty) {
+                        console.log('No matching documents.');
+                      } else {
+                        querySnapshot.forEach(doc => {
+                          // Retrieve the user's address from the document
+                          address = doc.data().address;
+                          console.log(`User's address: ${address}`);
+                          const location1 = address;
+                          const location2 = '10 Paya Lebar Rd Singapore 409057';
+                          const apiKey = 'AIzaSyCe-H2Rttn3Ta8D1h0EpV3YagTInTB0wzw';
+
+                          // Make API request for location 1
+                          const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+                          axios.get(apiUrl1)
+                            .then(response => {
+                              if (response.data.results.length === 0) {
+                                console.error('No results found for location:', location1);
+                                return;
+                              }
+                              const result = response.data.results[0];
+                              const coords1 = {
+                                latitude: result.geometry.location.lat,
+                                longitude: result.geometry.location.lng
+                              };
+
+                              // Make API request for location 2
+                              const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                              axios.get(apiUrl2)
+                                .then(response => {
+                                  if (response.data.results.length === 0) {
+                                    console.error('No results found for location:', location2);
+                                    return;
+                                  }
+                                  const result = response.data.results[0];
+                                  const coords2 = {
+                                    latitude: result.geometry.location.lat,
+                                    longitude: result.geometry.location.lng
+                                  };
+
+                                  // Calculate the distance between the two sets of coordinates
+                                  const distanceInMeters = geolib.getDistance(coords1, coords2);
+                                  console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                                  const deliveryFee = distanceInMeters/500
+                                  console.log(deliveryFee);
+                                })
+                                .catch(error => {
+                                  console.error(error);
+                                });
+                            })
+                            .catch(error => {
+                              console.error(error);
+                            });
+
+                        });
+                      }
+                    })
+                    .catch(error => {
+                      console.error(error);
+                    });
+
                     console.log('Selected time added for user with UID: ', user.uid);
                     const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime, orders: matchingOrders, },];
                     setSelectedTimesList(newSelectedTimesList);
@@ -304,14 +392,20 @@ const DeliveryScreen = ({ navigation, route }) => {
                     const batch = db.batch();
                     matchingOrders.forEach((order) => {
                       const orderRef = db.collection('orders').doc(order.id);
+                      // deliveryfee hardcoded for now
+                      updateDoc(orderRef, { requireDelivery: 'true', totalPrice: order.totalPrice + deliveryfee });
                       batch.update(orderRef, { orderStatus: 'Pending Delivery' });
                     });
                     batch.commit()
                       .then(() => {
-                        console.log('Orders updated successfully');
+                        alert('Selection for delivery is confirmed');
+                        navigation.navigate("Home")
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 2000);
                       })
                       .catch((error) => {
-                        console.error('Error updating orders:', error);
+                        console.error('Error:', error);
                       });
                   })
                   .catch((error) => {
@@ -327,65 +421,67 @@ const DeliveryScreen = ({ navigation, route }) => {
     };
     //for modal
     return (
-      <View style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
-        <Modal visible={isModalOpen}
-          animationType="slide"
-          onRequestClose={onClose}
-        >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text style={styles.modalTitle}>Available Timings on {date}</Text>
-                  {console.log(availableTimings)}
-                  {availableTimings.map((timing) => {
-                    const isDisabled = selectedTime !== null && selectedTime !== timing;
-                    return (
-                      <TouchableOpacity
-                        key={timing}
-                        style={[
-                          styles.timingButton,
-                          selectedTime === timing && styles.selectedTimingButton,
-                          isDisabled && styles.disabledTimingButton,
-                        ]}
-                        onPress={() => handleTimeSelect(timing)}
-                        disabled={isDisabled}
-                      >
-                        <Text
-                          style={[
-                            styles.timingText,
-                            isDisabled && styles.disabledTimingText,
-                          ]}
-                        >
-                          {timing}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  <View style={styles.modalButtons}>
+      <Modal visible={isModalOpen}
+        animationType="fade"
+        onRequestClose={onClose}
+      >
+        <ScrollView style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={styles.modalTitle}>Available Timings on {date}</Text>
+                {console.log(availableTimings)}
+                {availableTimings.map((timing) => {
+                  const isDisabled = selectedTime !== null && selectedTime !== timing;
+                  return (
                     <TouchableOpacity
+                      key={timing}
                       style={[
-                        styles.confirmButton,
-                        selectedTime === null && styles.disabledConfirmButton,
+                        styles.timingButton,
+                        selectedTime === timing && styles.selectedTimingButton,
+                        isDisabled && styles.disabledTimingButton,
                       ]}
-                      onPress={() => handleConfirm(date, selectedTime)}
-                      disabled={selectedTime === null}
+                      onPress={() => handleTimeSelect(timing)}
+                      disabled={isDisabled}
                     >
-                      <Text style={styles.confirmButtonText}>Confirm</Text>
+                      <Text
+                        style={[
+                          styles.timingText,
+                          isDisabled && styles.disabledTimingText,
+                        ]}
+                      >
+                        {timing}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={handleClose}
-                    >
-                      <Text style={styles.closeButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
+                  );
+                })}
+                {availableTimings.length === 0
+                  && <Text style={styles.selectedDateText}>No Available Timeslot</Text>}
+
+                <View style={styles.modalButtons}>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.confirmButton,
+                      selectedTime === null && styles.disabledConfirmButton,
+                    ]}
+                    onPress={() => handleConfirm(date, selectedTime)}
+                    disabled={selectedTime === null}
+                  >
+                    <Text style={styles.confirmButtonText}>Confirm</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={handleClose}
+                  >
+                    <Text style={styles.closeButtonText}>Cancel</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
-          </ScrollView>
-        </Modal>
-      </View>
+          </View>
+        </ScrollView>
+      </Modal>
     );
   };
 
@@ -451,7 +547,6 @@ const DeliveryScreen = ({ navigation, route }) => {
             selected_times: selectedTimes,
           }).then(() => {
             console.log('Selected time deleted for user with UID: ', user.uid);
-
             const newSelectedTimesList = selectedTimesList.filter(
               (item) => item.date !== id.date || item.time !== id.time
             );
@@ -481,6 +576,10 @@ const DeliveryScreen = ({ navigation, route }) => {
               })
               .then(() => {
                 console.log('Orders updated successfully');
+                alert('Selected delivery has been removed');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 2000);
               })
               .catch((error) => {
                 console.error(error);
@@ -503,7 +602,6 @@ const DeliveryScreen = ({ navigation, route }) => {
   return (
     <ScrollView>
       <View style={styles.mainContainer}>
-        <View style={styles.container}>
           <View style={styles.leftcontainer}>
             <View style={styles.calendarcontainer}>
               <CalendarList
@@ -519,14 +617,14 @@ const DeliveryScreen = ({ navigation, route }) => {
                     {}
                   ),
                 }}
-                minDate={today}
+                minDate={todayCalendar}
                 markingType="simple"
                 pastScrollRange={0}
-                futureScrollRange={3}
+                futureScrollRange={1}
                 scrollEnabled={true}
                 horizontal={true}
                 pagingEnabled={true}
-                calendarWidth={480}
+                calendarWidth={290}
                 theme={{
                   selectedDayBackgroundColor: colors.blue800,
                   selectedDayTextColor: colors.white,
@@ -549,6 +647,17 @@ const DeliveryScreen = ({ navigation, route }) => {
                   <Text style={styles.dateText}>
                     {selectedDate}
                   </Text>
+                  {/*<TouchableOpacity
+                    style={styles.viewTimingsButton}
+                    onPress={() => setIsModalOpen(true)}
+                  >
+                    <Text style={styles.viewTimingsButtonText}>View timings</Text>
+              </TouchableOpacity>*/}
+                </View>
+              )}
+            </View>
+            {selectedDate && (
+                <View style={styles.dateContent}>
                   <TouchableOpacity
                     style={styles.viewTimingsButton}
                     onPress={() => setIsModalOpen(true)}
@@ -556,8 +665,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                     <Text style={styles.viewTimingsButtonText}>View timings</Text>
                   </TouchableOpacity>
                 </View>
-              )}
-            </View>
+            )}
           </View>
           <View style={styles.detailContainer}>
             {selectedTimesList.length > 0 && (
@@ -606,7 +714,6 @@ const DeliveryScreen = ({ navigation, route }) => {
             />
           </View>
         </View>
-      </View>
     </ScrollView>
   )
 }
@@ -625,23 +732,21 @@ const styles = StyleSheet.create({
   leftcontainer: {
     flex: "left",
     padding: 20,
-    width: "50%",
+    width: "100%",
     borderRadius: 5,
     alignContent: "center",
   },
   calendarcontainer: {
     flex: "left",
-    padding: 20,
+    padding: 10,
     borderRadius: 5,
     alignContent: "center",
     backgroundColor: colors.white,
     borderRadius: 10
   },
   detailContainer: {
-    flex: "right",
     padding: 20,
-    width: "48%",
-    marginLeft: "2%"
+    width:"100%"
   },
   view: {
     width: "100%",
@@ -656,7 +761,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    width: '50%',
     backgroundColor: colors.white,
     borderRadius: 20,
     padding: 35,
@@ -767,9 +871,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blue600,
     shadowColor: colors.shadowGray,
     borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginLeft: 50,
+    paddingVertical: 15,
+    paddingHorizontal: "33%",
+    marginLeft: 2,
   },
   viewTimingsButtonText: {
     color: 'white',
@@ -887,6 +991,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333333',
     marginLeft: 10
+  },
+  checkoutDetails: {
+    fontSize: 18,
+    color: '#333333',
+    marginTop: 10
+
   }
 
 });

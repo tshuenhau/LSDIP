@@ -18,6 +18,7 @@ export default function SignUpScreen({ navigation }) {
         number: "",
         address: "",
         points: 0,
+        expenditure: 0,
         pwd: "",
         pwd2: ""
     })
@@ -32,7 +33,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     function SignUp() {
-        const { email, pwd, pwd2, name, role, number, address, points } = values
+        const { email, pwd, pwd2, name, role, number, address, points, expenditure } = values
         if (pwd == pwd2) {
             auth1().createUserWithEmailAndPassword(email, pwd)
                 .then(() => {
@@ -43,19 +44,30 @@ export default function SignUpScreen({ navigation }) {
                         email,
                         address,
                         points,
+                        expenditure,
                         number
                     })
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Account created',
+                    });
+                    navigation.navigate("Login")
                 })
                 .catch((error) => {
-                    alert(error.message)
+                    //alert(error.message)
+                    Toast.show({
+                        type: 'error',
+                        text1: error.message,
+                    });
                 });
-            Toast.show({
-                type: 'success',
-                text1: 'Account created',
-            });
-            navigation.navigate("Login")
+
+            
         } else {
-            alert("Passwords are different!")
+            //alert("Passwords are different!")
+            Toast.show({
+                type: 'error',
+                text1: 'Passwords are different!',
+            });
         }
     }
 

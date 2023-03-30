@@ -1,23 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
-import { auth } from '../config/firebase';
-import OrdersList from "../components/OrdersList";
-import CustomerOrderList from "../components/CustomerOrderList";
-import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
 import colors from '../colors';
-import CustomerHome from "./CustomerHome";
 
-export default function Home({ navigation }) {
+export default function CustomerViewOrderHistory({ navigation }) {
 
   const auth1 = firebase.auth;
 
   const [user, setUser] = useState(null) // This user
+  const [expandedOrder, setExpandedOrder] = useState(null);
+  const [orderList, setOrderList] = useState([]);
   const users = firebase.firestore().collection('users');
+  const orders = firebase.firestore().collection('orders');
 
   useEffect(() => {
     users.doc(auth1().currentUser.uid)
@@ -43,75 +37,98 @@ export default function Home({ navigation }) {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    if (user) {
+      orders
+        .where("customerNumber", "==", user.number)
+        .get()
+        .then(querySnapshot => {
+          const orderList = [];
+          console.log(user);
+          querySnapshot.forEach((doc) => {
+            const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+            orderList.push({
+              id: doc.id,
+              customerName,
+              customerNumber,
+              date,
+              orderItems,
+              outletId,
+              orderStatus,
+              totalPrice,
+            });
+          });
+          setOrderList(orderList);
+          console.log(orderList);
+        }).then(console.log(orderList));
+    }
+  }, [user]);
+
+
+  const formatOrderNumber = (id) => {
+    return '#' + id.slice(0, 4).toUpperCase();
+  };
+
+  const formatOrderDate = (date) => {
+    //return date.toDate().toLocaleString();
+    return date;
+  };
+
+  const toggleExpand = (id) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (expandedOrder === id) {
+      setExpandedOrder(null);
+    } else {
+      setExpandedOrder(id);
+    }
+  };
+
+  const renderItem = ({ item: order }) => (
+    <View>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => toggleExpand(order.id)}
+        activeOpacity={0.8}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+          <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
+          <Text style={styles.orderNumber}>{order.orderStatus}</Text>
+        </View>
+        {expandedOrder === order.id && (
+          <View style={styles.cardBody}>
+            <Text style={styles.orderNumber}>Name: {order.customerName}</Text>
+            <Text style={styles.orderNumber}>Number: {order.customerNumber}</Text>
+            <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
+            <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <View style={{ flex: 1 }}>
+    <View>
       <ScrollView>
-        {user?.role === "Staff" ?
-          <View>
-            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
-            <OrdersList navigation={navigation} />
-          </View>
-          : null
-        }
-        {user?.role === "Admin" ?
-          <View>
-            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
-            <OrdersList navigation={navigation} />
-
-          </View>
-          : null
-        }
-        {user?.role === "Customer" ?
-          <View>
-            <View style={{ marginLeft: 10 }}>
-              <Text style={styles.welcomeMessage}>Hello, {user.name}</Text>
-            </View>
-            <CustomerHome user={user} navigation={navigation} />
-          </View>
-          : null
-        }
-        {user?.role === "Driver" ?
-          <View>
-            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
-            </View>
-            <Text>Hi im Driver</Text>
-          </View>
-          : null
-        }
-
-        {/* <View style={styles.chatContainer}>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Chat")}
-                    style={styles.chatButton}
-                >
-                    <Entypo name="chat" size={24} color={colors.lightGray} />
-                </TouchableOpacity>
-            </View> */}
-
+        <View style={styles.container}>
+          <FlatList
+            style={styles.list}
+            data={orderList}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+              <Text style={styles.noDataText}>No Data Found!</Text>
+            }
+          />
+        </View>
       </ScrollView>
     </View>
-
   )
 };
 
 const styles = StyleSheet.create({
-  welcomeMessage: {
-    fontSize: 30,
-    fontWeight: "800",
-    padding: 5,
-    marginLeft: 10
-  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
   ordersListContainer: {
     flex: 1,
@@ -212,9 +229,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     height: 300,
   },
-  selectedTimesList: {
-    flex: 1,
-  },
+  // selectedTimesList: {
+  //   flex: 1,
+  // },
   removeButton: {
     alignSelf: 'flex-end',
     marginTop: 8,

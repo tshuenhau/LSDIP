@@ -26,6 +26,7 @@ export default function OutletDetail({ route, navigation }) {
   const [selectedStaff, setSelectedStaff] = useState([]);
   const [staffList, setStaffList] = useState([]);
   const [allocatedStaffList, setAllocateStaffList] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const outlets = firebase.firestore().collection('outlet');
   const users = firebase.firestore().collection('users');
   const outletStaff = firebase.firestore().collection('outlet_staff');
@@ -70,10 +71,10 @@ export default function OutletDetail({ route, navigation }) {
   }
 
   const updateOutlet = () => {
-    if (updateModalData.outletName.length > 0 &&
-      updateModalData.outletAddress.length > 0 &&
-      updateModalData.outletNumber.length > 0 &&
-      updateModalData.outletEmail.length > 0) {
+    if (updateModalData.outletName &&
+      updateModalData.outletAddress &&
+      updateModalData.outletNumber &&
+      updateModalData.outletEmail) {
       outlets.doc(updateModalData.id)
         .update({
           outletName: updateModalData.outletName,
@@ -86,10 +87,13 @@ export default function OutletDetail({ route, navigation }) {
             type: 'success',
             text1: 'Outlet Updated',
           });
+          setErrorMessage("");
           setUpdateModalVisible(!updateModalVisible);
         }).catch((err) => {
           console.log(err)
         })
+    } else {
+      setErrorMessage("Please fill up all fields");
     }
   }
 
@@ -98,37 +102,42 @@ export default function OutletDetail({ route, navigation }) {
     for (let i = 0; i < selectedStaff.length; i++) {
       allocateArr.push({ outletID: updateModalData.id, staffID: selectedStaff[i] });
     }
-    console.log(allocateArr);
-    const batch = firebase.firestore().batch();
-    allocateArr.forEach((doc) => {
-      const newDocRef = outletStaff.doc();
-      batch.set(newDocRef, doc);
-    })
-    batch.commit()
-      .then(() => {
-        console.log("Allocated Staff");
-        setAllocateModalVisible(!allocateModalVisible);
-        outletStaff.where("outletID", "==", updateModalData.id)
-          .get()
-          .then(querySnapshot => {
-            const allocatedStaffList = [];
-            querySnapshot.forEach(doc => {
-              allocatedStaffList.push({
-                id: doc.id,
-                staffID: doc.data().staffID,
-                name: staffList.find(s => s.key === doc.data().staffID).value,
-                number: staffList.find(s => s.key === doc.data().staffID).number
-              })
-            })
-            Toast.show({
-              type: 'success',
-              text1: 'Staff Allocated',
-            });
-            setAllocateStaffList(allocatedStaffList);
-          })
-      }).catch((err) => {
-        console.log(err);
+    if (allocateArr.length > 0) {
+      console.log(allocateArr);
+      const batch = firebase.firestore().batch();
+      allocateArr.forEach((doc) => {
+        const newDocRef = outletStaff.doc();
+        batch.set(newDocRef, doc);
       })
+      batch.commit()
+        .then(() => {
+          console.log("Allocated Staff");
+          setAllocateModalVisible(!allocateModalVisible);
+          outletStaff.where("outletID", "==", updateModalData.id)
+            .get()
+            .then(querySnapshot => {
+              const allocatedStaffList = [];
+              querySnapshot.forEach(doc => {
+                allocatedStaffList.push({
+                  id: doc.id,
+                  staffID: doc.data().staffID,
+                  name: staffList.find(s => s.key === doc.data().staffID).value,
+                  number: staffList.find(s => s.key === doc.data().staffID).number
+                })
+              })
+              Toast.show({
+                type: 'success',
+                text1: 'Staff Allocated',
+              });
+              setErrorMessage("");
+              setAllocateStaffList(allocatedStaffList);
+            })
+        }).catch((err) => {
+          console.log(err);
+        })
+    } else {
+      setErrorMessage("Select a staff");
+    }
   }
 
   const showConfirmDiaglog = (item) => {
@@ -250,10 +259,10 @@ export default function OutletDetail({ route, navigation }) {
 
         {/* Update Modal */}
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={true}
           visible={updateModalVisible}>
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -262,6 +271,11 @@ export default function OutletDetail({ route, navigation }) {
                   <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
                   <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
                   <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
+                  {errorMessage &&
+                    <View style={styles.errorMessageContainer}>
+                      <Text style={styles.errorMessage}>{errorMessage}</Text>
+                    </View>
+                  }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                     <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
                     <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -269,15 +283,15 @@ export default function OutletDetail({ route, navigation }) {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </View>
         </Modal>
 
         {/* Allocate Staff Modal */}
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={true}
           visible={allocateModalVisible}>
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -294,6 +308,11 @@ export default function OutletDetail({ route, navigation }) {
                       label='Staff'
                     />
                   </View>
+                  {errorMessage &&
+                    <View style={styles.errorMessageContainer}>
+                      <Text style={styles.errorMessage}>{errorMessage}</Text>
+                    </View>
+                  }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                     <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
                     <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
@@ -301,7 +320,7 @@ export default function OutletDetail({ route, navigation }) {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </View>
         </Modal>
 
       </ScrollView>
@@ -310,6 +329,17 @@ export default function OutletDetail({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+  errorMessageContainer: {
+    padding: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    width: '100%',
+  },
+  errorMessage: {
+    color: colors.red,
+    fontStyle: 'italic',
+    fontSize: 16,
+  },
   outletSettings: {
     flex: 1,
     padding: 16,

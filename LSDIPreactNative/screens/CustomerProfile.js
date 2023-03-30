@@ -17,8 +17,7 @@ import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
 
-export default function MyProfile() {
-
+export default function CustomerProfile() {
     const initialValues = {
         email: "",
         name: "",
@@ -60,30 +59,19 @@ export default function MyProfile() {
             }
         })
     }
-
-    function handlePasswordChange(text, eventName) {
-        setPasswordDetails(prev => {
-            return {
-                ...prev,
-                [eventName]: text
-            }
-        })
-    }
-
     const updateDetails = () => {
         if (updateModalData.name &&
             updateModalData.number &&
-            updateModalData.email) {
+            updateModalData.address) {
             users.doc(updateModalData.uid)
                 .update({
-                    email: updateModalData.email,
+                    address: updateModalData.address,
                     name: updateModalData.name,
                     number: updateModalData.number,
                 }).then(() => {
                     console.log("Update Success")
                     setUserDetails({
-                        role: updateModalData.role,
-                        email: updateModalData.email,
+                        address: updateModalData.address,
                         number: updateModalData.number,
                         name: updateModalData.name
                     })
@@ -99,6 +87,15 @@ export default function MyProfile() {
         } else {
             setErrorMessage("Please fill up all fields");
         }
+    }
+
+    function handlePasswordChange(text, eventName) {
+        setPasswordDetails(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
     }
 
     const reauthenticate = (currentPassword) => {
@@ -171,8 +168,8 @@ export default function MyProfile() {
                         <Text style={styles.mainNameText}>{userDetails.name}</Text>
                         <Text style={styles.mainRoleText}>{userDetails.role}</Text>
                     </View>
-                    <LeftCardDetails label={"Salary ($/h)"} text={userDetails.salary} />
-                    <LeftCardDetails label={"Overtime Rate"} text={userDetails.overtimeRate} />
+                    {/* <LeftCardDetails label={"Salary ($/h)"} text={userDetails.salary} />
+                    <LeftCardDetails label={"Overtime Rate"} text={userDetails.overtimeRate} /> */}
 
                     <TouchableOpacity
                         onPress={() => setPasswordModalVisible(!passwordModalVisible)}
@@ -197,10 +194,10 @@ export default function MyProfile() {
                         <ProfileDetail label={"Role"} text={userDetails.role} />
                     </View>
                     <ProfileDetail label={"Address"} text={userDetails.address} />
-                    <View style={styles.profileDetailRow}>
+                    {/* <View style={styles.profileDetailRow}>
                         <ProfileDetail label={"Salary ($/h)"} text={userDetails.salary} />
                         <ProfileDetail label={"Overtime Rate"} text={userDetails.overtimeRate} />
-                    </View>
+                    </View> */}
                     <View style={styles.profileDetailRow}>
                         <ProfileDetail label={"Email"} text={userDetails.email} />
                         <ProfileDetail label={"Number"} text={userDetails.number} />
@@ -220,7 +217,7 @@ export default function MyProfile() {
                             <View style={styles.view}>
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Edit Profile</Text>
                                 <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={userDetails.name} />
-                                <TextBox placeholder="laundry@email.com" onChangeText={text => handleChange(text, "email")} defaultValue={userDetails.email} />
+                                <TextBox placeholder="Address" onChangeText={text => handleChange(text, "address")} defaultValue={userDetails.address} />
                                 <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} defaultValue={userDetails.number} />
                                 {errorMessage &&
                                     <View style={styles.errorMessageContainer}>
@@ -281,7 +278,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     profileDetailRow: {
-        flex: 1,
+        // flex: 1,
         flexDirection: 'row',
     },
     profileDetailContainer: {
@@ -291,13 +288,17 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
     },
     leftProfileContainer: {
-        flex: 1,
         padding: 16,
+        width: "90%",
+        flexDirection: 'row',
         backgroundColor: colors.white,
-        alignItems: 'center',
-        marginLeft: 40,
-        marginRight: 40,
+        justifyContent: 'space-between',
         borderRadius: 25,
+        marginBottom: 20,
+        // flex: 1,
+        // alignItems: 'center',
+        // marginLeft: 20,
+        // marginRight: 20,
     },
     leftCardDetailsContainer: {
         width: "100%",
@@ -313,10 +314,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     rightProfileContainer: {
-        flex: 2,
+        // flex: 2,
+        width: "90%",
         padding: 25,
         backgroundColor: colors.white,
-        marginRight: 40,
+        // marginRight: 40,
         borderRadius: 25,
     },
     itemLabel: {
@@ -329,15 +331,15 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     image: {
-        height: 250,
-        width: 250,
+        height: 50,
+        width: 50,
         borderRadius: 50,
     },
     itemContainer: {
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: "flex-start",
+        // flexDirection: 'row',
+        // justifyContent: 'space-between',
+        alignItems: "center",
         marginTop: 20,
     },
     mainNameText: {
@@ -381,8 +383,8 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     password: {
-        fontSize: 20,
-        fontWeight: "600",
+        fontSize: 15,
+        fontWeight: "400",
         color: "#fff"
     },
     editIcon: {
@@ -397,7 +399,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
-        width: '50%',
+        width: '90%',
         backgroundColor: colors.white,
         borderRadius: 20,
         padding: 35,

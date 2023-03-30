@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 import { firebase } from '../config/firebase';
 import DuplicateAlert from '../components/DuplicateAlert';
@@ -73,14 +73,14 @@ export default function Pickup({ navigation }) {
         }, [selectedDate]);
 
         const timings = [
-            '12:00am - 1:00am',
+            /*'12:00am - 1:00am',
             '1:00am - 2:00am',
             '2:00am - 3:00am',
             '3:00am - 4:00am',
             '4:00am - 5:00am',
             '5:00am - 6:00am',
             '6:00am - 7:00am',
-            '7:00am - 8:00am',
+            '7:00am - 8:00am',*/
             '8:00am - 9:00am',
             '9:00am - 10:00am',
             '10:00am - 11:00am',
@@ -95,8 +95,8 @@ export default function Pickup({ navigation }) {
             '7:00pm - 8:00pm',
             '8:00pm - 9:00pm',
             '9:00pm - 10:00pm',
-            '10:00pm - 11:00pm',
-            '11:00pm - 12:00am',
+            /*'10:00pm - 11:00pm',
+            '11:00pm - 12:00am',*/
         ];
 
         const filterAvailableTimings = (timings, blockedTimings) => {
@@ -216,8 +216,8 @@ export default function Pickup({ navigation }) {
         };
 
         return (
-            <Modal visible={isModalOpen} animationType="slide" onRequestClose={onClose}>
-                <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+            <Modal visible={isModalOpen} animationType="fade" onRequestClose={onClose}>
+                <ScrollView style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
@@ -248,6 +248,8 @@ export default function Pickup({ navigation }) {
                                         </TouchableOpacity>
                                     );
                                 })}
+                                {availableTimings.length === 0
+                                    && <Text style={styles.selectedDateText}>No Available Timeslot</Text>}
                                 <View style={styles.modalButtons}>
                                     <TouchableOpacity
                                         style={[
@@ -329,7 +331,6 @@ export default function Pickup({ navigation }) {
     return (
         <ScrollView>
             <View style={styles.mainContainer}>
-                <View style={styles.container}>
                     <View style={styles.leftcontainer}>
                         <View style={styles.calendarcontainer}>
                             <CalendarList
@@ -351,7 +352,7 @@ export default function Pickup({ navigation }) {
                                 scrollEnabled={true}
                                 horizontal={true}
                                 pagingEnabled={true}
-                                calendarWidth={480}
+                                calendarWidth={290}
                                 theme={{
                                     selectedDayBackgroundColor: colors.blue800,
                                     selectedDayTextColor: colors.white,
@@ -375,6 +376,11 @@ export default function Pickup({ navigation }) {
                                     <Text style={styles.dateText}>
                                         {selectedDate}
                                     </Text>
+                                </View>
+                            )}
+                        </View>
+                        {selectedDate && (
+                                <View>
                                     <TouchableOpacity
                                         style={styles.viewTimingsButton}
                                         onPress={() => setIsModalOpen(true)}
@@ -383,7 +389,6 @@ export default function Pickup({ navigation }) {
                                     </TouchableOpacity>
                                 </View>
                             )}
-                        </View>
                     </View>
                     <View style={styles.detailContainer}>
                         {selectedTimesList.length > 0 && (
@@ -422,7 +427,6 @@ export default function Pickup({ navigation }) {
                         />
                     </View>
                 </View>
-            </View>
         </ScrollView>
     )
 }
@@ -441,7 +445,7 @@ const styles = StyleSheet.create({
     leftcontainer: {
         flex: "left",
         padding: 20,
-        width: "50%",
+        width: "100%",
         borderRadius: 5,
         alignContent: "center",
     },
@@ -454,10 +458,8 @@ const styles = StyleSheet.create({
         borderRadius: 10
     },
     detailContainer: {
-        flex: "right",
         padding: 20,
-        width: "48%",
-        marginLeft: "2%"
+        width: "100%",
     },
     view: {
         width: "100%",
@@ -472,7 +474,6 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 20,
-        width: '50%',
         backgroundColor: colors.white,
         borderRadius: 20,
         padding: 35,
@@ -583,9 +584,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.blue600,
         shadowColor: colors.shadowGray,
         borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        marginLeft: 50,
+        paddingVertical: 15,
+        paddingHorizontal: "33%",
+        marginLeft: 2,
     },
     viewTimingsButtonText: {
         color: 'white',
@@ -698,5 +699,11 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         marginLeft: 10
     },
+    checkoutDetails: {
+        fontSize: 18,
+        color: '#333333',
+        marginTop: 10
+
+    }
 
 });

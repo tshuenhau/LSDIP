@@ -354,8 +354,8 @@ export default function AdminOutletScheduling({ route, navigation }) {
                 </View>
 
                 {/* weekday modal */}
-                <Modal visible={weekdayModalVisible} animationType="slide" transparent={true}>
-                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <Modal visible={weekdayModalVisible} animationType="fade" transparent={true}>
+                    <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Text style={styles.modalHeader}>{selectedDate}</Text>
@@ -393,12 +393,12 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 </View>
                             </View>
                         </View>
-                    </ScrollView>
+                    </View>
                 </Modal >
 
                 {/* weekend modal */}
-                <Modal visible={weekendModalVisible} animationType="slide" transparent={true}>
-                    <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+                <Modal visible={weekendModalVisible} animationType="fade" transparent={true}>
+                    <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Text style={styles.modalHeader}>Date: {selectedDate}</Text>
@@ -436,7 +436,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                 </View>
                             </View>
                         </View>
-                    </ScrollView>
+                    </View>
                 </Modal >
 
 

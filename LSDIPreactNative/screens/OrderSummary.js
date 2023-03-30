@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
 import * as Print from 'expo-print';
+import { SelectList } from 'react-native-dropdown-select-list';
 
 if (
     Platform.OS === 'android' &&
@@ -37,17 +38,48 @@ export default function OrderSummary(props) {
         pickupDate: "",
         deliveryDate: "",
         description: "",
+        pickup: false,
+        requireDelivery: false,
         express: false,
         redeemPoints: false,
         pointsDiscount: 0,
     }
 
     const [totalPrice, setTotalPrice] = useState(subTotal);
+    // pending pickup price calculation, flat $10 for now
+    const [CRMValues, setCRMValues] = useState({});
+    const [pickupfee, setPickUpFee] = useState(10);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
+    const [selectedPrinter, setSelectedPrinter] = React.useState();
+    const [selectedOutlet, setSelectedOutlet] = useState("");
+    const [outletList, setOutletList] = useState([]);
+    const [invoiceNumber, setInvoiceNumber] = useState(0);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
-    const [selectedPrinter, setSelectedPrinter] = React.useState();
     const users = firebase.firestore().collection('users');
+    const crm = firebase.firestore().collection('crm');
+    const invoice_number = firebase.firestore().collection('invoice_number');
+
+    useEffect(() => {
+        firebase.firestore().collection("outlet").get()
+            .then((querySnapshot) => {
+                const data = querySnapshot.docs.map((doc) => doc.data().outletName + ' (' + doc.id + ')');
+                setOutletList(data);
+            });
+    }, []);
+
+    useEffect(() => {
+        crm.doc('point_cash')
+            .get()
+            .then(doc => {
+                setCRMValues({ pointCash: doc.data().value })
+            })
+        invoice_number.doc('invoiceNumber')
+            .get()
+            .then(doc => {
+                setInvoiceNumber(doc.data().invoiceNumber);
+            })
+    }, [])
 
     useEffect(() => {
         users
@@ -62,16 +94,15 @@ export default function OrderSummary(props) {
                     const updatedOrderValues = {
                         ...orderValues,
                         customerName: name,
+                        customerNumber: customerNumber,
                         customerAddress: address,
-                        // need to update when admin point management is implemented
                         points,
-                        pointsDiscount: points * 0.01,
                     }
                     console.log(updatedOrderValues);
                     setOrderValues(updatedOrderValues);
                 }
             })
-    }, [])
+    }, [customerNumber])
 
     const html = () => OrderPage(props);
 
@@ -97,24 +128,41 @@ export default function OrderSummary(props) {
 
     const handleExpressCheck = () => {
         if (orderValues.express) {
-            setTotalPrice(totalPrice / 2);
+            setTotalPrice(totalPrice - subTotal);
         } else {
-            setTotalPrice(totalPrice * 2);
+            setTotalPrice(totalPrice + subTotal);
         }
         setOrderValues({ ...orderValues, express: !orderValues.express })
     }
 
     const handleRedeemPoints = () => {
-
+        const discountValue = CRMValues.pointCash * orderValues.points;
         if (orderValues.redeemPoints) {
-            setTotalPrice(totalPrice + orderValues.pointsDiscount);
+            setTotalPrice(totalPrice + discountValue);
         } else {
-            setTotalPrice(totalPrice - orderValues.pointsDiscount);
+            setTotalPrice(totalPrice - discountValue);
         }
         setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints })
     }
 
+    const handlePickUpChange = () => {
+        if (orderValues.pickup) {
+            setTotalPrice(totalPrice - 10);
+        } else {
+            setTotalPrice(totalPrice + 10);
+        }
+        setOrderValues({ ...orderValues, pickup: !orderValues.pickup })
+    }
+
     const createOrder = async () => {
+        if (!selectedOutlet) {
+            Toast.show({
+                type: "error",
+                text1: "Please select an outlet",
+            });
+            return;
+        }
+
         console.log(cart);
         const batch = firebase.firestore().batch();
         const orderItemIds = [];
@@ -147,27 +195,33 @@ export default function OrderSummary(props) {
                     ...orderValues,
                     customerName: orderValues.customerName,
                     // customerNumber: orderValues.customerNumber,
+                    invoiceNumber: invoiceNumber,
                     description: orderValues.description,
                     endDate: null,
-                    totalPrice: totalPrice,
+                    totalPrice: subTotal,
                     orderStatus: "Pending Wash",
                     receiveFromWasherDate: null,
                     sendFromWasherDate: null,
                     staffID: await getUserId(),
-                    outletId: "bTvPBNfMLkBmF9IKEQ3n", //this is default, assuming one outlet
+                    outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
                     orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
 
-                if (orderValues.customerAddress.length > 0) { //customer is a member
-                    const newPointValue = Number(orderValues.redeemPoints ? 0 : orderValues.points) + Math.floor(totalPrice);
-                    console.log(newPointValue);
+                invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
+
+                if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0 && orderValues.redeemPoints) { // member redeemed points
                     users
                         .where("number", "==", customerNumber)
-                        .update({
-                            points: newPointValue,
+                        .get()
+                        .then(querySnapshot => {
+                            querySnapshot.forEach((doc) => {
+                                users.doc(doc.id)
+                                    .update({
+                                        points: 0,
+                                    })
+                            })
                         })
-
                 }
                 setOrderValues(initialOrderValues);
                 navigation.navigate('Home');
@@ -175,8 +229,6 @@ export default function OrderSummary(props) {
                     type: 'success',
                     text1: 'Order Created',
                 });
-
-                navigation.navigate("Orders");
             }).catch((err) => {
                 console.error(err);
                 Toast.show({
@@ -227,12 +279,36 @@ export default function OrderSummary(props) {
                 <View style={styles.checkoutCard}>
                     <View style={{ flexDirection: 'row' }}>
                         <View style={styles.checkoutDetailsContainer}>
+                            <View style={styles.checkoutDetailsContainer}>
+                                <Text style={styles.checkoutDetails}>Outlet</Text>
+                                <SelectList
+                                    data={outletList}
+                                    placeholder="Select Outlet"
+                                    //setSelected={(val) => handleChange(val, "typeOfServices")}
+                                    setSelected={(selectedOutlet) => {
+                                        const id = selectedOutlet.split(' ')[1].slice(1, -1);
+                                        setOrderValues({ ...orderValues, outletId: id });
+                                        setSelectedOutlet(selectedOutlet)
+                                    }}
+                                />
+
+                            </View>
                             <Text style={styles.checkoutDetails}>Customer Name</Text>
                             <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
                             <Text style={styles.checkoutDetails}>Customer Number</Text>
                             <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
+                            <View style={styles.checkboxContainer}>
+                                <Text style={styles.checkboxLabel}>Laundry pick up ($10)</Text>
+                                <Checkbox
+                                    style={{ marginLeft: 20, marginBottom: 2 }}
+                                    disabled={false}
+                                    value={orderValues.pickup}
+                                    onValueChange={() => handlePickUpChange()}
+                                />
+                            </View >
+
                             <View style={styles.checkboxContainer}>
                                 <Text style={styles.checkboxLabel}>Express</Text>
                                 <Checkbox
@@ -243,29 +319,37 @@ export default function OrderSummary(props) {
                                 />
                             </View>
 
-                            <View style={styles.checkboxContainer}>
-                                <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
-                                <Checkbox
-                                    disabled={false}
-                                    style={{ marginLeft: 20, marginBottom: 2 }}
-                                    value={orderValues.redeemPoints}
-                                    onValueChange={() => handleRedeemPoints()}
-                                />
-                            </View>
+                            {orderValues.customerAddress.length > 0 &&
+                                <View style={styles.checkboxContainer}>
+                                    <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
+                                    <Checkbox
+                                        disabled={false}
+                                        style={{ marginLeft: 20, marginBottom: 2 }}
+                                        value={orderValues.redeemPoints}
+                                        onValueChange={() => handleRedeemPoints()}
+                                    />
+                                </View>
+                            }
                         </View>
                         <View style={styles.orderDetails}>
                             <Text style={styles.subTotal}>Order Details</Text>
                             <View style={styles.orderDetailsBreakdown}>
                                 <InvoiceLine label={"Subtotal"} value={subTotal} />
-                                {
-                                    orderValues.express &&
+                                {orderValues.express &&
                                     <InvoiceLine label={"Express"} value={subTotal} />
                                 }
                                 {/* pending CRM module */}
-                                <InvoiceLine label={"Membership Discount"} value={0} />
-                                {/* pending CRM module */}
+                                {orderValues.customerAddress &&
+                                    <InvoiceLine label={"Membership Discount"} value={0} />
+                                }
+                                {/* flat $10 charge for now */}
+                                {orderValues.pickup &&
+                                    <InvoiceLine label={"Pick up Fee"} value={10} />
+                                }
+                            </View>
+                            <View>
                                 {orderValues.redeemPoints &&
-                                    <InvoiceLine label={"Redeem Points"} value={orderValues.pointsDiscount} discount={true} />
+                                    <InvoiceLine label={"Redeem Points"} value={CRMValues.pointCash * orderValues.points} discount={true} />
                                 }
                             </View>
                             <View >
@@ -273,17 +357,27 @@ export default function OrderSummary(props) {
                                 <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
                                     <Text style={styles.checkoutButtonText}>Create Order</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.checkoutButton} onPress={print}>
+                                {/*<TouchableOpacity style={styles.checkoutButton} onPress={props.navigation.navigate('Customer Invoice', { customerNumber: customerNumber, 
+                                    customerName: orderValues.customerName, cart: cart, })}>
+                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
+                                </TouchableOpacity>*/}
+                                <TouchableOpacity style={styles.checkoutButton} onPress={() => {
+                                    props.navigation.navigate('Customer Invoice', {
+                                        customerNumber: customerNumber,
+                                        customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
+                                        redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet
+                                    })
+                                }}
+                                >
                                     <Text style={styles.checkoutButtonText}>Print Invoice</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
-
                 </View>
             </View>
         </ScrollView >
-    );
+    )
 }
 
 const styles = StyleSheet.create({

@@ -19,6 +19,8 @@ import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import Checkbox from "expo-checkbox";
+import { fonts } from 'react-native-elements/dist/config';
 
 if (
   Platform.OS === 'android' &&
@@ -35,6 +37,11 @@ export default function OrderPage(props) {
   const [orderDescription, setOrderDescription] = useState("");
   const refunds = firebase.firestore().collection('refunds');
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
+  const [pickup, setPickUp] = useState(Boolean);
+  const [requireDelivery, setRequireDelivery] = useState(Boolean);
+  const [totalPrice, setTotalPrice] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
+  const [pricingMethods, setPricingMethods] = useState([]);
   //const [customerName, setCustomerName] = useState("");
 
 
@@ -45,6 +52,9 @@ export default function OrderPage(props) {
       if (doc.exists) {
         setOrder({ id: doc.id, ...doc.data() });
         setOrderDescription(doc.data().description);
+        setPickUp(doc.data().pickup);
+        setRequireDelivery(doc.data().requireDelivery);
+        setTotalPrice(doc.data().totalPrice);
         //console.log('order', order);
       } else {
         console.log('No such order document!');
@@ -81,6 +91,7 @@ export default function OrderPage(props) {
 
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [laundryItemsData, setLaundryItemsData] = useState([]);
+  
   useEffect(() => {
     if (order) {
       const orderItem = firebase.firestore().collection('orderItem');
@@ -88,7 +99,7 @@ export default function OrderPage(props) {
       const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
         const orderItemsList = [];
         querySnapshot.forEach((doc) => {
-          const { laundryItemName, price, typeOfServices, quantity } = doc.data();
+          const { laundryItemName, price, typeOfServices, quantity, pricingMethod, weight } = doc.data();
           //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
           orderItemsList.push({
             id: doc.id,
@@ -96,7 +107,9 @@ export default function OrderPage(props) {
             price,
             orderId,
             typeOfServices,
-            quantity
+            quantity,
+            pricingMethod,
+            weight
           });
         });
         setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
@@ -110,6 +123,7 @@ export default function OrderPage(props) {
     const laundryItems = firebase.firestore().collection('laundryItem');
     const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
       const laundryItemsData = [];
+      const pricingMs = [];
       querySnapshot.forEach(doc => {
         const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
         laundryItemsData.push({
@@ -118,8 +132,20 @@ export default function OrderPage(props) {
           pricingMethod: pricingMethod,
           price: price,
         });
+        pricingMs.push({
+          pricingMethod: pricingMethod,
+        });
       });
       setLaundryItemsData(laundryItemsData);
+      //const pm =[...new Set(pricingMs)];
+      const pricingMethods = [];
+      pricingMs.forEach((element) => {
+        if(!pricingMethods.includes(element.pricingMethod)) {
+          pricingMethods.push(element.pricingMethod);
+        }
+      });
+      setPricingMethods(pricingMethods);
+      console.log('pricing methods', pricingMethods);
     });
     return () => unsubscribe();
   }, []);
@@ -162,29 +188,65 @@ export default function OrderPage(props) {
     const selectedItem = modalData.typeOfServices;
     // Create a new order item document in the 'orderItem' collection
     // Get the values of description and price from the state modalData
-    const { price } = modalData;
-    firebase.firestore().collection('orderItem').add({
-      laundryItemName: selectedItem.split("--")[1],
-      //typeOfServices: selectedItem.split(' ')[1],
-      typeOfServices: selectedItem.split("--")[0],
-      price: price,
-      quantity: 1,
-      orderId: orderId,
-    }).then((docRef) => {
-      console.log('Order item created with ID: ', docRef.id);
-      // Add the new order item ID to the 'items' array in the order document
-      const orderRef = firebase.firestore().collection('orders').doc(orderId);
-      orderRef.update({
-        orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
-      }).then(() => {
-        console.log('Order item added to order successfully');
-      }).catch((error) => {
-        console.error('Error adding order item to order: ', error);
-      });
-    }).catch((error) => {
-      console.error('Error creating order item: ', error);
-    });
-    toggleModal();
+    const { quantity, price, pricingMethod } = modalData;
+    if (pricingMethod && price) {
+      if (pricingMethod === "Weight") {
+        const weight = modalData.weight;
+        firebase.firestore().collection('orderItem').add({
+          laundryItemName: selectedItem.split("--")[1],
+          //typeOfServices: selectedItem.split(' ')[1],
+          typeOfServices: selectedItem.split("--")[0],
+          price: price,
+          //quantity: quantity,
+          orderId: orderId,
+          pricingMethod: pricingMethod,
+          weight: weight
+        }).then((docRef) => {
+          console.log('Order item created with ID: ', docRef.id);
+          // Add the new order item ID to the 'items' array in the order document
+          const orderRef = firebase.firestore().collection('orders').doc(orderId);
+          orderRef.update({
+            orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+            totalPrice: order.totalPrice + parseInt(price)
+          }).then(() => {
+            console.log('Order item added to order successfully');
+          }).catch((error) => {
+            console.error('Error adding order item to order: ', error);
+          });
+        }).catch((error) => {
+          console.error('Error creating order item: ', error);
+        });
+      } else {
+        firebase.firestore().collection('orderItem').add({
+          laundryItemName: selectedItem.split("--")[1],
+          //typeOfServices: selectedItem.split(' ')[1],
+          typeOfServices: selectedItem.split("--")[0],
+          price: price,
+          quantity: quantity,
+          orderId: orderId,
+          pricingMethod: pricingMethod,
+          //weight: weight
+        }).then((docRef) => {
+          console.log('Order item created with ID: ', docRef.id);
+          // Add the new order item ID to the 'items' array in the order document
+          const orderRef = firebase.firestore().collection('orders').doc(orderId);
+          orderRef.update({
+            orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
+            totalPrice: order.totalPrice + price * quantity
+          }).then(() => {
+            console.log('Order item added to order successfully');
+          }).catch((error) => {
+            console.error('Error adding order item to order: ', error);
+          });
+        }).catch((error) => {
+          console.error('Error creating order item: ', error);
+        });
+      }
+      setErrorMessage("");
+      toggleModal();
+    } else {
+      setErrorMessage("Please fill up all fields");
+    }
   }
 
   const renderSeparator = () => {
@@ -206,62 +268,52 @@ export default function OrderPage(props) {
   }
 
   const refund1 = () => {
+    const details = modalData.refundDetails;
+    const refundAmount = modalData.refundAmount;
+    const refundMethod = modalData.refundMethod;
     console.log("refund 1");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     //console.log(orderRef);
     let cn = "";
-
-    orderRef.get().then(doc => {
-      if (!doc.exists) {
-        console.log('No such User document!');
-        throw new Error('No such User document!'); //should not occur normally as the notification is a "child" of the user
-      } else {
-        //console.log('Document data:', doc.data());
-        cn = doc.data().customerName;
-        console.log('Document data:', doc.data().customerName);
-        console.log('customer', cn);
-        orderRef.update({
-          orderStatus: "Refunded"
-        });
-        refunds.add({
-          customerName: cn,
-          orderId: orderId,
-          orderItemId: selectedOrderItem.id,
-          orderItemName: selectedOrderItem.laundryItemName,
-          typeOfServices: selectedOrderItem.typeOfServices,
-          price: selectedOrderItem.price,
-          refundAmount: refundAmount,
-          refundMethod: refundMethod,
-          refundDetails: details,
-        });
-        Toast.show({
-          type: 'success',
-          text1: 'Refund added',
-        });
-      }
-    })
-      .catch(err => {
+    if (refundAmount && refundMethod) {
+      orderRef.get().then(doc => {
+        if (!doc.exists) {
+          console.log('No such User document!');
+          throw new Error('No such User document!'); //should not occur normally as the notification is a "child" of the user
+        } else {
+          //console.log('Document data:', doc.data());
+          cn = doc.data().customerName;
+          console.log('Document data:', doc.data().customerName);
+          console.log('customer', cn);
+          orderRef.update({
+            orderStatus: "Refunded"
+          });
+          refunds.add({
+            customerName: cn,
+            orderId: orderId,
+            orderItemId: selectedOrderItem.id,
+            orderItemName: selectedOrderItem.laundryItemName,
+            typeOfServices: selectedOrderItem.typeOfServices,
+            price: selectedOrderItem.price,
+            refundAmount: refundAmount,
+            refundMethod: refundMethod,
+            refundDetails: details,
+          });
+          Toast.show({
+            type: 'success',
+            text1: 'Refund added',
+          });
+          setErrorMessage("");
+        }
+      }).catch(err => {
         console.log('Error getting document', err);
         return false;
       });
-
-    //const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
-    const details = modalData.refundDetails;
-    const refundAmount = modalData.refundAmount;
-    const refundMethod = modalData.refundMethod;
-    console.log("cn now", cn);
-    /*
-    refunds.add({
-      customerName: cn,
-      orderId: orderId,
-      orderItemId: selectedOrderItem.id,
-      refundAmount: refundAmount,
-      refundDetails: details,  
-    }).then((docRef) => {
-      console.log(orderRef, selectedOrderItem);
-    })
-    */
-    toggleModal1();
+      console.log("cn now", cn);
+      toggleModal1();
+    } else {
+      setErrorMessage("Please fill up all fields")
+    }
   }
 
   const toggleModal1 = () => {
@@ -296,7 +348,53 @@ export default function OrderPage(props) {
         return false;
       });
 
-      setIsModal2Visible(false);
+    setIsModal2Visible(false);
+  }
+
+  const handlePickUpChange = () => {
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log("No such User document!");
+        throw new Error("No such User document!")
+      } else {
+        if (pickup) { //true change to false
+          orderRef.update({
+            pickup: !pickup,
+            totalPrice: order.totalPrice - 10
+          })
+        } else { //false change to true
+          orderRef.update({
+            pickup: !pickup,
+            totalPrice: order.totalPrice + 10
+          })
+        }
+      }
+    })
+    setPickUp(!pickup);
+  }
+
+  const handleDeliveryChange = () => {
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log("No such User document!");
+        throw new Error("No such User document!")
+      } else {
+        if (requireDelivery) { //true change to false
+          orderRef.update({
+            requireDelivery: !requireDelivery,
+            totalPrice: order.totalPrice - 10
+          })
+        } else { //false change to true
+          orderRef.update({
+            requireDelivery: !requireDelivery,
+            totalPrice: order.totalPrice + 10
+          })
+        }
+      }
+    })
+    setPickUp(!requireDelivery);
   }
 
   const renderItem = ({ item }) => (
@@ -304,7 +402,8 @@ export default function OrderPage(props) {
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
       <Text style={styles.itemName}>{item.laundryItemName}</Text>
       <Text style={styles.itemName}>S$ {item.price}</Text>
-      <Text style={styles.itemName}>{item.quantity}</Text>
+      {item.pricingMethod === "Weight" && <Text style={styles.itemName}>{item.weight} kg</Text>}
+      {item.pricingMethod !== "Weight" && <Text style={styles.itemName}>{item.quantity}</Text>}
       <View style={styles.cardButtons}>
         <FontAwesome
           style={styles.outletIcon}
@@ -351,6 +450,24 @@ export default function OrderPage(props) {
         <View style={styles.checkoutCard}>
           <Text style={styles.sectionText}>Order Details</Text>
           <Text style={styles.orderNumber}>Order #{orderId}</Text>
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxLabel}>Laundry Pick Up ($10)</Text>
+            <Checkbox
+              style={{ marginLeft: 20, marginBottom: 2 }}
+              disabled={false}
+              value={pickup}
+              onValueChange={() => handlePickUpChange()}
+            />
+          </View >
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxLabel}>Laundry Delivery ($10)</Text>
+            <Checkbox
+              style={{ marginLeft: 20, marginBottom: 2 }}
+              disabled={false}
+              value={requireDelivery}
+              onValueChange={() => handleDeliveryChange()}
+            />
+          </View >
           <View style={styles.tableHeader}>
             <Text style={styles.tableHeaderText}>Service</Text>
             <Text style={styles.tableHeaderText}>Item Name</Text>
@@ -366,6 +483,9 @@ export default function OrderPage(props) {
             renderItem={renderItem}
           />
           <View style={{ flexDirection: 'row' }}>
+            <Text style={{ fontSize: 20, paddingLeft: 15 }}><b>Total Price: </b>$ {totalPrice}</Text>
+          </View>
+          <View style={{ flexDirection: 'row' }}>
             <Text style={styles.orderNumber}>Order Description</Text>
             <FontAwesome
               style={styles.outletIcon}
@@ -377,44 +497,46 @@ export default function OrderPage(props) {
           <Text style={styles.orderDescription}>{orderDescription}</Text>
           <Modal
             visible={isModal2Visible}
-            animationType="slide"
+            animationType="fade"
             transparent={true}
           >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text
-                    style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
-                  >
-                    Update Order Description
-                  </Text>
-                  <TextInput
-                    editable
-                    multiline
-                    //numberOfLines={4}
-                    //onChangeText={text => handleChange(text, 'orderDescription')}
-                    onChangeText={text => setOrderDescription(text)}
-                    value={orderDescription}
-                    style={{ padding: 10, width: "80%", height: 80 }}
-                  />
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "92%",
-                    }}
-                  >
-                    <Btn
-                      onClick={() => updateDescription1()}
-                      title="Update"
-                      style={{ width: "48%" }}
+            <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <View style={styles.view}>
+                    <Text
+                      style={{ fontSize: 34, fontWeight: "800", marginBottom: 20, color: colors.blue700 }}
+                    >
+                      Update Order Description
+                    </Text>
+                    <TextInput
+                      editable
+                      multiline
+                      //numberOfLines={4}
+                      //onChangeText={text => handleChange(text, 'orderDescription')}
+                      onChangeText={text => setOrderDescription(text)}
+                      value={orderDescription}
+                      style={{ padding: 10, width: "80%", height: 80 }}
                     />
-                    <Btn
-                      onClick={() => setIsModal2Visible(false)}
-                      title="Dismiss"
-                      style={{ width: "48%", backgroundColor: "#344869" }}
-                    />
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "92%",
+                      }}
+                    >
+                      <Btn
+                        onClick={() => updateDescription1()}
+                        title="Update"
+                        style={{ width: "48%" }}
+                      />
+                      <Btn
+                        onClick={() => setIsModal2Visible(false)}
+                        title="Dismiss"
+                        style={{ width: "48%", backgroundColor: "#344869" }}
+                      />
+                    </View>
                   </View>
                 </View>
               </View>
@@ -425,9 +547,9 @@ export default function OrderPage(props) {
         <Modal
           visible={isModalVisible}
           transparent={true}
-          animationType="slide"
+          animationType="fade"
         >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -445,15 +567,42 @@ export default function OrderPage(props) {
                         (item) => item.typeOfServices + "--" + item.laundryItemName
                         //(item) => item.typeOfServices
                       )}
+                      placeholder="Select Item"
                       setSelected={(val) => handleChange(val, 'typeOfServices')}
                       save="value"
                     />
                   </View>
-                  <TextBox
-                    style={styles.textBox}
-                    placeholder="Price"
-                    onChangeText={(text) => handleChange(text, 'price')}
-                  />
+                  <View
+                    style={{
+                      width: '92%',
+                      borderRadius: 20,
+                      marginTop: 20,
+                      backgroundColor: 'white',
+                    }}>
+                    <SelectList 
+                      data={pricingMethods}
+                      placeholder="Pricing Method"
+                      setSelected={(val) => handleChange(val, 'pricingMethod')}
+                      save="value"
+                    />
+                  </View>
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod === "Weight" &&
+                    <TextBox placeholder="Total Price" onChangeText={text => handleChange(text, "price")} />
+                  }
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod === "Weight" &&
+                    <TextBox placeholder="Weight" onChangeText={text => handleChange(text, "weight")} />
+                  }
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod !== "Weight" &&
+                    <TextBox placeholder="Price per piece" onChangeText={text => handleChange(text, "price")} />
+                  }
+                  {modalData.pricingMethod != undefined && modalData.pricingMethod !== "Weight" &&
+                    <TextBox placeholder="Quantity" onChangeText={text => handleChange(text, "quantity")} />
+                  }
+                  {errorMessage &&
+                    <View style={styles.errorMessageContainer}>
+                      <Text style={styles.errorMessage}>{errorMessage}</Text>
+                    </View>
+                  }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <Btn
                       onClick={() => addOrderItem1()}
@@ -468,15 +617,15 @@ export default function OrderPage(props) {
                   </View>
                 </View>
               </View>
-            </View >
-          </ScrollView>
+            </View>
+          </View>
         </Modal>
         <Modal
           visible={isModal1Visible}
           transparent={true}
-          animationType="slide"
+          animationType="fade"
         >
-          <ScrollView style={{ backgroundColor: 'rgba(52, 52, 52, 0.8)' }}>
+          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <View style={styles.view}>
@@ -512,7 +661,7 @@ export default function OrderPage(props) {
                 </View>
               </View>
             </View >
-          </ScrollView>
+          </View>
         </Modal>
       </View>
     </ScrollView>
@@ -520,6 +669,17 @@ export default function OrderPage(props) {
 }
 
 const styles = StyleSheet.create({
+  errorMessageContainer: {
+    padding: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    width: '100%',
+  },
+  errorMessage: {
+    color: colors.red,
+    fontStyle: 'italic',
+    fontSize: 16,
+  },
   container: {
     flex: 1,
     padding: 25
@@ -754,8 +914,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 800,
   },
-
-
   text: {
     fontSize: 20,
     fontWeight: "600",
@@ -765,6 +923,17 @@ const styles = StyleSheet.create({
   outletIcon: {
     fontSize: 25,
     margin: 10,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    marginLeft: "2%",
+    marginBottom: 10,
+    alignItems: 'flex-end'
+  },
+  checkboxLabel: {
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 
 });
