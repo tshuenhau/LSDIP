@@ -261,9 +261,16 @@ const DeliveryScreen = ({ navigation, route }) => {
           setIsDuplicateOpen(true);
           setIsModalOpen(false);
         } else {
+          if (matchingOrders.length === 0) {
+            alert('No matching orders found');
+            navigation.navigate('Delivery');
+            setIsModalOpen(false);
+            return;
+          } 
           const db = firebase.firestore();
           const user = firebase.auth().currentUser;
           console.log(user);
+
           const selectedOrders = matchingOrders.map((order) => order.id);
 
           if (user) {
@@ -395,7 +402,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                         navigation.navigate("Home")
                         setTimeout(() => {
                           window.location.reload();
-                        }, 1000000);
+                        }, 2000);
                       })
                       .catch((error) => {
                         console.error('Error:', error);
@@ -572,7 +579,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                 alert('Selected delivery has been removed');
                 setTimeout(() => {
                   window.location.reload();
-                }, 1000000);
+                }, 2000);
               })
               .catch((error) => {
                 console.error(error);
