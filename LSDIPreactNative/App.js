@@ -377,12 +377,12 @@ function RootNavigator() {
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
-          <Drawer.Screen name='Delivery' component={DeliveryTemp} initialParams={{ curuser: user1 }}
+          {/* <Drawer.Screen name='Delivery' component={DeliveryTemp} initialParams={{ curuser: user1 }}
             options={{
               drawerIcon: ({ focused }) => (
                 <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
-            }} />
+            }} /> */}
           <Drawer.Screen name='Home' component={Home}
             options={{
               drawerIcon: ({ focused }) => (
@@ -393,6 +393,12 @@ function RootNavigator() {
             options={{
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: user1 }}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }}
