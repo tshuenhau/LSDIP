@@ -11,6 +11,9 @@ import Btn from "../components/Button"
 import Checkbox from "expo-checkbox";
 import colors from '../colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as geolib from 'geolib';
+import { getLatLng } from 'geolib';
+import axios from 'axios';
 
 
 
@@ -27,7 +30,6 @@ const DeliveryScreen = ({ navigation, route }) => {
   const orderList = firebase.firestore().collection('orders');
 
   const [matchingOrders, setMatchingOrders] = useState([]);
-
   useEffect(() => {
     if (curuser) {
       const db = firebase.firestore();
@@ -51,6 +53,14 @@ const DeliveryScreen = ({ navigation, route }) => {
       setMatchingOrders([]);
     }
   }, [curuser]);
+
+  // const location1 = 'New York City, NY';
+  // const location2 = 'Los Angeles, CA';
+  // const coords1 = getLatLng(location1);
+  // const coords2 = getLatLng(location2);
+  // const distanceInMeters = Geolib.getDistance(coords1, coords2);
+  // console.log(distanceInMeters);
+  
 
   const getMonthDays = (month, year) => {
 
@@ -253,6 +263,7 @@ const DeliveryScreen = ({ navigation, route }) => {
         } else {
           const db = firebase.firestore();
           const user = firebase.auth().currentUser;
+          console.log(user);
           const selectedOrders = matchingOrders.map((order) => order.id);
 
           if (user) {
@@ -301,6 +312,71 @@ const DeliveryScreen = ({ navigation, route }) => {
                     });
                   })
                   .then(() => {
+                    let address = "";
+                    db.collection('users')
+                    .where('email', '==', user.email)
+                    .get()
+                    .then(querySnapshot => {
+                      if (querySnapshot.empty) {
+                        console.log('No matching documents.');
+                      } else {
+                        querySnapshot.forEach(doc => {
+                          // Retrieve the user's address from the document
+                          address = doc.data().address;
+                          console.log(`User's address: ${address}`);
+                          const location1 = address;
+                          const location2 = '10 Paya Lebar Rd Singapore 409057';
+                          const apiKey = 'AIzaSyCe-H2Rttn3Ta8D1h0EpV3YagTInTB0wzw';
+
+                          // Make API request for location 1
+                          const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+                          axios.get(apiUrl1)
+                            .then(response => {
+                              if (response.data.results.length === 0) {
+                                console.error('No results found for location:', location1);
+                                return;
+                              }
+                              const result = response.data.results[0];
+                              const coords1 = {
+                                latitude: result.geometry.location.lat,
+                                longitude: result.geometry.location.lng
+                              };
+
+                              // Make API request for location 2
+                              const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                              axios.get(apiUrl2)
+                                .then(response => {
+                                  if (response.data.results.length === 0) {
+                                    console.error('No results found for location:', location2);
+                                    return;
+                                  }
+                                  const result = response.data.results[0];
+                                  const coords2 = {
+                                    latitude: result.geometry.location.lat,
+                                    longitude: result.geometry.location.lng
+                                  };
+
+                                  // Calculate the distance between the two sets of coordinates
+                                  const distanceInMeters = geolib.getDistance(coords1, coords2);
+                                  console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                                  const deliveryFee = distanceInMeters/500
+                                  console.log(deliveryFee);
+                                })
+                                .catch(error => {
+                                  console.error(error);
+                                });
+                            })
+                            .catch(error => {
+                              console.error(error);
+                            });
+
+                        });
+                      }
+                    })
+                    .catch(error => {
+                      console.error(error);
+                    });
+
                     console.log('Selected time added for user with UID: ', user.uid);
                     const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime, orders: matchingOrders, },];
                     setSelectedTimesList(newSelectedTimesList);
@@ -319,7 +395,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                         navigation.navigate("Home")
                         setTimeout(() => {
                           window.location.reload();
-                        }, 2000);
+                        }, 1000000);
                       })
                       .catch((error) => {
                         console.error('Error:', error);
@@ -496,7 +572,7 @@ const DeliveryScreen = ({ navigation, route }) => {
                 alert('Selected delivery has been removed');
                 setTimeout(() => {
                   window.location.reload();
-                }, 2000);
+                }, 1000000);
               })
               .catch((error) => {
                 console.error(error);
