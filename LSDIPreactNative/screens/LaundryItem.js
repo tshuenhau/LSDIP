@@ -9,17 +9,11 @@ import {
     Platform,
     ScrollView,
 } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
-import TextBox from "../components/TextBox";
-import Btn from "../components/Button";
 import colors from '../colors';
 import { firebase } from "../config/firebase";
 import { doc, addDoc, getFirestore, collection, getDoc, getDocs, QuerySnapshot, deleteDoc, GeoPoint, updateDoc } from "firebase/firestore";
-import { SelectList } from 'react-native-dropdown-select-list'
 import LaundryList from "../components/LaundryItemList";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TextInput } from "react-native-gesture-handler";
-import Toast from 'react-native-toast-message';
 
 if (
     Platform.OS === 'android' &&
@@ -61,9 +55,9 @@ export default function LaundryItem({ navigation }) {
 
     return (
         <ScrollView>
-                <View>
-                    <LaundryList />
-                </View>
+            <View>
+                <LaundryList />
+            </View>
         </ScrollView >
     )
 }

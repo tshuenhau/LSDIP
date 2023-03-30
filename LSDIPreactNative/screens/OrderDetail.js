@@ -41,6 +41,7 @@ export default function OrderPage(props) {
   const [requireDelivery, setRequireDelivery] = useState(Boolean);
   const [totalPrice, setTotalPrice] = useState("");
   const [errorMessage, setErrorMessage] = useState('');
+  const [pricingMethods, setPricingMethods] = useState([]);
   //const [customerName, setCustomerName] = useState("");
 
 
@@ -122,6 +123,7 @@ export default function OrderPage(props) {
     const laundryItems = firebase.firestore().collection('laundryItem');
     const unsubscribe = laundryItems.onSnapshot(querySnapshot => {
       const laundryItemsData = [];
+      const pricingMs = [];
       querySnapshot.forEach(doc => {
         const { laundryItemName, price, pricingMethod, typeOfServices } = doc.data();
         laundryItemsData.push({
@@ -130,8 +132,20 @@ export default function OrderPage(props) {
           pricingMethod: pricingMethod,
           price: price,
         });
+        pricingMs.push({
+          pricingMethod: pricingMethod,
+        });
       });
       setLaundryItemsData(laundryItemsData);
+      //const pm =[...new Set(pricingMs)];
+      const pricingMethods = [];
+      pricingMs.forEach((element) => {
+        if(!pricingMethods.includes(element.pricingMethod)) {
+          pricingMethods.push(element.pricingMethod);
+        }
+      });
+      setPricingMethods(pricingMethods);
+      console.log('pricing methods', pricingMethods);
     });
     return () => unsubscribe();
   }, []);
@@ -565,10 +579,8 @@ export default function OrderPage(props) {
                       marginTop: 20,
                       backgroundColor: 'white',
                     }}>
-                    <SelectList
-                      data={laundryItemsData.map(
-                        (item) => item.pricingMethod
-                      )}
+                    <SelectList 
+                      data={pricingMethods}
                       placeholder="Pricing Method"
                       setSelected={(val) => handleChange(val, 'pricingMethod')}
                       save="value"
