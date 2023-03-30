@@ -154,6 +154,15 @@ export default function OrderSummary(props) {
         setOrderValues({ ...orderValues, pickup: !orderValues.pickup })
     }
 
+    const handleDeliveryChange = () => {
+        if (orderValues.requireDelivery) {
+            setTotalPrice(totalPrice - 10);
+        } else {
+            setTotalPrice(totalPrice + 10);
+        }
+        setOrderValues({ ...orderValues, requireDelivery: !orderValues.requireDelivery })
+    }
+
     const createOrder = async () => {
         if (!selectedOutlet) {
             Toast.show({
@@ -310,6 +319,16 @@ export default function OrderSummary(props) {
                             </View >
 
                             <View style={styles.checkboxContainer}>
+                                <Text style={styles.checkboxLabel}>Laundry Delivery ($10)</Text>
+                                <Checkbox
+                                    style={{ marginLeft: 20, marginBottom: 2 }}
+                                    disabled={false}
+                                    value={orderValues.requireDelivery}
+                                    onValueChange={() => handleDeliveryChange()}
+                                />
+                            </View >
+
+                            <View style={styles.checkboxContainer}>
                                 <Text style={styles.checkboxLabel}>Express</Text>
                                 <Checkbox
                                     disabled={false}
@@ -345,6 +364,10 @@ export default function OrderSummary(props) {
                                 {/* flat $10 charge for now */}
                                 {orderValues.pickup &&
                                     <InvoiceLine label={"Pick up Fee"} value={10} />
+                                }
+                                {/* flat $10 charge for now */}
+                                {orderValues.requireDelivery &&
+                                    <InvoiceLine label={"Delivery Fee"} value={10} />
                                 }
                             </View>
                             <View>
