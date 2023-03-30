@@ -46,6 +46,7 @@ import CustomerViewOrderHistory from './screens/CustomerViewOrderHistory';
 import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
 import CustomerProfile from './screens/CustomerProfile';
+import Whatsapp from './screens/Whatsapp';
 
 
 const Stack = createStackNavigator();
@@ -268,6 +269,9 @@ function RootNavigator() {
             options={{
               drawerItemStyle: { display: "none" }
             }}
+          />
+          <Drawer.Screen name='Whatsapps' component={Whatsapp}
+            
           />
         </Drawer.Navigator>
       </NavigationContainer >

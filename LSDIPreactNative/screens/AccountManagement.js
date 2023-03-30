@@ -22,6 +22,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import TextBox from "../components/TextBox";
 import alert from '../components/Alert';
 
+
 if (
     Platform.OS === "android" &&
     UIManager.setLayoutAnimationEnabledExperimental
@@ -42,6 +43,7 @@ export default function AccountManagement() {
     const [errorMessage, setErrorMessage] = useState('');
     const auth1 = firebase.auth;
     const firestore = firebase.firestore;
+    const [whatsAppModalVisible, setWhatsAppModalVisible] = useState(false);
 
     const initialValues = {
         name: "",
@@ -150,6 +152,12 @@ export default function AccountManagement() {
         setUpdateModalVisible(true);
     }
 
+    const openWhatsAppModal = (users) => {
+        console.log(users);
+        setUpdateModalData(users);
+        setWhatsAppModalVisible(true);
+    }
+
     //directly change the user role to disabled
     const deleteUser = (users) => {
         return alert(
@@ -196,6 +204,12 @@ export default function AccountManagement() {
                 <View style={styles.cardButtons}>
                     <FontAwesome
                         style={styles.outletIcon}
+                        name="whatsapp"
+                        color={colors.green}
+                        onPress={() => openWhatsAppModal(item)}
+                    />
+                    <FontAwesome
+                        style={styles.outletIcon}
                         name="edit"
                         color={colors.green}
                         onPress={() => openModal(item)}
@@ -228,7 +242,7 @@ export default function AccountManagement() {
             <View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
-                        autoFocus="autoFocus"
+                    /*autoFocus*/
                         style={styles.searchInputWithBtn}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -411,6 +425,45 @@ export default function AccountManagement() {
         { key: 'disabled', title: 'Disabled' },
     ]);
 
+    //for whatsapp function 
+    const [numberEmptyError, setNumberEmptyError] = useState(false);
+    const [messageEmptyError, setMessageEmptyError] = useState(false);
+
+    const [formData, setFormData] = useState({
+        message: "",
+    });
+
+    const { message } = formData;
+
+    const onChange = (text, eventName) => {
+        setFormData({
+            ...formData,
+            [eventName]: text
+        });
+    };
+
+    const onSubmit = () => {
+        if (updateModalData.number.length < 1) {
+            setNumberEmptyError(true);
+            setTimeout(() => setNumberEmptyError(false), 3000);
+        } else if (message.length < 1) {
+            setMessageEmptyError(true);
+            setTimeout(() => setMessageEmptyError(false), 3000);
+        } else {
+            // Regex expression to remove all characters which are NOT alphanumeric 
+            let number = updateModalData.number.replace(/[^\w\s]/gi, "").replace(/ /g, "");
+
+            // Appending the phone number to the URL
+            let url = `https://web.whatsapp.com/send?phone=${number}`;
+
+            // Appending the message to the URL by encoding it
+            url += `&text=${encodeURI(message)}&app_absent=0`;
+
+            // Open our newly created URL in a new tab to send the message
+            window.open(url);
+        }
+    };
+
     return (
         <ScrollView>
             <View>
@@ -512,10 +565,55 @@ export default function AccountManagement() {
                     </ScrollView>
                 </Modal>
 
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={whatsAppModalVisible}
+                >
+                    <ScrollView style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>WhatsApp to {updateModalData.name}</Text>
+                                    {numberEmptyError && (
+                                        <div className='errors'>Mobile number cannot be empty!</div>
+                                    )}
+                                    {messageEmptyError && (
+                                        <div className='errors'>Message cannot be empty!</div>
+                                    )}
+                                    {!numberEmptyError && !messageEmptyError && (
+                                        <div className='errors-null'> </div>
+                                    )}
+                                    <TextBox
+                                        placeholder="Number"
+                                        error={numberEmptyError}
+                                        value={updateModalData.number}
+                                    />
+                                    <TextInput
+                                        autoFocus
+                                        multiline
+                                        numberOfLines={4}
+                                        placeholder="Type in your Message"
+                                        value={message}
+                                        onChangeText={text => onChange(text, "message")}
+                                        maxLength={500}
+                                        style = {styles.whatsapp}
+                                    />
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%", }}>
+                                        <Btn onClick={() => onSubmit()} title="Send Message" style={{ width: "48%" }} />
+                                        <Btn onClick={() => setWhatsAppModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </ScrollView>
+                </Modal>
+
             </View>
         </ScrollView>
     );
 }
+
 
 const styles = StyleSheet.create({
     errorMessageContainer: {
@@ -657,5 +755,13 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: "600",
         color: colors.white,
+    },
+    whatsapp:{
+        width: "92%",
+        padding:15,
+        borderRadius: 10,
+        marginTop: 20,
+        borderColor: colors.darkBlue,
+        borderWidth: 1,
     }
 });
