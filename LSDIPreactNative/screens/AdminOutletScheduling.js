@@ -143,7 +143,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
         } else {
             setWeekdayModalVisible(!weekdayModalVisible);
         }
-    }
+    };
 
     const deleteAvailability = (item) => {
         return alert("Confirmation", "Are you sure you want to remove indicated availability?",
@@ -226,7 +226,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                     }
                 ])
         }
-    }
+    };
 
     const confirmStaffSchedule = (item) => {
         return alert("Confirmation", "Are you sure you want allocate schedule?",
@@ -276,6 +276,68 @@ export default function AdminOutletScheduling({ route, navigation }) {
                     }
                 }
             ])
+    };
+
+    // only allocates records with no conflicts
+    const handleAllocateAll = () => {
+        const uniqueDates = new Set();
+        const duplicateDates = new Set();
+        for (const date in markedDates) {
+            if (uniqueDates.has(date)) {
+                duplicateDates.add(date);
+            } else {
+                uniqueDates.add(date);
+            }
+        }
+        staffAvailableDates.forEach((item) => {
+            const date = item.date;
+            if (uniqueDates.has(date)) {
+                duplicateDates.add(date);
+            } else {
+                uniqueDates.add(date);
+            }
+        })
+
+        const recordsToAllocate = staffAvailableDates.filter(item => {
+            const date = item.date;
+            return !duplicateDates.has(date);
+        })
+
+        const db = firebase.firestore();
+        const batch = db.batch();
+        recordsToAllocate.forEach(record => {
+            const recordRef = db.collection('staff_schedule').doc(record.id);
+            batch.update(recordRef, { confirmed: true });
+        })
+        batch.commit()
+            .then(() => {
+                console.log("Batch Allocated");
+                Toast.show({
+                    type: 'success',
+                    text1: 'Staff allocated (please manage schedule conflicts)',
+                });
+
+                recordsToAllocate.forEach(record => {
+                    setOutletSchedule(outletSchedule.map(schedule => {
+                        if (schedule.id === record.id) {
+                            return {
+                                ...schedule,
+                                confirmed: true,
+                            };
+                        } else {
+                            return { ...schedule };
+                        }
+                    }));
+
+                    const temp = staffAvailableDates.filter(s => s.id != record.id);
+                    setStaffAvailableDates(temp);
+
+                    setMarkedDates(prevState => ({
+                        ...prevState,
+                        [record.date]: { marked: true }
+                    }));
+                })
+            })
     }
 
     const renderItem = ({ item }) => (
@@ -318,7 +380,6 @@ export default function AdminOutletScheduling({ route, navigation }) {
             <ScrollView>
                 <View style={styles.topButtonContainer}>
                     <Btn onClick={() => navigation.goBack()} title="Back" style={styles.topBackButton} />
-                    {/* <Btn onClick={openAllocateModal} title="Allocate Staff" style={styles.topAllocateButton} /> */}
                 </View>
                 <View style={styles.calendarContainer}>
                     <Text style={styles.outletName}>{outletDetails.outletName} Schedule</Text>
@@ -342,7 +403,10 @@ export default function AdminOutletScheduling({ route, navigation }) {
                     />
                 </View>
                 <View style={styles.timingsContainer}>
-                    <Text style={styles.timingsTitle}>Indicated Timings</Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20 }}>
+                        <Text style={styles.timingsTitle}>Indicated Timings</Text>
+                        <Btn onClick={() => handleAllocateAll()} title="Allocate All" style={styles.allocateAllButton} />
+                    </View>
                     <FlatList
                         data={staffAvailableDates}
                         keyExtractor={(item) => item.id}
@@ -439,7 +503,6 @@ export default function AdminOutletScheduling({ route, navigation }) {
                     </View>
                 </Modal >
 
-
             </ScrollView>
         </View>
     )
@@ -452,12 +515,17 @@ const styles = StyleSheet.create({
     },
     topButtonContainer: {
         flexDirection: "row",
-        justifyContent: "space-between",
         alignSelf: "center",
         width: "92%",
+        marginTop: 10,
+    },
+    allocateAllButton: {
+        width: "15%",
+        backgroundColor: "#344869",
+        margin: 10,
     },
     topBackButton: {
-        width: "23%",
+        width: "15%",
         backgroundColor: "#344869",
         margin: 10,
     },
