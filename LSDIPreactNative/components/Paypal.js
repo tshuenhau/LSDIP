@@ -1,16 +1,25 @@
 import { Text, View, ActivityIndicator, Platform } from 'react-native'
 import React, { Component } from 'react'
 import WebView from 'react-native-webview'
+import { firebase } from '../config/firebase';
 
 export default class Paypal extends Component {
 
-    state = {
-        accessToken: null,
-        approvalUrl: null,
-        paymentId: null,
+    constructor(props) {
+        super(props);
+        this.state = {
+            accessToken: null,
+            approvalUrl: null,
+            paymentId: null,
+        };
     }
 
     componentDidMount() {
+
+        const { route } = this.props;
+        const { deliveryfee, matchingOrders, curuser, selectedTime, selectedDate } = route.params;
+        this.setState({ ...this.state, deliveryfee, matchingOrders, curuser, selectedTime, selectedDate })
+
         const dataDetail = {
             "intent": "sale",
             "payer": {
@@ -41,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAJ6VsuslNpyltsPNiQH5dFvF6YVNOekthQ9NaXo-bDZXCZZfFHdL-NKi_A5HVOPbdXmHOe88uIPEnZ1ndu5Hzdvy5PGmA`
+                    'Authorization': `Bearer A21AAK0Uk4LnWMDnfpcBB0-uOMNh3-mHWEQ_FQGjEN03qvPjeN5_wBIG2DB_dSUwfONGZl6qArjAlscyayC7lLFu55473XvLA`
                 },
                 body: 'grant_type=client_credentials'
             }
@@ -111,20 +120,73 @@ export default class Paypal extends Component {
                     }
                     if (response.state === "approved") {
                         console.log("create delivery");
+                        updateDatabase();
                     }
                 }).catch(err => {
                     console.log(...err)
                 })
         }
     }
+
+    updateDatabase = () => {
+        const db = firebase.firestore();
+        const user = firebase.auth().currentUser;
+        console.log(user);
+
+        const selectedOrders = this.state.matchingOrders.map((order) => order.id);
+
+        if (user) {
+            const selectedHour = this.state.selectedTime.split(' - ')[0];
+            const shiftTime = selectedHour.split('00')[1];
+            const docRef = db.collection('shift_orders').doc(this.state.selectedDate);
+
+            docRef.get()
+                .then((doc) => {
+                    let shiftData;
+                    if (doc.exists) {
+                        shiftData = doc.data();
+                    } else {
+                        shiftData = {};
+                    }
+
+                    // Check if orders exist for this date, and create an empty array if not
+                    if (!shiftData[this.state.selectedDate]) {
+                        shiftData[this.state.selectedDate] = [];
+                    }
+
+                    // Add selected orders to the array for this date
+                    shiftData[this.state.selectedDate].push(...selectedOrders);
+
+                    return docRef.set(shiftData);
+                })
+                .then(() => {
+                    console.log('Shift orders updated successfully');
+                    const docRef = db.collection('user_timings').doc(user.uid);
+                    docRef.get()
+                        .then((doc) => {
+                            let selectedTimes = [];
+
+                            if (doc.exists) {
+                                selectedTimes = doc.data().selected_times;
+                            }
+
+                            selectedTimes.push({
+                                date: selectedDate,
+                                time: this.state.selectedTime,
+                                orders: matchingOrders,
+                            });
+
+                            return docRef.set({
+                                selected_times: selectedTimes,
+                            });
+                        })
+                })
+        }
+    }
+
     render() {
         const { approvalUrl } = this.state;
-        const { route } = this.props;
-        const { deliveryfee, matchingOrders, curuser } = route.params;
 
-        console.log(deliveryfee)
-        console.log(matchingOrders)
-        console.log(curuser);
         return (
             <View style={{ flex: 1 }}>
                 {
