@@ -43,6 +43,10 @@ export default function OutletList({ navigation }) {
     const outlets = firebase.firestore().collection('outlet');
     const [searchQuery, setSearchQuery] = useState("");
     const [errorMessage, setErrorMessage] = useState('');
+    const logData = firebase.firestore().collection('log');
+    const [log, setLog] = useState({});
+    const auth1 = firebase.auth;
+    const currUser = auth1().currentUser.uid;
 
     useEffect(() => {
         outlets.onSnapshot(querySnapshot => {
@@ -88,6 +92,15 @@ export default function OutletList({ navigation }) {
         if (outletName, outletAddress, outletNumber, outletEmail) {
             outlets.add(values)
                 .then(() => {
+                    //for log
+                logData.add({
+                    ...log,
+                    date:firebase.firestore.Timestamp.fromDate(new Date()),
+                    staffID: currUser,
+                    outletName: values.outletName,
+                    logType: "Outlet",
+                    logDetail: "Create Outlet"
+                });
                     setCreateModalVisible(!createModalVisible);
                     clearState;
                     Toast.show({
@@ -95,6 +108,10 @@ export default function OutletList({ navigation }) {
                         text1: 'Outlet Created',
                     });
                     setErrorMessage("");
+
+                    
+
+
                 }).catch((err) => {
                     console.log(err);
                 })
@@ -117,6 +134,16 @@ export default function OutletList({ navigation }) {
                                 Toast.show({
                                     type: 'success',
                                     text1: 'Outlet Deleted',
+                                });
+
+                                logData.add({
+                                    ...log,
+                                    date:firebase.firestore.Timestamp.fromDate(new Date()),
+                                    staffID: currUser,
+                                    outletId: outlet.id,
+                                    outletName: outlet.outletName,
+                                    logType: "Outlet",
+                                    logDetail: "Delete Outlet"
                                 });
                             }).catch((err) => {
                                 console.log(err);

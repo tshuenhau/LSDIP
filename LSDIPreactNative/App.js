@@ -46,6 +46,8 @@ import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
 import CustomerProfile from './screens/CustomerProfile';
 import Paypal from './components/Paypal';
+import Logging from './screens/Logging';
+import Setting from './screens/AdminSetting';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -232,7 +234,7 @@ function RootNavigator() {
           <Drawer.Screen name='Service' component={Service}
             options={{
               drawerIcon: ({ focused }) => (
-                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                <MaterialIcons name="dry-cleaning" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Payment' component={Payment}
@@ -265,6 +267,18 @@ function RootNavigator() {
           <Drawer.Screen name='Customer Invoice' component={CustomerInvoice}
             options={{
               drawerItemStyle: { display: "none" }
+            }}
+          />
+          <Drawer.Screen name='Logging' component={Logging}
+            options={{
+              drawerItemStyle: { display: "none" }
+            }}
+          />
+          <Drawer.Screen name='Setting' component={Setting}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
             }}
           />
         </Drawer.Navigator>
