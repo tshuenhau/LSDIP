@@ -141,6 +141,7 @@ export default function OutletList({ navigation }) {
                                     date:firebase.firestore.Timestamp.fromDate(new Date()),
                                     staffID: currUser,
                                     outletId: outlet.id,
+                                    outletName: outlet.outletName,
                                     logType: "Outlet",
                                     logDetail: "Delete Outlet"
                                 });

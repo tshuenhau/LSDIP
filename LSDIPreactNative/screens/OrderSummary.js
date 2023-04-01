@@ -241,6 +241,7 @@ export default function OrderSummary(props) {
                     date:firebase.firestore.Timestamp.fromDate(new Date()),
                     staffID: await getUserId(),
                     outletId: selectedOutlet.split('(')[1].split(')')[0],
+                    outletName: selectedOutlet.split(" ",2)[1],
                     logType: "Order",
                     logDetail: "Create Order"
                 });

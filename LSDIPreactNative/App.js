@@ -45,6 +45,7 @@ import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
 import CustomerProfile from './screens/CustomerProfile';
 import Paypal from './components/Paypal';
+import Logging from './screens/Logging';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -265,6 +266,9 @@ function RootNavigator() {
             options={{
               drawerItemStyle: { display: "none" }
             }}
+          />
+          <Drawer.Screen name='Logging' component={Logging}
+
           />
         </Drawer.Navigator>
       </NavigationContainer >

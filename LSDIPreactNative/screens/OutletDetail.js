@@ -91,6 +91,7 @@ export default function OutletDetail({ route, navigation }) {
             date: firebase.firestore.Timestamp.fromDate(new Date()),
             staffID: currUser,
             outletId: updateModalData.id,
+            outletName: updateModalData.outletName,
             logType: "Outlet",
             logDetail: "Update Outlet"
           });
@@ -143,6 +144,7 @@ export default function OutletDetail({ route, navigation }) {
                 date: firebase.firestore.Timestamp.fromDate(new Date()),
                 staffID: currUser,
                 outletId: updateModalData.id,
+                outletName: updateModalData.outletName,
                 logType: "Shift",
                 logDetail: "Allocate Staff"
               });
