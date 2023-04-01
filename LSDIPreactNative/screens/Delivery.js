@@ -26,6 +26,22 @@ export default function DeliveryTemp({ navigation, route }) {
   const [deliveryfee, setDeliveryFee] = useState(0);
   const today = moment().format("YYYY-MM-DD");
 
+  // retrieving User's selected delivery
+  useEffect(() => {
+    if (curuser) {
+      const docRef = db.collection('user_timings').doc(curuser.uid);
+      docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          const scheduledDeliveries = doc.data().selected_times || [];
+          console.log(scheduledDeliveries);
+          setScheduledDeliveries(scheduledDeliveries);
+        } else {
+          setScheduledDeliveries([]);
+        }
+      });
+    }
+  }, [curuser]);
+
   // retrieving User's orders available for delivery
   useEffect(() => {
     if (curuser) {
@@ -49,22 +65,6 @@ export default function DeliveryTemp({ navigation, route }) {
     }
   }, [curuser]);
 
-  // retrieving User's selected delivery
-  useEffect(() => {
-    if (curuser) {
-      const docRef = db.collection('user_timings').doc(curuser.uid);
-      docRef.onSnapshot((doc) => {
-        if (doc.exists) {
-          const scheduledDeliveries = doc.data().selected_times || [];
-          console.log(scheduledDeliveries);
-          setScheduledDeliveries(scheduledDeliveries);
-        } else {
-          setScheduledDeliveries([]);
-        }
-      });
-    }
-  }, [curuser]);
-
   const handleDayPress = (day) => {
     console.log(day);
     const date = day.dateString;
@@ -76,6 +76,70 @@ export default function DeliveryTemp({ navigation, route }) {
     setSelectedDate(date);
     setIsModalOpen(true);
   };
+
+  const calculateDeliveryFee = () => {
+    let address = "";
+    db.collection('users')
+      .where('email', '==', curuser.email)
+      .get()
+      .then(querySnapshot => {
+        if (querySnapshot.empty) {
+          console.log('No matching documents.');
+        } else {
+          querySnapshot.forEach(doc => {
+            // Retrieve the user's address from the document
+            address = doc.data().address;
+            console.log(`User's address: ${address}`);
+            const location1 = address;
+            const location2 = '10 Paya Lebar Rd Singapore 409057';
+            const apiKey = 'AIzaSyCe-H2Rttn3Ta8D1h0EpV3YagTInTB0wzw';
+
+            // Make API request for location 1
+            const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+            axios.get(apiUrl1)
+              .then(response => {
+                if (response.data.results.length === 0) {
+                  console.error('No results found for location:', location1);
+                  return;
+                }
+                const result = response.data.results[0];
+                const coords1 = {
+                  latitude: result.geometry.location.lat,
+                  longitude: result.geometry.location.lng
+                };
+
+                // Make API request for location 2
+                const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                axios.get(apiUrl2)
+                  .then(response => {
+                    if (response.data.results.length === 0) {
+                      console.error('No results found for location:', location2);
+                      return;
+                    }
+                    const result = response.data.results[0];
+                    const coords2 = {
+                      latitude: result.geometry.location.lat,
+                      longitude: result.geometry.location.lng
+                    };
+
+                    // Calculate the distance between the two sets of coordinates
+                    const distanceInMeters = geolib.getDistance(coords1, coords2);
+                    console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                    const deliveryFee = distanceInMeters / 500
+                    console.log(deliveryFee);
+                    setDeliveryFee(deliveryFee);
+                  }).catch(error => {
+                    console.error(error);
+                  });
+              }).catch(error => {
+                console.error(error);
+              });
+          })
+        }
+      }).catch(error => {
+        console.error(error);
+      });
+  }
 
   const handlePayment = () => {
     const selectedOrders = matchingOrders.map((order) => order.id);
@@ -97,9 +161,11 @@ export default function DeliveryTemp({ navigation, route }) {
     const db = firebase.firestore();
     const user = firebase.auth().currentUser;
     console.log(user);
-
+    console.log(matchingOrders);
     const selectedOrders = matchingOrders.map((order) => order.id);
-
+    console.log(selectedOrders);
+    console.log(selectedTime);
+    console.log(selectedDate);
     if (user) {
 
       const docRef = db.collection('user_timings').doc(user.uid);
@@ -108,20 +174,73 @@ export default function DeliveryTemp({ navigation, route }) {
 
         if (doc.exists) {
           selectedTimes = doc.data().selected_times;
-        }
-
-        selectedOrders.forEach(orderId => {
-          selectedTimes.push({
-            time: selectedTime,
-            orders: orderId,
+        } else {
+          // Create a new document with the user's uid and the initial data
+          db.collection('user_timings').doc(user.uid).set({
+            selected_times: []
           });
-        })
+          selectedTimes = doc.data().selected_times;
+        }
+          selectedTimes.push({
+            date: selectedDate,
+            time: selectedTime,
+            orders: selectedOrders,
+          });
         console.log(selectedTimes);
-
-        // return docRef.set({
-        //   selected_times: selectedTimes,
-        // });
-      })
+        db.collection('user_timings').doc(user.uid).set({
+          selected_times: selectedTimes
+        })
+        .then(() => {
+          console.log('Selected times updated successfully');
+        })
+        .catch((error) => {
+          console.error('Error updating selected times:', error);
+        });
+        const batch = db.batch();
+        matchingOrders.forEach((order) => {
+          const orderRef = db.collection('orders').doc(order.id);
+          batch.update(orderRef, { orderStatus: 'Pending Delivery' });
+        });
+        batch.commit()
+          .then(() => {
+            console.log('Orders updated successfully');
+          })
+          .catch((error) => {
+            console.error('Error updating orders:', error);
+          });
+      }).then(() =>{
+        const selectedTimeObj = {
+          time: selectedTime,
+          orders: selectedOrders,
+        };
+      
+        const selectedDateDocRef = db.collection('shift_orders').doc(selectedDate);
+        selectedDateDocRef.get().then((doc) => {
+          if (doc.exists) {
+            // If the document already exists, update its data
+            const updatedSelectedTimes = [...doc.data().selected_times, selectedTimeObj];
+            selectedDateDocRef.update({ selected_times: updatedSelectedTimes })
+              .then(() => {
+                console.log(`Selected times updated for ${selectedDate}`);
+              })
+              .catch((error) => {
+                console.error(`Error updating selected times for ${selectedDate}:`, error);
+              });
+          } else {
+            // If the document doesn't exist, create a new one with the initial data
+            selectedDateDocRef.set({
+              date: selectedDate,
+              selected_times: [selectedTimeObj],
+            })
+              .then(() => {
+                console.log(`New document created for ${selectedDate}`);
+              })
+              .catch((error) => {
+                console.error(`Error creating new document for ${selectedDate}:`, error);
+              });
+          }
+        })
+    })
       // .then(() => {
       //   console.log('Selected time added for user with UID: ', user.uid);
       //   const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime, orders: matchingOrders, },];
@@ -204,70 +323,47 @@ export default function DeliveryTemp({ navigation, route }) {
     );
 
     setSelectedTimesList(newSelectedTimesList);
-  }
+    // const db = firebase.firestore();
+    // const user = firebase.auth().currentUser;
 
-  const calculateDeliveryFee = () => {
-    let address = "";
-    db.collection('users')
-      .where('email', '==', curuser.email)
-      .get()
-      .then(querySnapshot => {
-        if (querySnapshot.empty) {
-          console.log('No matching documents.');
-        } else {
-          querySnapshot.forEach(doc => {
-            // Retrieve the user's address from the document
-            address = doc.data().address;
-            console.log(`User's address: ${address}`);
-            const location1 = address;
-            const location2 = '10 Paya Lebar Rd Singapore 409057';
-            const apiKey = 'AIzaSyCe-H2Rttn3Ta8D1h0EpV3YagTInTB0wzw';
+    // if (user) {
+    //     const docRef = db.collection('user_timings').doc(user.uid);
+    //     docRef.get().then((doc) => {
+    //         if (doc.exists) {
+    //             const selectedTime = doc.data().selected_times.find(
+    //                 (time) => time.date === id.date && time.time === id.time
+    //             );
+    //             const selectedTimes = doc.data().selected_times.filter(
+    //                 (time) => time.date !== id.date || time.time !== id.time
+    //             );
 
-            // Make API request for location 1
-            const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
-            axios.get(apiUrl1)
-              .then(response => {
-                if (response.data.results.length === 0) {
-                  console.error('No results found for location:', location1);
-                  return;
-                }
-                const result = response.data.results[0];
-                const coords1 = {
-                  latitude: result.geometry.location.lat,
-                  longitude: result.geometry.location.lng
-                };
+    //             return docRef.set({
+    //                 selected_times: selectedTimes,
+    //             }).then(() => {
+    //                 console.log('Selected time deleted for user with UID: ', user.uid);
 
-                // Make API request for location 2
-                const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
-                axios.get(apiUrl2)
-                  .then(response => {
-                    if (response.data.results.length === 0) {
-                      console.error('No results found for location:', location2);
-                      return;
-                    }
-                    const result = response.data.results[0];
-                    const coords2 = {
-                      latitude: result.geometry.location.lat,
-                      longitude: result.geometry.location.lng
-                    };
+    //                 // const newSelectedTimesList = selectedTimesList.filter(
+    //                 //     (item) => item.date !== id.date || item.time !== id.time
+    //                 // );
 
-                    // Calculate the distance between the two sets of coordinates
-                    const distanceInMeters = geolib.getDistance(coords1, coords2);
-                    console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
-                    const deliveryFee = distanceInMeters / 500
-                    console.log(deliveryFee);
-                    setDeliveryFee(deliveryFee);
-                  }).catch(error => {
-                    console.error(error);
-                  });
-              }).catch(error => {
-                console.error(error);
-              });
-          })
-        }
-      }).catch(error => {
-        console.error(error);
-      });
+    //                 // setSelectedTimesList(newSelectedTimesList);
+
+    //                 const batch = db.batch();
+
+    //                 selectedTime.orders.forEach((order) => {
+    //                     const orderRef = db.collection('orders').doc(order);
+    //                     batch.update(orderRef, { orderStatus: 'Back from Wash' });
+    //                 });
+
+    //                 return batch.commit();
+    //             });
+    //         }
+    //     }).then(() => {
+    //         console.log('Orders updated successfully');
+    //     }).catch((error) => {
+    //         console.error(error);
+    //     });
+    // }
   }
 
   const AvailableTimingsModal = ({ date, onClose }) => {
@@ -510,7 +606,7 @@ export default function DeliveryTemp({ navigation, route }) {
                     </Text>
                     {item.orders ? (
                       <View>
-                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.map((order) => order.id).join(", ")}</Text>
+                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.join(", ")}</Text>
                       </View>
                     ) : (
                       <Text style={styles.noOrdersText}>No orders for this timeslot</Text>

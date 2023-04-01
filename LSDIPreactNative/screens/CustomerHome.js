@@ -101,46 +101,64 @@ export default function CustomerHome({ user, navigation }) {
     const deleteDelivery = (id) => {
         const db = firebase.firestore();
         const user = firebase.auth().currentUser;
-
+      
         if (user) {
-            const docRef = db.collection('user_timings').doc(user.uid);
-            docRef.get().then((doc) => {
-                if (doc.exists) {
-                    const selectedTime = doc.data().selected_times.find(
-                        (time) => time.date === id.date && time.time === id.time
-                    );
-                    const selectedTimes = doc.data().selected_times.filter(
-                        (time) => time.date !== id.date || time.time !== id.time
-                    );
-
-                    return docRef.set({
-                        selected_times: selectedTimes,
-                    }).then(() => {
-                        console.log('Selected time deleted for user with UID: ', user.uid);
-
-                        // const newSelectedTimesList = selectedTimesList.filter(
-                        //     (item) => item.date !== id.date || item.time !== id.time
-                        // );
-
-                        // setSelectedTimesList(newSelectedTimesList);
-
-                        const batch = db.batch();
-
-                        selectedTime.orders.forEach((order) => {
-                            const orderRef = db.collection('orders').doc(order.id);
-                            batch.update(orderRef, { orderStatus: 'Back from Wash' });
-                        });
-
-                        return batch.commit();
-                    });
-                }
-            }).then(() => {
-                console.log('Orders updated successfully');
-            }).catch((error) => {
-                console.error(error);
-            });
+          const userDocRef = db.collection('user_timings').doc(user.uid);
+          const shiftOrdersDocRef = db.collection('shift_orders').doc(id.date);
+      
+          userDocRef.get().then((doc) => {
+            if (doc.exists) {
+              const selectedTime = doc.data().selected_times.find(
+                (time) => time.date === id.date && time.time === id.time
+              );
+              const selectedTimes = doc.data().selected_times.filter(
+                (time) => time.date !== id.date || time.time !== id.time
+              );
+      
+              return userDocRef.set({
+                selected_times: selectedTimes,
+              }).then(() => {
+                console.log('Selected time deleted for user with UID: ', user.uid);
+      
+                const batch = db.batch();
+      
+                selectedTime.orders.forEach((order) => {
+                  const orderRef = db.collection('orders').doc(order);
+                  batch.update(orderRef, { orderStatus: 'Back from Wash' });
+                });
+      
+                batch.commit().then(() => {
+                  console.log('Orders updated successfully');
+      
+                  // Delete the order and timing from the shift_orders collection
+                  shiftOrdersDocRef.get().then((doc) => {
+                    if (doc.exists) {
+                      const updatedSelectedTimes = doc.data().selected_times.filter(
+                        (time) => time.time !== id.time || time.orders.join() !== selectedTime.orders.join()
+                      );
+      
+                      return shiftOrdersDocRef.update({
+                        selected_times: updatedSelectedTimes,
+                      }).then(() => {
+                        console.log(`Selected times updated for ${id.date}`);
+                      }).catch((error) => {
+                        console.error(`Error updating selected times for ${id.date}:`, error);
+                      });
+                    }
+                  }).catch((error) => {
+                    console.error(error);
+                  });
+                }).catch((error) => {
+                  console.error('Error updating orders:', error);
+                });
+              });
+            }
+          }).catch((error) => {
+            console.error(error);
+          });
         }
-    }
+      }
+      
 
     const handlePickupDelete = (id) => {
         return alert(
@@ -211,11 +229,11 @@ export default function CustomerHome({ user, navigation }) {
                     milestoneCount={4} />
             </View>
 
-            {orderList.length > 0 && (
+            {/* {orderList.length > 0 && (
                 <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
                     <Text style={styles.ViewAllButtonText}>Schedule Deliveries</Text>
                 </TouchableOpacity>
-            )}
+            )} */}
 
             {selectedTimesList.length > 0 && (
                 <View style={styles.selectedTimesContainer}>
@@ -230,7 +248,7 @@ export default function CustomerHome({ user, navigation }) {
                                 {item.orders ? (
                                     <View>
                                         {/*<Text style={styles.orderTitle}>Order IDs:</Text>*/}
-                                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.map((order) => order.id).join(", ")}</Text>
+                                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.join(", ")}</Text>
                                     </View>
                                 ) : (
                                     <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
@@ -273,7 +291,7 @@ export default function CustomerHome({ user, navigation }) {
             )}
 
             <Text style={styles.listtext}>Available for Delivery</Text>
-            <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} />
+            <CustomerAvailableOrderList navigation={navigation} orderList={orderList.filter(o => o.orderStatus === "Back from Wash")} curUser={user} />
         </View>
     )
 }
