@@ -81,15 +81,120 @@ export default function DeliveryTemp({ navigation, route }) {
     const selectedOrders = matchingOrders.map((order) => order.id);
     console.log(selectedOrders);
     console.log(matchingOrders);
-    calculateDeliveryFee();
-    navigation.navigate('Payment',
-      {
-        deliveryfee: deliveryfee,
-        matchingOrders: matchingOrders,
-        curuser: curuser,
-        selectedTime: selectedTime,
-        selectedDate: selectedDate
-      });
+    // calculateDeliveryFee();
+    // navigation.navigate('Payment',
+    //   {
+    //     deliveryfee: deliveryfee,
+    //     matchingOrders: matchingOrders,
+    //     curuser: curuser,
+    //     selectedTime: selectedTime,
+    //     selectedDate: selectedDate
+    //   });
+    updateDatabase();
+  }
+
+  const updateDatabase = () => {
+    const db = firebase.firestore();
+    const user = firebase.auth().currentUser;
+    console.log(user);
+
+    const selectedOrders = matchingOrders.map((order) => order.id);
+
+    if (user) {
+
+      const docRef = db.collection('user_timings').doc(user.uid);
+      docRef.get().then((doc) => {
+        let selectedTimes = [];
+
+        if (doc.exists) {
+          selectedTimes = doc.data().selected_times;
+        }
+
+        selectedOrders.forEach(orderId => {
+          selectedTimes.push({
+            time: selectedTime,
+            orders: orderId,
+          });
+        })
+        console.log(selectedTimes);
+
+        // return docRef.set({
+        //   selected_times: selectedTimes,
+        // });
+      })
+      // .then(() => {
+      //   console.log('Selected time added for user with UID: ', user.uid);
+      //   const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime, orders: matchingOrders, },];
+      //   setSelectedTimesList(newSelectedTimesList);
+      //   setSelectedTime(null);
+      //   setIsModalOpen(false);
+      //   const batch = db.batch();
+      //   console.log(matchingOrders);
+      //   matchingOrders.forEach((order) => {
+      //     const orderRef = db.collection('orders').doc(order.id);
+      //     batch.update(orderRef, { orderStatus: 'Pending Delivery' });
+      //   });
+      //   batch.commit()
+      //     .then(() => {
+      //       console.log('Orders updated successfully');
+      //     })
+      //     .catch((error) => {
+      //       console.error('Error updating orders:', error);
+      //     });
+      // })
+      // .catch((error) => {
+      //   console.error(error);
+      // });
+    }
+
+
+    // const selectedHour = selectedTime.split(' - ')[0];
+    // const shiftTime = selectedHour.split('00')[1];
+    // const docRef = db.collection('shift_orders').doc(selectedDate);
+
+    // docRef.get()
+    //   .then((doc) => {
+    //     let shiftData;
+    //     if (doc.exists) {
+    //       shiftData = doc.data();
+    //     } else {
+    //       shiftData = {};
+    //     }
+
+    //     // Check if orders exist for this date, and create an empty array if not
+    //     if (!shiftData[selectedDate]) {
+    //       shiftData[selectedDate] = [];
+    //     }
+
+    //     // Add selected orders to the array for this date
+
+    //     shiftData[selectedDate].push(...selectedOrders);
+
+    //     return docRef.set(shiftData);
+    //   })
+    //   .then(() => {
+    //     console.log('Shift orders updated successfully');
+    //     const docRef = db.collection('user_timings').doc(user.uid);
+    //     docRef.get()
+    //       .then((doc) => {
+    //         let selectedTimes = [];
+
+    //         if (doc.exists) {
+    //           selectedTimes = doc.data().selected_times;
+    //         }
+
+    //         selectedTimes.push({
+    //           date: selectedDate,
+    //           time: selectedTime,
+    //           orders: matchingOrders,
+    //         });
+
+    //         return docRef.set({
+    //           selected_times: selectedTimes,
+    //         });
+    //       })
+    //   })
+
   }
 
   const handleDelete = (id) => {
