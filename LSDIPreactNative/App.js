@@ -26,6 +26,7 @@ import Delivery from './screens/Delivery';
 import CreateOrder from './screens/CreateOrder';
 import Payment from './screens/Payment';
 import CRM from './screens/CRM';
+import CheckOrder from './screens/CheckOrder';
 import CustomerRewards from './screens/CustomerRewards';
 import OrderDetail from './screens/OrderDetail';
 import ForgotPassword from './screens/ForgotPassword';
@@ -446,6 +447,7 @@ function RootNavigator() {
         <Stack.Navigator screenOptions={{
           headerShown: false,
         }}>
+          <Stack.Screen name='Check Order Status' component={CheckOrder} />
           <Stack.Screen name='Login' component={Login} />
           <Stack.Screen name='Signup' component={Signup} />
           <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
