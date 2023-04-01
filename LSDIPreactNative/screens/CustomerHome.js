@@ -210,6 +210,13 @@ export default function CustomerHome({ user, navigation }) {
                     transitionSpeed={1000}
                     milestoneCount={4} />
             </View>
+
+            {orderList.length > 0 && (
+                <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
+                    <Text style={styles.ViewAllButtonText}>Schedule Deliveries</Text>
+                </TouchableOpacity>
+            )}
+
             {selectedTimesList.length > 0 && (
                 <View style={styles.selectedTimesContainer}>
                     <Text style={styles.listtext}>Selected Delivery Times</Text>
@@ -361,11 +368,11 @@ const styles = StyleSheet.create({
     },
     ViewAllButton: {
         backgroundColor: colors.primary,
-        padding: 5,
+        padding: 10,
         borderRadius: 5,
-        margin: 2,
-        alignSelf: 'center',
-        marginBottom: 30
+        margin: 20,
+        alignSelf: 'flex-end',
+        // marginBottom: 30
     },
     ViewAllButtonText: {
         color: 'white',
