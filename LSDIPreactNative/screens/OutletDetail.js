@@ -30,6 +30,10 @@ export default function OutletDetail({ route, navigation }) {
   const outlets = firebase.firestore().collection('outlet');
   const users = firebase.firestore().collection('users');
   const outletStaff = firebase.firestore().collection('outlet_staff');
+  const logData = firebase.firestore().collection('log');
+  const [log, setLog] = useState({});
+  const auth1 = firebase.auth;
+  const currUser = auth1().currentUser.uid;
 
   useEffect(() => {
     users.where("role", "==", "Staff")
@@ -82,6 +86,14 @@ export default function OutletDetail({ route, navigation }) {
           outletNumber: updateModalData.outletNumber,
           outletEmail: updateModalData.outletEmail
         }).then(() => {
+          logData.add({
+            ...log,
+            date: firebase.firestore.Timestamp.fromDate(new Date()),
+            staffID: currUser,
+            outletId: updateModalData.id,
+            logType: "Outlet",
+            logDetail: "Update Outlet"
+          });
           console.log("Update Success")
           Toast.show({
             type: 'success',
@@ -125,6 +137,16 @@ export default function OutletDetail({ route, navigation }) {
                   number: staffList.find(s => s.key === doc.data().staffID).number
                 })
               })
+
+              logData.add({
+                ...log,
+                date: firebase.firestore.Timestamp.fromDate(new Date()),
+                staffID: currUser,
+                outletId: updateModalData.id,
+                logType: "Shift",
+                logDetail: "Allocate Staff"
+              });
+
               Toast.show({
                 type: 'success',
                 text1: 'Staff Allocated',
