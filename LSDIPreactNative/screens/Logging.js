@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     TouchableOpacity,
@@ -17,6 +17,9 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import DateTimePicker from 'react-datetime-picker';
+
 
 
 if (
@@ -38,6 +41,9 @@ export default function OrderSummary({ navigation }) {
     const [expandedService, setExpandedService] = useState(null);
     const users = firebase.firestore().collection('users');
     const outlets = firebase.firestore().collection('outlet');
+    const [index, setIndex] = React.useState(0);
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [isDateTimePickerVisible, setDateTimePickerVisible] = useState('date');
 
 
     useEffect(() => {
@@ -77,16 +83,14 @@ export default function OrderSummary({ navigation }) {
 
     const filteredLog = logList.filter((item) => item.staffID.includes(currUser));
 
-    const formatDate = (date) => {
-        //return date.toDate().toLocaleString();
-        var convertedDate = date.toDate();
-        return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
-    };
-
     const formatTime = (date) => {
         var convertedDate = date.toDate();
         return moment(convertedDate).format('YYYY-MM-DD hh:mmA');
     };
+
+    const filteredDateList = filteredLog.filter((log) =>
+        moment(log.date.toDate()).isSameOrBefore(selectedDate)
+    );
 
     const renderItem = ({ item }) => (
         <View style={styles.card}>
@@ -112,17 +116,86 @@ export default function OrderSummary({ navigation }) {
 
     const FlatListSeparator = () => {
         return (
-          <View
-            style={{
-              height: 1,
-              width: "92%",
-              backgroundColor: colors.gray,
-              alignContent:"center",
-              alignSelf:'center'
-            }}
-          />
+            <View
+                style={{
+                    height: 1,
+                    width: "92%",
+                    backgroundColor: colors.gray,
+                    alignContent: "center",
+                    alignSelf: 'center'
+                }}
+            />
         );
-      }
+    }
+
+    const Admin = () => (
+        <View>
+            <FlatList
+                data={filteredDateList.filter(user => user.logType === "Admin")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ItemSeparatorComponent={FlatListSeparator}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No Data Found!</Text>
+                }
+            />
+        </View>
+    );
+
+    const Order = () => (
+        <View>
+            <FlatList
+                data={filteredLog.filter(user => user.logType === "Order")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ItemSeparatorComponent={FlatListSeparator}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No Data Found!</Text>
+                }
+            />
+        </View>
+    );
+    const Outlet = () => (
+        <View>
+            <FlatList
+                data={filteredLog.filter(user => user.logType === "Outlet")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ItemSeparatorComponent={FlatListSeparator}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No Data Found!</Text>
+                }
+            />
+        </View>
+    );
+
+    const Shift = () => (
+        <View>
+            <FlatList
+                data={filteredLog.filter(user => user.logType === "Shift")}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ItemSeparatorComponent={FlatListSeparator}
+                ListEmptyComponent={
+                    <Text style={styles.noDataText}>No Data Found!</Text>
+                }
+            />
+        </View>
+    );
+
+    const renderScene = SceneMap({
+        admin: Admin,
+        order: Order,
+        outlet: Outlet,
+        shift: Shift,
+    });
+
+    const [routes] = React.useState([
+        { key: 'admin', title: 'Admin' },
+        { key: 'order', title: 'Order' },
+        { key: 'outlet', title: 'Outlet' },
+        { key: 'shift', title: 'Shift' },
+    ]);
 
     return (
         <ScrollView>
@@ -134,13 +207,27 @@ export default function OrderSummary({ navigation }) {
                 </TouchableOpacity>
             </View>
             <View style={styles.container}>
-                <FlatList
+                {/*<FlatList
                     data={filteredLog}
                     renderItem={renderItem}
-                    ItemSeparatorComponent = {FlatListSeparator}
+                    ItemSeparatorComponent={FlatListSeparator}
                     ListEmptyComponent={
                         <Text style={styles.noDataText}>No Data Found!</Text>
                     }
+                />*/}
+                <Text style={styles.searchText}>Activity Log</Text>
+                <View style={styles.dateTimePicker}>
+                    <DateTimePicker
+                        value={selectedDate}
+                        onChange={setSelectedDate}
+                        format="yyyy-MM-dd"
+                    />
+                </View>
+                <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    onIndexChange={setIndex}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.blue900 }} />}
                 />
             </View>
         </ScrollView>
@@ -184,27 +271,46 @@ const styles = StyleSheet.create({
     },
     buttonView: {
         justifyContent: 'space-between',
-        marginTop:30,
+        marginTop: 30,
         flexDirection: 'row',
-      },
-      btn: {
+    },
+    btn: {
         borderRadius: 20,
         backgroundColor: colors.darkBlue,
         justifyContent: "center",
         alignItems: "center",
-        width:"20%",
+        width: "20%",
         marginHorizontal: "5%",
-      },
-      text: {
+    },
+    text: {
         fontSize: 20,
         fontWeight: "600",
         color: "#fff",
         padding: 10
-      },
-      noDataText: {
+    },
+    noDataText: {
         fontSize: 20,
         fontWeight: "600",
-        alignContent:'center',
-        padding: 10
-      }
+        alignContent: 'center',
+        alignSelf: 'center',
+        padding: 10,
+        marginTop: 20
+    },
+    dateTimePicker: {
+        backgroundColor: colors.white,
+        borderRadius: 10,
+        padding: 10,
+        width: '100%',
+        position: 'relative',
+        zIndex: 1,
+        marginTop: 10,
+    },
+    searchText: {
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left"
+    }
 })
