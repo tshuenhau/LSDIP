@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     TouchableOpacity,
@@ -14,13 +14,9 @@ import {
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
 import moment from 'moment';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import DateTimePicker from 'react-datetime-picker';
-
-
 
 if (
     Platform.OS === 'android' &&
@@ -32,19 +28,13 @@ if (
 export default function OrderSummary({ navigation }) {
 
     const auth1 = firebase.auth;
-    const firestore = firebase.firestore;
     const logData = firebase.firestore().collection('log');
-    const [log, setLog] = useState({});
     const currUser = auth1().currentUser.uid;
     const [logList, setLogList] = useState([]);
     const [user, setUser] = useState([]);
-    const [expandedService, setExpandedService] = useState(null);
     const users = firebase.firestore().collection('users');
-    const outlets = firebase.firestore().collection('outlet');
     const [index, setIndex] = React.useState(0);
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [isDateTimePickerVisible, setDateTimePickerVisible] = useState('date');
-
 
     useEffect(() => {
         logData.onSnapshot(querySnapshot => {
@@ -201,7 +191,7 @@ export default function OrderSummary({ navigation }) {
         <ScrollView>
             <View style={styles.buttonView}>
                 <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.navigate('Setting')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back</Text>
                 </TouchableOpacity>
