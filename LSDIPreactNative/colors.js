@@ -31,4 +31,7 @@ export default {
     teal500: '#14b8a6',
     violet400: '#a78bfa',
     warning500: '#f97316',
+    indigo400: '#818cf8',
+    inidigo50: '#eef2ff',
+    rose400: '#fb7185',
 };

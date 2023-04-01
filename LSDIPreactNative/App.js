@@ -45,6 +45,7 @@ import colors from './colors';
 import { Entypo, AntDesign, Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5, SimpleLineIcons } from '@expo/vector-icons';
 import CustomerProfile from './screens/CustomerProfile';
 import Paypal from './components/Paypal';
+import Dashboard from './screens/Dashboard';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -155,6 +156,12 @@ function RootNavigator() {
                 <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+          <Drawer.Screen name='Dashboard' component={Dashboard}
+            options={{
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
           <Drawer.Screen name='My Profile' component={MyProfile}
             options={{
               drawerIcon: ({ focused }) => (
@@ -240,7 +247,6 @@ function RootNavigator() {
                 <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-
           {/* hidden screens */}
           {/* <Drawer.Screen name='Create Admin' component={CreateAdmin}
             options={{
