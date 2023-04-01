@@ -17,7 +17,7 @@ import colors from '../colors';
 import { FontAwesome } from '@expo/vector-icons';
 import alert from '../components/Alert'
 import Btn from "../components/Button";
-import TextBox from "../components/TextBox";
+import TextBox from "./TextBox";
 import { SelectList } from 'react-native-dropdown-select-list'
 import Toast from 'react-native-toast-message';
 
