@@ -13,14 +13,17 @@ import React, { useState, useEffect } from "react";
 import BarChart from "../components/BarChart";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'react-native-svg';
+import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { line } from 'd3';
 
 export default function Dashboard() {
     const [orderList, setOrderList] = useState([]);
     const [refundList, setRefundList] = useState([]);
     const [orderRefunds, setOrderRefunds] = useState([]);
+    const [completedOrders, setCompletedOrders] = useState(0);
+    const [requestDelivery, setRequestDelivery] = useState(0);
+    const [requestExpress, setRequestExpress] = useState(0);
     const orders = firebase.firestore().collection("orders");
     const refunds = firebase.firestore().collection("refunds");
 
@@ -73,11 +76,17 @@ export default function Dashboard() {
         { month: 12, orderAmt: 0, sales: 0 },
     ]
 
+    let isRun = false;
+
     useEffect(() => {
         orders.onSnapshot(querySnapshot => {
             const orderList = [];
+            let completedorders = 0;
             querySnapshot.forEach(doc => {
-                const { customerNumber, outletId, orderDate, totalPrice, express, requireDelivery } = doc.data();
+                const { customerNumber, outletId, orderDate, totalPrice, express, requireDelivery, orderStatus } = doc.data();
+                if (orderStatus === "Closed") {
+                    completedorders++;
+                }
                 orderList.push({
                     id: doc.id,
                     customerNumber,
@@ -85,11 +94,16 @@ export default function Dashboard() {
                     orderDate,
                     totalPrice,
                     express,
-                    requireDelivery
+                    requireDelivery,
+                    orderStatus
                 });
             });
+            console.log(completedorders);
+            setCompletedOrders(completedorders);
+            console.log(completedOrders);
             setOrderList(orderList);
             addOrderToMonth(orderList);
+            //setOrderStatistics(orderList);
         });
     }, []);
 
@@ -100,7 +114,28 @@ export default function Dashboard() {
             record.orderAmt++;
             record.sales += element.totalPrice;
         });
-        console.log(orderByMonth);
+        //console.log(orderByMonth);
+    }
+
+    function setOrderStatistics(orderList) {
+        orderList.forEach((element) => {
+            if (element.orderStatus === 'Closed') {
+                console.log('closed');
+                setCompletedOrders(completedOrders + 1);
+                console.log(completedOrders);
+            }
+            if (element.requireDelivery) {
+                setRequestDelivery(requestDelivery + 1);
+            }
+            if (element.express) {
+                setRequestExpress(requestExpress + 1);
+            }
+        });
+        console.log('set', completedOrders, requestDelivery, requestExpress);
+    }
+
+    function calculateOrderStats(a, b) {
+        return (a / b * 100).toFixed(2);
     }
 
     return (
@@ -110,28 +145,31 @@ export default function Dashboard() {
                     <Text style={styles.cardHeader}>NEW USERS</Text>
                 </View>
                 <View style={styles.cardContainer}>
-                    <Text style={styles.cardHeader}>STAFF</Text>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={styles.cardHeader}>DELIVERY & EXPRESS RATE</Text>
+                        <AntDesign name="piechart" size={40} color={colors.warning500} style={{ marginTop: 10, marginRight: 15 }} />
+                    </View>
+                    <Text style={styles.cardInfo}>{calculateOrderStats(requestDelivery, orderList.length)}% requested delivery</Text>
+                    <Text style={styles.cardInfo}>{calculateOrderStats(requestExpress, orderList.length)}% requested express</Text>
                 </View>
                 <View style={styles.cardContainer}>
                     <Text style={styles.cardHeader}>SALES</Text>
                 </View>
                 <View style={styles.cardContainer}>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{ flexDirection: 'row' }}>
                         <Text style={styles.cardHeader}>ORDERS PERFORMANCE</Text>
-                        <linearGradient 
-                            start={{x:0, y:0}}
-                            end={{x:1, y: 0}}
-                            colors={[colors.blue50, colors.blue600]}>
-                            <MaterialCommunityIcons name="format-list-checks" size={30} color="#fff" style={styles.cardIcon}/>
-                        </linearGradient>
+                        <MaterialCommunityIcons name="format-list-checks" size={30} color="#fff" style={styles.cardIcon} />
                     </View>
-                    
+                    {/* don't know why useeffect executes twice, thus / 2 */}
+                    <Text style={styles.cardStats}>{calculateOrderStats(parseInt(completedOrders / 2), orderList.length)}%</Text>
+                    <Text style={styles.cardInfo}>{parseInt(completedOrders / 2)} orders finished</Text>
+                    <Text style={styles.cardInfo}>{orderList.length - parseInt(completedOrders / 2)} orders left</Text>
                 </View>
             </View>
 
             <View style={styles.chartContainer}>
                 <Text style={styles.chartHeader}>Total Orders</Text>
-                {console.log('dashboard', orderByMonth)}
+                {/*console.log('dashboard', orderByMonth)*/}
                 <BarChart data={orderByMonth} />
             </View>
 
@@ -172,18 +210,32 @@ const styles = StyleSheet.create({
     },
     cardIcon: {
         marginTop: 10,
-        marginLeft: 5,        
+        //marginLeft: 5,        
         marginRight: 10,
         width: 50,
-        height: 40,
+        height: 43,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '50%',
         border: 'none',
         padding: '2',
-        //backgroundColor: colors.blue600
+        backgroundColor: colors.blue600
         //background: LinearGradient(colors.blue50, colors.blue600)
+    },
+    cardStats: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        marginTop: 5,
+        marginBottom: 10,
+        marginLeft: 20
+    },
+    cardInfo: {
+        fontSize: 16,
+        marginTop: 10,
+        marginBottom: 5,
+        marginLeft: 20,
+        color: colors.muted400
     },
     chartContainer: {
         position: 'sticky',
