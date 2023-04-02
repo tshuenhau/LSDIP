@@ -156,6 +156,10 @@ export default function CustomerHome({ user, navigation }) {
           }).catch((error) => {
             console.error(error);
           });
+          navigation.navigate('Home');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         }
       }
       

@@ -240,6 +240,10 @@ export default function DeliveryTemp({ navigation, route }) {
               });
           }
         })
+        navigation.navigate('Home');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
     })
       // .then(() => {
       //   console.log('Selected time added for user with UID: ', user.uid);
