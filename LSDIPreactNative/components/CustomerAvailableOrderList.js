@@ -11,8 +11,8 @@ import {
 import colors from '../colors';
 import OrderDetails from "./OrderDetails";
 
-export default function CustomerOrderList({ orderList, navigation }) {
-    // console.log(curUser);
+export default function CustomerOrderList({ orderList, navigation, curUser }) {
+    console.log(curUser);
 
     const [expandedOrder, setExpandedOrder] = useState(null);
 
@@ -72,6 +72,11 @@ export default function CustomerOrderList({ orderList, navigation }) {
                         }
                     />
                 </View>
+                {orderList.length > 0 && (
+                    <TouchableOpacity style={styles.deliveryButton} onPress={() => navigation.navigate("Delivery", { curuser: curUser })}>
+                        <Text style={styles.deliveryButtonText}>Select Delivery Timing</Text>
+                    </TouchableOpacity>
+                )}
             </ScrollView>
         </View>
     )

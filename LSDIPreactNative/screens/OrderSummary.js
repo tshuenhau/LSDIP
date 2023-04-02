@@ -59,6 +59,8 @@ export default function OrderSummary(props) {
     const users = firebase.firestore().collection('users');
     const crm = firebase.firestore().collection('crm');
     const invoice_number = firebase.firestore().collection('invoice_number');
+    const logData = firebase.firestore().collection('log');
+    const [log, setLog] = useState({});
 
     useEffect(() => {
         firebase.firestore().collection("outlet").get()
@@ -232,6 +234,18 @@ export default function OrderSummary(props) {
                             })
                         })
                 }
+
+                //for log
+                await logData.add({
+                    ...log,
+                    date:firebase.firestore.Timestamp.fromDate(new Date()),
+                    staffID: await getUserId(),
+                    outletId: selectedOutlet.split('(')[1].split(')')[0],
+                    outletName: selectedOutlet.split(" ",2)[1],
+                    logType: "Order",
+                    logDetail: "Create Order"
+                });
+
                 setOrderValues(initialOrderValues);
                 navigation.navigate('Home');
                 Toast.show({

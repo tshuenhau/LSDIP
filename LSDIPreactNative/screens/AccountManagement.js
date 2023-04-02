@@ -42,6 +42,9 @@ export default function AccountManagement() {
     const [errorMessage, setErrorMessage] = useState('');
     const auth1 = firebase.auth;
     const firestore = firebase.firestore;
+    const logData = firebase.firestore().collection('log');
+    const [log, setLog] = useState({});
+    const currUser = auth1().currentUser.uid;
 
     const initialValues = {
         name: "",
@@ -78,6 +81,15 @@ export default function AccountManagement() {
                             overtimeRate,
                             address
                         })
+
+                        logData.add({
+                            ...log,
+                            date: firebase.firestore.Timestamp.fromDate(new Date()),
+                            staffID: currUser,
+                            logType: "Admin",
+                            logDetail: "Create User"
+                        });
+
                         Toast.show({
                             type: 'success',
                             text1: 'Account created',
@@ -167,6 +179,14 @@ export default function AccountManagement() {
                                     type: 'success',
                                     text1: 'User Disabled',
                                 });
+
+                                logData.add({
+                                    ...log,
+                                    date: firebase.firestore.Timestamp.fromDate(new Date()),
+                                    staffID: currUser,
+                                    logType: "Admin",
+                                    logDetail: "Delete User"
+                                });
                             }).catch((err) => {
                                 console.log(err);
                             })
@@ -228,7 +248,7 @@ export default function AccountManagement() {
             <View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
-                        autoFocus="autoFocus"
+                        /*autoFocus="autoFocus"*/
                         style={styles.searchInputWithBtn}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -380,6 +400,15 @@ export default function AccountManagement() {
                     number: updateModalData.number,
                     address: updateModalData.address,
                 }).then(() => {
+
+                    logData.add({
+                        ...log,
+                        date: firebase.firestore.Timestamp.fromDate(new Date()),
+                        staffID: currUser,
+                        logType: "Admin",
+                        logDetail: "Update User"
+                    });
+
                     Toast.show({
                         type: 'success',
                         text1: 'User updated',

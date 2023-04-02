@@ -35,4 +35,6 @@ export default {
     inidigo50: '#eef2ff',
     rose400: '#fb7185',
     muted400: '#a3a3a3',
+    text: '#333333',
+    placeholder: '#A5A5A5',
 };
