@@ -13,6 +13,9 @@ import React, { useState, useEffect } from "react";
 import BarChart from "../components/BarChart";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'react-native-svg';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 export default function Dashboard() {
     const [orderList, setOrderList] = useState([]);
@@ -56,18 +59,18 @@ export default function Dashboard() {
     */
 
     const orderByMonth = [
-        {month: 1, orderAmt: 0, sales: 0},
-        {month: 2, orderAmt: 0, sales: 0},
-        {month: 3, orderAmt: 0, sales: 0},
-        {month: 4, orderAmt: 0, sales: 0},
-        {month: 5, orderAmt: 0, sales: 0},
-        {month: 6, orderAmt: 0, sales: 0},
-        {month: 7, orderAmt: 0, sales: 0},
-        {month: 8, orderAmt: 0, sales: 0},
-        {month: 9, orderAmt: 0, sales: 0},
-        {month: 10, orderAmt: 0, sales: 0},
-        {month: 11, orderAmt: 0, sales: 0},
-        {month: 12, orderAmt: 0, sales: 0},
+        { month: 1, orderAmt: 0, sales: 0 },
+        { month: 2, orderAmt: 0, sales: 0 },
+        { month: 3, orderAmt: 0, sales: 0 },
+        { month: 4, orderAmt: 0, sales: 0 },
+        { month: 5, orderAmt: 0, sales: 0 },
+        { month: 6, orderAmt: 0, sales: 0 },
+        { month: 7, orderAmt: 0, sales: 0 },
+        { month: 8, orderAmt: 0, sales: 0 },
+        { month: 9, orderAmt: 0, sales: 0 },
+        { month: 10, orderAmt: 0, sales: 0 },
+        { month: 11, orderAmt: 0, sales: 0 },
+        { month: 12, orderAmt: 0, sales: 0 },
     ]
 
     useEffect(() => {
@@ -94,7 +97,7 @@ export default function Dashboard() {
         orderList.forEach((element) => {
             // console.log(element.orderDate.toDate().getMonth());
             let record = orderByMonth.at(element.orderDate.toDate().getMonth());
-            record.orderAmt ++;
+            record.orderAmt++;
             record.sales += element.totalPrice;
         });
         console.log(orderByMonth);
@@ -102,8 +105,33 @@ export default function Dashboard() {
 
     return (
         <View>
+            <View style={styles.cards}>
+                <View style={styles.cardContainer}>
+                    <Text style={styles.cardHeader}>NEW USERS</Text>
+                </View>
+                <View style={styles.cardContainer}>
+                    <Text style={styles.cardHeader}>STAFF</Text>
+                </View>
+                <View style={styles.cardContainer}>
+                    <Text style={styles.cardHeader}>SALES</Text>
+                </View>
+                <View style={styles.cardContainer}>
+                    <View style={{flexDirection: 'row'}}>
+                        <Text style={styles.cardHeader}>ORDERS PERFORMANCE</Text>
+                        <linearGradient 
+                            start={{x:0, y:0}}
+                            end={{x:1, y: 0}}
+                            colors={[colors.blue50, colors.blue600]}>
+                            <MaterialCommunityIcons name="format-list-checks" size={30} color="#fff" style={styles.cardIcon}/>
+                        </linearGradient>
+                    </View>
+                    
+                </View>
+            </View>
+
             <View style={styles.chartContainer}>
                 <Text style={styles.chartHeader}>Total Orders</Text>
+                {console.log('dashboard', orderByMonth)}
                 <BarChart data={orderByMonth} />
             </View>
 
@@ -112,10 +140,55 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-    chartContainer: {
-        //position: 'sticky',
+    cards: {
+        flexDirection: 'row',
+        marginHorizontal: "2%",
+    },
+    cardContainer: {
         flex: 2,
-        height: "30%",
+        height: 200,
+        width: 220,
+        marginTop: 20,
+        marginBottom: 20,
+        marginRight: 15,
+        backgroundColor: "#fff",
+        borderRadius: 4,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 8,
+            height: 8,
+        },
+        shadowOpacity: 0.02,
+        elevation: 3,
+    },
+    cardHeader: {
+        fontWeight: "bold",
+        fontSize: 20,
+        marginTop: 10,
+        marginBottom: 10,
+        marginLeft: 20,
+        color: colors.muted400,
+        //backgroundColor: colors.indigo400
+    },
+    cardIcon: {
+        marginTop: 10,
+        marginLeft: 5,        
+        marginRight: 10,
+        width: 50,
+        height: 40,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '50%',
+        border: 'none',
+        padding: '2',
+        //backgroundColor: colors.blue600
+        //background: LinearGradient(colors.blue50, colors.blue600)
+    },
+    chartContainer: {
+        position: 'sticky',
+        flex: 2,
+        height: "40%",
         width: 400,
         marginTop: 20,
         marginBottom: 20,

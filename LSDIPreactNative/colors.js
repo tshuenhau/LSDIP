@@ -34,4 +34,5 @@ export default {
     indigo400: '#818cf8',
     inidigo50: '#eef2ff',
     rose400: '#fb7185',
+    muted400: '#a3a3a3',
 };
