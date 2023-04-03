@@ -11,7 +11,7 @@ export default function BarChart({ data }) {
         (svg) => {
             const height = 300;
             const width = 400;
-            const margin = { top: 10, right: 20, bottom: 20, left: 30 };
+            const margin = { top: 10, right: 20, bottom: 20, left: 40 };
 
             const x = d3
                 .scaleBand()
@@ -88,7 +88,7 @@ export default function BarChart({ data }) {
 
             svg
                 .select(".plot-area")
-                .attr("fill", colors.rose400)
+                .attr("fill", colors.orange400)
                 .selectAll(".bar")
                 .data(data)
                 .join("rect")
