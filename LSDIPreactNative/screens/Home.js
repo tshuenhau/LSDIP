@@ -15,6 +15,16 @@ import CustomerHome from "./CustomerHome";
 export default function Home({ navigation }) {
 
   const auth1 = firebase.auth;
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const locale = 'en';
+  const day = currentDate.toLocaleDateString(locale, { weekday: 'long' });
+  const date = `${day}, ${currentDate.getDate()} ${currentDate.toLocaleDateString(locale, { month: 'long' })} `;
+
+  const hour = currentDate.getHours();
+  const wish = `Good ${(hour < 12 && 'Morning') || (hour < 17 && 'Afternoon') || 'Evening'}, `;
+
+  const time = currentDate.toLocaleTimeString(locale, { hour: 'numeric', hour12: true, minute: 'numeric' });
 
   const [user, setUser] = useState(null) // This user
   const users = firebase.firestore().collection('users');
@@ -43,14 +53,25 @@ export default function Home({ navigation }) {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    const timer = setInterval(() => { // Creates an interval which will update the current data every minute
+      // This will trigger a rerender every component that uses the useDate hook.
+      setCurrentDate(new Date());
+    }, 60 * 1000);
+    return () => {
+      clearInterval(timer); // Return a funtion to clear the timer so that it will stop being called on unmount
+    }
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView>
         {user?.role === "Staff" ?
           <View>
-            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
+            <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
+              {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
+              <Text>{date + time}</Text>
             </View>
             <OrdersList navigation={navigation} />
           </View>
@@ -58,9 +79,10 @@ export default function Home({ navigation }) {
         }
         {user?.role === "Admin" ?
           <View>
-            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
+            <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
+              {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
+              <Text>{date + time}</Text>
             </View>
             <OrdersList navigation={navigation} />
 
@@ -70,7 +92,8 @@ export default function Home({ navigation }) {
         {user?.role === "Customer" ?
           <View>
             <View style={{ marginLeft: 10 }}>
-              <Text style={styles.welcomeMessage}>Hello, {user.name}</Text>
+              <Text style={styles.welcomeMessage}>{wish}{user.name}</Text>
+              <Text>{date + time}</Text>
             </View>
             <CustomerHome user={user} navigation={navigation} />
           </View>
@@ -78,9 +101,10 @@ export default function Home({ navigation }) {
         }
         {user?.role === "Driver" ?
           <View>
-            <Text style={styles.welcomeMessage}>Welcome {user?.role} {user?.name}</Text>
+            <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
             <View style={{ paddingLeft: 5, marginLeft: 10 }}>
-              <Text>Email: {auth.currentUser?.email}</Text>
+              {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
+              <Text>{date + time}</Text>
             </View>
             <Text>Hi im Driver</Text>
           </View>
