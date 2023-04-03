@@ -34,6 +34,7 @@ export default function OrderSummary(props) {
         orderDate: firebase.firestore.FieldValue.serverTimestamp(),
         customerName: "",
         customerAddress: "",
+        customerEmail: "",
         customerNumber: customerNumber,
         pickupDate: "",
         deliveryDate: "",
@@ -90,12 +91,13 @@ export default function OrderSummary(props) {
                 if (querySnapshot.empty) {
                     console.log('No documents found');
                 } else {
-                    const { name, address, points } = querySnapshot.docs[0].data();
+                    const { name, address, points, email } = querySnapshot.docs[0].data();
                     const updatedOrderValues = {
                         ...orderValues,
                         customerName: name,
                         customerNumber: customerNumber,
                         customerAddress: address,
+                        customerEmail: email,
                         points,
                     }
                     console.log(updatedOrderValues);
