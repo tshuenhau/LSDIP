@@ -13,16 +13,27 @@ import React, { useState, useEffect } from "react";
 import BarChart from "../components/BarChart";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'react-native-svg';
+import { MaterialCommunityIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { line } from 'd3';
 
 export default function Dashboard() {
+    const date = new Date();
+    const today = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
     const [orderList, setOrderList] = useState([]);
+    const [rosterList, setRosterList] = useState([]);
     const [refundList, setRefundList] = useState([]);
     const [orderRefunds, setOrderRefunds] = useState([]);
+    const [completedOrders, setCompletedOrders] = useState(0);
+    const [requestDelivery, setRequestDelivery] = useState(0);
+    const [requestExpress, setRequestExpress] = useState(0);
+    const [staff, setStaff] = useState(0);
+    const [sales, setSales] = useState(0);
+    const [salesLastMonth, setSalesLastMonth] = useState(0);
     const orders = firebase.firestore().collection("orders");
     const refunds = firebase.firestore().collection("refunds");
+    const users = firebase.firestore().collection("users");
+    const staff_schedule = firebase.firestore().collection("staff_schedule");
 
     const data = [
         { year: 1980, efficiency: 24.3, sales: 8949000 },
@@ -74,26 +85,75 @@ export default function Dashboard() {
     ]
 
     useEffect(() => {
-        orders.onSnapshot(querySnapshot => {
-            const orderList = [];
-            querySnapshot.forEach(doc => {
-                const { customerNumber, outletId, orderDate, totalPrice, express, requireDelivery } = doc.data();
-                orderList.push({
-                    id: doc.id,
-                    customerNumber,
-                    outletId,
-                    orderDate,
-                    totalPrice,
-                    express,
-                    requireDelivery
+        orders
+            .get()
+            .then(querySnapshot => {
+                const orderList = [];
+                let completedorders = 0;
+                let requestDelivery = 0;
+                let requestExpress = 0;
+                querySnapshot.forEach(doc => {
+                    const { customerNumber, outletId, orderDate, totalPrice, express, requireDelivery, orderStatus } = doc.data();
+                    if (orderStatus === "Closed") {
+                        completedorders++;
+                    }
+                    if (requireDelivery) {
+                        requestDelivery++;
+                    }
+                    if (express) {
+                        requestExpress++;
+                    }
+                    orderList.push({
+                        id: doc.id,
+                        customerNumber,
+                        outletId,
+                        orderDate,
+                        totalPrice,
+                        express,
+                        requireDelivery,
+                        orderStatus
+                    });
                 });
+                console.log(completedorders);
+                setCompletedOrders(completedorders);
+                setRequestDelivery(requestDelivery);
+                setRequestExpress(requestExpress);
+                //console.log(completedOrders);
+                setOrderList(orderList);
+                console.log('order list', orderList);
+                //getOrderByMonth(orderList);
+                orderList.forEach((element) => {
+                    // console.log(element.orderDate.toDate().getMonth());
+                    let record = orderByMonth.at(element.orderDate.toDate().getMonth());
+                    record.orderAmt++;
+                    record.sales += element.totalPrice;
+                });
+                console.log(orderByMonth);
+                console.log(data);
+                console.log(orderByMonth[1].sales);
+                setSales(orderByMonth[date.getMonth()].sales);
+                setSalesLastMonth(orderByMonth[date.getMonth() - 1].sales);
+                console.log(data[1].sales);
             });
-            setOrderList(orderList);
-            addOrderToMonth(orderList);
+    }, []);
+
+    useEffect(() => {
+        console.log(today);
+        staff_schedule.onSnapshot(querySnapshot => {
+            let staff = 0;
+            querySnapshot.forEach(doc => {
+                const { date, outletID, userID } = doc.data();
+                if (date === today && outletID === 'bTvPBNfMLkBmF9IKEQ3n') {
+                    console.log('found');
+                    staff++;
+                }
+            });
+            setStaff(staff);
         });
     }, []);
 
-    function addOrderToMonth(orderList) {
+    function getOrderByMonth(orderList) {
+        //console.log('ol', orderList);
         orderList.forEach((element) => {
             // console.log(element.orderDate.toDate().getMonth());
             let record = orderByMonth.at(element.orderDate.toDate().getMonth());
@@ -101,40 +161,97 @@ export default function Dashboard() {
             record.sales += element.totalPrice;
         });
         console.log(orderByMonth);
+        console.log(data);
+        console.log(orderByMonth[1].sales);
+        console.log(data[1].sales);
+        //return orderByMonth;
+    }
+
+    function calculateOrderStats(a, b) {
+        return (a / b * 100).toFixed(2);
+    }
+
+    function compareSales(sales, salesLastMonth) {
+        return ((sales - salesLastMonth) / salesLastMonth * 100).toFixed(2);
     }
 
     return (
         <View>
             <View style={styles.cards}>
                 <View style={styles.cardContainer}>
-                    <Text style={styles.cardHeader}>NEW USERS</Text>
-                </View>
-                <View style={styles.cardContainer}>
-                    <Text style={styles.cardHeader}>STAFF</Text>
-                </View>
-                <View style={styles.cardContainer}>
-                    <Text style={styles.cardHeader}>SALES</Text>
-                </View>
-                <View style={styles.cardContainer}>
-                    <View style={{flexDirection: 'row'}}>
-                        <Text style={styles.cardHeader}>ORDERS PERFORMANCE</Text>
-                        <linearGradient 
-                            start={{x:0, y:0}}
-                            end={{x:1, y: 0}}
-                            colors={[colors.blue50, colors.blue600]}>
-                            <MaterialCommunityIcons name="format-list-checks" size={30} color="#fff" style={styles.cardIcon}/>
-                        </linearGradient>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={styles.cardHeader}>STAFF</Text>
+                        <Image source={require('../assets/staff.png')} style={{ marginTop: 10, marginRight: 15, marginLeft: 'auto', height: 50, width: 50 }} />
                     </View>
-                    
+                    <Text style={styles.cardStats}></Text>
+                    <Text style={styles.cardInfo}></Text>
+                    <Text style={styles.cardInfo}>{staff} staff in the outlet</Text>
+                </View>
+                <View style={styles.cardContainer}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={styles.cardHeader}>DELIVERY & EXPRESS RATE</Text>
+                        <Image source={require('../assets/piechart.png')} style={{ marginTop: 10, marginRight: 15, marginLeft: 'auto', height: 50, width: 50 }} />
+                    </View>
+                    <Text style={styles.cardStats}></Text>
+                    <Text style={styles.cardInfo}>{calculateOrderStats(requestDelivery, orderList.length)}% requested delivery</Text>
+                    <Text style={styles.cardInfo}>{calculateOrderStats(requestExpress, orderList.length)}% requested express</Text>
+                </View>
+                <View style={styles.cardContainer}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={styles.cardHeader}>SALES</Text>
+                        <Image source={require('../assets/sales.png')} style={{ marginTop: 10, marginRight: 15, marginLeft: 'auto', height: 50, width: 50 }} />
+                    </View>
+                    <Text style={styles.cardStats}>$ {sales}</Text>
+                    {compareSales(sales, salesLastMonth) >= 0 && (
+                        <Text style={{ color: colors.green500, marginLeft: 20 }}>
+                        {compareSales(sales, salesLastMonth)}%
+                        <Text style={styles.cardInfo}>
+                            since last month
+                        </Text>
+                    </Text>
+                    )}
+                    {compareSales(sales, salesLastMonth) < 0 && (
+                        <Text style={{ color: colors.red500, marginLeft: 20 }}>
+                            {compareSales(sales, salesLastMonth)}%
+                            <Text style={styles.cardInfo}>
+                                since last month
+                            </Text>
+                        </Text>)}
+                </View>
+                <View style={styles.cardContainer}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={styles.cardHeader}>ORDERS PERFORMANCE</Text>
+                        {/* <MaterialCommunityIcons name="format-list-checks" size={30} color="#fff" style={styles.cardIcon} />*/}
+                        <Image source={require('../assets/orderperformance.png')} style={styles.cardIcon} />
+                    </View>
+                    {/* don't know why useeffect executes twice, thus / 2 */}
+                    <Text style={styles.cardStats}>{calculateOrderStats(completedOrders, orderList.length)}%</Text>
+                    <Text style={styles.cardInfo}>{completedOrders} orders finished</Text>
+                    <Text style={styles.cardInfo}>{orderList.length - completedOrders} orders left</Text>
                 </View>
             </View>
 
-            <View style={styles.chartContainer}>
-                <Text style={styles.chartHeader}>Total Orders</Text>
-                {console.log('dashboard', orderByMonth)}
-                <BarChart data={orderByMonth} />
+            <View style={styles.charts}>
+                <View style={styles.chartContainer1}>
+                    <Text style={{
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        marginTop: 10,
+                        marginBottom: 0,
+                        marginLeft: 20,
+                        color: '#e7e5e4'
+                    }}>OVERVIEW</Text>
+                    <Text style={styles.chartHeader1}>Sales Value</Text>
+                    {/*console.log('dashboard', orderByMonth)*/}
+                    {/** <BarChart data={data} />*/}
+                </View>
+                <View style={styles.chartContainer2}>
+                    <Text style={styles.chartHeader2}>Total Orders</Text>
+                    {/*console.log('dashboard', orderByMonth)*/}
+                    <BarChart data={orderByMonth} />
+                    {/** <BarChart data={orderByMonth} />*/}
+                </View>
             </View>
-
         </View>
     );
 }
@@ -172,43 +289,89 @@ const styles = StyleSheet.create({
     },
     cardIcon: {
         marginTop: 10,
-        marginLeft: 5,        
+        marginLeft: 'auto',
         marginRight: 10,
         width: 50,
-        height: 40,
+        height: 50,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: '50%',
+        //borderRadius: '50%',
         border: 'none',
         padding: '2',
-        //backgroundColor: colors.blue600
+        backgroundColor: "#fff"
         //background: LinearGradient(colors.blue50, colors.blue600)
     },
-    chartContainer: {
+    cardStats: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        marginTop: 5,
+        marginBottom: 10,
+        marginLeft: 20
+    },
+    cardInfo: {
+        fontSize: 16,
+        marginTop: 10,
+        marginBottom: 5,
+        marginLeft: 20,
+        color: colors.muted400
+    },
+    charts: {
+        flexDirection: 'row',
+        //marginHorizontal: "5%",
+    },
+    chartContainer1: {
         position: 'sticky',
         flex: 2,
-        height: "40%",
-        width: 400,
+        height: "100%",
+        //width: "50%",
+        marginTop: 20,
+        marginBottom: 20,
+        marginLeft: 20,
+        marginRight: 20,
+        backgroundColor: colors.chart,
+        borderRadius: 4,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 8,
+            height: 8,
+        },
+        shadowOpacity: 0.02,
+        elevation: 3,
+    },
+    chartContainer2: {
+        //position: 'sticky',
+        //flex: 2,
+        height: "100%",
+        width: "35%",
         marginTop: 20,
         marginBottom: 20,
         marginRight: 15,
         backgroundColor: "#fff",
+        //backgroundColor: colors.blue100,
         borderRadius: 4,
         shadowColor: "#000",
         shadowOffset: {
-            width: 2,
-            height: 2,
+            width: 8,
+            height: 8,
         },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.02,
         elevation: 3,
     },
-    chartHeader: {
+    chartHeader1: {
         fontWeight: "bold",
         fontSize: 24,
         marginTop: 10,
-        marginBottom: 10,
-        marginLeft: 20
+        marginBottom: 20,
+        marginLeft: 20,
+        color: '#fff',
+    },
+    chartHeader2: {
+        fontWeight: "bold",
+        fontSize: 24,
+        marginTop: 10,
+        marginBottom: 20,
+        marginLeft: 20,
         //color: colors.blue700
     }
 });

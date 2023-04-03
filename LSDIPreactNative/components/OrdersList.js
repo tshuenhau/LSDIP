@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15,
     borderColor: '#f5f5f5',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.themelight,
     alignItems: "center",
     flexDirection: "row"
   },

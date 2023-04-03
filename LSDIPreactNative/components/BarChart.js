@@ -5,13 +5,13 @@ import { View } from 'react-native-web';
 import colors from '../colors';
 
 export default function BarChart({ data }) {
-    console.log(data);
-    console.log(data[1]);
+    //console.log(data);
+    //console.log(data[1]);
     const ref = useD3(
         (svg) => {
             const height = 300;
             const width = 400;
-            const margin = { top: 10, right: 20, bottom: 20, left: 30 };
+            const margin = { top: 10, right: 20, bottom: 20, left: 40 };
 
             const x = d3
                 .scaleBand()
@@ -43,13 +43,13 @@ export default function BarChart({ data }) {
                 {month: 5, orderAmt: 0, sales: 0},
                 {month: 6, orderAmt: 0, sales: 0},
             ];
-            console.log(orderByM);
-            console.log('new', orderByM[1].orderAmt);
+            //console.log(orderByM);
+            //console.log('new', orderByM[1].orderAmt);
             data.forEach(element => {
                 console.log(element);
             });
-            console.log(orderAmts);
-            console.log(d3.max(data, (d) => d.orderAmt));
+            //console.log(orderAmts);
+            //console.log(d3.max(data, (d) => d.orderAmt));
             const y1 = d3
                 .scaleLinear()
                 .domain([0, 100])
@@ -88,7 +88,7 @@ export default function BarChart({ data }) {
 
             svg
                 .select(".plot-area")
-                .attr("fill", colors.rose400)
+                .attr("fill", colors.orange400)
                 .selectAll(".bar")
                 .data(data)
                 .join("rect")
