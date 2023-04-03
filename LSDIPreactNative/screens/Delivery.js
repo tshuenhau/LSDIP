@@ -146,15 +146,15 @@ export default function DeliveryTemp({ navigation, route }) {
     console.log(selectedOrders);
     console.log(matchingOrders);
     // calculateDeliveryFee();
-    // navigation.navigate('Payment',
-    //   {
-    //     deliveryfee: deliveryfee,
-    //     matchingOrders: matchingOrders,
-    //     curuser: curuser,
-    //     selectedTime: selectedTime,
-    //     selectedDate: selectedDate
-    //   });
-    updateDatabase();
+    navigation.navigate('Payment',
+      {
+        deliveryfee: deliveryfee,
+        matchingOrders: matchingOrders,
+        curuser: curuser,
+        selectedTime: selectedTime,
+        selectedDate: selectedDate
+      });
+    // updateDatabase();
   }
 
   const updateDatabase = () => {
