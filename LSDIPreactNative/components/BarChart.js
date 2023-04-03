@@ -33,8 +33,6 @@ export default function BarChart({ data }) {
                     .rangeRound([height - margin.bottom, martin.top])
                  */
             }
-
-            const orderAmts = [];
             const orderByM = [
                 {month: 1, orderAmt: 0, sales: 0},
                 {month: 2, orderAmt: 4, sales: 0},

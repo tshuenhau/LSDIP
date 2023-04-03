@@ -383,21 +383,45 @@ function RootNavigator() {
           />
           <Drawer.Screen name='Order Summary' component={OrderSummary}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerItemStyle: { display: "none" }
             }}
           />
           <Drawer.Screen name='Customer Invoice' component={CustomerInvoice}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerItemStyle: { display: "none" }
             }}
           />
           <Drawer.Screen name='Logging' component={Logging}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerItemStyle: { display: "none" }
             }}
           />
           <Drawer.Screen name='Setting' component={Setting}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
