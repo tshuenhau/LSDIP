@@ -68,10 +68,10 @@ export default function Home({ navigation }) {
       <ScrollView>
         {user?.role === "Staff" ?
           <View>
+            <View style={{marginLeft: 30}}>
             <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
               {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
-              <Text>{date + time}</Text>
+              <Text style={{ paddingLeft: 5, marginLeft: 10 }}>{date + time}</Text>
             </View>
             <OrdersList navigation={navigation} />
           </View>
@@ -79,10 +79,10 @@ export default function Home({ navigation }) {
         }
         {user?.role === "Admin" ?
           <View>
-            <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
-            <View style={{ paddingLeft: 5, marginLeft: 10 }}>
+            <View style={{marginLeft: 30}}>
+              <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
               {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
-              <Text>{date + time}</Text>
+              <Text style={{ paddingLeft: 5, marginLeft: 10 }}>{date + time}</Text>
             </View>
             <OrdersList navigation={navigation} />
 
