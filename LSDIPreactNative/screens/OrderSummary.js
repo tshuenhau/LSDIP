@@ -92,16 +92,18 @@ export default function OrderSummary(props) {
                 if (querySnapshot.empty) {
                     console.log('No documents found');
                 } else {
-                    const { name, address, points } = querySnapshot.docs[0].data();
-                    const updatedOrderValues = {
-                        ...orderValues,
-                        customerName: name,
-                        customerNumber: customerNumber,
-                        customerAddress: address,
-                        points,
+                    if (querySnapshot.docs[0].data().address) {
+                        const { name, address, points } = querySnapshot.docs[0].data();
+                        const updatedOrderValues = {
+                            ...orderValues,
+                            customerName: name,
+                            customerNumber: customerNumber,
+                            customerAddress: address,
+                            points,
+                        }
+                        console.log(updatedOrderValues);
+                        setOrderValues(updatedOrderValues);
                     }
-                    console.log(updatedOrderValues);
-                    setOrderValues(updatedOrderValues);
                 }
             })
     }, [customerNumber])
@@ -238,10 +240,10 @@ export default function OrderSummary(props) {
                 //for log
                 await logData.add({
                     ...log,
-                    date:firebase.firestore.Timestamp.fromDate(new Date()),
+                    date: firebase.firestore.Timestamp.fromDate(new Date()),
                     staffID: await getUserId(),
                     outletId: selectedOutlet.split('(')[1].split(')')[0],
-                    outletName: selectedOutlet.split(" ",2)[1],
+                    outletName: selectedOutlet.split(" ", 2)[1],
                     logType: "Order",
                     logDetail: "Create Order"
                 });
