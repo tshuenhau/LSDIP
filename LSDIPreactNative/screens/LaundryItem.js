@@ -55,6 +55,13 @@ export default function LaundryItem({ navigation }) {
 
     return (
         <ScrollView>
+            <View style={styles.buttonView}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Home')}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Back</Text>
+                </TouchableOpacity>
+            </View>
             <View>
                 <LaundryList />
             </View>
@@ -137,12 +144,12 @@ const styles = StyleSheet.create({
 
     },
     btn: {
-        padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 10
+        width: "20%",
+        marginLeft: "2.5%",
     },
     btn2: {
         padding: 5,
@@ -185,5 +192,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    }
+    },
+    buttonView: {
+        justifyContent: 'space-between',
+        marginTop: 30,
+        flexDirection: 'row',
+    },
+    
 })

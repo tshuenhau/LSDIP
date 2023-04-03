@@ -4,6 +4,7 @@ import {
     Text,
     StyleSheet,
     FlatList,
+    TextInput,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { FontAwesome } from '@expo/vector-icons';
@@ -14,6 +15,7 @@ export default function AdminRosterOutlet({ navigation }) {
 
     const [outletList, setOutletList] = useState([]);
     const outlets = firebase.firestore().collection('outlet');
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         outlets.onSnapshot(querySnapshot => {
@@ -58,16 +60,35 @@ export default function AdminRosterOutlet({ navigation }) {
         </TouchableOpacity>
     );
 
+    const filteredAdminRosteringList = outletList.filter((outlet) =>
+        outlet.outletName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <View>
-            <FlatList
-                data={outletList}
-                keyExtractor={outlet => outlet.id}
-                renderItem={renderItem}
-                ListEmptyComponent={
-                    <Text style={styles.noDataText}>No Data Found!</Text>
-                }
-            />
+        <View style={styles.container}>
+            <Text style={styles.searchText}>Admin Rostering List </Text>
+            <View style={styles.header}>
+                <View style={styles.searchnfilter}>
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by Name"
+                        />
+                    </View>
+                </View>
+            </View>
+            <View>
+                <FlatList
+                    data={filteredAdminRosteringList}
+                    keyExtractor={outlet => outlet.id}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <Text style={styles.noDataText}>No Data Found!</Text>
+                    }
+                />
+            </View>
         </View>
     )
 }
@@ -123,5 +144,49 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         textAlign: 'center',
         marginVertical: 10,
+    },
+    container: {
+        backgroundColor: '#fff',
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
+    },
+    header: {
+        width: "97%",
+        flexDirection: "row",
+        marginTop: 40
+    },
+    searchnfilter: {
+        flexDirection: 'row',
+        width: "96%"
+      },
+    searchContainer: {
+        width: "96%",
+        marginVertical: 15,
+        marginLeft: "auto",
+        marginRight: "auto",
+        borderWidth: 1,
+        borderRadius: 15,
+        borderColor: '#f5f5f5',
+        backgroundColor: '#f5f5f5',
+        alignItems: "center",
+        flexDirection: "row"
+    },
+    searchInput: {
+        height: 40,
+        fontSize: 18,
+        width:'96%',
+        marginLeft: 10,
+        paddingHorizontal: 10
+    },
+    searchText: {
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left"
     },
 })
