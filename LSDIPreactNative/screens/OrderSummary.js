@@ -42,7 +42,7 @@ export default function OrderSummary(props) {
         requireDelivery: false,
         express: false,
         redeemPoints: false,
-        pointsDiscount: 0,
+        // pointsDiscount: 0,
     }
 
     const [totalPrice, setTotalPrice] = useState(subTotal);
@@ -54,11 +54,13 @@ export default function OrderSummary(props) {
     const [selectedOutlet, setSelectedOutlet] = useState("");
     const [outletList, setOutletList] = useState([]);
     const [invoiceNumber, setInvoiceNumber] = useState(0);
+    const [membershipDiscount, setMembershipDiscount] = useState(0);
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const users = firebase.firestore().collection('users');
     const crm = firebase.firestore().collection('crm');
     const invoice_number = firebase.firestore().collection('invoice_number');
+    const membershipTier = firebase.firestore().collection('membership_tier');
     const logData = firebase.firestore().collection('log');
     const [log, setLog] = useState({});
 
@@ -92,6 +94,29 @@ export default function OrderSummary(props) {
                 if (querySnapshot.empty) {
                     console.log('No documents found');
                 } else {
+                    const customerExpenditure = querySnapshot.docs[0].data().expenditure;
+                    membershipTier
+                        .get()
+                        .then(querySnapshot => {
+                            const membershipTiers = [];
+                            querySnapshot.forEach((doc) => {
+                                membershipTiers.push({ id: doc.id, ...doc.data() });
+                            })
+                            const sortedTiers = membershipTiers.sort((a, b) => a.expenditure - b.expenditure);
+                            let customerTier;
+                            for (let i = sortedTiers.length - 1; i >= 0; i--) {
+                                if (customerExpenditure >= sortedTiers[i].expenditure) {
+                                    customerTier = sortedTiers[i];
+                                    break;
+                                }
+                            }
+                            if (customerTier) {
+                                const membershipDiscount = (Number(customerTier.discount) / 100) * subTotal;
+                                setTotalPrice(totalPrice - membershipDiscount);
+                                setMembershipDiscount(membershipDiscount);
+                            }
+                        })
+
                     if (querySnapshot.docs[0].data().address) {
                         const { name, address, points } = querySnapshot.docs[0].data();
                         const updatedOrderValues = {
@@ -373,10 +398,6 @@ export default function OrderSummary(props) {
                                 {orderValues.express &&
                                     <InvoiceLine label={"Express"} value={subTotal} />
                                 }
-                                {/* pending CRM module */}
-                                {orderValues.customerAddress &&
-                                    <InvoiceLine label={"Membership Discount"} value={0} />
-                                }
                                 {/* flat $10 charge for now */}
                                 {orderValues.pickup &&
                                     <InvoiceLine label={"Pick up Fee"} value={10} />
@@ -387,6 +408,9 @@ export default function OrderSummary(props) {
                                 }
                             </View>
                             <View>
+                                {orderValues.customerAddress &&
+                                    <InvoiceLine label={"Membership Discount"} value={membershipDiscount} discount={true} />
+                                }
                                 {orderValues.redeemPoints &&
                                     <InvoiceLine label={"Redeem Points"} value={CRMValues.pointCash * orderValues.points} discount={true} />
                                 }

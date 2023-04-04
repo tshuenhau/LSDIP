@@ -19,7 +19,7 @@ export default class Paypal extends Component {
         const { route } = this.props;
         const { deliveryfee, matchingOrders, curuser, selectedTime, selectedDate } = route.params;
         this.setState({ ...this.state, deliveryfee, matchingOrders, curuser, selectedTime, selectedDate })
-
+        console.log(deliveryfee);
         const dataDetail = {
             "intent": "sale",
             "payer": {
@@ -27,10 +27,10 @@ export default class Paypal extends Component {
             },
             "transactions": [{
                 "amount": {
-                    "total": '0.01',
+                    "total": deliveryfee,
                     "currency": "SGD",
                     "details": {
-                        "subtotal": '0.01',
+                        "subtotal": deliveryfee,
                         "tax": "0",
                         "shipping": "0",
                         "handling_fee": "0",
@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AALaldQHlB3M3spnS2f4ht5cg0J5Hx4VpmpnfCnTEZdyHV10yRtIAdgnkiU0S6lAfZb_tklm1YjOR6qJ8T9HAbgeGOha5Q`
+                    'Authorization': `Bearer A21AAKcsDwXj7YaB_8mbZ9S1mlR4elOYc3VwHR30KjjA25rr0CDvAY0NI1xAY0RzAanUEPPmQOBtPiT6eykqpenvnMaj-G2Yw`
                 },
                 body: 'grant_type=client_credentials'
             }
