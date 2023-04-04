@@ -1,8 +1,12 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import colors from '../colors';
-import Toast from 'react-native-toast-message';
 import { firebase } from '../config/firebase';
+import { FontAwesome } from '@expo/vector-icons';
+import colors from '../colors';
+import TextBox from "../components/TextBox"
+import alert from '../components/Alert'
+import Btn from "../components/Button"
+import Toast from 'react-native-toast-message';
 
 export default function MembershipTier() {
 
@@ -14,9 +18,11 @@ export default function MembershipTier() {
 
     const [newTierValues, setNewTierValues] = useState(initialValues);
     const [existingTiers, setExistingTiers] = useState([]);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [createErrorMessage, setCreateErrorMessage] = useState('');
+    const [editErrorMessage, setEditErrorMessage] = useState('');
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editModalData, setEditModalData] = useState({});
     const membershipTier = firebase.firestore().collection('membership_tier');
-
 
     useEffect(() => {
         membershipTier
@@ -26,8 +32,8 @@ export default function MembershipTier() {
                 querySnapshot.forEach((doc) => {
                     existingTiers.push({ id: doc.id, ...doc.data() });
                 })
-                console.log(existingTiers);
-                setExistingTiers(existingTiers);
+                const sortedTiers = existingTiers.sort((a, b) => a.expenditure - b.expenditure);
+                setExistingTiers(sortedTiers);
             })
     }, [])
 
@@ -40,22 +46,107 @@ export default function MembershipTier() {
         })
     }
 
+    function handleEditChange(text, eventName) {
+        setEditModalData(prev => {
+            return {
+                ...prev,
+                [eventName]: text
+            }
+        })
+    }
+
     const createTier = () => {
         console.log("create");
         if (newTierValues.name && newTierValues.expenditure && newTierValues.discount) {
             membershipTier.add(newTierValues)
                 .then(() => {
-                    setNewTierValues(initialValues);
-                    setErrorMessage("");
                     Toast.show({
                         type: 'success',
                         text1: 'Membership tier created',
                     });
-                    console.log("Success");
+                    existingTiers.push(newTierValues);
+                    const sortedTiers = existingTiers.sort((a, b) => a.expenditure - b.expenditure);
+                    setExistingTiers(sortedTiers);
+                    setNewTierValues(initialValues);
+                    setCreateErrorMessage("");
+                }).catch((err) => {
+                    console.log(err)
                 })
         } else {
-            setErrorMessage("Please fill up all fields.");
+            setCreateErrorMessage("Please fill up all fields.");
         }
+    }
+
+    const handleEditPress = (existingTier) => {
+        setEditModalData(existingTier);
+        setEditModalVisible(true);
+    }
+
+    const editTier = () => {
+        if (editModalData.name && editModalData.expenditure && editModalData.discount) {
+            membershipTier.doc(editModalData.id).update({
+                name: editModalData.name,
+                expenditure: editModalData.expenditure,
+                discount: editModalData.discount,
+            }).then(() => {
+                console.log("Update success");
+                const indexToUpdate = existingTiers.findIndex(tier => tier.id === editModalData.id);
+                existingTiers[indexToUpdate] = editModalData;
+                const sortedTiers = existingTiers.sort((a, b) => a.expenditure - b.expenditure);
+                setExistingTiers(sortedTiers);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Tier Updated',
+                });
+                setEditModalData({});
+                setEditErrorMessage("");
+                setEditModalVisible(false);
+            }).catch((err) => {
+                console.log(err)
+            })
+        } else {
+            setEditErrorMessage("Please fill up all fields");
+        }
+    }
+
+    const deleteTier = (existingTier) => {
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete this Membership Tier?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        membershipTier.doc(existingTier.id)
+                            .delete()
+                            .then(() => {
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Membership Tier deleted',
+                                });
+                                const newTiers = existingTiers.filter(tier => tier.id != existingTier.id);
+                                setExistingTiers(newTiers);
+                            }).catch((err) => {
+                                console.log(err);
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
+    const TierDetail = ({ label, text }) => {
+        return (
+            <View style={styles.tierDetailContainer}>
+                <Text style={styles.tierDetailLabel}>{label}</Text>
+                <Text style={styles.tierDetailText}>{text}</Text>
+            </View >
+        );
     }
 
     return (
@@ -89,9 +180,9 @@ export default function MembershipTier() {
                             onChangeText={text => handleNewChange(text, "discount")}
                         />
                     </View >
-                    {errorMessage &&
+                    {createErrorMessage &&
                         <View style={styles.errorMessageContainer}>
-                            <Text style={styles.errorMessage}>{errorMessage}</Text>
+                            <Text style={styles.errorMessage}>{createErrorMessage}</Text>
                         </View>
                     }
 
@@ -102,23 +193,64 @@ export default function MembershipTier() {
             </View>
 
             <View style={{ flex: 1 }}>
-                <ScrollView style={{ margin: 30, padding: 15 }}>
+                <ScrollView style={{ margin: 30 }}>
                     {existingTiers &&
                         existingTiers.map((existingTier, index) => (
-                            <View key={index} style={styles.tierContainer}>
-                                <Text style={styles.tierTitle}>{existingTier.name}</Text>
-                                <Text style={styles.tierText}>{existingTier.expenditure}</Text>
-                                <Text style={styles.tierText}>{existingTier.discount}</Text>
-                                <TouchableOpacity
-                                    onPress={() => console.log("remove")}
-                                    style={styles.removeButton}>
-                                    <Text style={styles.removeButtonText}>Remove</Text>
-                                </TouchableOpacity>
+                            <View style={styles.tierContainer} key={index}>
+                                <View>
+                                    <Text style={styles.tierTitle}>{existingTier.name}</Text>
+                                    <TierDetail label={"Expenditure"} text={existingTier.expenditure} />
+                                    <TierDetail label={"Discount"} text={existingTier.discount + "%"} />
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <FontAwesome
+                                        style={styles.actionButton}
+                                        name="edit"
+                                        color='green'
+                                        onPress={() => handleEditPress(existingTier)}
+                                    />
+                                    <FontAwesome
+                                        style={styles.actionButton}
+                                        name="trash-o"
+                                        color='red'
+                                        onPress={() => deleteTier(existingTier)}
+                                    />
+                                </View>
                             </View>
                         ))
                     }
                 </ScrollView>
             </View>
+
+            {/* Update Modal */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={editModalVisible}
+            >
+                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.view}>
+                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Edit Profile</Text>
+                                <TextBox placeholder="Tier Name" onChangeText={text => handleEditChange(text, "name")} defaultValue={editModalData.name} />
+                                <TextBox placeholder="Expenditure" onChangeText={text => handleEditChange(text, "expenditure")} defaultValue={editModalData.expenditure} />
+                                <TextBox placeholder="Discount 0% - 100%" onChangeText={text => handleEditChange(text, "discount")} defaultValue={editModalData.discount} />
+                                {editErrorMessage &&
+                                    <View style={styles.errorMessageContainer}>
+                                        <Text style={styles.errorMessage}>{editErrorMessage}</Text>
+                                    </View>
+                                }
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                    <Btn onClick={() => editTier()} title="Update" style={{ width: "48%" }} />
+                                    <Btn onClick={() => setEditModalVisible(false)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
         </View>
     )
 }
@@ -142,9 +274,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        padding: 16,
-        // marginVertical: 10,
-        // width: '100%',
+        padding: 20,
+        marginBottom: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
     },
     tierTitle: {
         fontWeight: 'bold',
@@ -225,5 +359,50 @@ const styles = StyleSheet.create({
         color: colors.red,
         fontStyle: 'italic',
         fontSize: 16,
+    },
+    actionButton: {
+        fontSize: 25,
+        margin: 10,
+    },
+    tierDetailContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    tierDetailLabel: {
+        color: colors.shadowGray,
+        fontWeight: "400",
+        fontSize: 16,
+        marginRight: 10,
+    },
+    tierDetailText: {
+        fontSize: 20,
+        fontWeight: '500',
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        width: '50%',
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: colors.shadowGray,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    view: {
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center"
     },
 });
