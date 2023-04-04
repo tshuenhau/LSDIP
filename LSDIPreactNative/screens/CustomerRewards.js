@@ -6,7 +6,7 @@ import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import { FontAwesome } from '@expo/vector-icons';
 
-export default function CustomersScreen({navigation}) {
+export default function CustomersScreen({ navigation }) {
   const [customers, setCustomers] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -89,7 +89,7 @@ export default function CustomersScreen({navigation}) {
             color={colors.shadowGray}
             onPress={() => {
               setSelectedCustomer(item);
-              navigation.navigate('Customer Order', { item });
+              navigation.navigate('Customer Order', { userNumber: item.number });
             }}
           />
         </View>
@@ -139,7 +139,7 @@ export default function CustomersScreen({navigation}) {
         </TouchableOpacity>
       </View>
       <View style={styles.container}>
-      <Text style={styles.searchText}>Member List</Text>
+        <Text style={styles.searchText}>Member List</Text>
         <View style={styles.searchnfilter}>
           <View style={styles.searchContainer}>
             <TextInput
@@ -384,34 +384,34 @@ const styles = StyleSheet.create({
     marginTop: '2%',
     width: '95%',
     marginBottom: 20,
-},
-buttonView: {
-  justifyContent: 'space-between',
-  marginTop: 30,
-  flexDirection: 'row',
-},
-btn: {
-  borderRadius: 20,
-  backgroundColor: colors.darkBlue,
-  justifyContent: "center",
-  alignItems: "center",
-  width: "20%",
-  marginHorizontal: "5%",
-},
-text: {
-  fontSize: 20,
-  fontWeight: "600",
-  color: "#fff",
-  padding: 10
-},
-searchText: {
-  textAlign: 'center',
-  fontSize: 24,
-  fontWeight: "bold",
-  color: colors.blue700,
-  padding: 10,
-  float: "left"
-}
+  },
+  buttonView: {
+    justifyContent: 'space-between',
+    marginTop: 30,
+    flexDirection: 'row',
+  },
+  btn: {
+    borderRadius: 20,
+    backgroundColor: colors.darkBlue,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "20%",
+    marginHorizontal: "5%",
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    padding: 10
+  },
+  searchText: {
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.blue700,
+    padding: 10,
+    float: "left"
+  }
 });
 
 
