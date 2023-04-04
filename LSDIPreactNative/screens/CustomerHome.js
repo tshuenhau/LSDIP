@@ -225,13 +225,13 @@ export default function CustomerHome({ user, navigation }) {
                 </View>
                 <AntDesign name="star" size={24} color="#0782F9" />
             </View>
-            <View style={{ padding: 30 }}>
+            {/* <View style={{ padding: 30 }}>
                 <ProgressBar
                     percentage={20}
                     color="#0782F9"
                     transitionSpeed={1000}
                     milestoneCount={4} />
-            </View>
+            </View> */}
 
             {/* {orderList.length > 0 && (
                 <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>

@@ -16,6 +16,8 @@ import { FontAwesome, Entypo } from '@expo/vector-icons';
 import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
+import { ProgressBar } from "react-milestone";
+import { log } from 'react-native-reanimated'
 
 export default function CustomerProfile() {
     const initialValues = {
@@ -30,26 +32,70 @@ export default function CustomerProfile() {
         confirmNewPassword: ""
     }
 
+    const initialTier = {
+        discount: "0",
+        expenditure: "0",
+        name: "NA"
+    }
+
     const [userDetails, setUserDetails] = useState(initialValues);
+    const [membershipList, setMembershipList] = useState([]);
+    const [currentTier, setCurrentTier] = useState(initialTier);
+    const [nextTier, setNextTier] = useState(initialTier);
     const [passwordDetails, setPasswordDetails] = useState(initialPassword);
     const [updateModalData, setUpdateModalData] = useState(initialValues);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const users = firebase.firestore().collection('users');
+    const membership_tier = firebase.firestore().collection('membership_tier');
     const auth = firebase.auth;
 
     useEffect(() => {
         users.doc(auth().currentUser.uid)
             .get()
             .then(doc => {
+                const userdata = doc.data();
                 setUserDetails(doc.data());
+                const MTID = doc.data().membership_tier;
+                membership_tier
+                    .get()
+                    .then(querySnapshot => {
+                        const membershipList = [];
+                        querySnapshot.forEach((doc) => {
+                            membershipList.push({
+                                id: doc.id,
+                                ...doc.data()
+                            });
+                        });
+                        setMembershipList(membershipList);
+                        let tempList = membershipList.filter(record => record.expenditure < userdata.expenditure);
+                        let current = initialTier;
+                        if (tempList.length > 0) {
+                            current = tempList[tempList.length - 1]
+                        } else {
+                            current = initialTier;
+                            next = membershipList[0];
+                        }
+
+                        let next;
+                        if (current.expenditure === membershipList[membershipList.length - 1].expenditure) {
+                            next = initialTier;
+                        }
+                        else {
+                            next = membershipList.find(tier => tier.expenditure > current.expenditure);
+                        }
+                        setCurrentTier(current);
+                        setNextTier(next);
+                    })
+                console.log(membership_tier);
                 setUpdateModalData(doc.data());
             })
             .catch((err) => {
                 console.log(err)
             })
     }, [])
+
 
     function handleChange(text, eventName) {
         setUpdateModalData(prev => {
@@ -158,7 +204,7 @@ export default function CustomerProfile() {
     }
 
     return (
-        <View style={{ backgroundColor: colors.background, flex: 1 }}>
+        <ScrollView style={{ backgroundColor: colors.background, flex: 1 }}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
@@ -202,6 +248,42 @@ export default function CustomerProfile() {
                         <ProfileDetail label={"Email"} text={userDetails.email} />
                         <ProfileDetail label={"Number"} text={userDetails.number} />
                     </View>
+                </View>
+
+                <View style={styles.rightProfileContainer}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{ fontWeight: "bold", fontSize: 24 }}>Membership</Text>
+                    </View>
+
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Current Tier"} text={currentTier.name} />
+                        <ProfileDetail label={"Discount"} text={currentTier.discount + "%"} />
+                    </View>
+
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"30 Days Expenditure"} text={userDetails.expenditure} />
+                    </View>
+
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Reward Points"} text={userDetails.points} />
+                    </View>
+
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Next Tier"} text={nextTier.name} />
+                        <ProfileDetail label={"Discount"} text={nextTier.discount + "%"} />
+                    </View>
+                    <View style={styles.profileDetailRow}>
+                        <ProfileDetail label={"Expenditure to reach next Tier"} text={(nextTier.expenditure - userDetails.expenditure > 0 ? nextTier.expenditure - userDetails.expenditure : "NA")} />
+                    </View>
+
+                    <ProgressBar
+                        style={{ margin: 30 }}
+                        percentage={100 * ((userDetails.expenditure - currentTier.expenditure) / (nextTier.expenditure - currentTier.expenditure))}
+                        color="#0782F9"
+                        transitionSpeed={1000}
+                        milestoneCount={2}
+                    />
+
                 </View>
             </View>
 
@@ -261,7 +343,7 @@ export default function CustomerProfile() {
                     </View>
                 </View>
             </Modal>
-        </View >
+        </ScrollView >
     )
 }
 
@@ -318,6 +400,7 @@ const styles = StyleSheet.create({
         width: "90%",
         padding: 25,
         backgroundColor: colors.white,
+        marginBottom: 25,
         // marginRight: 40,
         borderRadius: 25,
     },
