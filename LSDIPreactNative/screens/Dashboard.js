@@ -16,6 +16,7 @@ import colors from '../colors';
 import { MaterialCommunityIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { line } from 'd3';
+import { Button } from 'react-native-web';
 
 export default function Dashboard() {
     const date = new Date();
@@ -34,8 +35,9 @@ export default function Dashboard() {
     const refunds = firebase.firestore().collection("refunds");
     const users = firebase.firestore().collection("users");
     const staff_schedule = firebase.firestore().collection("staff_schedule");
+    const [data, setData] = useState([]);
 
-    const data = [
+    const dat = [
         { year: 1980, efficiency: 24.3, sales: 8949000 },
         { year: 1985, efficiency: 27.6, sales: 10979000 },
         { year: 1990, efficiency: 28, sales: 9303000 },
@@ -129,11 +131,12 @@ export default function Dashboard() {
                     record.sales += element.totalPrice;
                 });
                 console.log(orderByMonth);
-                console.log(data);
+                setData(orderByMonth);
+                //console.log(data);
                 console.log(orderByMonth[1].sales);
                 setSales(orderByMonth[date.getMonth()].sales);
                 setSalesLastMonth(orderByMonth[date.getMonth() - 1].sales);
-                console.log(data[1].sales);
+                //console.log(data[1].sales);
             });
     }, []);
 
@@ -173,6 +176,10 @@ export default function Dashboard() {
 
     function compareSales(sales, salesLastMonth) {
         return ((sales - salesLastMonth) / salesLastMonth * 100).toFixed(2);
+    }
+    
+    function showChart() {
+        console.log('showchart');
     }
 
     return (
@@ -248,7 +255,8 @@ export default function Dashboard() {
                 <View style={styles.chartContainer2}>
                     <Text style={styles.chartHeader2}>Total Orders</Text>
                     {/*console.log('dashboard', orderByMonth)*/}
-                    <BarChart data={orderByMonth} />
+                    {console.log('dashboard', orderByMonth)}
+                    <BarChart data={data} />
                     {/** <BarChart data={orderByMonth} />*/}
                 </View>
             </View>

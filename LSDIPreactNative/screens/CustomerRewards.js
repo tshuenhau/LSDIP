@@ -13,27 +13,43 @@ export default function CustomersScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [expenditure, setExpenditure] = useState(null);
   const [points, setPoints] = useState(null);
-  const [orderList, setOrderList] = useState([]);
   const [expandedItem, setExpandedItem] = useState(null);
-  const [orderModalVisible, setOrderModalVisible] = useState(false);
 
   //for users
   useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
-    usersRef.where('role', '==', 'Customer').onSnapshot((snapshot) => {
-      const data = [];
-      snapshot.forEach((doc) => {
-        data.push({
-          id: doc.id,
-          name: doc.data().name,
-          number: doc.data().number || "no number",
-          expenditure: doc.data().expenditure || 0,
-          points: doc.data().points || 0,
-          membership_tier: doc.data().membership_tier || "Not a member"
+    const membershipTier = firebase.firestore().collection('membership_tier');
+    membershipTier
+      .get()
+      .then(querySnapshot => {
+        const membershipTiers = [];
+        querySnapshot.forEach((doc) => {
+          membershipTiers.push({ id: doc.id, ...doc.data() });
+        })
+        const sortedTiers = membershipTiers.sort((a, b) => a.expenditure - b.expenditure);
+        const usersRef = firebase.firestore().collection('users');
+        usersRef.where('role', '==', 'Customer').onSnapshot((snapshot) => {
+          const data = [];
+          snapshot.forEach((doc) => {
+            let customerTier;
+            for (let i = sortedTiers.length - 1; i >= 0; i--) {
+              if (doc.data().expenditure >= sortedTiers[i].expenditure) {
+                customerTier = sortedTiers[i].name;
+                break;
+              }
+            }
+            data.push({
+              id: doc.id,
+              name: doc.data().name,
+              number: doc.data().number || "No number",
+              expenditure: doc.data().expenditure || 0,
+              points: doc.data().points || 0,
+              membership_tier: customerTier || "No membership discount"
+            });
+          });
+          setCustomers(data);
         });
-      });
-      setCustomers(data);
-    });
+
+      })
   }, []);
 
   const toggleExpand = (id) => {
@@ -132,11 +148,11 @@ export default function CustomersScreen({ navigation }) {
   return (
     <ScrollView >
       <View style={styles.buttonView}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.btn}>
           <Text style={styles.text}>Back</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View style={styles.container}>
         <Text style={styles.searchText}>Member List</Text>

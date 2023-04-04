@@ -161,7 +161,7 @@ export default function MyProfile() {
     }
 
     return (
-        <View style={{ backgroundColor: colors.background, flex: 1 }}>
+        <View style={{flex: 1 }}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
