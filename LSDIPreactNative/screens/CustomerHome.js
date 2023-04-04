@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { FontAwesome5 } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 import { firebase } from "../config/firebase";
 import CustomerAvailableOrderList from "../components/CustomerAvailableOrderList";
@@ -15,10 +13,13 @@ export default function CustomerHome({ user, navigation }) {
     const [pointCash, setPointCash] = useState(0);
     const [selectedTimesList, setSelectedTimesList] = useState([]);
     const [selectedPickupTimesList, setSelectedPickupTimesList] = useState([]);
+    const [membershipTiers, setMembershipTiers] = useState([]);
+    const [customerMilestone, setCustomerMilestone] = useState(0);
     const orders = firebase.firestore().collection('orders');
     const crm = firebase.firestore().collection('crm');
     const userTimings = firebase.firestore().collection('user_timings');
     const pickupTimings = firebase.firestore().collection('pickup_timings');
+    const membershipTier = firebase.firestore().collection('membership_tier');
 
     useEffect(() => {
         if (user) {
@@ -42,7 +43,7 @@ export default function CustomerHome({ user, navigation }) {
                         });
                     });
                     setOrderList(orderList);
-                    console.log(orderList);
+                    // console.log(orderList);
                 }).then(console.log(orderList));
 
             crm
@@ -50,6 +51,19 @@ export default function CustomerHome({ user, navigation }) {
                 .get()
                 .then(querySnapshot => {
                     setPointCash(querySnapshot.data().value);
+                })
+
+            membershipTier
+                .get()
+                .then(querySnapshot => {
+                    const membershipTiers = [];
+                    querySnapshot.forEach((doc) => {
+                        membershipTiers.push({ id: doc.id, ...doc.data() });
+                    })
+                    const sortedTiers = membershipTiers.sort((a, b) => a.expenditure - b.expenditure);
+                    const userExpenditure = user.expenditure;
+                    setCustomerMilestone((Number(userExpenditure) / Number(sortedTiers[sortedTiers.length - 1].expenditure)) * 100);
+                    setMembershipTiers(sortedTiers);
                 })
 
             userTimings
@@ -101,68 +115,67 @@ export default function CustomerHome({ user, navigation }) {
     const deleteDelivery = (id) => {
         const db = firebase.firestore();
         const user = firebase.auth().currentUser;
-      
+
         if (user) {
-          const userDocRef = db.collection('user_timings').doc(user.uid);
-          const shiftOrdersDocRef = db.collection('shift_orders').doc(id.date);
-      
-          userDocRef.get().then((doc) => {
-            if (doc.exists) {
-              const selectedTime = doc.data().selected_times.find(
-                (time) => time.date === id.date && time.time === id.time
-              );
-              const selectedTimes = doc.data().selected_times.filter(
-                (time) => time.date !== id.date || time.time !== id.time
-              );
-      
-              return userDocRef.set({
-                selected_times: selectedTimes,
-              }).then(() => {
-                console.log('Selected time deleted for user with UID: ', user.uid);
-      
-                const batch = db.batch();
-      
-                selectedTime.orders.forEach((order) => {
-                  const orderRef = db.collection('orders').doc(order);
-                  batch.update(orderRef, { orderStatus: 'Back from Wash' });
-                });
-      
-                batch.commit().then(() => {
-                  console.log('Orders updated successfully');
-      
-                  // Delete the order and timing from the shift_orders collection
-                  shiftOrdersDocRef.get().then((doc) => {
-                    if (doc.exists) {
-                      const updatedSelectedTimes = doc.data().selected_times.filter(
-                        (time) => time.time !== id.time || time.orders.join() !== selectedTime.orders.join()
-                      );
-      
-                      return shiftOrdersDocRef.update({
-                        selected_times: updatedSelectedTimes,
-                      }).then(() => {
-                        console.log(`Selected times updated for ${id.date}`);
-                      }).catch((error) => {
-                        console.error(`Error updating selected times for ${id.date}:`, error);
-                      });
-                    }
-                  }).catch((error) => {
-                    console.error(error);
-                  });
-                }).catch((error) => {
-                  console.error('Error updating orders:', error);
-                });
-              });
-            }
-          }).catch((error) => {
-            console.error(error);
-          });
-          navigation.navigate('Home');
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+            const userDocRef = db.collection('user_timings').doc(user.uid);
+            const shiftOrdersDocRef = db.collection('shift_orders').doc(id.date);
+
+            userDocRef.get().then((doc) => {
+                if (doc.exists) {
+                    const selectedTime = doc.data().selected_times.find(
+                        (time) => time.date === id.date && time.time === id.time
+                    );
+                    const selectedTimes = doc.data().selected_times.filter(
+                        (time) => time.date !== id.date || time.time !== id.time
+                    );
+
+                    return userDocRef.set({
+                        selected_times: selectedTimes,
+                    }).then(() => {
+                        console.log('Selected time deleted for user with UID: ', user.uid);
+
+                        const batch = db.batch();
+
+                        selectedTime.orders.forEach((order) => {
+                            const orderRef = db.collection('orders').doc(order);
+                            batch.update(orderRef, { orderStatus: 'Back from Wash' });
+                        });
+
+                        batch.commit().then(() => {
+                            console.log('Orders updated successfully');
+
+                            // Delete the order and timing from the shift_orders collection
+                            shiftOrdersDocRef.get().then((doc) => {
+                                if (doc.exists) {
+                                    const updatedSelectedTimes = doc.data().selected_times.filter(
+                                        (time) => time.time !== id.time || time.orders.join() !== selectedTime.orders.join()
+                                    );
+
+                                    return shiftOrdersDocRef.update({
+                                        selected_times: updatedSelectedTimes,
+                                    }).then(() => {
+                                        console.log(`Selected times updated for ${id.date}`);
+                                    }).catch((error) => {
+                                        console.error(`Error updating selected times for ${id.date}:`, error);
+                                    });
+                                }
+                            }).catch((error) => {
+                                console.error(error);
+                            });
+                        }).catch((error) => {
+                            console.error('Error updating orders:', error);
+                        });
+                    });
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
+            navigation.navigate('Home');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         }
-      }
-      
+    }
 
     const handlePickupDelete = (id) => {
         return alert(
@@ -225,13 +238,17 @@ export default function CustomerHome({ user, navigation }) {
                 </View>
                 <AntDesign name="star" size={24} color="#0782F9" />
             </View>
-            {/* <View style={{ padding: 30 }}>
+            <View style={{ padding: 30 }}>
                 <ProgressBar
-                    percentage={20}
+                    percentage={customerMilestone}
                     color="#0782F9"
                     transitionSpeed={1000}
-                    milestoneCount={4} />
-            </View> */}
+                    Milestone={() => <AntDesign name="star" size={24} color="#AEAEAE" />}
+                    CurrentMilestone={() => <AntDesign name="star" size={24} color="#647C90" />}
+                    CompletedMilestone={() => <AntDesign name="star" size={24} color="#0782F9" />}
+                    milestoneCount={membershipTiers.length} />
+
+            </View>
 
             {/* {orderList.length > 0 && (
                 <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
