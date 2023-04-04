@@ -6,34 +6,50 @@ import Btn from "../components/Button";
 import TextBox from "../components/TextBox";
 import { FontAwesome } from '@expo/vector-icons';
 
-export default function CustomersScreen({navigation}) {
+export default function CustomersScreen({ navigation }) {
   const [customers, setCustomers] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [expenditure, setExpenditure] = useState(null);
   const [points, setPoints] = useState(null);
-  const [orderList, setOrderList] = useState([]);
   const [expandedItem, setExpandedItem] = useState(null);
-  const [orderModalVisible, setOrderModalVisible] = useState(false);
 
   //for users
   useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
-    usersRef.where('role', '==', 'Customer').onSnapshot((snapshot) => {
-      const data = [];
-      snapshot.forEach((doc) => {
-        data.push({
-          id: doc.id,
-          name: doc.data().name,
-          number: doc.data().number || "no number",
-          expenditure: doc.data().expenditure || 0,
-          points: doc.data().points || 0,
-          membership_tier: doc.data().membership_tier || "Not a member"
+    const membershipTier = firebase.firestore().collection('membership_tier');
+    membershipTier
+      .get()
+      .then(querySnapshot => {
+        const membershipTiers = [];
+        querySnapshot.forEach((doc) => {
+          membershipTiers.push({ id: doc.id, ...doc.data() });
+        })
+        const sortedTiers = membershipTiers.sort((a, b) => a.expenditure - b.expenditure);
+        const usersRef = firebase.firestore().collection('users');
+        usersRef.where('role', '==', 'Customer').onSnapshot((snapshot) => {
+          const data = [];
+          snapshot.forEach((doc) => {
+            let customerTier;
+            for (let i = sortedTiers.length - 1; i >= 0; i--) {
+              if (doc.data().expenditure >= sortedTiers[i].expenditure) {
+                customerTier = sortedTiers[i].name;
+                break;
+              }
+            }
+            data.push({
+              id: doc.id,
+              name: doc.data().name,
+              number: doc.data().number || "no number",
+              expenditure: doc.data().expenditure || 0,
+              points: doc.data().points || 0,
+              membership_tier: customerTier || "Not a member"
+            });
+          });
+          setCustomers(data);
         });
-      });
-      setCustomers(data);
-    });
+
+      })
   }, []);
 
   const toggleExpand = (id) => {
@@ -132,14 +148,14 @@ export default function CustomersScreen({navigation}) {
   return (
     <ScrollView >
       <View style={styles.buttonView}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.btn}>
           <Text style={styles.text}>Back</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View style={styles.container}>
-      <Text style={styles.searchText}>Member List</Text>
+        <Text style={styles.searchText}>Member List</Text>
         <View style={styles.searchnfilter}>
           <View style={styles.searchContainer}>
             <TextInput
@@ -384,34 +400,34 @@ const styles = StyleSheet.create({
     marginTop: '2%',
     width: '95%',
     marginBottom: 20,
-},
-buttonView: {
-  justifyContent: 'space-between',
-  marginTop: 30,
-  flexDirection: 'row',
-},
-btn: {
-  borderRadius: 20,
-  backgroundColor: colors.darkBlue,
-  justifyContent: "center",
-  alignItems: "center",
-  width: "20%",
-  marginHorizontal: "5%",
-},
-text: {
-  fontSize: 20,
-  fontWeight: "600",
-  color: "#fff",
-  padding: 10
-},
-searchText: {
-  textAlign: 'center',
-  fontSize: 24,
-  fontWeight: "bold",
-  color: colors.blue700,
-  padding: 10,
-  float: "left"
-}
+  },
+  buttonView: {
+    justifyContent: 'space-between',
+    marginTop: 30,
+    flexDirection: 'row',
+  },
+  btn: {
+    borderRadius: 20,
+    backgroundColor: colors.darkBlue,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "20%",
+    marginHorizontal: "5%",
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    padding: 10
+  },
+  searchText: {
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.blue700,
+    padding: 10,
+    float: "left"
+  }
 });
 
 
