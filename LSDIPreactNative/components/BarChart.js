@@ -62,7 +62,7 @@ export default function BarChart({ data }) {
                             .tickValues(
                                 d3
                                     .ticks(...d3.extent(x.domain()), width / 40)
-                                    //.filter((v) => x(v) !== undefined)
+                                    .filter((v) => x(v) !== undefined)
                             )
                             .tickSizeOuter(0)
                     );
