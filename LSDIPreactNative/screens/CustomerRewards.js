@@ -105,7 +105,7 @@ export default function CustomersScreen({ navigation }) {
             color={colors.shadowGray}
             onPress={() => {
               setSelectedCustomer(item);
-              navigation.navigate('Customer Order', { item });
+              navigation.navigate('Customer Order', { userNumber: item.number });
             }}
           />
         </View>
