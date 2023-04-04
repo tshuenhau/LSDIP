@@ -5,19 +5,17 @@ import {
     TouchableOpacity,
     Image,
     Modal,
-    Alert,
     ScrollView
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
 import { firebase } from '../config/firebase'
-import { FontAwesome, Entypo } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
 import { ProgressBar } from "react-milestone";
-import { log } from 'react-native-reanimated'
 
 export default function CustomerProfile() {
     const initialValues = {
@@ -57,7 +55,6 @@ export default function CustomerProfile() {
             .then(doc => {
                 const userdata = doc.data();
                 setUserDetails(doc.data());
-                const MTID = doc.data().membership_tier;
                 membership_tier
                     .get()
                     .then(querySnapshot => {
@@ -68,6 +65,7 @@ export default function CustomerProfile() {
                                 ...doc.data()
                             });
                         });
+                        membershipList.sort((a, b) => a.expenditure - b.expenditure);
                         setMembershipList(membershipList);
                         let tempList = membershipList.filter(record => record.expenditure < userdata.expenditure);
                         let current = initialTier;
@@ -95,7 +93,6 @@ export default function CustomerProfile() {
                 console.log(err)
             })
     }, [])
-
 
     function handleChange(text, eventName) {
         setUpdateModalData(prev => {
@@ -185,15 +182,6 @@ export default function CustomerProfile() {
         }
     };
 
-    const LeftCardDetails = ({ label, text }) => {
-        return (
-            <View style={styles.leftCardDetailsContainer}>
-                <Text style={styles.leftCardLabel}>{label}</Text>
-                <Text style={styles.leftCardText}>{text}</Text>
-            </View>
-        )
-    }
-
     const ProfileDetail = ({ label, text }) => {
         return (
             <View style={styles.profileDetailContainer}>
@@ -214,8 +202,6 @@ export default function CustomerProfile() {
                         <Text style={styles.mainNameText}>{userDetails.name}</Text>
                         <Text style={styles.mainRoleText}>{userDetails.role}</Text>
                     </View>
-                    {/* <LeftCardDetails label={"Salary ($/h)"} text={userDetails.salary} />
-                    <LeftCardDetails label={"Overtime Rate"} text={userDetails.overtimeRate} /> */}
 
                     <TouchableOpacity
                         onPress={() => setPasswordModalVisible(!passwordModalVisible)}
@@ -239,11 +225,9 @@ export default function CustomerProfile() {
                         <ProfileDetail label={"Name"} text={userDetails.name} />
                         <ProfileDetail label={"Role"} text={userDetails.role} />
                     </View>
+
                     <ProfileDetail label={"Address"} text={userDetails.address} />
-                    {/* <View style={styles.profileDetailRow}>
-                        <ProfileDetail label={"Salary ($/h)"} text={userDetails.salary} />
-                        <ProfileDetail label={"Overtime Rate"} text={userDetails.overtimeRate} />
-                    </View> */}
+
                     <View style={styles.profileDetailRow}>
                         <ProfileDetail label={"Email"} text={userDetails.email} />
                         <ProfileDetail label={"Number"} text={userDetails.number} />
@@ -261,7 +245,7 @@ export default function CustomerProfile() {
                     </View>
 
                     <View style={styles.profileDetailRow}>
-                        <ProfileDetail label={"30 Days Expenditure"} text={userDetails.expenditure} />
+                        <ProfileDetail label={"Total Expenditure"} text={userDetails.expenditure} />
                     </View>
 
                     <View style={styles.profileDetailRow}>
@@ -273,7 +257,7 @@ export default function CustomerProfile() {
                         <ProfileDetail label={"Discount"} text={nextTier.discount + "%"} />
                     </View>
                     <View style={styles.profileDetailRow}>
-                        <ProfileDetail label={"Expenditure to reach next Tier"} text={(nextTier.expenditure - userDetails.expenditure > 0 ? nextTier.expenditure - userDetails.expenditure : "NA")} />
+                        <ProfileDetail label={"Expenditure to reach next Tier"} text={"$" + (nextTier.expenditure - userDetails.expenditure > 0 ? nextTier.expenditure - userDetails.expenditure : "NA")} />
                     </View>
 
                     <ProgressBar

@@ -435,36 +435,72 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='My Profile' component={MyProfile}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='Create Order' component={CreateOrder}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <Ionicons name="create" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='Staff Rostering' component={StaffRostering}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <Ionicons name="people" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='Vehicle' component={VehicleModule}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <Entypo name="calendar" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
@@ -507,18 +543,36 @@ function RootNavigator() {
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='Driver' component={Driver}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <AntDesign name="user" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
             <Drawer.Screen name='Vehicle' component={VehicleModule}
               options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
                 drawerIcon: ({ focused }) => (
                   <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
@@ -538,32 +592,50 @@ function RootNavigator() {
             headerTintColor: '#fff',
           }}
         >
-          {/* <Drawer.Screen name='Delivery' component={DeliveryTemp} initialParams={{ curuser: user1 }}
-            options={{
-              drawerIcon: ({ focused }) => (
-                <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} /> */}
           <Drawer.Screen name='Home' component={Home}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerIcon: ({ focused }) => (
                 <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='My Profile' component={CustomerProfile}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: user1 }}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerIcon: ({ focused }) => (
                 <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Pick up' component={Pickup} initialParams={{ curuser: null }}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerIcon: ({ focused }) => (
                 <Entypo name="shopping-basket" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
@@ -583,6 +655,12 @@ function RootNavigator() {
             }} /> */}
           <Drawer.Screen name='Order History' component={CustomerViewOrderHistory}
             options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
