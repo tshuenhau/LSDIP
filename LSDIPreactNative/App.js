@@ -165,18 +165,6 @@ function RootNavigator() {
             headerTintColor: '#fff',
           }}
         >
-          <Drawer.Screen name='Membership Tier' component={MembershipTier}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialCommunityIcons name="wallet-membership" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
           <Drawer.Screen name='Home' component={Home}
             options={{
               headerStyle: {
@@ -321,7 +309,7 @@ function RootNavigator() {
                 <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-          {/* <Drawer.Screen name='Membership Tier' component={MembershipTier}
+          <Drawer.Screen name='Membership Tier' component={MembershipTier}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme
@@ -332,7 +320,7 @@ function RootNavigator() {
               drawerIcon: ({ focused }) => (
                 <MaterialCommunityIcons name="wallet-membership" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
-            }} /> */}
+            }} />
           <Drawer.Screen name='Reward System' component={CRM}
             options={{
               headerStyle: {
