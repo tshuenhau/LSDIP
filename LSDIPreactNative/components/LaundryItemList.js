@@ -273,7 +273,8 @@ export default function LaundryItemList() {
     );
 
     return (
-        <View>
+        <View style={styles.container}>
+            <Text style={styles.searchText}>Laundry Item List</Text>
             <View style={styles.header}>
                 <View style={styles.searchnfilter}>
                     <View style={styles.searchContainer}>
@@ -291,7 +292,7 @@ export default function LaundryItemList() {
                     <Text style={styles.text}>Create Laundry Item</Text>
                 </TouchableOpacity>
             </View>
-            <Text style={styles.listtext}>Laundry Item List</Text>
+            
 
             <View>
                 <FlatList
@@ -483,6 +484,14 @@ const styles = StyleSheet.create({
     cardBody: {
         padding: 16,
     },
+    container: {
+        backgroundColor: '#fff',
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
+      },
     itemContainer: {
         backgroundColor: colors.lightGray,
         flex: 1,
@@ -581,43 +590,37 @@ const styles = StyleSheet.create({
     },
     searchnfilter: {
         flexDirection: 'row',
-        marginLeft: 10,
-        width: "78%",
-    },
+        width: "78%"
+      },
     searchContainer: {
+        width: "96%",
         marginVertical: 15,
-        marginLeft: 30,
+        marginLeft: "auto",
+        marginRight: "auto",
         borderWidth: 1,
-        borderRadius: 20,
+        borderRadius: 15,
         borderColor: '#f5f5f5',
         backgroundColor: '#f5f5f5',
         alignItems: "center",
-        flexDirection: "row",
-        alignContent: "space-between"
+        flexDirection: "row"
     },
     searchInput: {
         height: 40,
         fontSize: 18,
-        marginLeft: 60,
+        width: '100%',
+        marginLeft: 10,
         paddingHorizontal: 10
-    },
+      },
     searchbaricon: {
         height: 40
-    }, searchInput: {
-        height: 40,
-        borderWidth: 1,
-        borderRadius: 5,
-        borderColor: colors.gray,
-        paddingHorizontal: 10,
-        fontSize: 18,
-        backgroundColor: colors.white,
-        marginVertical: 10,
-    },
-    searchContainer: {
-        justifyContent: "center",
-        alignContent: "center",
-        width: "96%",
-        marginLeft: 10
+    }, 
+    searchText: {
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left"
     },
     listtext: {
         paddingLeft: 20,
@@ -629,5 +632,13 @@ const styles = StyleSheet.create({
         width: "97%",
         flexDirection: "row",
         marginTop: 40
-    }
+    },
+    btn: {
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "20%",
+        marginHorizontal: "5%",
+    },
 });

@@ -200,7 +200,8 @@ export default function OutletList({ navigation }) {
     );
 
     return (
-        <View>
+        <View style={styles.container}>
+            <Text style={styles.searchText}>Outlet List </Text>
             <View style={styles.header}>
                 <View style={styles.searchnfilter}>
                     <View style={styles.searchContainer}>
@@ -225,7 +226,7 @@ export default function OutletList({ navigation }) {
                     <Text style={styles.text}>Create Outlet</Text>
                 </TouchableOpacity>
     </View>*/}
-            <Text style={styles.listtext}>Outlet List </Text>
+            
             <View>
                 <FlatList
                     data={filteredOutletList}
@@ -379,26 +380,34 @@ const styles = StyleSheet.create({
     },
     searchnfilter: {
         flexDirection: 'row',
-        marginLeft: 10,
-        width: "78%",
-    },
+        width: "78%"
+      },
     searchContainer: {
-        marginVertical: 15,
-        marginLeft: 30,
-        borderWidth: 1,
-        borderRadius: 5,
-        borderColor: '#f5f5f5',
-        backgroundColor: colors.white,
-        justifyContent: "center",
-        alignContent: "center",
         width: "96%",
-        marginLeft: 10,
-        height: 50
+        marginVertical: 15,
+        marginLeft: "auto",
+        marginRight: "auto",
+        borderWidth: 1,
+        borderRadius: 15,
+        borderColor: '#f5f5f5',
+        backgroundColor: '#f5f5f5',
+        alignItems: "center",
+        flexDirection: "row"
     },
     searchInput: {
         height: 40,
         fontSize: 18,
-        paddingHorizontal: 10,
+        width:'100%',
+        marginLeft: 10,
+        paddingHorizontal: 10
+    },
+    searchText: {
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left"
     },
     createBtn: {
         borderRadius: 5,
@@ -415,5 +424,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "600",
         color: "black"
+    },
+    container: {
+        backgroundColor: '#fff',
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
     },
 })

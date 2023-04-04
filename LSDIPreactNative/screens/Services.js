@@ -167,7 +167,7 @@ export default function Services({ navigation }) {
     );
 
     return (
-        <View>
+        <View style={styles.container}>
             {/*for create services */}
             <Modal
                 animationType="fade"
@@ -195,6 +195,7 @@ export default function Services({ navigation }) {
                 </View>
             </Modal >
             {/*to view service list */}
+            <Text style={styles.searchText}>Service List </Text>
             <View style={styles.header}>
                 <View style={styles.searchnfilter}>
                     <View style={styles.searchContainer}>
@@ -221,7 +222,7 @@ export default function Services({ navigation }) {
                 </TouchableOpacity>
             </View> */}
             <View>
-                <Text style={styles.listtext}>Service List </Text>
+                
 
                 <FlatList
                     data={filteredServiceList}
@@ -334,43 +335,34 @@ const styles = StyleSheet.create({
     },
     searchnfilter: {
         flexDirection: 'row',
-        marginLeft: 10,
-        width: "78%",
-    },
+        width: "78%"
+      },
     searchContainer: {
+        width: "96%",
         marginVertical: 15,
-        marginLeft: 30,
+        marginLeft: "auto",
+        marginRight: "auto",
         borderWidth: 1,
-        borderRadius: 20,
+        borderRadius: 15,
         borderColor: '#f5f5f5',
         backgroundColor: '#f5f5f5',
         alignItems: "center",
-        flexDirection: "row",
-        alignContent: "space-between"
+        flexDirection: "row"
     },
     searchInput: {
         height: 40,
         fontSize: 18,
-        marginLeft: 60,
+        width:'100%',
+        marginLeft: 10,
         paddingHorizontal: 10
     },
-    searchbaricon: {
-        height: 40
-    }, searchInput: {
-        height: 40,
-        borderWidth: 1,
-        borderRadius: 5,
-        borderColor: colors.gray,
-        paddingHorizontal: 10,
-        fontSize: 18,
-        backgroundColor: colors.white,
-        marginVertical: 10,
-    },
-    searchContainer: {
-        justifyContent: "center",
-        alignContent: "center",
-        width: "96%",
-        marginLeft: 10
+    searchText: {
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left"
     },
     listtext: {
         paddingLeft: 20,
@@ -408,5 +400,13 @@ const styles = StyleSheet.create({
     cardHeaderIcon: {
         flexDirection: 'row',
         padding: 16,
+    },
+    container: {
+        backgroundColor: '#fff',
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
     },
 })

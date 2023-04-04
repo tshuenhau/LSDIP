@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAK0Uk4LnWMDnfpcBB0-uOMNh3-mHWEQ_FQGjEN03qvPjeN5_wBIG2DB_dSUwfONGZl6qArjAlscyayC7lLFu55473XvLA`
+                    'Authorization': `Bearer A21AALaldQHlB3M3spnS2f4ht5cg0J5Hx4VpmpnfCnTEZdyHV10yRtIAdgnkiU0S6lAfZb_tklm1YjOR6qJ8T9HAbgeGOha5Q`
                 },
                 body: 'grant_type=client_credentials'
             }
@@ -112,15 +112,15 @@ export default class Paypal extends Component {
                 .then(response => {
                     console.log("res", response);
                     if (response.name == "INVALID_RESOURCE_ID") {
-                        alert('Payment Failed. Please Try Again!')
-                        this.setState({
-                            approvalUrl: null
-                        })
-                        this.props.navigation.pop();
+                        // alert('Payment Failed. Please Try Again!')
+                        // this.setState({
+                        //     approvalUrl: null
+                        // })
+                        // this.props.navigation.pop();
                     }
                     if (response.state === "approved") {
                         console.log("create delivery");
-                        updateDatabase();
+                        // updateDatabase();
                     }
                 }).catch(err => {
                     console.log(...err)
@@ -129,59 +129,59 @@ export default class Paypal extends Component {
     }
 
     updateDatabase = () => {
-        const db = firebase.firestore();
-        const user = firebase.auth().currentUser;
-        console.log(user);
+        // const db = firebase.firestore();
+        // const user = firebase.auth().currentUser;
+        // console.log(user);
 
-        const selectedOrders = this.state.matchingOrders.map((order) => order.id);
+        // const selectedOrders = this.state.matchingOrders.map((order) => order.id);
 
-        if (user) {
-            const selectedHour = this.state.selectedTime.split(' - ')[0];
-            const shiftTime = selectedHour.split('00')[1];
-            const docRef = db.collection('shift_orders').doc(this.state.selectedDate);
+        // if (user) {
+        //     const selectedHour = this.state.selectedTime.split(' - ')[0];
+        //     const shiftTime = selectedHour.split('00')[1];
+        //     const docRef = db.collection('shift_orders').doc(this.state.selectedDate);
 
-            docRef.get()
-                .then((doc) => {
-                    let shiftData;
-                    if (doc.exists) {
-                        shiftData = doc.data();
-                    } else {
-                        shiftData = {};
-                    }
+        //     docRef.get()
+        //         .then((doc) => {
+        //             let shiftData;
+        //             if (doc.exists) {
+        //                 shiftData = doc.data();
+        //             } else {
+        //                 shiftData = {};
+        //             }
 
-                    // Check if orders exist for this date, and create an empty array if not
-                    if (!shiftData[this.state.selectedDate]) {
-                        shiftData[this.state.selectedDate] = [];
-                    }
+        //             // Check if orders exist for this date, and create an empty array if not
+        //             if (!shiftData[this.state.selectedDate]) {
+        //                 shiftData[this.state.selectedDate] = [];
+        //             }
 
-                    // Add selected orders to the array for this date
-                    shiftData[this.state.selectedDate].push(...selectedOrders);
+        //             // Add selected orders to the array for this date
+        //             shiftData[this.state.selectedDate].push(...selectedOrders);
 
-                    return docRef.set(shiftData);
-                })
-                .then(() => {
-                    console.log('Shift orders updated successfully');
-                    const docRef = db.collection('user_timings').doc(user.uid);
-                    docRef.get()
-                        .then((doc) => {
-                            let selectedTimes = [];
+        //             return docRef.set(shiftData);
+        //         })
+        //         .then(() => {
+        //             console.log('Shift orders updated successfully');
+        //             const docRef = db.collection('user_timings').doc(user.uid);
+        //             docRef.get()
+        //                 .then((doc) => {
+        //                     let selectedTimes = [];
 
-                            if (doc.exists) {
-                                selectedTimes = doc.data().selected_times;
-                            }
+        //                     if (doc.exists) {
+        //                         selectedTimes = doc.data().selected_times;
+        //                     }
 
-                            selectedTimes.push({
-                                date: selectedDate,
-                                time: this.state.selectedTime,
-                                orders: matchingOrders,
-                            });
+        //                     selectedTimes.push({
+        //                         date: selectedDate,
+        //                         time: this.state.selectedTime,
+        //                         orders: matchingOrders,
+        //                     });
 
-                            return docRef.set({
-                                selected_times: selectedTimes,
-                            });
-                        })
-                })
-        }
+        //                     return docRef.set({
+        //                         selected_times: selectedTimes,
+        //                     });
+        //                 })
+        //         })
+        // }
     }
 
     render() {

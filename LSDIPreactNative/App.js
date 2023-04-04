@@ -49,6 +49,7 @@ import Paypal from './components/Paypal';
 import Dashboard from './screens/Dashboard';
 import Logging from './screens/Logging';
 import Setting from './screens/AdminSetting';
+import MembershipTier from './screens/MembershipTier';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -160,6 +161,9 @@ function RootNavigator() {
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            headerTintColor: '#fff',
+          }}
         >
           <Drawer.Screen name='Home' component={Home}
             options={{
@@ -173,18 +177,6 @@ function RootNavigator() {
                 <Entypo name="home" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-          <Drawer.Screen name='Dashboard' component={Dashboard}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
           <Drawer.Screen name='My Profile' component={MyProfile}
             options={{
               headerStyle: {
@@ -195,6 +187,18 @@ function RootNavigator() {
               },
               drawerIcon: ({ focused }) => (
                 <MaterialIcons name="account-circle" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
+          <Drawer.Screen name='Account Management' component={Account}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="person-search" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Create Order' component={CreateOrder}
@@ -221,7 +225,7 @@ function RootNavigator() {
                 <MaterialIcons name="local-laundry-service" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-          <Drawer.Screen name='Account Management' component={Account}
+          <Drawer.Screen name='Service' component={Service}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme
@@ -230,7 +234,7 @@ function RootNavigator() {
                 color: '#fff',
               },
               drawerIcon: ({ focused }) => (
-                <MaterialIcons name="person-search" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                <MaterialIcons name="dry-cleaning" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
           <Drawer.Screen name='Outlet Management' component={OutletManagement}
@@ -305,6 +309,18 @@ function RootNavigator() {
                 <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+          <Drawer.Screen name='Membership Tier' component={MembershipTier}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerIcon: ({ focused }) => (
+                <MaterialCommunityIcons name="wallet-membership" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }} />
           <Drawer.Screen name='Reward System' component={CRM}
             options={{
               headerStyle: {
@@ -329,8 +345,7 @@ function RootNavigator() {
                 <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
-          <Drawer.Screen name='Service' component={Service}
+          <Drawer.Screen name='Dashboard' component={Dashboard}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme
@@ -339,9 +354,10 @@ function RootNavigator() {
                 color: '#fff',
               },
               drawerIcon: ({ focused }) => (
-                <MaterialIcons name="dry-cleaning" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+          {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Payment' component={Payment}
             options={{
               headerStyle: {
@@ -436,6 +452,9 @@ function RootNavigator() {
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            headerTintColor: '#fff',
+          }}
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home}
@@ -505,6 +524,9 @@ function RootNavigator() {
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            headerTintColor: '#fff',
+          }}
         >
           <Drawer.Group>
             <Drawer.Screen name='Home' component={Home}
@@ -536,6 +558,9 @@ function RootNavigator() {
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            headerTintColor: '#fff',
+          }}
         >
           {/* <Drawer.Screen name='Delivery' component={DeliveryTemp} initialParams={{ curuser: user1 }}
             options={{
