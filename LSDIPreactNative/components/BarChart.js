@@ -33,24 +33,10 @@ export default function BarChart({ data }) {
                     .rangeRound([height - margin.bottom, martin.top])
                  */
             }
-            const orderByM = [
-                {month: 1, orderAmt: 0, sales: 0},
-                {month: 2, orderAmt: 4, sales: 0},
-                {month: 3, orderAmt: 86, sales: 0},
-                {month: 4, orderAmt: 12, sales: 0},
-                {month: 5, orderAmt: 0, sales: 0},
-                {month: 6, orderAmt: 0, sales: 0},
-            ];
-            //console.log(orderByM);
-            //console.log('new', orderByM[1].orderAmt);
-            data.forEach(element => {
-                console.log(element);
-            });
-            //console.log(orderAmts);
-            //console.log(d3.max(data, (d) => d.orderAmt));
+
             const y1 = d3
                 .scaleLinear()
-                .domain([0, 100])
+                .domain([0, d3.max(data, (d) => d.orderAmt)])
                 .rangeRound([height - margin.bottom, margin.top]);
 
             const xAxis = (g) =>
