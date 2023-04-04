@@ -371,7 +371,7 @@ function RootNavigator() {
                 <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-            <Drawer.Screen name='Setting' component={Setting}
+          <Drawer.Screen name='Setting' component={Setting}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme
