@@ -23,7 +23,7 @@ export default function DeliveryTemp({ navigation, route }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedTime, setSelectedTime] = useState(null);
-  const [deliveryfee, setDeliveryFee] = useState(0);
+  const [deliveryFees, setDeliveryFees] = useState(0);
   const today = moment().format("YYYY-MM-DD");
 
   // retrieving User's selected delivery
@@ -77,85 +77,186 @@ export default function DeliveryTemp({ navigation, route }) {
     setIsModalOpen(true);
   };
 
+  // const calculateDeliveryFee = () => {
+  //   let address = "";
+  //   db.collection('users')
+  //     .where('email', '==', curuser.email)
+  //     .get()
+  //     .then(querySnapshot => {
+  //       if (querySnapshot.empty) {
+  //         console.log('No matching documents.');
+  //       } else {
+  //         querySnapshot.forEach(doc => {
+  //           // Retrieve the user's address from the document
+  //           address = doc.data().address;
+  //           console.log(`User's address: ${address}`);
+  //           const location1 = address;
+  //           const location2 = '10 Paya Lebar Rd Singapore 409057';
+  //           const apiKey = 'AIzaSyD8TTzob1ybGqAfl_3au0otOEisH44dFuY';
+
+  //           // Make API request for location 1
+  //           const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+  //           axios.get(apiUrl1)
+  //             .then(response => {
+  //               if (response.data.results.length === 0) {
+  //                 console.error('No results found for location:', location1);
+  //                 return;
+  //               }
+  //               const result = response.data.results[0];
+  //               const coords1 = {
+  //                 latitude: result.geometry.location.lat,
+  //                 longitude: result.geometry.location.lng
+  //               };
+
+  //               // Make API request for location 2
+  //               const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+  //               axios.get(apiUrl2)
+  //                 .then(response => {
+  //                   if (response.data.results.length === 0) {
+  //                     console.error('No results found for location:', location2);
+  //                     return;
+  //                   }
+  //                   const result = response.data.results[0];
+  //                   const coords2 = {
+  //                     latitude: result.geometry.location.lat,
+  //                     longitude: result.geometry.location.lng
+  //                   };
+
+  //                   // Calculate the distance between the two sets of coordinates
+  //                   const distanceInMeters = geolib.getDistance(coords1, coords2);
+  //                   console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+  //                   const deliveryFee = distanceInMeters / 500
+  //                   console.log(deliveryFee);
+  //                   console.log("delivery fee is here!");
+  //                   setDeliveryFees(deliveryFee);
+  //                   console.log(deliveryFees);
+  //                 }).catch(error => {
+  //                   console.error(error);
+  //                 });
+  //             }).catch(error => {
+  //               console.error(error);
+  //             });
+  //         })
+  //       }
+  //     }).catch(error => {
+  //       console.error(error);
+  //     });
+  // }
+
   const calculateDeliveryFee = () => {
-    let address = "";
-    db.collection('users')
-      .where('email', '==', curuser.email)
-      .get()
-      .then(querySnapshot => {
-        if (querySnapshot.empty) {
-          console.log('No matching documents.');
-        } else {
-          querySnapshot.forEach(doc => {
-            // Retrieve the user's address from the document
-            address = doc.data().address;
-            console.log(`User's address: ${address}`);
-            const location1 = address;
-            const location2 = '10 Paya Lebar Rd Singapore 409057';
-            const apiKey = 'AIzaSyCe-H2Rttn3Ta8D1h0EpV3YagTInTB0wzw';
-
-            // Make API request for location 1
-            const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
-            axios.get(apiUrl1)
-              .then(response => {
-                if (response.data.results.length === 0) {
-                  console.error('No results found for location:', location1);
-                  return;
-                }
-                const result = response.data.results[0];
-                const coords1 = {
-                  latitude: result.geometry.location.lat,
-                  longitude: result.geometry.location.lng
-                };
-
-                // Make API request for location 2
-                const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
-                axios.get(apiUrl2)
-                  .then(response => {
-                    if (response.data.results.length === 0) {
-                      console.error('No results found for location:', location2);
-                      return;
-                    }
-                    const result = response.data.results[0];
-                    const coords2 = {
-                      latitude: result.geometry.location.lat,
-                      longitude: result.geometry.location.lng
-                    };
-
-                    // Calculate the distance between the two sets of coordinates
-                    const distanceInMeters = geolib.getDistance(coords1, coords2);
-                    console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
-                    const deliveryFee = distanceInMeters / 500
-                    console.log(deliveryFee);
-                    setDeliveryFee(deliveryFee);
-                  }).catch(error => {
-                    console.error(error);
-                  });
-              }).catch(error => {
-                console.error(error);
-              });
-          })
-        }
-      }).catch(error => {
-        console.error(error);
-      });
+    return new Promise((resolve, reject) => {
+      let address = "";
+      db.collection('users')
+        .where('email', '==', curuser.email)
+        .get()
+        .then(querySnapshot => {
+          if (querySnapshot.empty) {
+            console.log('No matching documents.');
+            reject();
+          } else {
+            querySnapshot.forEach(doc => {
+              // Retrieve the user's address from the document
+              address = doc.data().address;
+              console.log(`User's address: ${address}`);
+              const location1 = address;
+              const location2 = '10 Paya Lebar Rd Singapore 409057';
+              const apiKey = 'AIzaSyD8TTzob1ybGqAfl_3au0otOEisH44dFuY';
+  
+              // Make API request for location 1
+              const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+              axios.get(apiUrl1)
+                .then(response => {
+                  if (response.data.results.length === 0) {
+                    console.error('No results found for location:', location1);
+                    reject();
+                  }
+                  const result = response.data.results[0];
+                  const coords1 = {
+                    latitude: result.geometry.location.lat,
+                    longitude: result.geometry.location.lng
+                  };
+  
+                  // Make API request for location 2
+                  const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                  axios.get(apiUrl2)
+                    .then(response => {
+                      if (response.data.results.length === 0) {
+                        console.error('No results found for location:', location2);
+                        reject();
+                      }
+                      const result = response.data.results[0];
+                      const coords2 = {
+                        latitude: result.geometry.location.lat,
+                        longitude: result.geometry.location.lng
+                      };
+  
+                      // Calculate the distance between the two sets of coordinates
+                      const distanceInMeters = geolib.getDistance(coords1, coords2);
+                      console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                      const deliveryFee = distanceInMeters / 500
+                      console.log(deliveryFee);
+                      console.log("delivery fee is here!");
+                      resolve(deliveryFee);
+                    }).catch(error => {
+                      console.error(error);
+                      reject();
+                    });
+                }).catch(error => {
+                  console.error(error);
+                  reject();
+                });
+            })
+          }
+        }).catch(error => {
+          console.error(error);
+          reject();
+        });
+    });
   }
+  
 
-  const handlePayment = () => {
+  useEffect(() => {
+    console.log('Delivery fees updated:', deliveryFees);
+  }, [deliveryFees]);
+
+  const handlePayment = async () => {
     const selectedOrders = matchingOrders.map((order) => order.id);
     console.log(selectedOrders);
     console.log(matchingOrders);
-    // calculateDeliveryFee();
-    navigation.navigate('Payment',
-      {
-        deliveryfee: deliveryfee,
-        matchingOrders: matchingOrders,
-        curuser: curuser,
-        selectedTime: selectedTime,
-        selectedDate: selectedDate
-      });
+    try {
+      const deliveryFee = await calculateDeliveryFee();
+      console.log("completed calculation of delivery fee!");
+      navigation.navigate('Payment',
+        {
+          deliveryfee: deliveryFee,
+          matchingOrders: matchingOrders,
+          curuser: curuser,
+          selectedTime: selectedTime,
+          selectedDate: selectedDate
+        });
+    } catch (error) {
+      console.error(error);
+      // handle error
+    }
     // updateDatabase();
   }
+
+  // const handlePayment = () => {
+  //   const selectedOrders = matchingOrders.map((order) => order.id);
+  //   console.log(selectedOrders);
+  //   console.log(matchingOrders);
+  //   calculateDeliveryFee();
+  //   console.log("completed calculation of delivery fee!");
+  //   navigation.navigate('Payment',
+  //     {
+  //       deliveryfee: deliveryFees,
+  //       matchingOrders: matchingOrders,
+  //       curuser: curuser,
+  //       selectedTime: selectedTime,
+  //       selectedDate: selectedDate
+  //     });
+  //   // updateDatabase();
+  // }
 
   const updateDatabase = () => {
     const db = firebase.firestore();
