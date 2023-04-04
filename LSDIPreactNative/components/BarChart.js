@@ -6,7 +6,6 @@ import colors from '../colors';
 
 export default function BarChart({ data }) {
     //console.log(data);
-    //console.log(data[1]);
     const ref = useD3(
         (svg) => {
             const height = 300;
