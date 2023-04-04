@@ -317,7 +317,7 @@ export default function OrdersList({ navigation }) {
           <View style={styles.tableHeader}>
             <Text style={styles.tableHeaderText}>Select</Text>
             <Text style={styles.tableHeaderText}>Date</Text>
-            <Text style={styles.tableHeaderText}>Invoice Number</Text>
+            <Text style={styles.tableHeaderText}>Invoice No</Text>
             <Text style={styles.tableHeaderText}>Customer</Text>
             <Text style={styles.tableHeaderText}>Price</Text>
             <Text style={styles.tableHeaderText}>Status</Text>
