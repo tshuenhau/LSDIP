@@ -40,10 +40,10 @@ export default function CustomersScreen({ navigation }) {
             data.push({
               id: doc.id,
               name: doc.data().name,
-              number: doc.data().number || "no number",
+              number: doc.data().number || "No number",
               expenditure: doc.data().expenditure || 0,
               points: doc.data().points || 0,
-              membership_tier: customerTier || "Not a member"
+              membership_tier: customerTier || "No membership discount"
             });
           });
           setCustomers(data);
