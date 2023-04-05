@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     borderColor: '#f5f5f5',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.themelight,
     justifyContent: "center",
     alignContent: "center",
     width: "96%",

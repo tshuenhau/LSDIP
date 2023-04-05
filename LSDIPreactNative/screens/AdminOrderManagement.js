@@ -22,13 +22,11 @@ if (
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function AdminOrderManagement({ navigation,  route }) {
-    const [user, setUser] = useState(null);
+export default function AdminOrderManagement({ navigation, route }) {
     const { userNumber } = route.params;
     const [orderList, setOrderList] = useState([]);
     const orders = firebase.firestore().collection('orders');
     const [expandedOrder, setExpandedOrder] = useState(null);
-    const users = firebase.firestore().collection('users');
     //console.log(userNumber.toString())
     useEffect(() => {
         orders
@@ -36,12 +34,12 @@ export default function AdminOrderManagement({ navigation,  route }) {
             .onSnapshot(querySnapshot => {
                 const orderList = [];
                 querySnapshot.forEach((doc) => {
-                    const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+                    const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice } = doc.data();
                     orderList.push({
                         id: doc.id,
                         customerName,
                         customerNumber,
-                        date,
+                        orderDate,
                         orderItems,
                         outletId,
                         orderStatus,
@@ -53,20 +51,15 @@ export default function AdminOrderManagement({ navigation,  route }) {
     }, []);
 
     const formatOrderNumber = (id) => {
-        return '#' + id.slice(0, 4).toUpperCase();
+        return '#' + id.slice(0, 6).toUpperCase();
+    };
+
+    const formatTime = (date) => {
+        var convertedDate = date.toDate();
+        return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
     };
 
     const filteredOrder = orderList.filter((item) => item.customerNumber == userNumber.toString());
-
-    const toggleExpand = (id) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        if (expandedOrder === id) {
-            setExpandedOrder(null);
-        } else {
-            setExpandedOrder(id);
-        }
-    };
-
 
     const renderItem = ({ item: order }) => (
         <TouchableOpacity
@@ -74,16 +67,13 @@ export default function AdminOrderManagement({ navigation,  route }) {
             onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
             activeOpacity={0.8}>
             <View style={styles.cardHeader}>
+                <View>
                 <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
-                <Text style={styles.orderDate}>{order.orderDate}</Text>
-                <Text style={styles.orderNumber}>{order.orderStatus}</Text>
-            </View>
-            {expandedOrder === order.id && (
-                <View style={styles.cardBody}>
-                    <Text style={styles.orderNumber}>OutletId: {order.outletId}</Text>
-                    <Text style={styles.orderNumber}>Total Price: {order.totalPrice}</Text>
+                <Text style={styles.orderStatus}>{order.orderStatus}</Text>
                 </View>
-            )}
+                <Text style={styles.orderDate}>{formatTime(order.orderDate)}</Text>
+                <Text style={styles.orderAmt}>S${order.totalPrice}</Text>
+            </View>
         </TouchableOpacity>
     );
 
@@ -141,12 +131,26 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     orderNumber: {
-        fontSize: 20,
+        fontSize: 30,
         fontWeight: 'bold',
+    },
+    orderStatus: {
+        fontSize: 15,
     },
     orderDate: {
         fontSize: 14,
         color: colors.gray,
+        alignContent:'center',
+        alignSelf:'center',
+        alignItems:'center',
+    },
+    orderAmt: {
+        fontSize: 20,
+        alignContent:'center',
+        alignSelf:'center',
+        alignItems:'center',
+        marginRight:30,
+        fontWeight:600
     },
     cardBody: {
         backgroundColor: colors.lightGray,
