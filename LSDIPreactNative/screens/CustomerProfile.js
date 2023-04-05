@@ -16,6 +16,7 @@ import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
 import { ProgressBar } from "react-milestone";
+import { AntDesign } from '@expo/vector-icons';
 
 export default function CustomerProfile() {
     const initialValues = {
@@ -195,7 +196,7 @@ export default function CustomerProfile() {
     }
 
     return (
-        <ScrollView style={{ backgroundColor: colors.background, flex: 1 }}>
+        <ScrollView style={{ backgroundColor: colors.themelight, flex: 1 }}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
@@ -266,8 +267,11 @@ export default function CustomerProfile() {
                     <ProgressBar
                         style={{ margin: 30 }}
                         percentage={100 * ((userDetails.expenditure - currentTier.expenditure) / (nextTier.expenditure - currentTier.expenditure))}
-                        color="#0782F9"
+                        color={colors.blue600}
                         transitionSpeed={1000}
+                        Milestone={() => <AntDesign name="star" size={26} color={colors.blue300} />}
+                        CurrentMilestone={() => <AntDesign name="star" size={26} color={colors.blue600} />}
+                        CompletedMilestone={() => <AntDesign name="star" size={26} color={colors.blue900} />}
                         milestoneCount={2}
                     />
 

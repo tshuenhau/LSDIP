@@ -236,16 +236,16 @@ export default function CustomerHome({ user, navigation }) {
                     </Text>
                     <Text style={styles.customerPointLabel}>Point balance</Text>
                 </View>
-                <AntDesign name="star" size={24} color="#0782F9" />
+                {/*<AntDesign name="star" size={24} color="#0782F9" />*/}
             </View>
-            <View style={{ padding: 30 }}>
+            <View style={{ padding: 20, width:"96%" }}>
                 <ProgressBar
                     percentage={customerMilestone}
-                    color="#0782F9"
+                    color={colors.blue600}
                     transitionSpeed={1000}
-                    Milestone={() => <AntDesign name="star" size={24} color="#AEAEAE" />}
-                    CurrentMilestone={() => <AntDesign name="star" size={24} color="#647C90" />}
-                    CompletedMilestone={() => <AntDesign name="star" size={24} color="#0782F9" />}
+                    Milestone={() => <AntDesign name="star" size={26} color={colors.blue300} />}
+                    CurrentMilestone={() => <AntDesign name="star" size={26} color={colors.blue600} />}
+                    CompletedMilestone={() => <AntDesign name="star" size={26} color={colors.blue900}/>}
                     milestoneCount={membershipTiers.length} />
 
             </View>

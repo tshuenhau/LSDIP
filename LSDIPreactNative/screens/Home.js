@@ -71,7 +71,7 @@ export default function Home({ navigation }) {
             <View style={{marginLeft: 30}}>
             <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
               {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
-              <Text style={{ paddingLeft: 5, marginLeft: 10 }}>{date + time}</Text>
+              <Text style={styles.dateText}>{date + time}</Text>
             </View>
             <OrdersList navigation={navigation} />
           </View>
@@ -82,7 +82,7 @@ export default function Home({ navigation }) {
             <View style={{marginLeft: 30}}>
               <Text style={styles.welcomeMessage}>{wish}{user?.role} {user?.name}</Text>
               {/*<Text>Email: {auth.currentUser?.email}</Text>*/}
-              <Text style={{ paddingLeft: 5, marginLeft: 10 }}>{date + time}</Text>
+              <Text style={styles.dateText}>{date + time}</Text>
             </View>
             <OrdersList navigation={navigation} />
 
@@ -93,7 +93,7 @@ export default function Home({ navigation }) {
           <View>
             <View style={{ marginLeft: 10 }}>
               <Text style={styles.welcomeMessage}>{wish}{user.name}</Text>
-              <Text>{date + time}</Text>
+              <Text style={styles.dateText}>{date + time}</Text>
             </View>
             <CustomerHome user={user} navigation={navigation} />
           </View>
@@ -131,6 +131,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "800",
     padding: 5,
+    marginLeft: 10
+  },
+  dateText:{
+    paddingLeft: 5, 
     marginLeft: 10
   },
   container: {

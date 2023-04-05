@@ -460,7 +460,7 @@ function RootNavigator() {
     );
   } else if (user1?.role === "Staff") {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -592,7 +592,7 @@ function RootNavigator() {
     );
   } else if (user1?.role === "Driver") {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -644,7 +644,7 @@ function RootNavigator() {
     );
   } else if (user1?.role === "Customer") {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -725,6 +725,19 @@ function RootNavigator() {
                 <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+            <Drawer.Screen name='Setting' component={Setting}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }}
+          />
           {/* <Drawer.Screen name='Payment' component={Payment}
             options={{
               drawerIcon: ({ focused }) => (
