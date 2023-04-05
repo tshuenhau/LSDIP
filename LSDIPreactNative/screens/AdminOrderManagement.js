@@ -22,9 +22,9 @@ if (
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function Invoice(props) {
+export default function AdminOrderManagement({ navigation,  route }) {
     const [user, setUser] = useState(null);
-    const { userNumber } = props.route.params;
+    const { userNumber } = route.params;
     const [orderList, setOrderList] = useState([]);
     const orders = firebase.firestore().collection('orders');
     const [expandedOrder, setExpandedOrder] = useState(null);
@@ -71,7 +71,7 @@ export default function Invoice(props) {
     const renderItem = ({ item: order }) => (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => toggleExpand(order.id)}
+            onPress={() => navigation.navigate('Order Page', { orderId: order.id })}
             activeOpacity={0.8}>
             <View style={styles.cardHeader}>
                 <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
@@ -91,7 +91,7 @@ export default function Invoice(props) {
         <ScrollView>
             <View style={styles.buttonView}>
                 <TouchableOpacity
-                    onPress={() => props.navigation.navigate('Customer Rewards')}
+                    onPress={() => navigation.navigate('Customer Rewards')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back</Text>
                 </TouchableOpacity>
