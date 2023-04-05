@@ -23,6 +23,9 @@ export default function CustomerProfile() {
         name: "",
         number: "",
         role: "",
+        expenditure: "",
+        points: "",
+        membership_tier: ""
     };
     const initialPassword = {
         currentPassword: "",
@@ -67,7 +70,7 @@ export default function CustomerProfile() {
                         });
                         membershipList.sort((a, b) => a.expenditure - b.expenditure);
                         setMembershipList(membershipList);
-                        let tempList = membershipList.filter(record => record.expenditure < userdata.expenditure);
+                        let tempList = membershipList.filter(record => record.expenditure <= userdata.expenditure);
                         let current = initialTier;
                         if (tempList.length > 0) {
                             current = tempList[tempList.length - 1]
