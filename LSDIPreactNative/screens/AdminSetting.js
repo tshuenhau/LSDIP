@@ -27,8 +27,7 @@ export default function AdminSetting({ navigation }) {
     useEffect(() => {
         module_toggle
             .doc('settings')
-            .get()
-            .then(querySnapshot => {
+            .onSnapshot(querySnapshot => {
                 setModuleSettings({ ...querySnapshot.data() });
             })
     }, [])
