@@ -7,16 +7,10 @@ import {
     Switch,
     UIManager,
     Platform,
-    ScrollView
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
-import { auth } from '../config/firebase';
-import TextBox from "../components/TextBox"
-import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
-import Btn from "../components/Button"
-
 
 if (
     Platform.OS === 'android' &&
@@ -41,7 +35,6 @@ export default function AdminSetting({ navigation }) {
 
     function handleChange(eventName) {
         setModuleSettings(prev => {
-            console.log(!moduleSettings[eventName]);
             return {
                 ...prev,
                 [eventName]: !moduleSettings[eventName]
@@ -90,8 +83,9 @@ export default function AdminSetting({ navigation }) {
             </View>
             <Text style={styles.systemServicesText}>System Services</Text>
             <View style={styles.container}>
+                <ToggleSettings text={"Outlet Management Module"} isEnabled={moduleSettings.multipleOutlets} name={"multipleOutlets"} />
                 <ToggleSettings text={"Customer Relations Module"} isEnabled={moduleSettings.customerRelations} name={"customerRelations"} />
-                <ToggleSettings text={"Delivery Module"} isEnabled={moduleSettings.delivery} name={"delivery"} />
+                <ToggleSettings text={"Vehicle"} isEnabled={moduleSettings.vehicle} name={"vehicle"} />
                 <ToggleSettings text={"Staff Rostering Module"} isEnabled={moduleSettings.staffRostering} name={"staffRostering"} />
                 <ToggleSettings text={"Analytics Module"} isEnabled={moduleSettings.analytics} name={"analytics"} />
             </View>
