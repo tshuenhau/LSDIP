@@ -186,6 +186,41 @@ export default function CustomerProfile() {
         }
     };
 
+    const deleteUser = () => {
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete your account?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        users.doc(currUser)
+                            .update({
+                                role: "Disabled"
+                            }).then(() => {
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Your Account is Disabled',
+                                });
+                                auth.signOut()
+                                    .then(() => {
+                                        console.log("you are sign out")
+                                        window.location.reload(false);
+                                        // navigation.navigate('Login')
+                                    })
+                                    .catch(error => alert(error.message))
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
     const ProfileDetail = ({ label, text }) => {
         return (
             <View style={styles.profileDetailContainer}>
@@ -276,6 +311,11 @@ export default function CustomerProfile() {
                     />
 
                 </View>
+                <TouchableOpacity
+                    onPress={() => deleteUser()}
+                    style={styles.deleteBtn}>
+                    <Text style={styles.password}>Deactivate My Account</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Update Modal */}
@@ -339,6 +379,14 @@ export default function CustomerProfile() {
 }
 
 const styles = StyleSheet.create({
+    deleteBtn: {
+        padding: 10,
+        borderRadius: 10,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 25,
+    },
     errorMessageContainer: {
         padding: 10,
         marginBottom: 10,

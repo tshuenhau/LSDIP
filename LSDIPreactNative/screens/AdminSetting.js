@@ -4,10 +4,7 @@ import {
     TouchableOpacity,
     Text,
     StyleSheet,
-    Modal,
-    FlatList,
-    TextInput,
-    LayoutAnimation,
+    Switch,
     UIManager,
     Platform,
     ScrollView
@@ -29,292 +26,138 @@ if (
 }
 
 export default function AdminSetting({ navigation }) {
-    const initialPassword = {
-        currentPassword: "",
-        newPassword: "",
-        confirmNewPassword: ""
-    }
-    const auth1 = firebase.auth;
-    const currUser = auth1().currentUser.uid;
-    const [passwordDetails, setPasswordDetails] = useState(initialPassword);
-    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-    const [cpasswordModalVisible, setcPasswordModalVisible] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [user, setUser] = useState(null) // This user
-    const users = firebase.firestore().collection('users');
 
+    const [moduleSettings, setModuleSettings] = useState({});
+    const module_toggle = firebase.firestore().collection('module_toggle');
 
     useEffect(() => {
-        users.doc(auth1().currentUser.uid)
+        module_toggle
+            .doc('settings')
             .get()
-            .then(user => {
-                setUser(user.data());
-                console.log(user);
+            .then(querySnapshot => {
+                setModuleSettings({ ...querySnapshot.data() });
             })
     }, [])
 
-
-    const reauthenticate = (currentPassword) => {
-        console.log("currentPassword = " + currentPassword)
-        var user = firebase.auth().currentUser;
-        var cred = firebase.auth.EmailAuthProvider.credential(
-            user.email,
-            currentPassword
-        );
-        return user.reauthenticateWithCredential(cred);
-    };
-
-    function handlePasswordChange(text, eventName) {
-        setPasswordDetails(prev => {
+    function handleChange(eventName) {
+        setModuleSettings(prev => {
+            console.log(!moduleSettings[eventName]);
             return {
                 ...prev,
-                [eventName]: text
+                [eventName]: !moduleSettings[eventName]
             }
         })
     }
 
-    const changePassword = () => {
-        let alertMsg = "";
-        if (passwordDetails.currentPassword === "" || passwordDetails.newPassword === "" || passwordDetails.confirmNewPassword === "") {
-            alertMsg = "All the fields are required";
-        } else if (passwordDetails.newPassword.length <= 5) {
-            alertMsg = "Password must contains more than 5 characters";
-        } else if (passwordDetails.newPassword != passwordDetails.confirmNewPassword) {
-            alertMsg = "Passwords do not match";
-        }
-        if (alertMsg.length > 0) {
-            setErrorMessage(alertMsg);
-        } else {
-            try {
-                reauthenticate(passwordDetails.currentPassword).then(() => {
-                    var user = firebase.auth().currentUser;
-                    user.updatePassword(passwordDetails.newPassword);
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Password updated',
-                    });
-                    setErrorMessage("");
-                    setPasswordModalVisible(!passwordModalVisible);
-                    setPasswordDetails(initialPassword);
-                })
-            } catch (error) {
-                console.log(error);
-                alert(error);
-            }
-        }
-    };
-
-    const deleteUser = () => {
-        return alert(
-            "Confirmation",
-            "Are you sure you want to delete your account?",
-            [
-                {
-                    text: "Yes",
-                    onPress: () => {
-                        users.doc(currUser)
-                            .update({
-                                role: "Disabled"
-                            }).then(() => {
-                                Toast.show({
-                                    type: 'success',
-                                    text1: 'Your Account is Disabled',
-                                });
-                                auth.signOut()
-                                    .then(() => {
-                                        console.log("you are sign out")
-                                        window.location.reload(false);
-                                        // navigation.navigate('Login')
-                                    })
-                                    .catch(error => alert(error.message))
-                            })
-                    }
-                },
-                {
-                    text: "Cancel",
-                    onPress: () => console.log("Cancelled`"),
-                    style: "cancel"
-                }
-            ]
+    const ToggleSettings = ({ text, name, isEnabled }) => {
+        return (
+            <View style={styles.profileDetailContainer}>
+                <Text style={styles.itemText}>{text}</Text>
+                <Switch
+                    value={isEnabled}
+                    trackColor={{ false: '#767577', true: colors.blue600 }}
+                    thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                    onValueChange={() => handleChange(name)}
+                />
+            </View >
         );
+    }
+
+    const saveSettings = () => {
+        module_toggle
+            .doc('settings')
+            .update(moduleSettings)
+            .then(() => {
+                console.log("Update Success")
+                Toast.show({
+                    type: 'success',
+                    text1: 'Settings updated',
+                });
+            }).catch((err) => {
+                console.log(err);
+            })
     }
 
     return (
         <View>
-            <View style={styles.buttonView}>
+            <View>
+                {/* <Text style={styles.settingsText}>Settings</Text> */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Logging')}
+                    style={styles.contentBtn}>
+                    <Text style={styles.contentText}>Activity Log</Text>
+                </TouchableOpacity>
             </View>
-            {user?.role === "Admin" &&
-                <View style={styles.container}>
-                    <View style={styles.container}>
-                        <Text style={styles.searchText}>Setting</Text>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('My Profile')}
-                            style={styles.contentBtn}>
-                            <Text style={styles.contentText}>Edit My Profile</Text>
-                        </TouchableOpacity>
+            <Text style={styles.systemServicesText}>System Services</Text>
+            <View style={styles.container}>
+                <ToggleSettings text={"Customer Relations Module"} isEnabled={moduleSettings.customerRelations} name={"customerRelations"} />
+                <ToggleSettings text={"Delivery Module"} isEnabled={moduleSettings.delivery} name={"delivery"} />
+                <ToggleSettings text={"Staff Rostering Module"} isEnabled={moduleSettings.staffRostering} name={"staffRostering"} />
+                <ToggleSettings text={"Analytics Module"} isEnabled={moduleSettings.analytics} name={"analytics"} />
+            </View>
 
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('Logging')}
-                            style={styles.contentBtn}>
-                            <Text style={styles.contentText}>Activity Log</Text>
-                        </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => saveSettings()}
+                style={styles.saveBtn}>
+                <Text style={styles.contentText}>Save Settings</Text>
+            </TouchableOpacity>
 
-
-                        <TouchableOpacity
-                            onPress={() => setPasswordModalVisible(!passwordModalVisible)}
-                            style={styles.contentBtn}>
-                            <Text style={styles.contentText}>Change Password</Text>
-                        </TouchableOpacity>
-
-                    </View>
-                </View>
-            }
-
-            {user?.role === "Customer" &&
-                <View style={styles.ccontainer}>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('My Profile')}
-                            style={styles.contentBtn}>
-                            <Text style={styles.contentText}>Edit My Profile</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => setcPasswordModalVisible(!cpasswordModalVisible)}
-                            style={styles.contentBtn}>
-                            <Text style={styles.contentText}>Change Password</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => deleteUser()}
-                            style={styles.contentBtn}>
-                            <Text style={styles.contentText}>Delete My Account</Text>
-                        </TouchableOpacity>
-                    </View>
-            }
-
-            {/*Update Admin Password Modal */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={passwordModalVisible}>
-                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Change Password</Text>
-                                <TextBox placeholder="Current Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "currentPassword")} />
-                                <TextBox placeholder="New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "newPassword")} />
-                                <TextBox placeholder="Confirm New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "confirmNewPassword")} />
-                                {errorMessage &&
-                                    <View style={styles.errorMessageContainer}>
-                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
-                                    </View>
-                                }
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                    <Btn onClick={() => changePassword()} title="Update" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setPasswordModalVisible(!passwordModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            {/*Update Customer Password Modal */}
-
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={cpasswordModalVisible}>
-                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.cmodalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Change Password</Text>
-                                <TextBox placeholder="Current Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "currentPassword")} />
-                                <TextBox placeholder="New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "newPassword")} />
-                                <TextBox placeholder="Confirm New Password" secureTextEntry={true} onChangeText={text => handlePasswordChange(text, "confirmNewPassword")} />
-                                {errorMessage &&
-                                    <View style={styles.errorMessageContainer}>
-                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
-                                    </View>
-                                }
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                    <Btn onClick={() => changePassword()} title="Update" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setcPasswordModalVisible(!cpasswordModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
         </View>
-
-
     );
 };
 
 const styles = StyleSheet.create({
-    cardBody: {
-        marginBottom: 20,
-        marginLeft: 40,
+    profileDetailContainer: {
+        flexDirection: 'row',
+        flex: 1,
+        justifyContent: 'space-between',
+        marginVertical: 20,
+        marginLeft: 30,
+        paddingRight: 30,
+        borderBottomColor: colors.shadowGray,
+        borderBottomWidth: 0.5,
     },
     itemText: {
-        flex: 1,
-        fontSize: 16,
-    },
-    card: {
-        backgroundColor: '#fff',
-        marginVertical: 10,
-        marginHorizontal: 16,
-        borderRadius: 10,
-    },
-    outletName: {
         fontSize: 20,
-        fontWeight: 'bold',
-        marginLeft: 20,
-        marginTop: 10
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 10,
-        marginLeft: 20,
+        fontWeight: '500',
     },
     container: {
         backgroundColor: '#fff',
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '2%',
         width: '95%',
-        marginBottom: 300,
-        marginVertical: "50%"
-    },
-    ccontainer: {
-        borderRadius: 25,
-        alignSelf: 'center',
-        marginTop: '2%',
-        width: '92%',
-    },
-    buttonView: {
-        justifyContent: 'space-between',
-        marginTop: 30,
-        flexDirection: 'row',
-    },
-    btn: {
-        borderRadius: 20,
-        backgroundColor: colors.darkBlue,
-        justifyContent: "center",
-        alignItems: "center",
-        width: "20%",
-        marginHorizontal: "5%",
+        paddingVertical: 20,
+        // marginTop: '2%',
+        // marginBottom: 300,
+        // marginVertical: "50%"
     },
     contentBtn: {
         borderRadius: 10,
-        backgroundColor: colors.white,
+        backgroundColor: colors.blue600,
         justifyContent: "center",
         alignItems: "center",
-        width: "100%",
-        height: "45%",
-        marginBottom: 10,
+        alignSelf: 'center',
+        width: "70%",
+        height: 40,
+        marginVertical: 20,
+        shadowColor: colors.shadowGray,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    saveBtn: {
+        borderRadius: 10,
+        backgroundColor: colors.blue600,
+        justifyContent: "center",
+        alignItems: "center",
+        alignSelf: 'center',
+        width: "40%",
+        height: 40,
+        marginVertical: 20,
         shadowColor: colors.shadowGray,
         shadowOffset: {
             width: 0,
@@ -327,79 +170,14 @@ const styles = StyleSheet.create({
     contentText: {
         fontSize: 20,
         fontWeight: "600",
-        padding: 10
-    },
-    text: {
-        fontSize: 20,
-        fontWeight: "600",
-        color: "#fff",
-        padding: 10
-    },
-    noDataText: {
-        fontSize: 20,
-        fontWeight: "600",
-        alignContent: 'center',
-        alignSelf: 'center',
         padding: 10,
-        marginTop: 20
+        color: colors.white,
     },
-    dateTimePicker: {
-        backgroundColor: colors.white,
-        borderRadius: 10,
-        padding: 10,
-        width: '100%',
-        position: 'relative',
-        zIndex: 1,
-        marginTop: 10,
-    },
-    searchText: {
+    systemServicesText: {
         textAlign: 'center',
         fontSize: 24,
         fontWeight: "bold",
         color: colors.blue700,
         padding: 10,
-        float: "left"
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        margin: 20,
-        width: '50%',
-        backgroundColor: colors.white,
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: colors.shadowGray,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    view: {
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    cmodalView: {
-        margin: 20,
-        backgroundColor: colors.white,
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: colors.shadowGray,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
     },
 })
