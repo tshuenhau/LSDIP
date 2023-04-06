@@ -65,9 +65,14 @@ export default function StaffSchedule() {
                             })
                         });
 
+                        const startDate = moment().subtract(1, 'months').format('YYYY-MM-DD');
+                        const endDate = moment().format('YYYY-MM-DD');
                         staff_schedule
                             .where("userID", "==", currUser)
                             .where("confirmed", "==", true)
+                            .where("date", ">=", startDate)
+                            .where("date", "<=", endDate)
+                            .orderBy('date', 'desc')
                             .get()
                             .then(querySnapshot => {
                                 const staffSchedule = [];
