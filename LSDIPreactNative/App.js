@@ -263,7 +263,7 @@ function RootNavigator() {
                 ),
               }} />
           }
-          {moduleSettings.StaffRostering &&
+          {moduleSettings.staffRostering &&
             <Drawer.Screen name='Admin Rostering' component={AdminRostering}
               options={{
                 headerStyle: {

@@ -153,7 +153,7 @@ export default function StaffAvailability() {
 
             const existingAvailability = indicatedAvailabilities.find((item) => item.date == selectedDate);
             if (existingAvailability) {
-                alert("The selected date has already been indicated",
+                alert("Confirmation", "The selected date has already been indicated",
                     [
                         {
                             text: "Ok",
