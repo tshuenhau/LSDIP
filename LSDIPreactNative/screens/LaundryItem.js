@@ -55,13 +55,13 @@ export default function LaundryItem({ navigation }) {
 
     return (
         <ScrollView>
-            <View style={styles.buttonView}>
-                <TouchableOpacity
+             {/*<View style={styles.buttonView}>
+               <TouchableOpacity
                     onPress={() => navigation.navigate('Home')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back</Text>
-                </TouchableOpacity>
-            </View>
+    </TouchableOpacity>
+            </View>*/}
             <View>
                 <LaundryList />
             </View>
