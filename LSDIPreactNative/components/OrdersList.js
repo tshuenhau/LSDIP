@@ -109,8 +109,12 @@ export default function OrdersList({ navigation }) {
 
   const formatOrderDate = (date) => {
     //return date.toDate().toLocaleString();
-    var convertedDate = date.toDate();
-    return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
+    if (date !== null) {
+      var convertedDate = new Date(date.seconds * 1000);
+      return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
+    } else {
+      return null;
+    }
   };
 
   const handleCheck = (order) => {
@@ -173,20 +177,69 @@ export default function OrdersList({ navigation }) {
         });
       }
 
-      selectedOrders.forEach((o) => {
-        orders
-          .doc(o.id)
-          .update({
-            orderStatus: selectedStatus,
-          })
-          .then(() => {
-            Toast.show({
-              type: 'success',
-              text1: 'Status Updated',
+      if (selectedStatus === "Out for Wash") {
+        selectedOrders.forEach((o) => {
+          orders
+            .doc(o.id)
+            .update({
+              orderStatus: selectedStatus,
+              sendFromWasherDate: firebase.firestore.Timestamp.fromDate(new Date()),
+            })
+            .then(() => {
+              Toast.show({
+                type: 'success',
+                text1: 'Status Updated',
+              });
+              console.log(firebase.firestore.Timestamp.fromDate(new Date()))
             });
-          });
-      });
+        });
+      } else if (selectedStatus === "Back from Wash") {
+        selectedOrders.forEach((o) => {
+          orders
+            .doc(o.id)
+            .update({
+              orderStatus: selectedStatus,
+              receiveFromWasherDate: firebase.firestore.Timestamp.fromDate(new Date()),
+            })
+            .then(() => {
+              Toast.show({
+                type: 'success',
+                text1: 'Status Updated',
+              });
+            });
+        });
+      } else if (selectedStatus === "Closed") {
+        selectedOrders.forEach((o) => {
+          orders
+            .doc(o.id)
+            .update({
+              orderStatus: selectedStatus,
+              endDate: firebase.firestore.Timestamp.fromDate(new Date()),
+            })
+            .then(() => {
+              Toast.show({
+                type: 'success',
+                text1: 'Status Updated',
+              });
+            });
+        });
+      } else {
+        selectedOrders.forEach((o) => {
+          orders
+            .doc(o.id)
+            .update({
+              orderStatus: selectedStatus,
+            })
+            .then(() => {
+              Toast.show({
+                type: 'success',
+                text1: 'Status Updated',
+              });
+            });
+        });
+      }
       setUpdateModalVisible(false);
+
     }
   };
 
@@ -284,11 +337,11 @@ export default function OrdersList({ navigation }) {
           <Text style={styles.orderDetails}><b>Customer Number: </b>{order.customerNumber}</Text>
           {order.customerAddress !== "" && (<Text style={styles.orderDetails}><b>Customer Address: </b>{order.customerAddress}</Text>)}
           {order.pickupDate !== "" && (<Text style={styles.orderDetails}><b>Pick Up Date: </b>{order.pickupDate}</Text>)}
-          {order.sendFromWasherDate !== "" && (<Text style={styles.orderDetails}><b>Send to Washer Date: </b>{order.sendFromWasherDate}</Text>)}
-          {order.receiveFromWasherDate !== "" && (<Text style={styles.orderDetails}><b>Receive from Washer Date: </b>{order.receiveFromWasherDate}</Text>)}
+          {order.sendFromWasherDate !== null && (<Text style={styles.orderDetails}><b>Send to Washer Date: </b>{formatOrderDate(order.sendFromWasherDate)}</Text>)}
+          {order.receiveFromWasherDate !== null && (<Text style={styles.orderDetails}><b>Receive from Washer Date: </b>{formatOrderDate(order.receiveFromWasherDate)}</Text>)}
           {order.deliveryDate !== "" && (<Text style={styles.orderDetails}><b>Delivery Date: </b>{order.deliveryDate}</Text>)}
-          {order.endDate !== "" && (<Text style={styles.orderDetails}><b>End Date: </b>{order.endDate}</Text>)}
-          <Text style={styles.orderDetails}><b>Delivery Fee: </b>when to add</Text>
+          {order.endDate !== null && (<Text style={styles.orderDetails}><b>End Date: </b>{formatOrderDate(order.endDate)}</Text>)}
+          {/*<Text style={styles.orderDetails}><b>Delivery Fee: </b>when to add</Text>*/}
           {order.orderStatus === "Refunded" && (
             <TouchableOpacity
               onPress={() => {
@@ -301,6 +354,7 @@ export default function OrdersList({ navigation }) {
       )}
     </TouchableOpacity>
   );
+
 
   return (
     <View style={{ marginBottom: 20 }}>
