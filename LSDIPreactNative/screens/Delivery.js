@@ -225,12 +225,11 @@ export default function DeliveryTemp({ navigation, route }) {
     try {
       const deliveryFee = await calculateDeliveryFee();
       console.log("completed calculation of delivery fee!");
+
       navigation.navigate('Payment',
         {
           deliveryfee: deliveryFee,
-          matchingOrders: matchingOrders,
-          curuser: curuser,
-          selectedTime: selectedTime,
+          selectedTime: selectedTime.split(" ")[0],
           selectedDate: selectedDate
         });
     } catch (error) {
