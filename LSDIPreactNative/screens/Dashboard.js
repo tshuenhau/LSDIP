@@ -37,7 +37,7 @@ export default function Dashboard() {
     const users = firebase.firestore().collection("users");
     const staff_schedule = firebase.firestore().collection("staff_schedule");
     const [data, setData] = useState([]);
-    
+
     /*
     const orderByMonth = [
         {month: 'Jan', orderAmt: 0, sales: 0},
@@ -53,7 +53,7 @@ export default function Dashboard() {
         {month: 'Nov', orderAmt: 0, sales: 0},
         {month: 'Dec', orderAmt: 0, sales: 0},
     ]
-   */ 
+   */
 
     const orderByMonth = [
         { month: 1, orderAmt: 0, sales: 0 },
@@ -161,13 +161,13 @@ export default function Dashboard() {
     function compareSales(sales, salesLastMonth) {
         return ((sales - salesLastMonth) / salesLastMonth * 100).toFixed(2);
     }
-    
+
     function showChart() {
         console.log('showchart');
     }
 
     return (
-        <View>
+        <View style = {styles.container}>
             <View style={styles.cards}>
                 <View style={styles.cardContainer}>
                     <View style={{ flexDirection: 'row' }}>
@@ -195,11 +195,11 @@ export default function Dashboard() {
                     <Text style={styles.cardStats}>$ {sales}</Text>
                     {compareSales(sales, salesLastMonth) >= 0 && (
                         <Text style={{ color: colors.green500, marginLeft: 20 }}>
-                        {compareSales(sales, salesLastMonth)}%
-                        <Text style={styles.cardInfo}>
-                            since last month
+                            {compareSales(sales, salesLastMonth)}%
+                            <Text style={styles.cardInfo}>
+                                since last month
+                            </Text>
                         </Text>
-                    </Text>
                     )}
                     {compareSales(sales, salesLastMonth) < 0 && (
                         <Text style={{ color: colors.red500, marginLeft: 20 }}>
@@ -235,7 +235,7 @@ export default function Dashboard() {
                     <Text style={styles.chartHeader1}>Sales Value</Text>
                     {/*console.log('dashboard', orderByMonth)*/}
                     {/** <LineChart />*/}
-                    <LineChart data={data}/>
+                    <LineChart data={data} />
                 </View>
                 <View style={styles.chartContainer2}>
                     <Text style={styles.chartHeader2}>Total Orders</Text>
@@ -249,9 +249,18 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '4%',
+        width: '95%',
+        marginBottom: 20,
+        flex: 1
+    },
     cards: {
         flexDirection: 'row',
-        marginHorizontal: "2%",
+        marginLeft:15
+        //marginHorizontal: "3%",
     },
     cardContainer: {
         flex: 2,

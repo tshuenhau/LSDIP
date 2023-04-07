@@ -36,7 +36,7 @@ export default function OrderSummary({ navigation }) {
     const [index, setIndex] = React.useState(0);
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    useEffect(() => {
+    /*useEffect(() => {
         logData.onSnapshot(querySnapshot => {
             const logList = [];
             querySnapshot.forEach(doc => {
@@ -53,7 +53,20 @@ export default function OrderSummary({ navigation }) {
             });
             setLogList(logList);
         });
-    }, []);
+    }, []);*/
+
+    useEffect(() => {
+        fetchData();
+      }, []);
+
+    const fetchData = () => {
+        let query = logData.orderBy('date', 'desc');
+    
+        query.onSnapshot((querySnapshot) => {
+          const logList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setLogList(logList)
+        });
+      }
 
     useEffect(() => {
         users.onSnapshot(querySnapshot => {
@@ -79,7 +92,7 @@ export default function OrderSummary({ navigation }) {
     };
 
     const filteredDateList = filteredLog.filter((log) =>
-        moment(log.date.toDate()).isSameOrBefore(selectedDate)
+        moment(log.date.toDate()).isSameOrBefore(moment(selectedDate).endOf('day'))
     );
 
     const renderItem = ({ item }) => (
