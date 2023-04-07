@@ -1,11 +1,13 @@
 import React from 'react';
 import * as d3 from 'd3';
 import { useD3 } from './useD3';
-import { View } from 'react-native-web';
+import { View } from 'react-native';
 import colors from '../colors';
 
 export default function BarChart({ data }) {
     //console.log(data);
+    const month = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
     const ref = useD3(
         (svg) => {
             const height = 300;
@@ -49,6 +51,7 @@ export default function BarChart({ data }) {
                                     .ticks(...d3.extent(x.domain()), width / 40)
                                     .filter((v) => x(v) !== undefined)
                             )
+                            .tickFormat((d) => month[d - 1])
                             .tickSizeOuter(0)
                     );
             const y1Axis = (g) =>

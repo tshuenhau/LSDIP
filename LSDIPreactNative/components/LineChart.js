@@ -4,7 +4,7 @@ import { useD3 } from './useD3';
 import {
     View,
     Text
-} from 'react-native-web';
+} from 'react-native';
 import colors from '../colors';
 
 export default function LineChart({data}) {
@@ -25,14 +25,20 @@ export default function LineChart({data}) {
         { year: 1999, efficiency: 28.3, sales: 8638000 },
     ];
     */
+    const month = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const ref = useD3(
         (svg) => {
             const height = 300;
             const width = 700;
             const margin = { top: 10, right: 20, bottom: 20, left: 40 };
 
+            /*
             const x = d3.scaleTime()
                 .domain(d3.extent(data, (d) => d.month))
+                .rangeRound([margin.left, width - margin.right]);
+                */
+            const x = d3.scaleBand()
+                .domain(data.map((d) => d.month))
                 .rangeRound([margin.left, width - margin.right]);
 
             const y = d3.scaleLinear()
@@ -49,6 +55,7 @@ export default function LineChart({data}) {
                             .ticks(...d3.extent(x.domain()), width / 40)
                             .filter((v) => x(v) !== undefined)
                     )
+                    .tickFormat((d) => month[d - 1])
                     .tickSizeOuter(0)
                 );
 
@@ -56,7 +63,7 @@ export default function LineChart({data}) {
                 .attr("transform", `translate(${margin.left},0)`)
                 .style("color", colors.violet100)
                 .call(d3.axisLeft(y).ticks(null, "s"))
-                .call((g) => g.select(".domain").remove())
+                //.call((g) => g.select(".domain").remove())
                 .call((g) =>
                     g
                         .append("text")
