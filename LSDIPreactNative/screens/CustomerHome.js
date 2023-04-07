@@ -99,8 +99,6 @@ export default function CustomerHome({ user, navigation }) {
             // console.log(curLink);
             const selectedDate = curLink[4];
             const selectedTime = curLink[5];
-            setSelectedDate(selectedDate);
-            // setSelectedTime(selectedTime);
             orders
                 .where("customerNumber", "==", user.number)
                 .where("orderStatus", "==", "Back from Wash")

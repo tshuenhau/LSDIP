@@ -230,7 +230,8 @@ export default function DeliveryTemp({ navigation, route }) {
         {
           deliveryfee: deliveryFee,
           selectedTime: selectedTime.split(" ")[0],
-          selectedDate: selectedDate
+          selectedDate: selectedDate,
+          user: curuser,
         });
     } catch (error) {
       console.error(error);
