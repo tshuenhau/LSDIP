@@ -241,11 +241,12 @@ export default function CustomerHome({ user, navigation }) {
             <View style={{ padding: 20, width:"96%" }}>
                 <ProgressBar
                     percentage={customerMilestone}
-                    color={colors.blue600}
+                    color={'#65a30d'}
+                    style={{backgroundColor: '#EDE5BB'}}
                     transitionSpeed={1000}
-                    Milestone={() => <AntDesign name="star" size={26} color={colors.blue300} />}
-                    CurrentMilestone={() => <AntDesign name="star" size={26} color={colors.blue600} />}
-                    CompletedMilestone={() => <AntDesign name="star" size={26} color={colors.blue900}/>}
+                    Milestone={() => <AntDesign name="star" size={26} color={'#FADA39'} />}
+                    CurrentMilestone={() => <AntDesign name="star" size={26} color={'#a3e635'} />}
+                    CompletedMilestone={() => <AntDesign name="star" size={26} color={'#65a30d'}/>}
                     milestoneCount={membershipTiers.length} />
 
             </View>
@@ -325,6 +326,8 @@ const styles = StyleSheet.create({
     },
     customerPointDisplay: {
         marginHorizontal: 10,
+        marginTop: 10,
+        marginBottom: 5,
         fontSize: 24,
         fontWeight: "600"
     },
