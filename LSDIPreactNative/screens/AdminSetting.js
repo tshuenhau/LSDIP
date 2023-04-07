@@ -7,6 +7,7 @@ import {
     Switch,
     UIManager,
     Platform,
+    ScrollView
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
@@ -71,7 +72,7 @@ export default function AdminSetting({ navigation }) {
     }
 
     return (
-        <View>
+        <ScrollView>
 
             <View style={styles.container}>
                 <Text style={styles.systemServicesText}>System Services</Text>
@@ -97,7 +98,7 @@ export default function AdminSetting({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-        </View>
+        </ScrollView>
     );
 };
 
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         alignSelf: 'center',
-        width: "95%",
+        width: "75%",
         height: 60,
         marginVertical: 20,
         shadowColor: colors.shadowGray,
