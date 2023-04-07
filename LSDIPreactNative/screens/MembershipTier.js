@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         // alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#f5f5f5',
+        //backgroundColor: '#f5f5f5',
     },
     tierContainer: {
         backgroundColor: colors.white,

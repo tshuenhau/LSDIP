@@ -400,7 +400,7 @@ export default function Driver() {
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
                 onIndexChange={setIndex}
-                renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#0B3270' }} />}
+                renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6' }} />}
             />
         </View>
     )

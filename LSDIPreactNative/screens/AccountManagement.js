@@ -448,7 +448,7 @@ export default function AccountManagement() {
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.darkBlue }} />}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6' }} />}
                 />
 
                 {/* Update Modal */}
