@@ -214,7 +214,6 @@ export default function DeliveryTemp({ navigation, route }) {
     });
   }
 
-
   useEffect(() => {
     console.log('Delivery fees updated:', deliveryFees);
   }, [deliveryFees]);
@@ -300,7 +299,19 @@ export default function DeliveryTemp({ navigation, route }) {
         const batch = db.batch();
         matchingOrders.forEach((order) => {
           const orderRef = db.collection('orders').doc(order.id);
-          batch.update(orderRef, { orderStatus: 'Pending Delivery' });
+
+          // Convert the date string to a Date object
+          const date = new Date(selectedDate);
+          // Extract the hours and minutes from the time string
+          const [hours, minutes] = selectedTime.split(" ")[0].split(':');
+          const meridian = minutes.slice(2);
+          const adjustedHours = meridian === 'pm' ? parseInt(hours, 10) + 12 : parseInt(hours, 10);
+          // Set the hours and minutes on the date object
+          date.setHours(adjustedHours);
+          // Create a Firestore Timestamp object
+          const timestamp = firebase.firestore.Timestamp.fromDate(date);
+
+          batch.update(orderRef, { orderStatus: 'Pending Delivery', deliveryDate: timestamp });
         });
         batch.commit()
           .then(() => {
