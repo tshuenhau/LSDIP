@@ -16,7 +16,6 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
-import * as Print from 'expo-print';
 import { SelectList } from 'react-native-dropdown-select-list';
 
 if (
@@ -49,13 +48,14 @@ export default function OrderSummary(props) {
     const [totalPrice, setTotalPrice] = useState(subTotal);
     // pending pickup price calculation, flat $10 for now
     const [CRMValues, setCRMValues] = useState({});
-    const [pickupfee, setPickUpFee] = useState(10);
+    // const [pickupfee, setPickUpFee] = useState(10);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
-    const [selectedPrinter, setSelectedPrinter] = React.useState();
+    // const [selectedPrinter, setSelectedPrinter] = React.useState();
     const [selectedOutlet, setSelectedOutlet] = useState("");
     const [outletList, setOutletList] = useState([]);
     const [invoiceNumber, setInvoiceNumber] = useState(0);
     const [membershipDiscount, setMembershipDiscount] = useState(0);
+    const [membershipDiscountPercent, setMembershipDiscountPercent] = useState("");
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const users = firebase.firestore().collection('users');
@@ -113,6 +113,7 @@ export default function OrderSummary(props) {
                             }
                             if (customerTier) {
                                 const membershipDiscount = (Number(customerTier.discount) / 100) * subTotal;
+                                setMembershipDiscountPercent(customerTier.discount);
                                 setTotalPrice(totalPrice - membershipDiscount);
                                 setMembershipDiscount(membershipDiscount);
                             }
@@ -135,16 +136,16 @@ export default function OrderSummary(props) {
             })
     }, [customerNumber])
 
-    const html = () => OrderPage(props);
+    // const html = () => OrderPage(props);
 
-    const print = async () => {
-        console.log("order:" + orderValues.customerName);
-        // On iOS/android prints the given html. On web prints the HTML from the current page.
-        await Print.printAsync({
-            html,
-            printerUrl: selectedPrinter?.url, // iOS only
-        });
-    };
+    // const print = async () => {
+    //     console.log("order:" + orderValues.customerName);
+    //     // On iOS/android prints the given html. On web prints the HTML from the current page.
+    //     await Print.printAsync({
+    //         html,
+    //         printerUrl: selectedPrinter?.url, // iOS only
+    //     });
+    // };
 
     const getUserId = async () => {
         try {
@@ -411,7 +412,7 @@ export default function OrderSummary(props) {
                             </View>
                             <View>
                                 {orderValues.customerAddress &&
-                                    <InvoiceLine label={"Membership Discount"} value={membershipDiscount} discount={true} />
+                                    <InvoiceLine label={"Membership Discount " + "(" + membershipDiscountPercent + "%)"} value={membershipDiscount} discount={true} />
                                 }
                                 {orderValues.redeemPoints &&
                                     <InvoiceLine label={"Redeem Points"} value={CRMValues.pointCash * orderValues.points} discount={true} />

@@ -215,6 +215,18 @@ export default function OrdersList({ navigation }) {
     });
   }
 
+  const sendMessage = (order) => {
+    let url = `https://web.whatsapp.com/send?phone=${order.customerNumber}`;
+
+    // Appending the message to the URL by encoding it
+    const message = `[Laundry] Hi ${order.customerName} Laundry Order: ${order.invoiceNumber} is ready for collection.`;
+    url += `&text=${encodeURI(message)}&app_absent=0`;
+
+    // Open our newly created URL in a new tab to send the message
+    window.open(url);
+
+  }
+
   const renderItem = ({ item: order }) => (
     <TouchableOpacity
       style={styles.card}
@@ -246,6 +258,12 @@ export default function OrdersList({ navigation }) {
         {order.orderStatus === "Void" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
         {order.orderStatus === "" && (<Text style={styles.otherstatuses}>{order.orderStatus}</Text>)}
         <View style={styles.cardButtons}>
+          <FontAwesome
+            style={styles.outletIcon}
+            name="whatsapp"
+            color="#25D366"
+            onPress={() => sendMessage(order)}
+          />
           <FontAwesome
             style={styles.outletIcon}
             name="edit"
