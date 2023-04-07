@@ -27,10 +27,10 @@ export default class Paypal extends Component {
             },
             "transactions": [{
                 "amount": {
-                    "total": deliveryfee,
+                    "total": deliveryfee.toFixed(2),
                     "currency": "SGD",
                     "details": {
-                        "subtotal": deliveryfee,
+                        "subtotal": deliveryfee.toFixed(2),
                         "tax": "0",
                         "shipping": "0",
                         "handling_fee": "0",
@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAKcsDwXj7YaB_8mbZ9S1mlR4elOYc3VwHR30KjjA25rr0CDvAY0NI1xAY0RzAanUEPPmQOBtPiT6eykqpenvnMaj-G2Yw`
+                    'Authorization': `Bearer A21AALC2JH-npy4jStfn_0OuChCZldaA04x_fEVB3S7RZm7AMs1ri8GvcyqV5N1J0nj7vt_DGfnLppaVU9uSwn3NLx-3lZfcg`
                 },
                 body: 'grant_type=client_credentials'
             }

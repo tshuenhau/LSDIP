@@ -129,7 +129,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
             [date]: { ...prevState[date], selected: true, selectedColor: '#344869' }
         }));
         setSelectedDate(date);
-        console.log(outletSchedule);
+        console.log("outlet", outletSchedule);
         setSelectedDateSchedule(outletSchedule.filter(s => s.date === date && s.confirmed === true));
         openAllocateModal();
 
@@ -181,39 +181,54 @@ export default function AdminOutletScheduling({ route, navigation }) {
 
     const allocateStaff = () => {
         if (modalData.shiftID && modalData.staffID) {
-            const newAllocation = {
-                completed: false,
-                confirmed: true,
-                date: selectedDate,
-                outletID: outletDetails.id,
-                shiftID: modalData.shiftID,
-                userID: modalData.staffID
+            const existingAllocation = outletSchedule.find((item) =>
+                item.date === selectedDate && item.userID === modalData.staffID && item.confirmed === true
+            );
+            if (existingAllocation) {
+                alert("The selected staff has already been allocated on the selected date",
+                    [
+                        {
+                            text: "Ok",
+                            onPress: () => {
+                                console.log(selectedDate);
+                            }
+                        }
+                    ])
+            } else {
+                const newAllocation = {
+                    completed: false,
+                    confirmed: true,
+                    date: selectedDate,
+                    outletID: outletDetails.id,
+                    shiftID: modalData.shiftID,
+                    userID: modalData.staffID
+                }
+                staff_schedule
+                    .add(newAllocation)
+                    .then(() => {
+                        outletSchedule.push({
+                            date: selectedDate,
+                            userName: staffDetails.find(s => s.key === modalData.staffID).value,
+                            shiftName: shiftDetails.find(s => s.key === modalData.shiftID).value,
+                            confirmed: true,
+                        });
+                        console.log(outletSchedule);
+                        setOutletSchedule(outletSchedule);
+
+                        setMarkedDates(prevState => ({
+                            ...prevState,
+                            [selectedDate]: { marked: true }
+                        }));
+
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Staff allocated',
+                        });
+
+                        setWeekdayModalVisible(false);
+                        setWeekendModalVisible(false);
+                    });
             }
-            staff_schedule
-                .add(newAllocation)
-                .then(() => {
-                    outletSchedule.push({
-                        date: selectedDate,
-                        userName: staffDetails.find(s => s.key === modalData.staffID).value,
-                        shiftName: shiftDetails.find(s => s.key === modalData.shiftID).value,
-                        confirmed: true,
-                    });
-                    console.log(outletSchedule);
-                    setOutletSchedule(outletSchedule);
-
-                    setMarkedDates(prevState => ({
-                        ...prevState,
-                        [selectedDate]: { marked: true }
-                    }));
-
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Staff allocated',
-                    });
-
-                    setWeekdayModalVisible(false);
-                    setWeekendModalVisible(false);
-                });
         } else {
             alert("Confirmation", "Please select staff and shift",
                 [

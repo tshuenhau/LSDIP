@@ -150,38 +150,52 @@ export default function StaffAvailability() {
 
     const indicateAvailability = () => {
         if (selectedAvailability.shiftID && selectedAvailability.outletID) {
-            const newAvailability = {
-                shiftID: selectedAvailability.shiftID,
-                outletID: selectedAvailability.outletID,
-                userID: currUser,
-                date: selectedDate,
-                completed: false,
-                confirmed: false,
+
+            const existingAvailability = indicatedAvailabilities.find((item) => item.date == selectedDate);
+            if (existingAvailability) {
+                alert("Confirmation", "The selected date has already been indicated",
+                    [
+                        {
+                            text: "Ok",
+                            onPress: () => {
+                                console.log(selectedDate);
+                            }
+                        }
+                    ])
+            } else {
+                const newAvailability = {
+                    shiftID: selectedAvailability.shiftID,
+                    outletID: selectedAvailability.outletID,
+                    userID: currUser,
+                    date: selectedDate,
+                    completed: false,
+                    confirmed: false,
+                }
+                staff_schedule
+                    .add(newAvailability)
+                    .then((doc) => {
+                        const newIndicatedAvailability = {
+                            id: doc.id,
+                            ...shiftTimings.find(s => s.key === selectedAvailability.shiftID),
+                            date: selectedDate,
+                            outletName: outlets.find(o => o.key === selectedAvailability.outletID).value,
+                        };
+                        indicatedAvailabilities.push(newIndicatedAvailability);
+                        setMarkedDates(prevState => ({
+                            ...prevState,
+                            [selectedDate]: { marked: true }
+                        }));
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Successfully indicated',
+                        });
+                        setWeekdayModalVisible(false);
+                        setWeekendModalVisible(false);
+                        console.log("Success");
+                    }).catch((err) => {
+                        console.log(err);
+                    })
             }
-            staff_schedule
-                .add(newAvailability)
-                .then((doc) => {
-                    const newIndicatedAvailability = {
-                        id: doc.id,
-                        ...shiftTimings.find(s => s.key === selectedAvailability.shiftID),
-                        date: selectedDate,
-                        outletName: outlets.find(o => o.key === selectedAvailability.outletID).value,
-                    };
-                    indicatedAvailabilities.push(newIndicatedAvailability);
-                    setMarkedDates(prevState => ({
-                        ...prevState,
-                        [selectedDate]: { marked: true }
-                    }));
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Successfully indicated',
-                    });
-                    setWeekdayModalVisible(false);
-                    setWeekendModalVisible(false);
-                    console.log("Success");
-                }).catch((err) => {
-                    console.log(err);
-                })
         } else {
             alert("Confirmation", "Please select outlet and shift",
                 [
@@ -316,7 +330,7 @@ export default function StaffAvailability() {
 
                                     <View style={styles.modalButtons}>
                                         <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
-                                        <Btn onClick={() => setWeekdayModalVisible(!weekdayModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                        <Btn onClick={() => setWeekdayModalVisible(false)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
                                     </View>
                                 </View>
                             </View>
@@ -341,7 +355,7 @@ export default function StaffAvailability() {
                                     />
                                     <View style={styles.modalButtons}>
                                         <Btn onClick={() => indicateAvailability()} title="Indicate" style={{ width: "48%" }} />
-                                        <Btn onClick={() => () => setWeekendModalVisible(!weekendModalVisible)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
+                                        <Btn onClick={() => setWeekendModalVisible(false)} title="Close" style={{ width: "48%", backgroundColor: "#344869" }} />
                                     </View>
                                 </View>
                             </View>

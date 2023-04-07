@@ -160,8 +160,8 @@ export default function DeliveryTemp({ navigation, route }) {
               console.log(`User's address: ${address}`);
               const location1 = address;
               const location2 = '10 Paya Lebar Rd Singapore 409057';
-              const apiKey = 'AIzaSyD8TTzob1ybGqAfl_3au0otOEisH44dFuY';
-  
+              const apiKey = 'AIzaSyDcYq8n3h92G2HV4IdjWG5es4ioIHvKZc0';
+
               // Make API request for location 1
               const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
               axios.get(apiUrl1)
@@ -175,7 +175,7 @@ export default function DeliveryTemp({ navigation, route }) {
                     latitude: result.geometry.location.lat,
                     longitude: result.geometry.location.lng
                   };
-  
+
                   // Make API request for location 2
                   const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
                   axios.get(apiUrl2)
@@ -189,7 +189,7 @@ export default function DeliveryTemp({ navigation, route }) {
                         latitude: result.geometry.location.lat,
                         longitude: result.geometry.location.lng
                       };
-  
+
                       // Calculate the distance between the two sets of coordinates
                       const distanceInMeters = geolib.getDistance(coords1, coords2);
                       console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
@@ -213,7 +213,7 @@ export default function DeliveryTemp({ navigation, route }) {
         });
     });
   }
-  
+
 
   useEffect(() => {
     console.log('Delivery fees updated:', deliveryFees);
@@ -282,21 +282,21 @@ export default function DeliveryTemp({ navigation, route }) {
           });
           selectedTimes = doc.data().selected_times;
         }
-          selectedTimes.push({
-            date: selectedDate,
-            time: selectedTime,
-            orders: selectedOrders,
-          });
+        selectedTimes.push({
+          date: selectedDate,
+          time: selectedTime,
+          orders: selectedOrders,
+        });
         console.log(selectedTimes);
         db.collection('user_timings').doc(user.uid).set({
           selected_times: selectedTimes
         })
-        .then(() => {
-          console.log('Selected times updated successfully');
-        })
-        .catch((error) => {
-          console.error('Error updating selected times:', error);
-        });
+          .then(() => {
+            console.log('Selected times updated successfully');
+          })
+          .catch((error) => {
+            console.error('Error updating selected times:', error);
+          });
         const batch = db.batch();
         matchingOrders.forEach((order) => {
           const orderRef = db.collection('orders').doc(order.id);
@@ -309,12 +309,12 @@ export default function DeliveryTemp({ navigation, route }) {
           .catch((error) => {
             console.error('Error updating orders:', error);
           });
-      }).then(() =>{
+      }).then(() => {
         const selectedTimeObj = {
           time: selectedTime,
           orders: selectedOrders,
         };
-      
+
         const selectedDateDocRef = db.collection('shift_orders').doc(selectedDate);
         selectedDateDocRef.get().then((doc) => {
           if (doc.exists) {
@@ -345,7 +345,7 @@ export default function DeliveryTemp({ navigation, route }) {
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-    })
+      })
       // .then(() => {
       //   console.log('Selected time added for user with UID: ', user.uid);
       //   const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime, orders: matchingOrders, },];

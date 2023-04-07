@@ -50,6 +50,7 @@ import Dashboard from './screens/Dashboard';
 import Logging from './screens/Logging';
 import Setting from './screens/AdminSetting';
 import MembershipTier from './screens/MembershipTier';
+import CustomerOrder from './screens/AdminOrderManagement';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -58,6 +59,7 @@ const AuthenticatedUserContext = createContext({});
 
 const AuthenticatedUserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+
   return (
     <AuthenticatedUserContext.Provider value={{ user, setUser }}>
       {children}
@@ -88,6 +90,8 @@ function RootNavigator() {
   const auth1 = firebase.auth;
   const firestore = firebase.firestore;
   const [user1, setUser1] = useState(null)
+  const [moduleSettings, setModuleSettings] = useState({});
+
   useEffect(() => {
     const unsubscribeAuth = auth1().onAuthStateChanged(
       async authenticatedUser => {
@@ -109,9 +113,17 @@ function RootNavigator() {
         setIsLoading(false);
       }
     );
-
     return unsubscribeAuth;
   }, []);
+
+  useEffect(() => {
+    const module_toggle = firebase.firestore().collection('module_toggle');
+    module_toggle
+      .doc('settings')
+      .onSnapshot(querySnapshot => {
+        setModuleSettings({ ...querySnapshot.data() });
+      })
+  }, [])
 
   if (isLoading) {
     return (
@@ -237,126 +249,138 @@ function RootNavigator() {
                 <MaterialIcons name="dry-cleaning" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
-          <Drawer.Screen name='Outlet Management' component={OutletManagement}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <Entypo name="shop" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Admin Rostering' component={AdminRostering}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <Ionicons name="people" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <Entypo name="calendar" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Driver' component={Driver}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <AntDesign name="user" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Vehicle' component={VehicleModule}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Membership Tier' component={MembershipTier}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialCommunityIcons name="wallet-membership" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Reward System' component={CRM}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialCommunityIcons name="wallet-giftcard" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Customer Rewards' component={CustomerRewards}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
-          <Drawer.Screen name='Dashboard' component={Dashboard}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }} />
+          {moduleSettings.multipleOutlets &&
+            < Drawer.Screen name='Outlet Management' component={OutletManagement}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="shop" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+          }
+          {moduleSettings.staffRostering &&
+            <Drawer.Screen name='Admin Rostering' component={AdminRostering}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <Ionicons name="people" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+          }
+          {moduleSettings.vehicle && <>
+            <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <Entypo name="calendar" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Delivery' component={Delivery} initialParams={{ curuser: null }}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <MaterialCommunityIcons name="truck-delivery" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Driver' component={Driver}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <AntDesign name="user" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Vehicle' component={VehicleModule}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+          </>
+          }
+          {moduleSettings.customerRelations && <>
+            <Drawer.Screen name='Membership Tier' component={MembershipTier}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <MaterialCommunityIcons name="wallet-membership" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Reward System' component={CRM}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <MaterialCommunityIcons name="wallet-giftcard" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+            <Drawer.Screen name='Customer Rewards' component={CustomerRewards}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <SimpleLineIcons name="present" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+          </>
+          }
+          {moduleSettings.analytics &&
+            <Drawer.Screen name='Dashboard' component={Dashboard}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+              }} />
+          }
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Payment' component={Payment}
             options={{
@@ -370,6 +394,19 @@ function RootNavigator() {
                 <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+          <Drawer.Screen name='Setting' component={Setting}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }}
+          />
           {/* hidden screens */}
           {/* <Drawer.Screen name='Create Admin' component={CreateAdmin}
             options={{
@@ -430,7 +467,7 @@ function RootNavigator() {
               drawerItemStyle: { display: "none" }
             }}
           />
-          <Drawer.Screen name='Setting' component={Setting}
+          <Drawer.Screen name='Customer Order' component={CustomerOrder}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme
@@ -438,9 +475,7 @@ function RootNavigator() {
               headerTitleStyle: {
                 color: '#fff',
               },
-              drawerIcon: ({ focused }) => (
-                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
+              drawerItemStyle: { display: "none" }
             }}
           />
         </Drawer.Navigator>
@@ -448,7 +483,7 @@ function RootNavigator() {
     );
   } else if (user1?.role === "Staff") {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -580,7 +615,7 @@ function RootNavigator() {
     );
   } else if (user1?.role === "Driver") {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -632,7 +667,7 @@ function RootNavigator() {
     );
   } else if (user1?.role === "Customer") {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <Drawer.Navigator
           useLegacyImplementation
           drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -713,6 +748,19 @@ function RootNavigator() {
                 <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+          {/* <Drawer.Screen name='Setting' component={Setting}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }}
+          /> */}
           {/* <Drawer.Screen name='Payment' component={Payment}
             options={{
               drawerIcon: ({ focused }) => (
@@ -749,7 +797,6 @@ function RootNavigator() {
     )
   }
 }
-
 
 export default function App() {
   return (

@@ -6,6 +6,7 @@ import {
     StyleSheet,
     Platform,
     UIManager,
+    ScrollView,
     LayoutAnimation
 } from 'react-native';
 import colors from '../colors';
@@ -26,7 +27,7 @@ export default function StaffSchedule() {
 
     const today = moment().format("YYYY-MM-DD");
     const [staffSchedule, setStaffSchedule] = useState([]);
-    const [displaySchedule, setDisplaySchedule] = useState("");
+    const [displaySchedule, setDisplaySchedule] = useState("upcoming");
     const staff_schedule = firebase.firestore().collection('staff_schedule');
     const shift_timings = firebase.firestore().collection('shift_timings');
     const outlet = firebase.firestore().collection('outlet');
@@ -64,9 +65,14 @@ export default function StaffSchedule() {
                             })
                         });
 
+                        const startDate = moment().subtract(1, 'months').format('YYYY-MM-DD');
+                        const endDate = moment().format('YYYY-MM-DD');
                         staff_schedule
                             .where("userID", "==", currUser)
                             .where("confirmed", "==", true)
+                            .where("date", ">=", startDate)
+                            .where("date", "<=", endDate)
+                            .orderBy('date', 'desc')
                             .get()
                             .then(querySnapshot => {
                                 const staffSchedule = [];
@@ -109,15 +115,16 @@ export default function StaffSchedule() {
                             })
                             .then(() => {
                                 console.log("Complete")
-                                staffSchedule.map(s => {
+                                setStaffSchedule(staffSchedule.map(s => {
                                     if (s.id === item.id) {
                                         return {
                                             ...s,
                                             completed: true,
                                         };
+                                    } else {
+                                        return s;
                                     }
-                                    return item;
-                                });
+                                }));
                             }).catch((err) => {
                                 console.log(err)
                             })
@@ -162,7 +169,6 @@ export default function StaffSchedule() {
                     <Text style={styles.itemText}>Hours: {item.hours} </Text>
                 </View>
                 <View style={styles.cardButtons}>
-                    {/* when staff is not available last min */}
                     <FontAwesome
                         style={styles.deleteAvailability}
                         name="check"
@@ -176,46 +182,48 @@ export default function StaffSchedule() {
     );
 
     return (
-        <View>
-            <TouchableOpacity
-                style={styles.card}
-                onPress={() => toggleExpand("past")}
-                activeOpacity={0.8}
-            >
-                <View style={styles.cardHeader}>
-                    <Text style={styles.scheduleHeader}>Past Schedules</Text>
-                </View>
-                {displaySchedule === "past" && (
-                    <FlatList
-                        data={staffSchedule.filter(s => s.completed === true)}
-                        keyExtractor={staff => staff.id}
-                        renderItem={renderPast}
-                        ListEmptyComponent={
-                            <Text style={styles.noDataText}>No Data Found!</Text>
-                        }
-                    />
-                )}
-            </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+            <ScrollView>
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => toggleExpand("past")}
+                    activeOpacity={0.8}
+                >
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.scheduleHeader}>Past Schedules</Text>
+                    </View>
+                    {displaySchedule === "past" && (
+                        <FlatList
+                            data={staffSchedule.filter(s => s.completed === true)}
+                            keyExtractor={staff => staff.id}
+                            renderItem={renderPast}
+                            ListEmptyComponent={
+                                <Text style={styles.noDataText}>No Data Found!</Text>
+                            }
+                        />
+                    )}
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                style={styles.card}
-                onPress={() => toggleExpand("upcoming")}
-                activeOpacity={0.8}
-            >
-                <View style={styles.cardHeader}>
-                    <Text style={styles.scheduleHeader}>Upcoming Schedules</Text>
-                </View>
-                {displaySchedule === "upcoming" && (
-                    <FlatList
-                        data={staffSchedule.filter(s => s.completed === false)}
-                        keyExtractor={staff => staff.id}
-                        renderItem={renderUpcoming}
-                        ListEmptyComponent={
-                            <Text style={styles.noDataText}>No Data Found!</Text>
-                        }
-                    />
-                )}
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => toggleExpand("upcoming")}
+                    activeOpacity={0.8}
+                >
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.scheduleHeader}>Upcoming Schedules</Text>
+                    </View>
+                    {displaySchedule === "upcoming" && (
+                        <FlatList
+                            data={staffSchedule.filter(s => s.completed === false)}
+                            keyExtractor={staff => staff.id}
+                            renderItem={renderUpcoming}
+                            ListEmptyComponent={
+                                <Text style={styles.noDataText}>No Data Found!</Text>
+                            }
+                        />
+                    )}
+                </TouchableOpacity>
+            </ScrollView>
         </View>
     )
 }

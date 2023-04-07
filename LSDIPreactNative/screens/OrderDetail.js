@@ -436,7 +436,7 @@ export default function OrderPage(props) {
       <View style={styles.container}>
         <View style={styles.buttonView}>
           <TouchableOpacity
-            onPress={() => props.navigation.navigate('Home')}
+            onPress={() => props.navigation.goBack()}
             style={styles.btn}>
             <Text style={styles.text}>Back</Text>
           </TouchableOpacity>

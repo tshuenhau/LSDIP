@@ -40,10 +40,10 @@ export default function CustomersScreen({ navigation }) {
             data.push({
               id: doc.id,
               name: doc.data().name,
-              number: doc.data().number || "no number",
+              number: doc.data().number || "No number",
               expenditure: doc.data().expenditure || 0,
               points: doc.data().points || 0,
-              membership_tier: customerTier || "Not a member"
+              membership_tier: customerTier || "No membership discount"
             });
           });
           setCustomers(data);
@@ -105,7 +105,7 @@ export default function CustomersScreen({ navigation }) {
             color={colors.shadowGray}
             onPress={() => {
               setSelectedCustomer(item);
-              navigation.navigate('Customer Order', { item });
+              navigation.navigate('Customer Order', { userNumber: item.number });
             }}
           />
         </View>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     borderColor: '#f5f5f5',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.themelight,
     justifyContent: "center",
     alignContent: "center",
     width: "96%",

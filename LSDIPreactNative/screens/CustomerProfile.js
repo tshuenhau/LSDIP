@@ -16,6 +16,7 @@ import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
 import { ProgressBar } from "react-milestone";
+import { AntDesign } from '@expo/vector-icons';
 
 export default function CustomerProfile() {
     const initialValues = {
@@ -23,6 +24,9 @@ export default function CustomerProfile() {
         name: "",
         number: "",
         role: "",
+        expenditure: "",
+        points: "",
+        membership_tier: ""
     };
     const initialPassword = {
         currentPassword: "",
@@ -67,7 +71,7 @@ export default function CustomerProfile() {
                         });
                         membershipList.sort((a, b) => a.expenditure - b.expenditure);
                         setMembershipList(membershipList);
-                        let tempList = membershipList.filter(record => record.expenditure < userdata.expenditure);
+                        let tempList = membershipList.filter(record => record.expenditure <= userdata.expenditure);
                         let current = initialTier;
                         if (tempList.length > 0) {
                             current = tempList[tempList.length - 1]
@@ -182,6 +186,41 @@ export default function CustomerProfile() {
         }
     };
 
+    const deleteUser = () => {
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete your account?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        users.doc(currUser)
+                            .update({
+                                role: "Disabled"
+                            }).then(() => {
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Your Account is Disabled',
+                                });
+                                auth.signOut()
+                                    .then(() => {
+                                        console.log("you are sign out")
+                                        window.location.reload(false);
+                                        // navigation.navigate('Login')
+                                    })
+                                    .catch(error => alert(error.message))
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
     const ProfileDetail = ({ label, text }) => {
         return (
             <View style={styles.profileDetailContainer}>
@@ -192,7 +231,7 @@ export default function CustomerProfile() {
     }
 
     return (
-        <ScrollView style={{ backgroundColor: colors.background, flex: 1 }}>
+        <ScrollView style={{ backgroundColor: colors.themelight, flex: 1 }}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
@@ -263,12 +302,20 @@ export default function CustomerProfile() {
                     <ProgressBar
                         style={{ margin: 30 }}
                         percentage={100 * ((userDetails.expenditure - currentTier.expenditure) / (nextTier.expenditure - currentTier.expenditure))}
-                        color="#0782F9"
+                        color={colors.blue600}
                         transitionSpeed={1000}
+                        Milestone={() => <AntDesign name="star" size={26} color={colors.blue300} />}
+                        CurrentMilestone={() => <AntDesign name="star" size={26} color={colors.blue600} />}
+                        CompletedMilestone={() => <AntDesign name="star" size={26} color={colors.blue900} />}
                         milestoneCount={2}
                     />
 
                 </View>
+                <TouchableOpacity
+                    onPress={() => deleteUser()}
+                    style={styles.deleteBtn}>
+                    <Text style={styles.password}>Deactivate My Account</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Update Modal */}
@@ -332,6 +379,14 @@ export default function CustomerProfile() {
 }
 
 const styles = StyleSheet.create({
+    deleteBtn: {
+        padding: 10,
+        borderRadius: 10,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 25,
+    },
     errorMessageContainer: {
         padding: 10,
         marginBottom: 10,

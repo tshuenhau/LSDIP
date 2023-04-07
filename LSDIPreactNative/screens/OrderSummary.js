@@ -35,6 +35,7 @@ export default function OrderSummary(props) {
         customerName: "",
         customerAddress: "",
         customerNumber: customerNumber,
+        customerEmail: "",
         pickupDate: "",
         deliveryDate: "",
         description: "",
@@ -118,12 +119,13 @@ export default function OrderSummary(props) {
                         })
 
                     if (querySnapshot.docs[0].data().address) {
-                        const { name, address, points } = querySnapshot.docs[0].data();
+                        const { name, address, points, email } = querySnapshot.docs[0].data();
                         const updatedOrderValues = {
                             ...orderValues,
                             customerName: name,
                             customerNumber: customerNumber,
                             customerAddress: address,
+                            customerEmail: email,
                             points,
                         }
                         console.log(updatedOrderValues);
