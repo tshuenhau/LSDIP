@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAJ3KfNZmvywo7yu0zCnAVRAN69SWslrnr22gDwmBhIAT0_cFk_QBWjodVRqqs7n7k-ClN8qwvLjS5fQNO6_nUJ0O7H8_A`
+                    'Authorization': `Bearer A21AAKTQ8VtocSgZw6d1GijgCFvXAYUESjp0_2z0IY-WkTu6ZXX5xL_RKwicp9YFVp_2B2GlGK3IhpGfZDf9idF6iA0VO2_Tw`
                 },
                 body: 'grant_type=client_credentials'
             }

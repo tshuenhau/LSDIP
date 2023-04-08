@@ -202,10 +202,11 @@ export default function CustomerHome({ user, navigation }) {
                                         });
                                 }
                             })
-                            // navigation.navigate('Home');
-                            // setTimeout(() => {
-                            //     window.location.reload();
-                            // }, 2000);
+                            
+                            setTimeout(() => {
+                                window.location.href = window.location.origin;
+                              }, 2000);
+
                         })
                         // .then(() => {
                         //   console.log('Selected time added for user with UID: ', user.uid);
