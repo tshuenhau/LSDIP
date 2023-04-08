@@ -226,11 +226,13 @@ export default function CustomersScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    backgroundColor: colors.lightGray,
+    borderRadius: 25,
+    alignSelf: 'center',
+    marginTop: '4%',
+    width: '95%',
+    marginBottom: 20,
+    flex:1
   },
   list: {
     alignItems: 'center',

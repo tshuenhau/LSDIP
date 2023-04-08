@@ -178,7 +178,7 @@ export default function Dashboard() {
     }
 
     return (
-        <View>
+        <View style = {styles.container}>
             <View style={styles.cards}>
                 <View style={styles.cardContainer}>
                     <View style={{ flexDirection: 'row' }}>
@@ -263,9 +263,18 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '4%',
+        width: '95%',
+        marginBottom: 20,
+        flex: 1
+    },
     cards: {
         flexDirection: 'row',
-        marginHorizontal: "2%",
+        marginLeft:15
+        //marginHorizontal: "3%",
     },
     cardContainer: {
         flex: 2,

@@ -485,10 +485,10 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.lightGray,
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '2%',
+        marginTop: '4%',
         width: '95%',
         marginBottom: 20,
       },
@@ -534,10 +534,9 @@ const styles = StyleSheet.create({
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 16,
     },
     cardHeader2: {
-        padding: 20,
+        padding: 10,
     },
     cardHeaderIcon: {
         flexDirection: 'row',
@@ -600,7 +599,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 15,
         borderColor: '#f5f5f5',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: colors.themelight,
         alignItems: "center",
         flexDirection: "row"
     },

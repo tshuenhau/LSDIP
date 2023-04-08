@@ -185,11 +185,13 @@ export default function MembershipTier() {
                             <Text style={styles.errorMessage}>{createErrorMessage}</Text>
                         </View>
                     }
-
+                    <TouchableOpacity style={styles.button} onPress={createTier}>
+                        <Text style={styles.buttonText}>Create Tier</Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.button} onPress={createTier}>
+                {/*<TouchableOpacity style={styles.button} onPress={createTier}>
                     <Text style={styles.buttonText}>Create Tier</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>*/}
             </View>
 
             <View style={{ flex: 1 }}>
@@ -262,6 +264,11 @@ const styles = StyleSheet.create({
         // alignItems: 'center',
         justifyContent: 'center',
         //backgroundColor: '#f5f5f5',
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '4%',
+        width: '95%',
+        marginBottom: 20,
     },
     tierContainer: {
         backgroundColor: colors.white,
@@ -305,12 +312,13 @@ const styles = StyleSheet.create({
         // justifyContent: 'center',
         // alignItems: 'center',
         padding: 15,
-        margin: 30,
+        margin: 10,
     },
     cardTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
+        marginLeft: 10
     },
     inputContainer: {
         // flexDirection: 'row',
@@ -337,13 +345,15 @@ const styles = StyleSheet.create({
         // textAlign: 'center',
     },
     button: {
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue600,
         padding: 10,
         borderRadius: 25,
         width: '40%',
         // margin: 10,
         alignItems: 'center',
         alignSelf: 'center',
+        marginBottom:20,
+        marginTop:10
     },
     buttonText: {
         color: '#fff',
