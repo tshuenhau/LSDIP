@@ -14,10 +14,14 @@ import BarChart from "../components/BarChart";
 import LineChart from "../components/LineChart";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
-import { MaterialCommunityIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { line } from 'd3';
-import { Button } from 'react-native-web';
+import { Button } from 'react-native';
+import * as Print from 'expo-print';
+import * as MediaLibrary from "expo-media-library";
+import * as Sharing from "expo-sharing";
+//import RNHTMLtoPDF from 'react-native-html-to-pdf';
+
 
 export default function Dashboard() {
     const date = new Date();
@@ -37,23 +41,6 @@ export default function Dashboard() {
     const users = firebase.firestore().collection("users");
     const staff_schedule = firebase.firestore().collection("staff_schedule");
     const [data, setData] = useState([]);
-    
-    /*
-    const orderByMonth = [
-        {month: 'Jan', orderAmt: 0, sales: 0},
-        {month: 'Feb', orderAmt: 0, sales: 0},
-        {month: 'Mar', orderAmt: 0, sales: 0},
-        {month: 'Apr', orderAmt: 0, sales: 0},
-        {month: 'May', orderAmt: 0, sales: 0},
-        {month: 'Jun', orderAmt: 0, sales: 0},
-        {month: 'Jul', orderAmt: 0, sales: 0},
-        {month: 'Aug', orderAmt: 0, sales: 0},
-        {month: 'Sep', orderAmt: 0, sales: 0},
-        {month: 'Oct', orderAmt: 0, sales: 0},
-        {month: 'Nov', orderAmt: 0, sales: 0},
-        {month: 'Dec', orderAmt: 0, sales: 0},
-    ]
-   */ 
 
     const orderByMonth = [
         { month: 1, orderAmt: 0, sales: 0 },
@@ -139,6 +126,34 @@ export default function Dashboard() {
         });
     }, []);
 
+    const html = () => Dashboard();
+    const createPDF = async () => {
+        try {
+            const { uri } = await Print.printToFileAsync({ html });
+            return uri;
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    const createAndSavePDF = async () => {
+        try {
+          console.log('create pdf');
+          const { uri } = await Print.printToFileAsync({ html });
+          if (Platform.OS === "ios") {
+            await Sharing.shareAsync(uri);
+          } else {
+            const permission = await MediaLibrary.requestPermissionsAsync();
+      
+            if (permission.granted) {
+              await MediaLibrary.createAssetAsync(uri);
+            }
+          }
+      
+        } catch (error) {
+          console.error(error);
+        }
+    };
+
     function getOrderByMonth(orderList) {
         //console.log('ol', orderList);
         orderList.forEach((element) => {
@@ -160,10 +175,6 @@ export default function Dashboard() {
 
     function compareSales(sales, salesLastMonth) {
         return ((sales - salesLastMonth) / salesLastMonth * 100).toFixed(2);
-    }
-    
-    function showChart() {
-        console.log('showchart');
     }
 
     return (
@@ -195,11 +206,11 @@ export default function Dashboard() {
                     <Text style={styles.cardStats}>$ {sales}</Text>
                     {compareSales(sales, salesLastMonth) >= 0 && (
                         <Text style={{ color: colors.green500, marginLeft: 20 }}>
-                        {compareSales(sales, salesLastMonth)}%
-                        <Text style={styles.cardInfo}>
-                            since last month
+                            {compareSales(sales, salesLastMonth)}%
+                            <Text style={styles.cardInfo}>
+                                since last month
+                            </Text>
                         </Text>
-                    </Text>
                     )}
                     {compareSales(sales, salesLastMonth) < 0 && (
                         <Text style={{ color: colors.red500, marginLeft: 20 }}>
@@ -235,7 +246,7 @@ export default function Dashboard() {
                     <Text style={styles.chartHeader1}>Sales Value</Text>
                     {/*console.log('dashboard', orderByMonth)*/}
                     {/** <LineChart />*/}
-                    <LineChart data={data}/>
+                    <LineChart data={data} />
                 </View>
                 <View style={styles.chartContainer2}>
                     <Text style={styles.chartHeader2}>Total Orders</Text>
@@ -244,6 +255,9 @@ export default function Dashboard() {
                     {/** <BarChart data={orderByMonth} />*/}
                 </View>
             </View>
+            <View>
+                <button onClick={createPDF}>download</button>
+            </View>    
         </View>
     );
 }
