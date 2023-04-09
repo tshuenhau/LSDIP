@@ -51,6 +51,7 @@ import Logging from './screens/Logging';
 import Setting from './screens/AdminSetting';
 import MembershipTier from './screens/MembershipTier';
 import CustomerOrder from './screens/AdminOrderManagement';
+import Report from './screens/Report';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -395,6 +396,19 @@ function RootNavigator() {
               ),
             }} />
           <Drawer.Screen name='Setting' component={Setting}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerIcon: ({ focused }) => (
+                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
+              ),
+            }}
+          />
+          <Drawer.Screen name='Report' component={Report}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme

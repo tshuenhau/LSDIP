@@ -3,6 +3,7 @@ import {
     Text,
     Image,
     StyleSheet,
+    Button,
     ScrollView,
     TextInput,
     Modal,
@@ -16,7 +17,7 @@ import { firebase } from "../config/firebase";
 import colors from '../colors';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { line } from 'd3';
-import { Button } from 'react-native';
+import Btn from "../components/Button";
 import * as Print from 'expo-print';
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
@@ -256,7 +257,7 @@ export default function Dashboard() {
                 </View>
             </View>
             <View>
-                <button onClick={createPDF}>download</button>
+                <Btn style={styles.button}onClick={createPDF} title='Download or Print'></Btn>
             </View>    
         </View>
     );
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
     container: {
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '4%',
+        marginTop: '2%',
         width: '95%',
         marginBottom: 20,
         flex: 1
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
         flex: 2,
         height: "100%",
         //width: "50%",
-        marginTop: 20,
+        marginTop: 12,
         marginBottom: 20,
         marginLeft: 20,
         marginRight: 20,
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
         //flex: 2,
         height: "100%",
         width: "35%",
-        marginTop: 20,
+        marginTop: 12,
         marginBottom: 20,
         marginRight: 15,
         backgroundColor: "#fff",
@@ -388,5 +389,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         marginLeft: 20,
         //color: colors.blue700
+    },
+    button: {
+        backgroundColor: '#4f46e5',
+        marginTop: 25
     }
 });
