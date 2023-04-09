@@ -6,7 +6,7 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import { firebase } from '../config/firebase';
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import { printToFileAsync } from 'expo-print';
-import { shareAsync } from 'expo-sharing';
+// import { shareAsync } from 'expo-sharing';
 
 export default function Report() {
 
@@ -171,27 +171,22 @@ export default function Report() {
                         setRevenueResult([])
                     }
                     setPayrollResult(payrollResult);
+                }).catch((err) => {
+                    console.log(err);
                 })
         }
-
-        // const html = `
-        //         <html>
-        //         <body>
-        //             <p style="color: red;">Hello. Bonjour. Hola.</p>
-        //         </body>
-        //         </html>
-        //     `;
-
-        // const generatePDF = async () => {
-        //     const file = await printToFileAsync({
-        //         html: html,
-        //         base64: false
-        //     });
-        //     console.log("generating");
-        //     await shareAsync(file.uri);
-        // };
-
-        // generatePDF();
+        setTimeout(() => {
+            const html = () => Report();
+            const createPDF = async () => {
+                try {
+                    const { uri } = await printToFileAsync({ html });
+                    return uri;
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+            createPDF();
+        }, 2000);
     }
 
     const renderRevenueItem = ({ item: order }) => {
