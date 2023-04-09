@@ -248,13 +248,13 @@ export default function OrderSummary(props) {
     }
 
     const createOrder = async () => {
-        if (!selectedOutlet) {
+        /*if (!selectedOutlet) {
             Toast.show({
                 type: "error",
                 text1: "Please select an outlet",
             });
             return;
-        }
+        }*/
 
         console.log(cart);
         const batch = firebase.firestore().batch();
@@ -296,7 +296,8 @@ export default function OrderSummary(props) {
                     receiveFromWasherDate: null,
                     sendFromWasherDate: null,
                     staffID: await getUserId(),
-                    outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
+                    outletId:"1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
+                    //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
                     orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
@@ -322,8 +323,8 @@ export default function OrderSummary(props) {
                     ...log,
                     date: firebase.firestore.Timestamp.fromDate(new Date()),
                     staffID: await getUserId(),
-                    outletId: selectedOutlet.split('(')[1].split(')')[0],
-                    outletName: selectedOutlet.split(" ", 2)[1],
+                    outletId: "1RSi3QaKpvrHfh4ZVXNk",
+                    outletName: "Lagoon Laundry",
                     logType: "Order",
                     logDetail: "Create Order"
                 });
@@ -384,7 +385,7 @@ export default function OrderSummary(props) {
                 <View style={styles.checkoutCard}>
                     <View style={{ flexDirection: 'row' }}>
                         <View style={styles.checkoutDetailsContainer}>
-                            <View style={styles.checkoutDetailsContainer}>
+                            {/*<View style={styles.checkoutDetailsContainer}>
                                 <Text style={styles.checkoutDetails}>Outlet</Text>
                                 <SelectList
                                     data={outletList}
@@ -397,7 +398,7 @@ export default function OrderSummary(props) {
                                     }}
                                 />
 
-                            </View>
+                                </View>*/}
                             <Text style={styles.checkoutDetails}>Customer Name</Text>
                             <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
                             <Text style={styles.checkoutDetails}>Customer Number</Text>
