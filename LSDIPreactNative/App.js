@@ -423,19 +423,6 @@ function RootNavigator() {
               ),
             }}
           />
-          <Drawer.Screen name='Report' component={Report}
-            options={{
-              headerStyle: {
-                backgroundColor: colors.theme
-              },
-              headerTitleStyle: {
-                color: '#fff',
-              },
-              drawerIcon: ({ focused }) => (
-                <MaterialIcons name="miscellaneous-services" size={24} color={focused ? colors.lightBlue : colors.gray} />
-              ),
-            }}
-          />
           {/* hidden screens */}
           {/* <Drawer.Screen name='Create Admin' component={CreateAdmin}
             options={{
