@@ -203,9 +203,11 @@ export default function OrderSummary({ navigation }) {
                     </View>
                     <View style={styles.dateTimePicker}>
                         <DateTimePicker
+                            portalId="root-portal"
                             value={selectedDate}
                             onChange={setSelectedDate}
                             format="yyyy-MM-dd"
+
                         />
                     </View>
                 </View>
@@ -213,7 +215,7 @@ export default function OrderSummary({ navigation }) {
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6' }} />}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6', zIndex: 'auto', }} />}
                 />
             </View>
         </ScrollView>
@@ -234,6 +236,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         marginHorizontal: 16,
         borderRadius: 10,
+        zIndex: 'auto',
     },
     outletName: {
         fontSize: 20,
@@ -254,6 +257,7 @@ const styles = StyleSheet.create({
         marginTop: '2%',
         width: '95%',
         marginBottom: 20,
+        zIndex: 'auto',
     },
     buttonView: {
         justifyContent: 'space-between',
@@ -280,7 +284,8 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         alignSelf: 'center',
         padding: 10,
-        marginTop: 20
+        marginTop: 20,
+        zIndex: 'auto',
     },
     dateTimePicker: {
         backgroundColor: colors.white,
@@ -288,7 +293,7 @@ const styles = StyleSheet.create({
         padding: 10,
         width: '25%',
         position: 'relative',
-        zIndex: 1,
+        zIndex: 'auto',
         marginTop: 10,
     },
     searchText: {
@@ -315,6 +320,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     headerView: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        zIndex: 'auto',
     }
 })
