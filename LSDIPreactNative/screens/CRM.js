@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
+    //backgroundColor: '#f5f5f5',
   },
   card: {
     width: '80%',
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#008080',
+    backgroundColor: colors.blue600,
     borderRadius: 5,
     padding: 10,
     marginTop: 30,

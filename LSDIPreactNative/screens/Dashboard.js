@@ -3,6 +3,7 @@ import {
     Text,
     Image,
     StyleSheet,
+    Button,
     ScrollView,
     TextInput,
     Modal,
@@ -11,12 +12,17 @@ import {
 } from 'react-native'
 import React, { useState, useEffect } from "react";
 import BarChart from "../components/BarChart";
+import LineChart from "../components/LineChart";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
-import { MaterialCommunityIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { line } from 'd3';
-import { Button } from 'react-native-web';
+import Btn from "../components/Button";
+import * as Print from 'expo-print';
+import * as MediaLibrary from "expo-media-library";
+import * as Sharing from "expo-sharing";
+//import RNHTMLtoPDF from 'react-native-html-to-pdf';
+
 
 export default function Dashboard() {
     const date = new Date();
@@ -36,40 +42,6 @@ export default function Dashboard() {
     const users = firebase.firestore().collection("users");
     const staff_schedule = firebase.firestore().collection("staff_schedule");
     const [data, setData] = useState([]);
-
-    const dat = [
-        { year: 1980, efficiency: 24.3, sales: 8949000 },
-        { year: 1985, efficiency: 27.6, sales: 10979000 },
-        { year: 1990, efficiency: 28, sales: 9303000 },
-        { year: 1991, efficiency: 28.4, sales: 8185000 },
-        { year: 1992, efficiency: 27.9, sales: 8213000 },
-        { year: 1993, efficiency: 28.4, sales: 8518000 },
-        { year: 1994, efficiency: 28.3, sales: 8991000 },
-        { year: 1995, efficiency: 28.6, sales: 8620000 },
-        { year: 1996, efficiency: 28.5, sales: 8479000 },
-        { year: 1997, efficiency: 28.7, sales: 8217000 },
-        { year: 1998, efficiency: 28.8, sales: 8085000 },
-        { year: 1999, efficiency: 28.3, sales: 8638000 },
-        { year: 2000, efficiency: 28.5, sales: 8778000 },
-        { year: 2001, efficiency: 28.8, sales: 8352000 },
-        { year: 2002, efficiency: 29, sales: 8042000 },
-    ];
-    /*
-    const orderByMonth = [
-        {month: 'Jan', orderAmt: 0, sales: 0},
-        {month: 'Feb', orderAmt: 0, sales: 0},
-        {month: 'Mar', orderAmt: 0, sales: 0},
-        {month: 'Apr', orderAmt: 0, sales: 0},
-        {month: 'May', orderAmt: 0, sales: 0},
-        {month: 'Jun', orderAmt: 0, sales: 0},
-        {month: 'Jul', orderAmt: 0, sales: 0},
-        {month: 'Aug', orderAmt: 0, sales: 0},
-        {month: 'Sep', orderAmt: 0, sales: 0},
-        {month: 'Oct', orderAmt: 0, sales: 0},
-        {month: 'Nov', orderAmt: 0, sales: 0},
-        {month: 'Dec', orderAmt: 0, sales: 0},
-    ]
-    */
 
     const orderByMonth = [
         { month: 1, orderAmt: 0, sales: 0 },
@@ -155,6 +127,34 @@ export default function Dashboard() {
         });
     }, []);
 
+    const html = () => Dashboard();
+    const createPDF = async () => {
+        try {
+            const { uri } = await Print.printToFileAsync({ html });
+            return uri;
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    const createAndSavePDF = async () => {
+        try {
+          console.log('create pdf');
+          const { uri } = await Print.printToFileAsync({ html });
+          if (Platform.OS === "ios") {
+            await Sharing.shareAsync(uri);
+          } else {
+            const permission = await MediaLibrary.requestPermissionsAsync();
+      
+            if (permission.granted) {
+              await MediaLibrary.createAssetAsync(uri);
+            }
+          }
+      
+        } catch (error) {
+          console.error(error);
+        }
+    };
+
     function getOrderByMonth(orderList) {
         //console.log('ol', orderList);
         orderList.forEach((element) => {
@@ -177,13 +177,9 @@ export default function Dashboard() {
     function compareSales(sales, salesLastMonth) {
         return ((sales - salesLastMonth) / salesLastMonth * 100).toFixed(2);
     }
-    
-    function showChart() {
-        console.log('showchart');
-    }
 
     return (
-        <View>
+        <View style = {styles.container}>
             <View style={styles.cards}>
                 <View style={styles.cardContainer}>
                     <View style={{ flexDirection: 'row' }}>
@@ -211,11 +207,11 @@ export default function Dashboard() {
                     <Text style={styles.cardStats}>$ {sales}</Text>
                     {compareSales(sales, salesLastMonth) >= 0 && (
                         <Text style={{ color: colors.green500, marginLeft: 20 }}>
-                        {compareSales(sales, salesLastMonth)}%
-                        <Text style={styles.cardInfo}>
-                            since last month
+                            {compareSales(sales, salesLastMonth)}%
+                            <Text style={styles.cardInfo}>
+                                since last month
+                            </Text>
                         </Text>
-                    </Text>
                     )}
                     {compareSales(sales, salesLastMonth) < 0 && (
                         <Text style={{ color: colors.red500, marginLeft: 20 }}>
@@ -250,24 +246,36 @@ export default function Dashboard() {
                     }}>OVERVIEW</Text>
                     <Text style={styles.chartHeader1}>Sales Value</Text>
                     {/*console.log('dashboard', orderByMonth)*/}
-                    {/** <BarChart data={data} />*/}
+                    {/** <LineChart />*/}
+                    <LineChart data={data} />
                 </View>
                 <View style={styles.chartContainer2}>
                     <Text style={styles.chartHeader2}>Total Orders</Text>
                     {/*console.log('dashboard', orderByMonth)*/}
-                    {console.log('dashboard', orderByMonth)}
                     <BarChart data={data} />
                     {/** <BarChart data={orderByMonth} />*/}
                 </View>
             </View>
+            <View>
+                <Btn style={styles.button}onClick={createPDF} title='Download or Print'></Btn>
+            </View>    
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
+        flex: 1
+    },
     cards: {
         flexDirection: 'row',
-        marginHorizontal: "2%",
+        marginLeft:15
+        //marginHorizontal: "3%",
     },
     cardContainer: {
         flex: 2,
@@ -333,7 +341,7 @@ const styles = StyleSheet.create({
         flex: 2,
         height: "100%",
         //width: "50%",
-        marginTop: 20,
+        marginTop: 12,
         marginBottom: 20,
         marginLeft: 20,
         marginRight: 20,
@@ -352,7 +360,7 @@ const styles = StyleSheet.create({
         //flex: 2,
         height: "100%",
         width: "35%",
-        marginTop: 20,
+        marginTop: 12,
         marginBottom: 20,
         marginRight: 15,
         backgroundColor: "#fff",
@@ -381,5 +389,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         marginLeft: 20,
         //color: colors.blue700
+    },
+    button: {
+        backgroundColor: '#4f46e5',
+        marginTop: 25
     }
 });

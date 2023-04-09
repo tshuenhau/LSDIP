@@ -17,8 +17,8 @@ export default class Paypal extends Component {
     componentDidMount() {
 
         const { route } = this.props;
-        const { deliveryfee, matchingOrders, curuser, selectedTime, selectedDate } = route.params;
-        this.setState({ ...this.state, deliveryfee, matchingOrders, curuser, selectedTime, selectedDate })
+        const { deliveryfee, selectedTime, selectedDate, user } = route.params;
+        this.setState({ ...this.state, deliveryfee, selectedTime, selectedDate, user })
         console.log(deliveryfee);
         const dataDetail = {
             "intent": "sale",
@@ -40,8 +40,8 @@ export default class Paypal extends Component {
                 }
             }],
             "redirect_urls": {
-                "return_url": "http://localhost:19006/",
-                "cancel_url": "http://localhost:19006/"
+                "return_url": "http://localhost:19006/success/" + selectedDate + "/" + selectedTime + "/",
+                "cancel_url": "http://localhost:19006/cancel"
             }
         }
 
@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AALC2JH-npy4jStfn_0OuChCZldaA04x_fEVB3S7RZm7AMs1ri8GvcyqV5N1J0nj7vt_DGfnLppaVU9uSwn3NLx-3lZfcg`
+                    'Authorization': `Bearer A21AAKTQ8VtocSgZw6d1GijgCFvXAYUESjp0_2z0IY-WkTu6ZXX5xL_RKwicp9YFVp_2B2GlGK3IhpGfZDf9idF6iA0VO2_Tw`
                 },
                 body: 'grant_type=client_credentials'
             }
@@ -112,15 +112,15 @@ export default class Paypal extends Component {
                 .then(response => {
                     console.log("res", response);
                     if (response.name == "INVALID_RESOURCE_ID") {
-                        // alert('Payment Failed. Please Try Again!')
-                        // this.setState({
-                        //     approvalUrl: null
-                        // })
-                        // this.props.navigation.pop();
+                        alert('Payment Failed. Please Try Again!')
+                        this.setState({
+                            approvalUrl: null
+                        })
+                        this.props.navigation.pop();
                     }
                     if (response.state === "approved") {
                         console.log("create delivery");
-                        // updateDatabase();
+                        this.updateDatabase();
                     }
                 }).catch(err => {
                     console.log(...err)
@@ -128,71 +128,126 @@ export default class Paypal extends Component {
         }
     }
 
-    updateDatabase = () => {
-        // const db = firebase.firestore();
-        // const user = firebase.auth().currentUser;
-        // console.log(user);
+    updateDatabase() {
+        firebase.firestore().collection("orders")
+            .where("customerNumber", "==", this.state.user.number)
+            .where("orderStatus", "==", "Back from Wash")
+            .get()
+            .then(querySnapshot => {
+                const matchingOrders = [];
+                querySnapshot.forEach((doc) => {
+                    matchingOrders.push({ id: doc.id, ...doc.data() });
+                });
+                console.log(matchingOrders);
+                const db = firebase.firestore();
+                const user = firebase.auth().currentUser;
+                console.log(user);
+                const selectedOrders = matchingOrders.map((order) => order.id);
+                console.log(selectedOrders);
+                console.log(this.state.selectedTime);
+                console.log(this.state.selectedDate);
+                if (user) {
 
-        // const selectedOrders = this.state.matchingOrders.map((order) => order.id);
+                    const docRef = db.collection('user_timings').doc(user.uid);
+                    docRef.get().then((doc) => {
+                        let selectedTimes = [];
 
-        // if (user) {
-        //     const selectedHour = this.state.selectedTime.split(' - ')[0];
-        //     const shiftTime = selectedHour.split('00')[1];
-        //     const docRef = db.collection('shift_orders').doc(this.state.selectedDate);
+                        if (doc.exists) {
+                            selectedTimes = doc.data().selected_times;
+                        } else {
+                            // Create a new document with the user's uid and the initial data
+                            db.collection('user_timings').doc(user.uid).set({
+                                selected_times: []
+                            });
+                            selectedTimes = doc.data().selected_times;
+                        }
+                        selectedTimes.push({
+                            date: this.state.selectedDate,
+                            time: this.state.selectedTime,
+                            orders: selectedOrders,
+                        });
+                        console.log(selectedTimes);
+                        db.collection('user_timings').doc(user.uid).set({
+                            selected_times: selectedTimes
+                        })
+                            .then(() => {
+                                console.log('Selected times updated successfully');
+                            })
+                            .catch((error) => {
+                                console.error('Error updating selected times:', error);
+                            });
+                        const batch = db.batch();
+                        matchingOrders.forEach((order) => {
+                            const orderRef = db.collection('orders').doc(order.id);
 
-        //     docRef.get()
-        //         .then((doc) => {
-        //             let shiftData;
-        //             if (doc.exists) {
-        //                 shiftData = doc.data();
-        //             } else {
-        //                 shiftData = {};
-        //             }
+                            // Convert the date string to a Date object
+                            const date = new Date(this.state.selectedDate);
+                            // Extract the hours and minutes from the time string
+                            const [hours, minutes] = this.state.selectedTime.split(" ")[0].split(':');
+                            const meridian = minutes.slice(2);
+                            const adjustedHours = meridian === 'pm' ? parseInt(hours, 10) + 12 : parseInt(hours, 10);
+                            // Set the hours and minutes on the date object
+                            date.setHours(adjustedHours);
+                            // Create a Firestore Timestamp object
+                            const timestamp = firebase.firestore.Timestamp.fromDate(date);
 
-        //             // Check if orders exist for this date, and create an empty array if not
-        //             if (!shiftData[this.state.selectedDate]) {
-        //                 shiftData[this.state.selectedDate] = [];
-        //             }
+                            batch.update(orderRef, { orderStatus: 'Pending Delivery', deliveryDate: timestamp });
+                        });
+                        batch.commit()
+                            .then(() => {
+                                console.log('Orders updated successfully');
+                            })
+                            .catch((error) => {
+                                console.error('Error updating orders:', error);
+                            });
+                    }).then(() => {
+                        const selectedTimeObj = {
+                            time: this.state.selectedTime,
+                            orders: selectedOrders,
+                        };
 
-        //             // Add selected orders to the array for this date
-        //             shiftData[this.state.selectedDate].push(...selectedOrders);
+                        const selectedDateDocRef = db.collection('shift_orders').doc(this.state.selectedDate);
+                        selectedDateDocRef.get().then((doc) => {
+                            if (doc.exists) {
+                                // If the document already exists, update its data
+                                const updatedSelectedTimes = [...doc.data().selected_times, selectedTimeObj];
+                                selectedDateDocRef.update({ selected_times: updatedSelectedTimes })
+                                    .then(() => {
+                                        console.log(`Selected times updated for ${this.state.selectedDate}`);
+                                    })
+                                    .catch((error) => {
+                                        console.error(`Error updating selected times for ${this.state.selectedDate}:`, error);
+                                    });
+                            } else {
+                                // If the document doesn't exist, create a new one with the initial data
+                                selectedDateDocRef.set({
+                                    date: this.state.selectedDate,
+                                    selected_times: [selectedTimeObj],
+                                })
+                                    .then(() => {
+                                        console.log(`New document created for ${this.state.selectedDate}`);
+                                    })
+                                    .catch((error) => {
+                                        console.error(`Error creating new document for ${this.state.selectedDate}:`, error);
+                                    });
+                            }
+                        })
+                    })
 
-        //             return docRef.set(shiftData);
-        //         })
-        //         .then(() => {
-        //             console.log('Shift orders updated successfully');
-        //             const docRef = db.collection('user_timings').doc(user.uid);
-        //             docRef.get()
-        //                 .then((doc) => {
-        //                     let selectedTimes = [];
+                }
 
-        //                     if (doc.exists) {
-        //                         selectedTimes = doc.data().selected_times;
-        //                     }
-
-        //                     selectedTimes.push({
-        //                         date: selectedDate,
-        //                         time: this.state.selectedTime,
-        //                         orders: matchingOrders,
-        //                     });
-
-        //                     return docRef.set({
-        //                         selected_times: selectedTimes,
-        //                     });
-        //                 })
-        //         })
-        // }
+            })
     }
 
     render() {
         const { approvalUrl } = this.state;
 
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1 }} >
                 {
                     approvalUrl ?
                         Platform.OS === "web"
-                            ? (<iframe src={approvalUrl} height={'100%'} width={'100%'} />)
+                            ? (<iframe id='iframe_id' src={approvalUrl} height={'100%'} width={'100%'} />)
                             : <WebView
                                 style={{ height: '100%', width: '100%', marginTop: 40 }}
                                 source={{ uri: approvalUrl }}
@@ -201,16 +256,16 @@ export default class Paypal extends Component {
                                 domStorageEnabled={true}
                                 startInLoadingState={false}
                             /> :
-                        <View style={{ flex: 1, justifyContent: 'center' }}>
+                        < View style={{ flex: 1, justifyContent: 'center' }}>
                             <Text style={{
                                 color: 'black',
                                 fontSize: 24, alignSelf: 'center'
                             }}>Do not press back or refresh page</Text>
                             <ActivityIndicator color={'black'} size={'large'} style={{ alignSelf: 'center', marginTop: 20 }} />
-                        </View>
+                        </View >
 
                 }
-            </View>
+            </View >
         )
     }
 }

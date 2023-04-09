@@ -7,6 +7,7 @@ import {
     Switch,
     UIManager,
     Platform,
+    ScrollView
 } from 'react-native';
 import { firebase } from '../config/firebase';
 import colors from '../colors';
@@ -71,31 +72,33 @@ export default function AdminSetting({ navigation }) {
     }
 
     return (
-        <View>
-            <View>
-                {/* <Text style={styles.settingsText}>Settings</Text> */}
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('Logging')}
-                    style={styles.contentBtn}>
-                    <Text style={styles.contentText}>Activity Log</Text>
-                </TouchableOpacity>
-            </View>
-            <Text style={styles.systemServicesText}>System Services</Text>
+        <ScrollView>
+
             <View style={styles.container}>
+                <Text style={styles.systemServicesText}>System Services</Text>
                 <ToggleSettings text={"Outlet Management Module"} isEnabled={moduleSettings.multipleOutlets} name={"multipleOutlets"} />
                 <ToggleSettings text={"Customer Relations Module"} isEnabled={moduleSettings.customerRelations} name={"customerRelations"} />
                 <ToggleSettings text={"Vehicle"} isEnabled={moduleSettings.vehicle} name={"vehicle"} />
                 <ToggleSettings text={"Staff Rostering Module"} isEnabled={moduleSettings.staffRostering} name={"staffRostering"} />
                 <ToggleSettings text={"Analytics Module"} isEnabled={moduleSettings.analytics} name={"analytics"} />
+
+                <TouchableOpacity
+                    onPress={() => saveSettings()}
+                    style={styles.saveBtn}>
+                    <Text style={styles.contentText}>Save Settings</Text>
+                </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-                onPress={() => saveSettings()}
-                style={styles.saveBtn}>
-                <Text style={styles.contentText}>Save Settings</Text>
-            </TouchableOpacity>
+            <View>
+                {/* <Text style={styles.settingsText}>Settings</Text> */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Logging')}
+                    style={styles.contentBtn}>
+                    <Text style={styles.contentText2}>Activity Log</Text>
+                </TouchableOpacity>
+            </View>
 
-        </View>
+        </ScrollView>
     );
 };
 
@@ -120,7 +123,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         width: '95%',
         paddingVertical: 20,
-        // marginTop: '2%',
+        marginTop: '4%',
         // marginBottom: 300,
         // marginVertical: "50%"
     },
@@ -130,8 +133,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         alignSelf: 'center',
-        width: "70%",
-        height: 40,
+        width: "75%",
+        height: 60,
         marginVertical: 20,
         shadowColor: colors.shadowGray,
         shadowOffset: {
@@ -151,18 +154,24 @@ const styles = StyleSheet.create({
         width: "40%",
         height: 40,
         marginVertical: 20,
-        shadowColor: colors.shadowGray,
+        shadowColor: "colors.shadowGray",
         shadowOffset: {
             width: 0,
             height: 2,
         },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.80,
         shadowRadius: 4,
         elevation: 5,
     },
     contentText: {
         fontSize: 20,
         fontWeight: "600",
+        padding: 10,
+        color: colors.white,
+    },
+    contentText2: {
+        fontSize: 24,
+        fontWeight: "700",
         padding: 10,
         color: colors.white,
     },

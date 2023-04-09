@@ -201,6 +201,10 @@ export default function AccountManagement({ navigation }) {
         );
     }
 
+    const formatStaffID = (id) => {
+        return id.slice(0, 8).toUpperCase();
+    };
+
     //for list
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -209,9 +213,9 @@ export default function AccountManagement({ navigation }) {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <View style={{}}>
+                <View style={{ alignItems: "flex-start" }}>
                     <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style>{item.role}</Text>
+                    <Text style={styles.subItem}>{formatStaffID(item.id)}</Text>
                 </View>
                 <View style={styles.cardHeaderIcon}>
                     <FontAwesome
@@ -456,7 +460,7 @@ export default function AccountManagement({ navigation }) {
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.darkBlue }} />}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6' }} />}
                 />
 
                 {/* Update Modal */}
@@ -579,6 +583,9 @@ const styles = StyleSheet.create({
     cardButtons: {
         flexDirection: "row",
         justifyContent: 'space-between',
+        alignContent:'center',
+        alignItems:'center',
+        alignSelf:'center'
     },
     searchContainer: {
         justifyContent: "center",
@@ -640,8 +647,12 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     itemName: {
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: 'bold',
+    },
+    subItem:{
+        fontSize:15, 
+        color:colors.gray
     },
     cardHeader: {
         flexDirection: 'row',

@@ -51,6 +51,7 @@ import Logging from './screens/Logging';
 import Setting from './screens/AdminSetting';
 import MembershipTier from './screens/MembershipTier';
 import CustomerOrder from './screens/AdminOrderManagement';
+import Report from './screens/Report';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -368,18 +369,33 @@ function RootNavigator() {
           </>
           }
           {moduleSettings.analytics &&
-            <Drawer.Screen name='Dashboard' component={Dashboard}
-              options={{
-                headerStyle: {
-                  backgroundColor: colors.theme
-                },
-                headerTitleStyle: {
-                  color: '#fff',
-                },
-                drawerIcon: ({ focused }) => (
-                  <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
-                ),
-              }} />
+            <>
+              <Drawer.Screen name='Dashboard' component={Dashboard}
+                options={{
+                  headerStyle: {
+                    backgroundColor: colors.theme
+                  },
+                  headerTitleStyle: {
+                    color: '#fff',
+                  },
+                  drawerIcon: ({ focused }) => (
+                    <MaterialIcons name="dashboard" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                  ),
+                }} />
+              <Drawer.Screen name="Report" component={Report}
+                options={{
+                  headerStyle: {
+                    backgroundColor: colors.theme
+                  },
+                  headerTitleStyle: {
+                    color: '#fff',
+                  },
+                  drawerIcon: ({ focused }) => (
+                    <Ionicons name="ios-newspaper-outline" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                  ),
+                }}
+              />
+            </>
           }
           {/* <Drawer.Screen name='Chat' component={Chat} /> */}
           <Drawer.Screen name='Payment' component={Payment}

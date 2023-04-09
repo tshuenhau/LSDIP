@@ -161,7 +161,7 @@ export default function MyProfile() {
     }
 
     return (
-        <View style={{flex: 1 }}>
+        <View style={styles.container}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: colors.white,
         alignItems: 'center',
-        marginLeft: 40,
+        //marginLeft: 40,
         marginRight: 40,
         borderRadius: 25,
     },
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
         flex: 2,
         padding: 25,
         backgroundColor: colors.white,
-        marginRight: 40,
+        //marginRight: 40,
         borderRadius: 25,
     },
     itemLabel: {
@@ -410,5 +410,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    }
+    },
+    container: {
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '4%',
+        width: '95%',
+        marginBottom: 20,
+        flex:1
+      },
 });

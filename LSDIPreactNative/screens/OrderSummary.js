@@ -16,8 +16,9 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
-import * as Print from 'expo-print';
 import { SelectList } from 'react-native-dropdown-select-list';
+import axios from 'axios';
+import * as geolib from 'geolib';
 
 if (
     Platform.OS === 'android' &&
@@ -49,13 +50,14 @@ export default function OrderSummary(props) {
     const [totalPrice, setTotalPrice] = useState(subTotal);
     // pending pickup price calculation, flat $10 for now
     const [CRMValues, setCRMValues] = useState({});
-    const [pickupfee, setPickUpFee] = useState(10);
+    const [pickupfee, setPickUpFee] = useState(0);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
-    const [selectedPrinter, setSelectedPrinter] = React.useState();
+    // const [selectedPrinter, setSelectedPrinter] = React.useState();
     const [selectedOutlet, setSelectedOutlet] = useState("");
     const [outletList, setOutletList] = useState([]);
     const [invoiceNumber, setInvoiceNumber] = useState(0);
     const [membershipDiscount, setMembershipDiscount] = useState(0);
+    const [membershipDiscountPercent, setMembershipDiscountPercent] = useState("");
     const orderItem = firebase.firestore().collection('orderItem');
     const orders = firebase.firestore().collection("orders");
     const users = firebase.firestore().collection('users');
@@ -113,6 +115,7 @@ export default function OrderSummary(props) {
                             }
                             if (customerTier) {
                                 const membershipDiscount = (Number(customerTier.discount) / 100) * subTotal;
+                                setMembershipDiscountPercent(customerTier.discount);
                                 setTotalPrice(totalPrice - membershipDiscount);
                                 setMembershipDiscount(membershipDiscount);
                             }
@@ -130,21 +133,71 @@ export default function OrderSummary(props) {
                         }
                         console.log(updatedOrderValues);
                         setOrderValues(updatedOrderValues);
+
+
+                        // querySnapshot.forEach(doc => {
+                        // Retrieve the user's address from the document
+                        // address = doc.data().address;
+                        console.log(`User's address: ${address}`);
+                        const location1 = address;
+                        const location2 = '10 Paya Lebar Rd Singapore 409057';
+                        const apiKey = 'AIzaSyDcYq8n3h92G2HV4IdjWG5es4ioIHvKZc0';
+
+                        // Make API request for location 1
+                        const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+                        axios.get(apiUrl1)
+                            .then(response => {
+                                if (response.data.results.length === 0) {
+                                    console.error('No results found for location:', location1);
+                                }
+                                const result = response.data.results[0];
+                                const coords1 = {
+                                    latitude: result.geometry.location.lat,
+                                    longitude: result.geometry.location.lng
+                                };
+
+                                // Make API request for location 2
+                                const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                                axios.get(apiUrl2)
+                                    .then(response => {
+                                        if (response.data.results.length === 0) {
+                                            console.error('No results found for location:', location2);
+                                        }
+                                        const result = response.data.results[0];
+                                        const coords2 = {
+                                            latitude: result.geometry.location.lat,
+                                            longitude: result.geometry.location.lng
+                                        };
+
+                                        // Calculate the distance between the two sets of coordinates
+                                        const distanceInMeters = geolib.getDistance(coords1, coords2);
+                                        console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                                        const pickupfee = Number((distanceInMeters / 500).toFixed(2));
+                                        console.log(pickupfee);
+                                        console.log("delivery fee is here!");
+                                        setPickUpFee(pickupfee)
+                                    }).catch(error => {
+                                        console.error(error);
+                                    });
+                            }).catch(error => {
+                                console.error(error);
+                            });
+                        // })
                     }
                 }
             })
     }, [customerNumber])
 
-    const html = () => OrderPage(props);
+    // const html = () => OrderPage(props);
 
-    const print = async () => {
-        console.log("order:" + orderValues.customerName);
-        // On iOS/android prints the given html. On web prints the HTML from the current page.
-        await Print.printAsync({
-            html,
-            printerUrl: selectedPrinter?.url, // iOS only
-        });
-    };
+    // const print = async () => {
+    //     console.log("order:" + orderValues.customerName);
+    //     // On iOS/android prints the given html. On web prints the HTML from the current page.
+    //     await Print.printAsync({
+    //         html,
+    //         printerUrl: selectedPrinter?.url, // iOS only
+    //     });
+    // };
 
     const getUserId = async () => {
         try {
@@ -178,9 +231,9 @@ export default function OrderSummary(props) {
 
     const handlePickUpChange = () => {
         if (orderValues.pickup) {
-            setTotalPrice(totalPrice - 10);
+            setTotalPrice(totalPrice - pickupfee);
         } else {
-            setTotalPrice(totalPrice + 10);
+            setTotalPrice(totalPrice + pickupfee);
         }
         setOrderValues({ ...orderValues, pickup: !orderValues.pickup })
     }
@@ -195,13 +248,13 @@ export default function OrderSummary(props) {
     }
 
     const createOrder = async () => {
-        if (!selectedOutlet) {
+        /*if (!selectedOutlet) {
             Toast.show({
                 type: "error",
                 text1: "Please select an outlet",
             });
             return;
-        }
+        }*/
 
         console.log(cart);
         const batch = firebase.firestore().batch();
@@ -243,7 +296,8 @@ export default function OrderSummary(props) {
                     receiveFromWasherDate: null,
                     sendFromWasherDate: null,
                     staffID: await getUserId(),
-                    outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
+                    outletId:"1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
+                    //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
                     orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
                     orderItemIds: orderItemIds, // Add order item IDs to order
                 });
@@ -269,8 +323,8 @@ export default function OrderSummary(props) {
                     ...log,
                     date: firebase.firestore.Timestamp.fromDate(new Date()),
                     staffID: await getUserId(),
-                    outletId: selectedOutlet.split('(')[1].split(')')[0],
-                    outletName: selectedOutlet.split(" ", 2)[1],
+                    outletId: "1RSi3QaKpvrHfh4ZVXNk",
+                    outletName: "Lagoon Laundry",
                     logType: "Order",
                     logDetail: "Create Order"
                 });
@@ -331,7 +385,7 @@ export default function OrderSummary(props) {
                 <View style={styles.checkoutCard}>
                     <View style={{ flexDirection: 'row' }}>
                         <View style={styles.checkoutDetailsContainer}>
-                            <View style={styles.checkoutDetailsContainer}>
+                            {/*<View style={styles.checkoutDetailsContainer}>
                                 <Text style={styles.checkoutDetails}>Outlet</Text>
                                 <SelectList
                                     data={outletList}
@@ -344,7 +398,7 @@ export default function OrderSummary(props) {
                                     }}
                                 />
 
-                            </View>
+                                </View>*/}
                             <Text style={styles.checkoutDetails}>Customer Name</Text>
                             <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
                             <Text style={styles.checkoutDetails}>Customer Number</Text>
@@ -352,7 +406,7 @@ export default function OrderSummary(props) {
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
                             <View style={styles.checkboxContainer}>
-                                <Text style={styles.checkboxLabel}>Laundry pick up ($10)</Text>
+                                <Text style={styles.checkboxLabel}>Laundry pick up (${pickupfee})</Text>
                                 <Checkbox
                                     style={{ marginLeft: 20, marginBottom: 2 }}
                                     disabled={false}
@@ -402,7 +456,7 @@ export default function OrderSummary(props) {
                                 }
                                 {/* flat $10 charge for now */}
                                 {orderValues.pickup &&
-                                    <InvoiceLine label={"Pick up Fee"} value={10} />
+                                    <InvoiceLine label={"Pick up Fee"} value={pickupfee} />
                                 }
                                 {/* flat $10 charge for now */}
                                 {orderValues.requireDelivery &&
@@ -411,7 +465,7 @@ export default function OrderSummary(props) {
                             </View>
                             <View>
                                 {orderValues.customerAddress &&
-                                    <InvoiceLine label={"Membership Discount"} value={membershipDiscount} discount={true} />
+                                    <InvoiceLine label={"Membership Discount " + "(" + membershipDiscountPercent + "%)"} value={membershipDiscount} discount={true} />
                                 }
                                 {orderValues.redeemPoints &&
                                     <InvoiceLine label={"Redeem Points"} value={CRMValues.pointCash * orderValues.points} discount={true} />

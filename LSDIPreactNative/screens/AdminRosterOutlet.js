@@ -49,13 +49,13 @@ export default function AdminRosterOutlet({ navigation }) {
                     <Text style={styles.itemText}>Number: {item.outletNumber} </Text>
                     <Text style={styles.itemText}>Email: {item.outletEmail} </Text>
                 </View>
-                <View style={styles.cardButtons}>
+                {/*<View style={styles.cardButtons}>
                     <FontAwesome
                         style={styles.outletIcon}
                         color="green"
                         name="edit"
                     />
-                </View>
+    </View>*/}
             </View>
         </TouchableOpacity>
     );
@@ -155,10 +155,10 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.lightGray,
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '2%',
+        marginTop: '4%',
         width: '95%',
         marginBottom: 20,
     },
@@ -169,24 +169,25 @@ const styles = StyleSheet.create({
     },
     searchnfilter: {
         flexDirection: 'row',
-        width: "96%"
+        width: "100%",
+        marginLeft: 15
       },
     searchContainer: {
-        width: "96%",
+        width: "100%",
         marginVertical: 15,
         marginLeft: "auto",
         marginRight: "auto",
         borderWidth: 1,
         borderRadius: 15,
         borderColor: '#f5f5f5',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: colors.themelight,
         alignItems: "center",
         flexDirection: "row"
     },
     searchInput: {
         height: 40,
         fontSize: 18,
-        width:'96%',
+        width:'100%',
         marginLeft: 10,
         paddingHorizontal: 10
     },

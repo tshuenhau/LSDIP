@@ -228,7 +228,7 @@ export default function OutletDetail({ route, navigation }) {
   }
 
   return (
-    <View style={{ backgroundColor: colors.background, flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <ScrollView>
         <View style={styles.topButtons}>
           <TouchableOpacity

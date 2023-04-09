@@ -92,6 +92,132 @@ export default function CustomerHome({ user, navigation }) {
         }
     }, [user]);
 
+    useEffect(() => {
+        if (window.location.href.includes("localhost:19006/success")) {
+            console.log("called");
+            const curLink = window.location.href.split("/");
+            // console.log(curLink);
+            const selectedDate = curLink[4];
+            const selectedTime = curLink[5];
+            orders
+                .where("customerNumber", "==", user.number)
+                .where("orderStatus", "==", "Back from Wash")
+                .get()
+                .then(querySnapshot => {
+                    const matchingOrders = [];
+                    querySnapshot.forEach((doc) => {
+                        matchingOrders.push({ id: doc.id, ...doc.data() });
+                    });
+                    console.log(matchingOrders);
+                    const db = firebase.firestore();
+                    const user = firebase.auth().currentUser;
+                    console.log(user);
+                    const selectedOrders = matchingOrders.map((order) => order.id);
+                    console.log(selectedOrders);
+                    console.log(selectedTime);
+                    console.log(selectedDate);
+                    if (user) {
+
+                        const docRef = db.collection('user_timings').doc(user.uid);
+                        docRef.get().then((doc) => {
+                            let selectedTimes = [];
+
+                            if (doc.exists) {
+                                selectedTimes = doc.data().selected_times;
+                            } else {
+                                // Create a new document with the user's uid and the initial data
+                                db.collection('user_timings').doc(user.uid).set({
+                                    selected_times: []
+                                });
+                                selectedTimes = doc.data().selected_times;
+                            }
+                            selectedTimes.push({
+                                date: selectedDate,
+                                time: selectedTime,
+                                orders: selectedOrders,
+                            });
+                            console.log(selectedTimes);
+                            db.collection('user_timings').doc(user.uid).set({
+                                selected_times: selectedTimes
+                            })
+                                .then(() => {
+                                    console.log('Selected times updated successfully');
+                                })
+                                .catch((error) => {
+                                    console.error('Error updating selected times:', error);
+                                });
+                            const batch = db.batch();
+                            matchingOrders.forEach((order) => {
+                                const orderRef = db.collection('orders').doc(order.id);
+
+                                // Convert the date string to a Date object
+                                const date = new Date(selectedDate);
+                                // Extract the hours and minutes from the time string
+                                const [hours, minutes] = selectedTime.split(" ")[0].split(':');
+                                const meridian = minutes.slice(2);
+                                const adjustedHours = meridian === 'pm' ? parseInt(hours, 10) + 12 : parseInt(hours, 10);
+                                // Set the hours and minutes on the date object
+                                date.setHours(adjustedHours);
+                                // Create a Firestore Timestamp object
+                                const timestamp = firebase.firestore.Timestamp.fromDate(date);
+
+                                batch.update(orderRef, { orderStatus: 'Pending Delivery', deliveryDate: timestamp });
+                            });
+                            batch.commit()
+                                .then(() => {
+                                    console.log('Orders updated successfully');
+                                })
+                                .catch((error) => {
+                                    console.error('Error updating orders:', error);
+                                });
+                        }).then(() => {
+                            const selectedTimeObj = {
+                                time: selectedTime,
+                                orders: selectedOrders,
+                            };
+
+                            const selectedDateDocRef = db.collection('shift_orders').doc(selectedDate);
+                            selectedDateDocRef.get().then((doc) => {
+                                if (doc.exists) {
+                                    // If the document already exists, update its data
+                                    const updatedSelectedTimes = [...doc.data().selected_times, selectedTimeObj];
+                                    selectedDateDocRef.update({ selected_times: updatedSelectedTimes })
+                                        .then(() => {
+                                            console.log(`Selected times updated for ${selectedDate}`);
+                                        })
+                                        .catch((error) => {
+                                            console.error(`Error updating selected times for ${selectedDate}:`, error);
+                                        });
+                                } else {
+                                    // If the document doesn't exist, create a new one with the initial data
+                                    selectedDateDocRef.set({
+                                        date: selectedDate,
+                                        selected_times: [selectedTimeObj],
+                                    })
+                                        .then(() => {
+                                            console.log(`New document created for ${selectedDate}`);
+                                        })
+                                        .catch((error) => {
+                                            console.error(`Error creating new document for ${selectedDate}:`, error);
+                                        });
+                                }
+                            })
+                            
+                            setTimeout(() => {
+                                window.location.href = window.location.origin;
+                              }, 2000);
+
+                        })
+                    }
+
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    }, [])
+
+
     const handleDeliveryDelete = (id) => {
         return alert(
             "Confirmation",
@@ -111,6 +237,56 @@ export default function CustomerHome({ user, navigation }) {
             ]
         );
     };
+
+    const handlePickupDelete = (id) => {
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete this pickup?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        deletePickup(id);
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
+    const deletePickup = (id) => {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            pickupTimings
+                .doc(user.uid)
+                .get().then((doc) => {
+                    if (doc.exists) {
+                        const selectedTimes = doc.data().selected_times.filter(
+                            (time) => time.date !== id.date || time.time !== id.time
+                        );
+                        return pickupTimings
+                            .doc(user.uid).set({
+                                selected_times: selectedTimes,
+                            }).then(() => {
+                                console.log('Selected time deleted for user with UID: ', user.uid);
+
+                                const newSelectedTimesList = selectedTimesList.filter(
+                                    (item) => item.date !== id.date || item.time !== id.time
+                                );
+                                setSelectedPickupTimesList(newSelectedTimesList);
+                            });
+                    }
+                }).then(() => {
+                    console.log('Pickup removed successfully');
+                }).catch((error) => {
+                    console.error(error);
+                });
+        }
+    }
 
     const deleteDelivery = (id) => {
         const db = firebase.firestore();
@@ -177,56 +353,6 @@ export default function CustomerHome({ user, navigation }) {
         }
     }
 
-    const handlePickupDelete = (id) => {
-        return alert(
-            "Confirmation",
-            "Are you sure you want to delete this pickup?",
-            [
-                {
-                    text: "Yes",
-                    onPress: () => {
-                        deletePickup(id);
-                    }
-                },
-                {
-                    text: "Cancel",
-                    onPress: () => console.log("Cancelled`"),
-                    style: "cancel"
-                }
-            ]
-        );
-    }
-
-    const deletePickup = (id) => {
-        const user = firebase.auth().currentUser;
-        if (user) {
-            pickupTimings
-                .doc(user.uid)
-                .get().then((doc) => {
-                    if (doc.exists) {
-                        const selectedTimes = doc.data().selected_times.filter(
-                            (time) => time.date !== id.date || time.time !== id.time
-                        );
-                        return pickupTimings
-                            .doc(user.uid).set({
-                                selected_times: selectedTimes,
-                            }).then(() => {
-                                console.log('Selected time deleted for user with UID: ', user.uid);
-
-                                const newSelectedTimesList = selectedTimesList.filter(
-                                    (item) => item.date !== id.date || item.time !== id.time
-                                );
-                                setSelectedPickupTimesList(newSelectedTimesList);
-                            });
-                    }
-                }).then(() => {
-                    console.log('Pickup removed successfully');
-                }).catch((error) => {
-                    console.error(error);
-                });
-        }
-    }
-
     return (
         <View>
             <View style={styles.customerPointContainer}>
@@ -238,23 +364,18 @@ export default function CustomerHome({ user, navigation }) {
                 </View>
                 {/*<AntDesign name="star" size={24} color="#0782F9" />*/}
             </View>
-            <View style={{ padding: 20, width:"96%" }}>
+            <View style={{ padding: 20, width: "96%" }}>
                 <ProgressBar
                     percentage={customerMilestone}
-                    color={colors.blue600}
+                    color={'#65a30d'}
+                    style={{backgroundColor: '#EDE5BB'}}
                     transitionSpeed={1000}
-                    Milestone={() => <AntDesign name="star" size={26} color={colors.blue300} />}
-                    CurrentMilestone={() => <AntDesign name="star" size={26} color={colors.blue600} />}
-                    CompletedMilestone={() => <AntDesign name="star" size={26} color={colors.blue900}/>}
+                    Milestone={() => <AntDesign name="star" size={26} color={'#FADA39'} />}
+                    CurrentMilestone={() => <AntDesign name="star" size={26} color={'#a3e635'} />}
+                    CompletedMilestone={() => <AntDesign name="star" size={26} color={'#65a30d'}/>}
                     milestoneCount={membershipTiers.length} />
 
             </View>
-
-            {/* {orderList.length > 0 && (
-                <TouchableOpacity style={styles.ViewAllButton} onPress={() => navigation.navigate("Delivery", { curuser: user })}>
-                    <Text style={styles.ViewAllButtonText}>Schedule Deliveries</Text>
-                </TouchableOpacity>
-            )} */}
 
             {selectedTimesList.length > 0 && (
                 <View style={styles.selectedTimesContainer}>
@@ -325,6 +446,8 @@ const styles = StyleSheet.create({
     },
     customerPointDisplay: {
         marginHorizontal: 10,
+        marginTop: 10,
+        marginBottom: 5,
         fontSize: 24,
         fontWeight: "600"
     },

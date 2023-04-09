@@ -35,51 +35,36 @@ export default function OrderSummary({ navigation }) {
     const users = firebase.firestore().collection('users');
     const [index, setIndex] = React.useState(0);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        logData.onSnapshot(querySnapshot => {
-            const logList = [];
-            querySnapshot.forEach(doc => {
-                const { date, logDetail, logType, outletName, outletId, staffID } = doc.data();
-                logList.push({
-                    id: doc.id,
-                    date,
-                    logDetail,
-                    logType,
-                    outletName,
-                    outletId,
-                    staffID
-                });
-            });
-            setLogList(logList);
-        });
+        fetchData();
     }, []);
 
-    useEffect(() => {
-        users.onSnapshot(querySnapshot => {
-            const userList = [];
-            querySnapshot.forEach(doc => {
-                const { name, email, address } = doc.data();
-                userList.push({
-                    id: doc.id,
-                    name,
-                    email,
-                    address,
-                });
-            });
-            setUser(userList.find(u => u.id === currUser))
-        });
-    }, []);
+    const fetchData = () => {
+        let query = logData.orderBy('date', 'asc');
 
-    const filteredLog = logList.filter((item) => item.staffID.includes(currUser));
+        query.onSnapshot((querySnapshot) => {
+            const logList = querySnapshot.docs.map(doc => ({ id: doc.id, staffID: doc.staffID, staffName: doc.staffName, ...doc.data() }));
+            setLogList(logList)
+        });
+    }
 
     const formatTime = (date) => {
         var convertedDate = date.toDate();
         return moment(convertedDate).format('YYYY-MM-DD hh:mmA');
     };
 
-    const filteredDateList = filteredLog.filter((log) =>
-        moment(log.date.toDate()).isSameOrBefore(selectedDate)
+    const formatStaffID = (id) => {
+        return id.slice(0, 8).toUpperCase();
+    };
+
+    const filteredDateList = logList.filter((log) =>
+        moment(log.date.toDate()).isSameOrAfter(moment(selectedDate).startOf('day'))
+    );
+
+    const filteredUserList = filteredDateList.filter((user) =>
+        user.staffID.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const renderItem = ({ item }) => (
@@ -89,16 +74,16 @@ export default function OrderSummary({ navigation }) {
             </View>
             <View style={styles.cardBody}>
                 {item.logType === "Order" &&
-                    <Text style={styles.itemText}>{user.name} {item.logDetail} at {item.outletName} on {formatTime(item.date)}</Text>
+                    <Text style={styles.itemText}>{formatStaffID(item.staffID)} {item.logDetail} at {item.outletName} on {formatTime(item.date)}</Text>
                 }
                 {item.logType === "Admin" &&
-                    <Text style={styles.itemText}>{user.name} {item.logDetail} on {formatTime(item.date)}</Text>
+                    <Text style={styles.itemText}>{formatStaffID(item.staffID)} {item.logDetail} on {formatTime(item.date)}</Text>
                 }
                 {item.logType === "Shift" &&
-                    <Text style={styles.itemText}>{user.name} {item.logDetail} at {item.outletName} on {formatTime(item.date)}</Text>
+                    <Text style={styles.itemText}>{formatStaffID(item.staffID)} {item.logDetail} at {item.outletName} on {formatTime(item.date)}</Text>
                 }
                 {item.logType === "Outlet" &&
-                    <Text style={styles.itemText}>{user.name} {item.logDetail} at {item.outletName} on {formatTime(item.date)}</Text>
+                    <Text style={styles.itemText}>{formatStaffID(item.staffID)} {item.logDetail} at {item.outletName} on {formatTime(item.date)}</Text>
                 }
             </View>
         </View>
@@ -121,7 +106,7 @@ export default function OrderSummary({ navigation }) {
     const Admin = () => (
         <View>
             <FlatList
-                data={filteredDateList.filter(user => user.logType === "Admin")}
+                data={filteredUserList.filter(user => user.logType === "Admin")}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}
                 ItemSeparatorComponent={FlatListSeparator}
@@ -135,7 +120,7 @@ export default function OrderSummary({ navigation }) {
     const Order = () => (
         <View>
             <FlatList
-                data={filteredLog.filter(user => user.logType === "Order")}
+                data={filteredUserList.filter(user => user.logType === "Order")}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}
                 ItemSeparatorComponent={FlatListSeparator}
@@ -148,7 +133,7 @@ export default function OrderSummary({ navigation }) {
     const Outlet = () => (
         <View>
             <FlatList
-                data={filteredLog.filter(user => user.logType === "Outlet")}
+                data={filteredUserList.filter(user => user.logType === "Outlet")}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}
                 ItemSeparatorComponent={FlatListSeparator}
@@ -162,7 +147,7 @@ export default function OrderSummary({ navigation }) {
     const Shift = () => (
         <View>
             <FlatList
-                data={filteredLog.filter(user => user.logType === "Shift")}
+                data={filteredUserList.filter(user => user.logType === "Shift")}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}
                 ItemSeparatorComponent={FlatListSeparator}
@@ -206,18 +191,31 @@ export default function OrderSummary({ navigation }) {
                     }
                 />*/}
                 <Text style={styles.searchText}>Activity Log</Text>
-                <View style={styles.dateTimePicker}>
-                    <DateTimePicker
-                        value={selectedDate}
-                        onChange={setSelectedDate}
-                        format="yyyy-MM-dd"
-                    />
+                <View style={styles.headerView}>
+                    <View style={styles.searchContainerWithBtn}>
+                        <TextInput
+                            /*autoFocus="autoFocus"*/
+                            style={styles.searchInputWithBtn}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by user's ID"
+                        />
+                    </View>
+                    <View style={styles.dateTimePicker}>
+                        <DateTimePicker
+                            portalId="root-portal"
+                            value={selectedDate}
+                            onChange={setSelectedDate}
+                            format="yyyy-MM-dd"
+
+                        />
+                    </View>
                 </View>
                 <TabView
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.blue900 }} />}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6', zIndex: 'auto', }} />}
                 />
             </View>
         </ScrollView>
@@ -238,6 +236,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         marginHorizontal: 16,
         borderRadius: 10,
+        zIndex: 'auto',
     },
     outletName: {
         fontSize: 20,
@@ -258,6 +257,7 @@ const styles = StyleSheet.create({
         marginTop: '2%',
         width: '95%',
         marginBottom: 20,
+        zIndex: 'auto',
     },
     buttonView: {
         justifyContent: 'space-between',
@@ -284,15 +284,16 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         alignSelf: 'center',
         padding: 10,
-        marginTop: 20
+        marginTop: 20,
+        zIndex: 'auto',
     },
     dateTimePicker: {
         backgroundColor: colors.white,
         borderRadius: 10,
         padding: 10,
-        width: '100%',
+        width: '25%',
         position: 'relative',
-        zIndex: 1,
+        zIndex: 'auto',
         marginTop: 10,
     },
     searchText: {
@@ -301,6 +302,25 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: colors.blue700,
         padding: 10,
-        float: "left"
+        float: "left",
+    },
+    searchContainerWithBtn: {
+        justifyContent: "center",
+        alignContent: "center",
+        width: "73%",
+        marginLeft: 15
+    },
+    searchInputWithBtn: {
+        height: 30,
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        fontSize: 18,
+        backgroundColor: colors.white,
+        marginTop: 10,
+    },
+    headerView: {
+        flexDirection: 'row',
+        zIndex: 'auto',
     }
 })
