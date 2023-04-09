@@ -201,6 +201,10 @@ export default function AccountManagement() {
         );
     }
 
+    const formatStaffID = (id) => {
+        return id.slice(0, 8).toUpperCase();
+    };
+
     //for list
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -209,9 +213,9 @@ export default function AccountManagement() {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
+                <View style={{ alignItems: "flex-start" }}>
                     <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style>    {item.role}</Text>
+                    <Text style={styles.subItem}>{formatStaffID(item.id)}</Text>
                 </View>
                 <View style={styles.cardButtons}>
                     <FontAwesome
@@ -571,6 +575,9 @@ const styles = StyleSheet.create({
     cardButtons: {
         flexDirection: "row",
         justifyContent: 'space-between',
+        alignContent:'center',
+        alignItems:'center',
+        alignSelf:'center'
     },
     searchContainer: {
         justifyContent: "center",
@@ -632,8 +639,12 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     itemName: {
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: 'bold',
+    },
+    subItem:{
+        fontSize:15, 
+        color:colors.gray
     },
     cardHeader: {
         flexDirection: 'row',
