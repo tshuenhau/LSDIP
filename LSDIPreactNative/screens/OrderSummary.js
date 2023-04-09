@@ -484,7 +484,8 @@ export default function OrderSummary(props) {
                                     props.navigation.navigate('Customer Invoice', {
                                         customerNumber: customerNumber,
                                         customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
-                                        redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet
+                                        delivery: orderValues.requireDelivery, redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet,
+                                        pickUpFee: pickupfee, expressAmt: subTotal, points: (CRMValues.pointCash * orderValues.points).toFixed(2), invoiceNumber: invoiceNumber 
                                     })
                                 }}
                                 >

@@ -15,6 +15,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import { ScrollView } from 'react-native-gesture-handler';
 import { doc } from 'firebase/firestore';
+import QR from "../components/QR";
+
 
 if (
   Platform.OS === 'android' &&
@@ -28,8 +30,7 @@ export default function CustomerInvoice(props) {
   const outlets = firebase.firestore().collection('outlet');
   //const temp = useState([]);
 
-  const { customerNumber, customerName, cart, subTotal, express, pickup, redeempt, totalPrice, selectedOutlet } = props.route.params;
-  console.log(selectedOutlet);
+  const { customerNumber, customerName, cart, subTotal, express, pickup, delivery, redeempt, totalPrice, pickUpFee, expressAmt, points , invoiceNumber} = props.route.params;
   /*
   if (outletDetails.id !== undefined && selectedOutlet.split('(')[1].slice(0, -1) !== outletDetails.id) {
     console.log('outlet', outletDetails.id);
@@ -60,7 +61,7 @@ export default function CustomerInvoice(props) {
         });
         setOutletDetails(temp);
         //const id = selectedOutlet.split(' ')[1].slice(1, -1);
-        let id = selectedOutlet.split('(')[1].slice(0, -1);
+        let id = "1RSi3QaKpvrHfh4ZVXNk"; //hardcoded
         console.log('id', id);
         setOutletDetails(temp.find(o => o.id === id));
       })
@@ -112,6 +113,9 @@ export default function CustomerInvoice(props) {
             <Text style={styles.outletDetailsText}><b>TEL: </b>(+65){outletDetails.outletNumber}</Text><br></br>
             {/*<Text style={styles.outletDetailsText}><b>Served by: </b>{staffDetails.name}</Text><br></br>*/}
           </div>
+          <div style={styles.qrCodeContainer}>
+          <Text style={styles.invoiceText}>Invoice Number: {invoiceNumber}</Text> <br></br>
+          </div>
 
         </div>
         <View style={styles.cardHeader}>
@@ -141,7 +145,7 @@ export default function CustomerInvoice(props) {
                 {item.pricingMethod === 'Weight'
                   ? <Text style={styles.itemQuantity}> {item.weight} kg</Text>
                   : <Text style={styles.itemQuantity}> {item.quantity}</Text>}
-                <Text style={styles.itemPrice}>S$ {item.price}</Text>
+                <Text style={styles.itemPrice}>S$ {Math.round(item.price).toFixed(2)}</Text>
               </View>
             </View>
           )
@@ -149,17 +153,13 @@ export default function CustomerInvoice(props) {
         />
         <div style={styles.bottomContainer}>
           <div style={styles.totalPrice}>
-            <Text style={styles.totalPrice}><b>Subtotal: </b>S$ {subTotal}</Text>
-          </div>
-        </div>
-        <div style={styles.bottomContainer}>
-          <div style={styles.tPrice}>
-            <Text style={styles.tPrice}><b>Total Price: </b>S$ {totalPrice}</Text>
-          </div>
-          <div style={styles.tPrice}>
-            {express && <Text style={styles.additionalservice}>Express</Text>}
-            {pickup && <Text style={styles.additionalservice}>Pick up</Text>}
-            {redeempt && <Text style={styles.additionalservice}>Redeem points</Text>}
+            <Text style={styles.totalPrice}><b>Subtotal: </b>S$ {subTotal.toFixed(2)}</Text><br></br>
+            <br></br>
+            {express && <Text style={styles.additionalservice}><b>Express: </b>{expressAmt} </Text>}<br></br>
+            {pickup && <Text style={styles.additionalservice}><b>Pick up: </b>{pickUpFee} </Text>}<br></br>
+            {delivery && <Text style={styles.additionalservice}><b>Delivery: </b>10 </Text>}<br></br>
+            {redeempt && <Text style={styles.additionalservice}><b>Redeem points: </b>-{points} </Text>}<br></br>
+            <Text style={styles.tPrice}><b>Total Price: </b>S$ {totalPrice.toFixed(2)}</Text>
           </div>
         </div>
 
@@ -293,6 +293,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 30,
   },
+  invoiceText: {
+    fontWeight: "bold",
+    fontSize: 25,
+    marginTop:20
+  },
   outletDetailsText: {
     fontSize: 15,
   },
@@ -308,7 +313,8 @@ const styles = StyleSheet.create({
     alignContent: 'space-between',
     flex: 'right',
     float: "right",
-    marginRight: 40
+    marginRight: 40,
+    marginTop:20
   },
   header: {
     flexDirection: 'row',
@@ -337,7 +343,7 @@ const styles = StyleSheet.create({
     alignItems: "right",
     flex: 'right',
     float: "right",
-    marginRight: 50,
+    marginRight: 30,
     backgroundColor: colors.white,
     fontSize: 20,
     marginTop: 0,
@@ -348,9 +354,9 @@ const styles = StyleSheet.create({
   },
   additionalservice: {
     alignItems: "left",
-    color: colors.blue700,
-    marginRight: 50,
-    fontSize: 20,
+    //marginRight: 90,
+    marginLeft:10,
+    fontSize: 15,
     marginBottom: "3%",
   }
 });
