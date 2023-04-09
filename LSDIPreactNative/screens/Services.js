@@ -167,71 +167,81 @@ export default function Services({ navigation }) {
     );
 
     return (
-        <View style={styles.container}>
-            {/*for create services */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={modalVisible}
-            >
-                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
-                                <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
-                                {errorMessage &&
-                                    <View style={styles.errorMessageContainer}>
-                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+        <View>
+            <View style={styles.buttonView}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Home')}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Back</Text>
+                </TouchableOpacity>
+            </View>
+            <View style={styles.container}>
+                {/*for create services */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalVisible}
+                >
+                    <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Services</Text>
+                                    <TextBox placeholder="Service Name" onChangeText={text => handleChangeCategory(text, "serviceName")} />
+                                    {errorMessage &&
+                                        <View style={styles.errorMessageContainer}>
+                                            <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                        </View>
+                                    }
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                        <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
+                                        <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                                     </View>
-                                }
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                    <Btn onClick={() => createLaundryCategory()} title="Create" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setmodalVisible(!modalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                                 </View>
                             </View>
                         </View>
                     </View>
-                </View>
-            </Modal >
-            {/*to view service list */}
-            <Text style={styles.searchText}>Service List </Text>
-            <View style={styles.header}>
-                <View style={styles.searchnfilter}>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={styles.searchInput}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search by Name"
-                        />
-                    </View>
-                </View>
-                <TouchableOpacity
-                    onPress={() => setmodalVisible(!modalVisible)}
-                    style={styles.createBtn}>
-                    <Text style={styles.text}>Create Service</Text>
-                </TouchableOpacity>
-            </View>
-            {/*
-            <View style={styles.view}>
-                <TouchableOpacity
-                    onPress={() => setmodalVisible(!modalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Create Service</Text>
-                </TouchableOpacity>
-            </View> */}
-            <View>
+                </Modal >
+                {/*to view service list */}
                 
+                <Text style={styles.searchText}>Service List </Text>
+                <View style={styles.header}>
+                    <View style={styles.searchnfilter}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Search by Name"
+                            />
+                        </View>
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => setmodalVisible(!modalVisible)}
+                        style={styles.createBtn}>
+                        <Text style={styles.text}>Create Service</Text>
+                    </TouchableOpacity>
+                </View>
+                {/*
+                <View style={styles.view}>
+                    <TouchableOpacity
+                        onPress={() => setmodalVisible(!modalVisible)}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Create Service</Text>
+                    </TouchableOpacity>
+                </View> */}
+                <View>
+                    
 
-                <FlatList
-                    data={filteredServiceList}
-                    keyExtractor={service => service.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDataText}>No Data Found!</Text>
-                    }
-                />
+                    <FlatList
+                        data={filteredServiceList}
+                        keyExtractor={service => service.id}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDataText}>No Data Found!</Text>
+                        }
+                    />
+                </View>
             </View>
         </View>
     )
@@ -332,6 +342,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "600",
         color: "#fff",
+        padding: 10
     },
     searchnfilter: {
         flexDirection: 'row',
@@ -408,5 +419,18 @@ const styles = StyleSheet.create({
         marginTop: '2%',
         width: '95%',
         marginBottom: 20,
+    },
+    buttonView: {
+        justifyContent: 'space-between',
+        marginTop: 30,
+        flexDirection: 'row',
+    },
+    btn: {
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "20%",
+        marginLeft: "2.5%",
     },
 })

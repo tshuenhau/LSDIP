@@ -200,72 +200,81 @@ export default function OutletList({ navigation }) {
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.searchText}>Outlet List </Text>
-            <View style={styles.header}>
-                <View style={styles.searchnfilter}>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={styles.searchInput}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search by Outlet Name"
-                        />
-                    </View>
+        <View>
+            <View style={styles.buttonView}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Home')}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Back</Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                    onPress={() => setCreateModalVisible(!createModalVisible)}
-                    style={styles.createBtn}>
-                    <Text style={styles.text}>Create Outlet</Text>
-                </TouchableOpacity>
-            </View>
-            {/*<View style={styles.view}>
-                <TouchableOpacity
-                    onPress={() => setCreateModalVisible(!createModalVisible)}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Create Outlet</Text>
-                </TouchableOpacity>
-    </View>*/}
-            
-            <View>
-                <FlatList
-                    data={filteredOutletList}
-                    keyExtractor={outlet => outlet.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDataText}>No Data Found!</Text>
-                    }
-                />
-            </View>
+            <View style={styles.container}>
+                <Text style={styles.searchText}>Outlet List </Text>
+                <View style={styles.header}>
+                    <View style={styles.searchnfilter}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Search by Outlet Name"
+                            />
+                        </View>
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => setCreateModalVisible(!createModalVisible)}
+                        style={styles.createBtn}>
+                        <Text style={styles.text}>Create Outlet</Text>
+                    </TouchableOpacity>
+                </View>
+                {/*<View style={styles.view}>
+                    <TouchableOpacity
+                        onPress={() => setCreateModalVisible(!createModalVisible)}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Create Outlet</Text>
+                    </TouchableOpacity>
+        </View>*/}
+                
+                <View>
+                    <FlatList
+                        data={filteredOutletList}
+                        keyExtractor={outlet => outlet.id}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDataText}>No Data Found!</Text>
+                        }
+                    />
+                </View>
 
-            {/* Create Modal */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={createModalVisible}>
-                <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.view}>
-                                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
-                                <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
-                                <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
-                                <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
-                                <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
-                                {errorMessage &&
-                                    <View style={styles.errorMessageContainer}>
-                                        <Text style={styles.errorMessage}>{errorMessage}</Text>
+                {/* Create Modal */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={createModalVisible}>
+                    <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.view}>
+                                    <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Outlet</Text>
+                                    <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} />
+                                    <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} />
+                                    <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} />
+                                    <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} />
+                                    {errorMessage &&
+                                        <View style={styles.errorMessageContainer}>
+                                            <Text style={styles.errorMessage}>{errorMessage}</Text>
+                                        </View>
+                                    }
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                                        <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
+                                        <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                                     </View>
-                                }
-                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                                    <Btn onClick={() => createOutlet()} title="Create" style={{ width: "48%" }} />
-                                    <Btn onClick={() => setCreateModalVisible(!createModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                                 </View>
                             </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
+            </View>
         </View>
     )
 }
@@ -340,16 +349,18 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     btn: {
-        padding: 10,
-        borderRadius: 25,
-        backgroundColor: "#0B3270",
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
         justifyContent: "center",
         alignItems: "center",
+        width: "20%",
+        marginLeft: "2.5%",
     },
     text: {
         fontSize: 20,
         fontWeight: "600",
-        color: "#fff"
+        color: "#fff",
+        padding: 10
     },
     centeredView: {
         flex: 1,
@@ -432,5 +443,10 @@ const styles = StyleSheet.create({
         marginTop: '2%',
         width: '95%',
         marginBottom: 20,
+    },
+    buttonView: {
+        justifyContent: 'space-between',
+        marginTop: 30,
+        flexDirection: 'row',
     },
 })

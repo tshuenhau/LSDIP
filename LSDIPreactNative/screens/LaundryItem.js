@@ -198,5 +198,12 @@ const styles = StyleSheet.create({
         marginTop: 30,
         flexDirection: 'row',
     },
-    
+    btn: {
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "20%",
+        marginLeft: "2.5%",
+    },
 })

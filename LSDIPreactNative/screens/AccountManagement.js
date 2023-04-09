@@ -29,7 +29,7 @@ if (
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function AccountManagement() {
+export default function AccountManagement({ navigation }) {
     const [index, setIndex] = React.useState(0);
     const userDatabase = firebase.firestore().collection('users');
     const [users, setUsers] = useState([]);
@@ -209,11 +209,11 @@ export default function AccountManagement() {
             activeOpacity={0.8}
         >
             <View style={styles.cardHeader}>
-                <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
+                <View style={{}}>
                     <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style>    {item.role}</Text>
+                    <Text style>{item.role}</Text>
                 </View>
-                <View style={styles.cardButtons}>
+                <View style={styles.cardHeaderIcon}>
                     <FontAwesome
                         style={styles.outletIcon}
                         name="edit"
@@ -244,7 +244,7 @@ export default function AccountManagement() {
     );
 
     const Admin = () => (
-        <View>
+        <View >
             <View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
@@ -301,7 +301,7 @@ export default function AccountManagement() {
     );
 
     const Driver = () => (
-        <View>
+        <View >
             <View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
@@ -329,7 +329,7 @@ export default function AccountManagement() {
     );
 
     const Customer = () => (
-        <View>
+        <View >
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
@@ -350,7 +350,7 @@ export default function AccountManagement() {
     );
 
     const Disabled = () => (
-        <View>
+        <View >
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
@@ -442,9 +442,17 @@ export default function AccountManagement() {
 
     return (
         <ScrollView>
-            <View>
+            <View style={styles.buttonView}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Home')}
+                    style={styles.btn2}>
+                    <Text style={styles.text2}>Back</Text>
+                </TouchableOpacity>
+            </View>
 
+            <View>
                 <TabView
+                    style={styles.container}
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
@@ -682,9 +690,40 @@ const styles = StyleSheet.create({
         width: '20%',
         height: '75%'
     },
+    btn2: {
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "20%",
+        marginLeft: "2.5%",
+    },
     text: {
         fontSize: 15,
         fontWeight: "600",
         color: colors.white,
-    }
+    },
+    text2: {
+        fontSize: 20,
+        fontWeight: "600",
+        color: "#fff",
+        padding: 10
+    },
+    container: {
+        backgroundColor: '#fff',
+        borderRadius: 5,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
+    },
+    cardHeaderIcon: {
+        flexDirection: 'row',
+        padding: 16,
+    },
+    buttonView: {
+        justifyContent: 'space-between',
+        marginTop: 30,
+        flexDirection: 'row',
+    },
 });

@@ -194,153 +194,154 @@ const BlockTimePage = () => {
   }, [blockedTimings]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.inputFlexContainer}>
+      <View style={styles.container}>
+        <View style={styles.inputFlexContainer}>
 
-        <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity style=
-            {selectedButtonFilter === "period"
-              ? styles.blockTypeSelectedButton
-              : styles.blockTypeUnselectedButton
-            } onPress={() => setSelectedButtonFilter("period")}>
-            <Text style={styles.inputLabel}>Block Period</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style=
-            {selectedButtonFilter === "date"
-              ? styles.blockTypeSelectedButton
-              : styles.blockTypeUnselectedButton
-            } onPress={() => setSelectedButtonFilter("date")}>
-            <Text style={styles.inputLabel}>Block Date</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ backgroundColor: colors.white, padding: 20 }}>
-          {errorMessage ? (
-            <View style={styles.errorMessageContainer}>
-              <Text style={styles.errorMessage}>{errorMessage}</Text>
-            </View>
-          ) : null}
-          {selectedButtonFilter == "period" &&
-            <View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Start Time:</Text>
-                <Text style={styles.inputText}>
-                  {startTime ? startTime.toLocaleTimeString() : 'Select start time'}
-                </Text>
-              </View>
-
-              <View style={styles.dateTimePicker}>
-                <DateTimePicker
-                  value={tempStartTime}
-                  onChange={handleStartTimeConfirm}
-                  format="HH:mm:ss"
-                  disableClearIcon={true}
-                  disableTextInput={true}
-                  disableCalendar={true}
-                  display="spinner"
-                  mode="time"
-                  disableClock={true}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>End Time:</Text>
-                <Text style={styles.inputText}>
-                  {endTime ? endTime.toLocaleTimeString() : 'Select end time'}
-                </Text>
-              </View>
-
-              <View style={styles.dateTimePicker}>
-                <DateTimePicker
-                  value={tempEndTime}
-                  onChange={handleEndTimeConfirm}
-                  format="HH:mm:ss"
-                  disableClearIcon={true}
-                  disableTextInput={true}
-                  disableCalendar={true}
-                  display="spinner"
-                  mode="time"
-                  disableClock={true}
-                />
-              </View>
-            </View>
-          }
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Date:</Text>
-            <Text style={styles.inputText}>
-              {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
-            </Text>
-          </View>
-          <View style={styles.dateTimePicker}>
-            <DateTimePicker
-              value={selectedDate}
-              onChange={handleDateTimeConfirm}
-              format="yyyy-MM-dd"
-            />
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity style=
+              {selectedButtonFilter === "period"
+                ? styles.blockTypeSelectedButton
+                : styles.blockTypeUnselectedButton
+              } onPress={() => setSelectedButtonFilter("period")}>
+              <Text style={styles.inputLabel}>Block Period</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style=
+              {selectedButtonFilter === "date"
+                ? styles.blockTypeSelectedButton
+                : styles.blockTypeUnselectedButton
+              } onPress={() => setSelectedButtonFilter("date")}>
+              <Text style={styles.inputLabel}>Block Date</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-            {selectedButtonFilter === "date"
-              ?
-              <TouchableOpacity onPress={handleBlockDate} style={styles.saveButton}>
-                <Text style={styles.saveButtonText}>Block Date</Text>
-              </TouchableOpacity>
-              :
-              <TouchableOpacity onPress={handleSaveBlockedTime} style={styles.saveButton}>
-                <Text style={styles.saveButtonText}>Block Period</Text>
-              </TouchableOpacity>
+          <View style={{ backgroundColor: colors.white, padding: 20 }}>
+            {errorMessage ? (
+              <View style={styles.errorMessageContainer}>
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
+              </View>
+            ) : null}
+            {selectedButtonFilter == "period" &&
+              <View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Start Time:</Text>
+                  <Text style={styles.inputText}>
+                    {startTime ? startTime.toLocaleTimeString() : 'Select start time'}
+                  </Text>
+                </View>
+
+                <View style={styles.dateTimePicker}>
+                  <DateTimePicker
+                    value={tempStartTime}
+                    onChange={handleStartTimeConfirm}
+                    format="HH:mm:ss"
+                    disableClearIcon={true}
+                    disableTextInput={true}
+                    disableCalendar={true}
+                    display="spinner"
+                    mode="time"
+                    disableClock={true}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>End Time:</Text>
+                  <Text style={styles.inputText}>
+                    {endTime ? endTime.toLocaleTimeString() : 'Select end time'}
+                  </Text>
+                </View>
+
+                <View style={styles.dateTimePicker}>
+                  <DateTimePicker
+                    value={tempEndTime}
+                    onChange={handleEndTimeConfirm}
+                    format="HH:mm:ss"
+                    disableClearIcon={true}
+                    disableTextInput={true}
+                    disableCalendar={true}
+                    display="spinner"
+                    mode="time"
+                    disableClock={true}
+                  />
+                </View>
+              </View>
             }
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Date:</Text>
+              <Text style={styles.inputText}>
+                {selectedDate ? selectedDate.toLocaleDateString() : 'Select a date'}
+              </Text>
+            </View>
+            <View style={styles.dateTimePicker}>
+              <DateTimePicker
+                value={selectedDate}
+                onChange={handleDateTimeConfirm}
+                format="yyyy-MM-dd"
+              />
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              {selectedButtonFilter === "date"
+                ?
+                <TouchableOpacity onPress={handleBlockDate} style={styles.saveButton}>
+                  <Text style={styles.saveButtonText}>Block Date</Text>
+                </TouchableOpacity>
+                :
+                <TouchableOpacity onPress={handleSaveBlockedTime} style={styles.saveButton}>
+                  <Text style={styles.saveButtonText}>Block Period</Text>
+                </TouchableOpacity>
+              }
+            </View>
           </View>
+
+        </View>
+
+        <View style={styles.cardFlexContainer}>
+          <ScrollView>
+            {blockedTimings &&
+              blockedTimings.map((blockedTiming, index) => (
+                <View key={index} style={styles.cardContainer}>
+                  <Text style={styles.cardTitle}>Date: {blockedTiming.id}</Text>
+                  {blockedTiming.blockedTimings[0].startTime.getHours() === 0 &&
+                    blockedTiming.blockedTimings[0].startTime.getMinutes() === 0 &&
+                    blockedTiming.blockedTimings[0].endTime.getHours() === 23 &&
+                    blockedTiming.blockedTimings[0].endTime.getMinutes() === 59 ? (
+                    <Text style={styles.cardText}>Whole day has been blocked</Text>
+                  ) : (
+                    <>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                        <MaterialIcons name="timer" size={24} color="black" />
+                        <Text style={styles.cardText}>
+                          Start Time: {new Date(blockedTiming.blockedTimings[0].startTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <MaterialIcons name="timer" size={24} color="black" />
+                        <Text style={styles.cardText}>
+                          End Time: {new Date(blockedTiming.blockedTimings[0].endTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                  <TouchableOpacity
+                    onPress={() =>
+                      removeBlockedTiming(
+                        blockedTiming.id,
+                        blockedTiming.blockedTimings[0].startTime,
+                        blockedTiming.blockedTimings[0].endTime,
+                      )
+                    }
+                    style={styles.removeButton}>
+                    <Text style={styles.removeButtonText}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+
+          </ScrollView>
         </View>
 
       </View>
 
-      <View style={styles.cardFlexContainer}>
-        <ScrollView>
-          {blockedTimings &&
-            blockedTimings.map((blockedTiming, index) => (
-              <View key={index} style={styles.cardContainer}>
-                <Text style={styles.cardTitle}>Date: {blockedTiming.id}</Text>
-                {blockedTiming.blockedTimings[0].startTime.getHours() === 0 &&
-                  blockedTiming.blockedTimings[0].startTime.getMinutes() === 0 &&
-                  blockedTiming.blockedTimings[0].endTime.getHours() === 23 &&
-                  blockedTiming.blockedTimings[0].endTime.getMinutes() === 59 ? (
-                  <Text style={styles.cardText}>Whole day has been blocked</Text>
-                ) : (
-                  <>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                      <MaterialIcons name="timer" size={24} color="black" />
-                      <Text style={styles.cardText}>
-                        Start Time: {new Date(blockedTiming.blockedTimings[0].startTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
-                      </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <MaterialIcons name="timer" size={24} color="black" />
-                      <Text style={styles.cardText}>
-                        End Time: {new Date(blockedTiming.blockedTimings[0].endTime.getTime() + 8 * 60 * 60 * 1000).toLocaleTimeString()}
-                      </Text>
-                    </View>
-                  </>
-                )}
-                <TouchableOpacity
-                  onPress={() =>
-                    removeBlockedTiming(
-                      blockedTiming.id,
-                      blockedTiming.blockedTimings[0].startTime,
-                      blockedTiming.blockedTimings[0].endTime,
-                    )
-                  }
-                  style={styles.removeButton}>
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-
-        </ScrollView>
-      </View>
-
-    </View>
 
   );
 };

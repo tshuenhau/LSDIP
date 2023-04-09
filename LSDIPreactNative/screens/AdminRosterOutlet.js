@@ -65,29 +65,38 @@ export default function AdminRosterOutlet({ navigation }) {
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.searchText}>Admin Rostering List </Text>
-            <View style={styles.header}>
-                <View style={styles.searchnfilter}>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={styles.searchInput}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search by Name"
-                        />
+        <View>
+            <View style={styles.buttonView}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Home')}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Back</Text>
+                </TouchableOpacity>
+            </View>
+            <View style={styles.container}>
+                <Text style={styles.searchText}>Admin Rostering List </Text>
+                <View style={styles.header}>
+                    <View style={styles.searchnfilter}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Search by Name"
+                            />
+                        </View>
                     </View>
                 </View>
-            </View>
-            <View>
-                <FlatList
-                    data={filteredAdminRosteringList}
-                    keyExtractor={outlet => outlet.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={
-                        <Text style={styles.noDataText}>No Data Found!</Text>
-                    }
-                />
+                <View>
+                    <FlatList
+                        data={filteredAdminRosteringList}
+                        keyExtractor={outlet => outlet.id}
+                        renderItem={renderItem}
+                        ListEmptyComponent={
+                            <Text style={styles.noDataText}>No Data Found!</Text>
+                        }
+                    />
+                </View>
             </View>
         </View>
     )
@@ -188,5 +197,24 @@ const styles = StyleSheet.create({
         color: colors.blue700,
         padding: 10,
         float: "left"
+    },
+    text: {
+        fontSize: 20,
+        fontWeight: "600",
+        color: "#fff",
+        padding: 10
+    },
+    btn: {
+        borderRadius: 20,
+        backgroundColor: colors.darkBlue,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "20%",
+        marginLeft: "2.5%",
+    },
+    buttonView: {
+        justifyContent: 'space-between',
+        marginTop: 30,
+        flexDirection: 'row',
     },
 })
