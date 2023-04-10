@@ -21,6 +21,7 @@ export default function DeliveryTemp({ navigation, route }) {
   const [selectedTimesList, setSelectedTimesList] = useState([]);
   const [scheduledDeliveries, setScheduledDeliveries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedTime, setSelectedTime] = useState(null);
   const [deliveryFees, setDeliveryFees] = useState(0);
@@ -439,6 +440,7 @@ export default function DeliveryTemp({ navigation, route }) {
     );
 
     setSelectedTimesList(newSelectedTimesList);
+    setIsSelected(false);
     // const db = firebase.firestore();
     // const user = firebase.auth().currentUser;
 
@@ -480,7 +482,7 @@ export default function DeliveryTemp({ navigation, route }) {
     //         console.error(error);
     //     });
     // }
-  }
+  } 
 
   const AvailableTimingsModal = ({ date, onClose }) => {
 
@@ -563,6 +565,11 @@ export default function DeliveryTemp({ navigation, route }) {
             `The selected time ${selectedTime} is already added for ${selectedDate}`
           );
           setIsDuplicateOpen(true);
+        } else if (isSelected){
+          setSelectedTimesList([]);
+          const newSelectedTimesList = [{ date: selectedDate, time: selectedTime, orders: matchingOrders, }];
+          setSelectedTimesList(newSelectedTimesList);
+          setIsSelected(true);
         } else {
           if (matchingOrders.length === 0) {
             Toast.show({
@@ -575,10 +582,61 @@ export default function DeliveryTemp({ navigation, route }) {
           console.log('Selected time added for user with UID: ', curuser.uid);
           const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime, orders: matchingOrders, }];
           setSelectedTimesList(newSelectedTimesList);
+          setIsSelected(true);
         }
         setIsModalOpen(false);
       }
     };
+
+    // const handleConfirm = () => {
+    //   if (selectedTime) {
+    //     const existingTime = selectedTimesList.find(
+    //       (item) => item.date === selectedDate && item.time === selectedTime
+    //     );
+        
+    //     if (existingTime) {
+    //       // Check if the selected orders are the same as the existing time
+    //       const sameOrders = existingTime.orders.every(
+    //         (order) => matchingOrders.find((mOrder) => mOrder.id === order.id)
+    //       );
+          
+    //       if (sameOrders) {
+    //         setSelectedTimesList((prevTimes) =>
+    //           prevTimes.filter((time) => time.date !== selectedDate || time.time !== selectedTime)
+    //         );
+            
+    //         setIsModalOpen(false);
+    //         return;
+    //       } else {
+    //         setDuplicateMessage(
+    //           `The selected time ${selectedTime} is already added for ${selectedDate}`
+    //         );
+    //         setIsDuplicateOpen(true);
+    //       }
+    //     } else {
+    //       if (matchingOrders.length === 0) {
+    //         Toast.show({
+    //           type: 'info',
+    //           text1: 'No matching orders found',
+    //         });
+    //         setIsModalOpen(false);
+    //         return;
+    //       }
+    //       console.log('Selected time added for user with UID: ', curuser.uid);
+    //       const newSelectedTimesList = [
+    //         ...selectedTimesList,
+    //         {
+    //           date: selectedDate,
+    //           time: selectedTime,
+    //           orders: matchingOrders,
+    //         },
+    //       ];
+    //       setSelectedTimesList(newSelectedTimesList);
+    //     }
+    //     setIsModalOpen(false);
+    //   }
+    // };
+    
 
     //for modal
     return (
