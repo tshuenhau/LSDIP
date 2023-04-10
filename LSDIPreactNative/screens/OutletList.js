@@ -93,14 +93,14 @@ export default function OutletList({ navigation }) {
             outlets.add(values)
                 .then(() => {
                     //for log
-                logData.add({
-                    ...log,
-                    date:firebase.firestore.Timestamp.fromDate(new Date()),
-                    staffID: currUser,
-                    outletName: values.outletName,
-                    logType: "Outlet",
-                    logDetail: "Create Outlet"
-                });
+                    logData.add({
+                        ...log,
+                        date: firebase.firestore.Timestamp.fromDate(new Date()),
+                        staffID: currUser,
+                        outletName: values.outletName,
+                        logType: "Outlet",
+                        logDetail: "Create Outlet"
+                    });
                     setCreateModalVisible(!createModalVisible);
                     clearState;
                     Toast.show({
@@ -109,7 +109,7 @@ export default function OutletList({ navigation }) {
                     });
                     setErrorMessage("");
 
-                    
+
 
 
                 }).catch((err) => {
@@ -138,7 +138,7 @@ export default function OutletList({ navigation }) {
 
                                 logData.add({
                                     ...log,
-                                    date:firebase.firestore.Timestamp.fromDate(new Date()),
+                                    date: firebase.firestore.Timestamp.fromDate(new Date()),
                                     staffID: currUser,
                                     outletId: outlet.id,
                                     outletName: outlet.outletName,
@@ -201,13 +201,13 @@ export default function OutletList({ navigation }) {
 
     return (
         <View>
-            <View style={styles.buttonView}>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Home')}
-                        style={styles.btn}>
-                        <Text style={styles.text}>Back</Text>
-                    </TouchableOpacity>
-                </View>
+            {/* <View style={styles.buttonView}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Home')}
+                    style={styles.btn}>
+                    <Text style={styles.text}>Back</Text>
+                </TouchableOpacity>
+            </View> */}
             <View style={styles.container}>
                 <Text style={styles.searchText}>Outlet List </Text>
                 <View style={styles.header}>
@@ -234,7 +234,7 @@ export default function OutletList({ navigation }) {
                         <Text style={styles.text}>Create Outlet</Text>
                     </TouchableOpacity>
         </View>*/}
-                
+
                 <View>
                     <FlatList
                         data={filteredOutletList}
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     searchnfilter: {
         flexDirection: 'row',
         width: "78%"
-      },
+    },
     searchContainer: {
         width: "96%",
         marginVertical: 15,
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     searchInput: {
         height: 40,
         fontSize: 18,
-        width:'100%',
+        width: '100%',
         marginLeft: 10,
         paddingHorizontal: 10
     },
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightGray,
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '4%',
+        marginTop: '2%',
         width: '95%',
         marginBottom: 20,
     },

@@ -66,13 +66,13 @@ export default function AdminRosterOutlet({ navigation }) {
 
     return (
         <View>
-            <View style={styles.buttonView}>
+            {/* <View style={styles.buttonView}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('Home')}
                     style={styles.btn}>
                     <Text style={styles.text}>Back</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <View style={styles.container}>
                 <Text style={styles.searchText}>Admin Rostering List </Text>
                 <View style={styles.header}>
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightGray,
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '4%',
+        marginTop: '2%',
         width: '95%',
         marginBottom: 20,
     },

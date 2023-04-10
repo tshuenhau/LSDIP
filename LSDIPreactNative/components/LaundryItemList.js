@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightGray,
         borderRadius: 25,
         alignSelf: 'center',
-        marginTop: '4%',
+        marginTop: '2%',
         width: '95%',
         marginBottom: 20,
       },

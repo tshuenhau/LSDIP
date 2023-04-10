@@ -44,11 +44,10 @@ export default function OrderSummary(props) {
         requireDelivery: false,
         express: false,
         redeemPoints: false,
-        // pointsDiscount: 0,
+        pickupCost: 0,
     }
 
     const [totalPrice, setTotalPrice] = useState(subTotal);
-    // pending pickup price calculation, flat $10 for now
     const [CRMValues, setCRMValues] = useState({});
     const [pickupfee, setPickUpFee] = useState(0);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
@@ -232,10 +231,21 @@ export default function OrderSummary(props) {
     const handlePickUpChange = () => {
         if (orderValues.pickup) {
             setTotalPrice(totalPrice - pickupfee);
+            setOrderValues({
+                ...orderValues,
+                pickup: !orderValues.pickup,
+                pickupCost: 0,
+                pickupDate: "",
+            })
         } else {
             setTotalPrice(totalPrice + pickupfee);
+            setOrderValues({
+                ...orderValues,
+                pickup: !orderValues.pickup,
+                pickupCost: pickupfee,
+                pickupDate: firebase.firestore.Timestamp.fromDate(new Date()),
+            })
         }
-        setOrderValues({ ...orderValues, pickup: !orderValues.pickup })
     }
 
     const handleDeliveryChange = () => {
@@ -248,100 +258,118 @@ export default function OrderSummary(props) {
     }
 
     const createOrder = async () => {
-        /*if (!selectedOutlet) {
-            Toast.show({
-                type: "error",
-                text1: "Please select an outlet",
-            });
-            return;
-        }*/
+        const temp = {
+            ...orderValues,
+            customerName: orderValues.customerName,
+            // customerNumber: orderValues.customerNumber,
+            invoiceNumber: invoiceNumber,
+            description: orderValues.description,
+            endDate: null,
+            totalPrice: subTotal,
+            orderStatus: "Pending Wash",
+            receiveFromWasherDate: null,
+            sendFromWasherDate: null,
+            staffID: await getUserId(),
+            outletId: "1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
+            //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
+            orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+            // orderItemIds: orderItemIds, // Add order item IDs to order
+        }
+        console.log(temp);
+        // /*if (!selectedOutlet) {
+        //     Toast.show({
+        //         type: "error",
+        //         text1: "Please select an outlet",
+        //     });
+        //     return;
+        // }*/
 
-        console.log(cart);
-        const batch = firebase.firestore().batch();
-        const orderItemIds = [];
+        // console.log(cart);
+        // const batch = firebase.firestore().batch();
+        // const orderItemIds = [];
 
-        // Creating orderItem Ids
-        cart.forEach((item) => {
-            if (item.pricingMethod !== "Weight") {
-                const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = item;
-                /*
-                for (let i = 0; i < item.quantity; i++) {
-                    const docRef = orderItem.doc();
-                    batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price });
-                    orderItemIds.push(docRef.id);
-                */
-                const docRef = orderItem.doc();
-                batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, quantity });
-                orderItemIds.push(docRef.id);
-            } else {
-                const docRef = orderItem.doc();
-                const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
-                batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, weight });
-                orderItemIds.push(docRef.id);
-            }
-        })
-        batch.commit()
-            .then(async () => {
+        // // Creating orderItem Ids
+        // cart.forEach((item) => {
+        //     if (item.pricingMethod !== "Weight") {
+        //         const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = item;
+        //         /*
+        //         for (let i = 0; i < item.quantity; i++) {
+        //             const docRef = orderItem.doc();
+        //             batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price });
+        //             orderItemIds.push(docRef.id);
+        //         */
+        //         const docRef = orderItem.doc();
+        //         batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, quantity });
+        //         orderItemIds.push(docRef.id);
+        //     } else {
+        //         const docRef = orderItem.doc();
+        //         const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
+        //         batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, weight });
+        //         orderItemIds.push(docRef.id);
+        //     }
+        // })
+        // batch.commit()
+        //     .then(async () => {
 
-                // Create order
-                const orderRef = await orders.add({
-                    ...orderValues,
-                    customerName: orderValues.customerName,
-                    // customerNumber: orderValues.customerNumber,
-                    invoiceNumber: invoiceNumber,
-                    description: orderValues.description,
-                    endDate: null,
-                    totalPrice: subTotal,
-                    orderStatus: "Pending Wash",
-                    receiveFromWasherDate: null,
-                    sendFromWasherDate: null,
-                    staffID: await getUserId(),
-                    outletId:"1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
-                    //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
-                    orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-                    orderItemIds: orderItemIds, // Add order item IDs to order
-                });
+        //         // Create order
+        //         const orderRef = await orders.add({
+        //             ...orderValues,
+        //             customerName: orderValues.customerName,
+        //             // customerNumber: orderValues.customerNumber,
+        //             invoiceNumber: invoiceNumber,
+        //             description: orderValues.description,
+        //             endDate: null,
+        //             totalPrice: subTotal,
+        //             orderStatus: "Pending Wash",
+        //             receiveFromWasherDate: null,
+        //             sendFromWasherDate: null,
+        //             staffID: await getUserId(),
+        //             outletId: "1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
+        //             //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
+        //             orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+        //             orderItemIds: orderItemIds, // Add order item IDs to order
+        //         });
 
-                invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
+        //         invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
 
-                if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0 && orderValues.redeemPoints) { // member redeemed points
-                    users
-                        .where("number", "==", customerNumber)
-                        .get()
-                        .then(querySnapshot => {
-                            querySnapshot.forEach((doc) => {
-                                users.doc(doc.id)
-                                    .update({
-                                        points: 0,
-                                    })
-                            })
-                        })
-                }
+        //         if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0 && orderValues.redeemPoints) { // member redeemed points
+        //             users
+        //                 .where("number", "==", customerNumber)
+        //                 .get()
+        //                 .then(querySnapshot => {
+        //                     querySnapshot.forEach((doc) => {
+        //                         users.doc(doc.id)
+        //                             .update({
+        //                                 points: 0,
+        //                             })
+        //                     })
+        //                 })
+        //         }
 
-                //for log
-                await logData.add({
-                    ...log,
-                    date: firebase.firestore.Timestamp.fromDate(new Date()),
-                    staffID: await getUserId(),
-                    outletId: "1RSi3QaKpvrHfh4ZVXNk",
-                    outletName: "Lagoon Laundry",
-                    logType: "Order",
-                    logDetail: "Create Order"
-                });
+        //         //for log
+        //         await logData.add({
+        //             ...log,
+        //             date: firebase.firestore.Timestamp.fromDate(new Date()),
+        //             staffID: await getUserId(),
+        //             outletId: "1RSi3QaKpvrHfh4ZVXNk",
+        //             outletName: "Lagoon Laundry",
+        //             logType: "Order",
+        //             logDetail: "Create Order"
+        //         });
 
-                setOrderValues(initialOrderValues);
-                navigation.navigate('Home');
-                Toast.show({
-                    type: 'success',
-                    text1: 'Order Created',
-                });
-            }).catch((err) => {
-                console.error(err);
-                Toast.show({
-                    type: 'error',
-                    text1: 'an error occurred',
-                });
-            })
+        //         setOrderValues(initialOrderValues);
+        //         navigation.navigate('Home');
+        //         Toast.show({
+        //             type: 'success',
+        //             text1: 'Order Created',
+        //         });
+        //     }).catch((err) => {
+        //         console.error(err);
+        //         Toast.show({
+        //             type: 'error',
+        //             text1: 'an error occurred',
+        //         });
+        //     })
     };
 
     const renderItem = ({ item }) => (
@@ -406,7 +434,7 @@ export default function OrderSummary(props) {
                             <Text style={styles.checkoutDetails}>Order Description</Text>
                             <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
                             <View style={styles.checkboxContainer}>
-                                <Text style={styles.checkboxLabel}>Laundry pick up (${pickupfee})</Text>
+                                <Text style={styles.checkboxLabel}>Laundry Pickup (${pickupfee})</Text>
                                 <Checkbox
                                     style={{ marginLeft: 20, marginBottom: 2 }}
                                     disabled={false}
@@ -485,7 +513,7 @@ export default function OrderSummary(props) {
                                         customerNumber: customerNumber,
                                         customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
                                         delivery: orderValues.requireDelivery, redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet,
-                                        pickUpFee: pickupfee, expressAmt: subTotal, points: (CRMValues.pointCash * orderValues.points).toFixed(2), invoiceNumber: invoiceNumber 
+                                        pickUpFee: pickupfee, expressAmt: subTotal, points: (CRMValues.pointCash * orderValues.points).toFixed(2), invoiceNumber: invoiceNumber
                                     })
                                 }}
                                 >

@@ -117,7 +117,6 @@ export default function AccountManagement({ navigation }) {
         }
     }
 
-
     const roles = [
         { key: '1', value: 'Admin' },
         { key: '2', value: 'Staff' },
@@ -446,13 +445,13 @@ export default function AccountManagement({ navigation }) {
 
     return (
         <ScrollView>
-            <View style={styles.buttonView}>
+            {/* <View style={styles.buttonView}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('Home')}
                     style={styles.btn2}>
                     <Text style={styles.text2}>Back</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
 
             <View>
                 <TabView
@@ -583,9 +582,9 @@ const styles = StyleSheet.create({
     cardButtons: {
         flexDirection: "row",
         justifyContent: 'space-between',
-        alignContent:'center',
-        alignItems:'center',
-        alignSelf:'center'
+        alignContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center'
     },
     searchContainer: {
         justifyContent: "center",
@@ -650,9 +649,9 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: 'bold',
     },
-    subItem:{
-        fontSize:15, 
-        color:colors.gray
+    subItem: {
+        fontSize: 15,
+        color: colors.gray
     },
     cardHeader: {
         flexDirection: 'row',
