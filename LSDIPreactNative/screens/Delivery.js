@@ -488,7 +488,21 @@ export default function DeliveryTemp({ navigation, route }) {
 
     const [blockedTimings, setBlockedTimings] = useState([]);
     const [availableTimings, setAvailableTimings] = useState([]);
-
+    const timings = [
+      '8:00am - 9:00am',
+      '9:00am - 10:00am',
+      '10:00am - 11:00am',
+      '11:00am - 12:00pm',
+      '12:00pm - 1:00pm',
+      '1:00pm - 2:00pm',
+      '2:00pm - 3:00pm',
+      '3:00pm - 4:00pm',
+      '4:00pm - 5:00pm',
+      '5:00pm - 6:00pm',
+      '6:00pm - 7:00pm',
+      '7:00pm - 8:00pm',
+      '8:00pm - 9:00pm',
+    ];
     useEffect(() => {
       if (selectedDate) {
         const db = firebase.firestore();
@@ -512,27 +526,17 @@ export default function DeliveryTemp({ navigation, route }) {
       }
     }, [selectedDate]);
 
-    const timings = [
-      '8:00am - 9:00am',
-      '9:00am - 10:00am',
-      '10:00am - 11:00am',
-      '11:00am - 12:00pm',
-      '12:00pm - 1:00pm',
-      '1:00pm - 2:00pm',
-      '2:00pm - 3:00pm',
-      '3:00pm - 4:00pm',
-      '4:00pm - 5:00pm',
-      '5:00pm - 6:00pm',
-      '6:00pm - 7:00pm',
-      '7:00pm - 8:00pm',
-      '8:00pm - 9:00pm',
-    ];
+    const currentTime = moment();
+    const currentTimeInServerTZ = currentTime;
 
     const filterAvailableTimings = (timings, blockedTimings) => {
       return timings.filter((timing) => {
         const startTime = moment(`${selectedDate} ${timing.split(' - ')[0]}`, 'YYYY-MM-DD hh:mmA');
         const endTime = moment(`${selectedDate} ${timing.split(' - ')[1]}`, 'YYYY-MM-DD hh:mmA');
         // console.log("options " + startTime + " and " + endTime);
+        if (startTime.isBefore(currentTimeInServerTZ)) {
+          return false;
+        }
         return !blockedTimings.some((blockedTiming) => {
           const blockedStartTime = moment(new Date(blockedTiming.startTime['seconds'] * 1000)).add(8, 'hours');
           const blockedEndTime = moment(new Date(blockedTiming.endTime['seconds'] * 1000)).add(8, 'hours');
