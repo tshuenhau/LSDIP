@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     itemContainer: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.violet50,
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -500,7 +500,8 @@ const styles = StyleSheet.create({
     btn: {
         padding: 10,
         borderRadius: 25,
-        backgroundColor: "#0B3270",
+        //backgroundColor: "#0B3270",
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
     },

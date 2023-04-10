@@ -235,7 +235,7 @@ export default function CustomerProfile() {
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
                     <Image style={styles.image}
-                        source={require('../assets/defaultProfilePicture.png')}
+                        source={require('../assets/customerprofile.png')}
                     />
                     <View style={{ alignItems: 'center' }}>
                         <Text style={styles.mainNameText}>{userDetails.name}</Text>
@@ -251,7 +251,7 @@ export default function CustomerProfile() {
 
                 <View style={styles.rightProfileContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: "bold", fontSize: 24 }}>Profile</Text>
+                        <Text style={{ fontWeight: "bold", fontSize: 22 }}>Profile</Text>
                         <TouchableOpacity
                             onPress={() => setUpdateModalVisible(!updateModalVisible)}
                             style={styles.editBtn}
@@ -275,7 +275,7 @@ export default function CustomerProfile() {
 
                 <View style={styles.rightProfileContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: "bold", fontSize: 24 }}>Membership</Text>
+                        <Text style={{ fontWeight: "bold", fontSize: 22 }}>Membership</Text>
                     </View>
 
                     <View style={styles.profileDetailRow}>
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     deleteBtn: {
         padding: 10,
         borderRadius: 10,
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
         marginBottom: 25,
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     itemText: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: '500',
     },
     image: {
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     },
     mainNameText: {
         fontWeight: '400',
-        fontSize: 32,
+        fontSize: 25,
     },
     mainRoleText: {
         color: colors.shadowGray,
@@ -474,12 +474,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     textLabel: {
-        fontSize: 20,
+        fontSize: 18,
         color: 'grey',
         paddingHorizontal: 10,
     },
     roleText: {
-        fontSize: 18,
+        fontSize: 16,
         color: 'black',
         paddingHorizontal: 10,
         marginTop: 10,
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     btn: {
         padding: 10,
         borderRadius: 10,
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
         margin: 10,

@@ -1,5 +1,6 @@
 import React from 'react'
 import {Text, TouchableOpacity, StyleSheet} from "react-native"
+import colors from '../colors'
 
 const styles = StyleSheet.create({
     btn: {
@@ -7,7 +8,8 @@ const styles = StyleSheet.create({
         width: "92%",
         borderRadius: 25,
         marginTop: 20,
-        backgroundColor: "#0B3270",
+        //backgroundColor: "#0B3270",
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
     },
