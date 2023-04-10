@@ -391,7 +391,9 @@ const styles = StyleSheet.create({
         //color: colors.blue700
     },
     button: {
-        backgroundColor: '#4f46e5',
-        marginTop: 25
+        //backgroundColor: '#4f46e5',
+        backgroundColor: colors.blue700,
+        marginTop: 25,
+        marginHorizontal: 'auto'
     }
 });

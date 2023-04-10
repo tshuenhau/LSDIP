@@ -16,6 +16,7 @@ import { FontAwesome, Entypo } from '@expo/vector-icons';
 import alert from '../components/Alert'
 import Toast from 'react-native-toast-message';
 import colors from '../colors';
+import { color } from 'react-native-reanimated'
 
 export default function MyProfile() {
 
@@ -164,9 +165,18 @@ export default function MyProfile() {
         <View style={styles.container}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
-                    <Image style={styles.image}
-                        source={require('../assets/defaultProfilePicture.png')}
-                    />
+                    {userDetails.role === 'Admin' && (<Image style={styles.image}
+                        source={require('../assets/profile.png')}
+                    />)}
+                    {userDetails.role === 'Staff' && (<Image style={styles.image}
+                        source={require('../assets/staffprofile.png')}
+                    />)}
+                    {userDetails.role === 'Customer' && (<Image style={styles.image}
+                        source={require('../assets/customerprofile.png')}
+                    />)}
+                    {userDetails.role === 'Driver' && (<Image style={styles.image}
+                        source={require('../assets/washin.jpg')}
+                    />)}
                     <View style={{ alignItems: 'center' }}>
                         <Text style={styles.mainNameText}>{userDetails.name}</Text>
                         <Text style={styles.mainRoleText}>{userDetails.role}</Text>
@@ -293,11 +303,14 @@ const styles = StyleSheet.create({
     leftProfileContainer: {
         flex: 1,
         padding: 16,
-        backgroundColor: colors.white,
+        //backgroundColor: colors.themelight,
         alignItems: 'center',
         //marginLeft: 40,
-        marginRight: 40,
-        borderRadius: 25,
+        marginRight: 20,
+        borderRadius: 6,
+        borderColor: '#c4b5fd',
+        //borderColor: '#e0e7ff',
+        borderWidth: 3
     },
     leftCardDetailsContainer: {
         width: "100%",
@@ -317,7 +330,9 @@ const styles = StyleSheet.create({
         padding: 25,
         backgroundColor: colors.white,
         //marginRight: 40,
-        borderRadius: 25,
+        borderRadius: 6,
+        borderColor: '#c4b5fd',
+        borderWidth: 2
     },
     itemLabel: {
         color: colors.shadowGray,
@@ -331,7 +346,7 @@ const styles = StyleSheet.create({
     image: {
         height: 250,
         width: 250,
-        borderRadius: 50,
+        borderRadius: '50%',
     },
     itemContainer: {
         flex: 1,
@@ -339,6 +354,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: "flex-start",
         marginTop: 20,
+        marginHorizontal: 'auto',
+        width: '98%'
     },
     mainNameText: {
         fontWeight: '400',
@@ -375,7 +392,8 @@ const styles = StyleSheet.create({
     btn: {
         padding: 10,
         borderRadius: 10,
-        backgroundColor: colors.darkBlue,
+        //backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
         margin: 10,
@@ -416,7 +434,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginTop: '4%',
         width: '95%',
-        marginBottom: 20,
-        flex:1
+        marginBottom: '10%',
+        flex:1,
+        backgroundColor: colors.white
       },
 });
