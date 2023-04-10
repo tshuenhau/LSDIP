@@ -282,6 +282,9 @@ export default function CustomerHome({ user, navigation }) {
                     }
                 }).then(() => {
                     console.log('Pickup removed successfully');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000)
                 }).catch((error) => {
                     console.error(error);
                 });

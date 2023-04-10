@@ -6,9 +6,12 @@ import DuplicateAlert from '../components/DuplicateAlert';
 import moment from 'moment';
 import Btn from "../components/Button"
 import colors from '../colors';
+import axios from 'axios';
+import * as geolib from 'geolib';
 
 export default function Pickup({ navigation }) {
     const today = moment().format("YYYY-MM-DD");;
+    const [loading, setLoading] = useState(true);
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [displayMonth, setDisplayMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -17,6 +20,7 @@ export default function Pickup({ navigation }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [duplicateMessage, setDuplicateMessage] = useState(null);
     const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
+    const [deliveryFees, setDeliveryFees] = useState(null);
 
     useEffect(() => {
         const db = firebase.firestore();
@@ -35,6 +39,95 @@ export default function Pickup({ navigation }) {
         }
     }, [handleMonthChange]);
 
+    useEffect(() => {
+        const calculateDeliveryFee = () => {
+            return new Promise((resolve, reject) => {
+            let address = "";
+            const db = firebase.firestore();
+            const user = firebase.auth().currentUser;
+            db.collection('users')
+                .where('email', '==', user.email)
+                .get()
+                .then(querySnapshot => {
+                if (querySnapshot.empty) {
+                    console.log('No matching documents.');
+                    reject();
+                } else {
+                    querySnapshot.forEach(doc => {
+                    // Retrieve the user's address from the document
+                    address = doc.data().address;
+                    console.log(`User's address: ${address}`);
+                    const location1 = address;
+                    const location2 = '10 Paya Lebar Rd Singapore 409057';
+                    const apiKey = 'AIzaSyDpuo4PKoIf6vYm6BbCa77-kQN_zq7pDoA';
+
+                    // Make API request for location 1
+                    const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+                    axios.get(apiUrl1)
+                        .then(response => {
+                        if (response.data.results.length === 0) {
+                            console.error('No results found for location:', location1);
+                            reject();
+                        }
+                        const result = response.data.results[0];
+                        const coords1 = {
+                            latitude: result.geometry.location.lat,
+                            longitude: result.geometry.location.lng
+                        };
+
+                        // Make API request for location 2
+                        const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                        axios.get(apiUrl2)
+                            .then(response => {
+                            if (response.data.results.length === 0) {
+                                console.error('No results found for location:', location2);
+                                reject();
+                            }
+                            const result = response.data.results[0];
+                            const coords2 = {
+                                latitude: result.geometry.location.lat,
+                                longitude: result.geometry.location.lng
+                            };
+
+                            // Calculate the distance between the two sets of coordinates
+                            const distanceInMeters = geolib.getDistance(coords1, coords2);
+                            console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                            const deliveryFee = distanceInMeters / 500;
+                            console.log(deliveryFee);
+                            console.log("delivery fee is here!");
+                            resolve(deliveryFee);
+                            }).catch(error => {
+                            console.error(error);
+                            reject();
+                            });
+                        }).catch(error => {
+                        console.error(error);
+                        reject();
+                        });
+                    })
+                }
+                }).catch(error => {
+                console.error(error);
+                reject();
+                });
+            });
+        }
+
+        calculateDeliveryFee().then(deliveryFee => {
+            setDeliveryFees(deliveryFee);
+            setLoading(false);
+        }).catch(error => {
+            console.error(error);
+            setLoading(false);
+        });
+    }, []);
+
+    useEffect(() => {
+    console.log('Delivery fees updated:', deliveryFees);
+    }, [deliveryFees]);
+
+
+
     const handleMonthChange = useCallback(({ year, month }) => {
         setDisplayMonth(`${Number(year)}-${Number(month)}`);
     }, []);
@@ -42,6 +135,83 @@ export default function Pickup({ navigation }) {
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
     };
+
+    // const calculateDeliveryFee = () => {
+    //     return new Promise((resolve, reject) => {
+    //       let address = "";
+    //       const db = firebase.firestore();
+    //       const user = firebase.auth().currentUser;
+    //       db.collection('users')
+    //         .where('email', '==', user.email)
+    //         .get()
+    //         .then(querySnapshot => {
+    //           if (querySnapshot.empty) {
+    //             console.log('No matching documents.');
+    //             reject();
+    //           } else {
+    //             querySnapshot.forEach(doc => {
+    //               // Retrieve the user's address from the document
+    //               address = doc.data().address;
+    //               console.log(`User's address: ${address}`);
+    //               const location1 = address;
+    //               const location2 = '10 Paya Lebar Rd Singapore 409057';
+    //               const apiKey = 'AIzaSyDcYq8n3h92G2HV4IdjWG5es4ioIHvKZc0';
+    
+    //               // Make API request for location 1
+    //               const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+    //               axios.get(apiUrl1)
+    //                 .then(response => {
+    //                   if (response.data.results.length === 0) {
+    //                     console.error('No results found for location:', location1);
+    //                     reject();
+    //                   }
+    //                   const result = response.data.results[0];
+    //                   const coords1 = {
+    //                     latitude: result.geometry.location.lat,
+    //                     longitude: result.geometry.location.lng
+    //                   };
+    
+    //                   // Make API request for location 2
+    //                   const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+    //                   axios.get(apiUrl2)
+    //                     .then(response => {
+    //                       if (response.data.results.length === 0) {
+    //                         console.error('No results found for location:', location2);
+    //                         reject();
+    //                       }
+    //                       const result = response.data.results[0];
+    //                       const coords2 = {
+    //                         latitude: result.geometry.location.lat,
+    //                         longitude: result.geometry.location.lng
+    //                       };
+    
+    //                       // Calculate the distance between the two sets of coordinates
+    //                       const distanceInMeters = geolib.getDistance(coords1, coords2);
+    //                       console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+    //                       const deliveryFee = distanceInMeters / 500
+    //                       console.log(deliveryFee);
+    //                       console.log("delivery fee is here!");
+    //                       resolve(deliveryFee);
+    //                     }).catch(error => {
+    //                       console.error(error);
+    //                       reject();
+    //                     });
+    //                 }).catch(error => {
+    //                   console.error(error);
+    //                   reject();
+    //                 });
+    //             })
+    //           }
+    //         }).catch(error => {
+    //           console.error(error);
+    //           reject();
+    //         });
+    //     });
+    //   }
+    
+    //   useEffect(() => {
+    //     console.log('Delivery fees updated:', deliveryFees);
+    //   }, [deliveryFees]);
 
     const AvailableTimingsModal = ({ date, onClose }) => {
         const [selectedTime, setSelectedTime] = useState(null);
@@ -126,7 +296,7 @@ export default function Pickup({ navigation }) {
             onClose();
         };
 
-        const handleConfirm = () => {
+        const handleConfirm = async () => {
             if (selectedTime) {
                 const existingTime = selectedTimesList.find(
                     (item) => item.date === selectedDate && item.time === selectedTime
@@ -143,6 +313,9 @@ export default function Pickup({ navigation }) {
                     const user = firebase.auth().currentUser;
 
                     if (user) {
+                        // const deliveryFee = await calculateDeliveryFee();
+                        // setDeliveryFees(deliveryFee);
+                        // console.log("completed calculation of delivery fee!");
                         console.log(selectedTime.split(' - ')[0]);
                         const selectedHour = selectedTime.split(' - ')[0];
                         const shiftTime = selectedHour.split('00')[1];
@@ -315,7 +488,11 @@ export default function Pickup({ navigation }) {
                                 shiftData.pm_shift = shiftData.pm_shift.filter((id) => !user.uid);
                             }
                             return docRef.set(shiftData);
-                        }).catch((error) => {
+                        },
+                        // setTimeout(() => {
+                        //     window.location.reload();
+                        // }, 2000)
+                        ).catch((error) => {
                             console.error(error);
                         });
                     }).catch((error) => {
@@ -327,108 +504,110 @@ export default function Pickup({ navigation }) {
             });
         }
     };
+    if (!loading) {
+        return (
+            <ScrollView>
+                <View style={styles.mainContainer}>
+                        <View style={styles.leftcontainer}>
+                            <View style={styles.calendarcontainer}>
+                                <CalendarList
+                                    onDayPress={handleDayPress}
+                                    minDate={today}
+                                    markedDates={{
+                                        ...(selectedDate && {
+                                            [selectedDate]: {
+                                                selected: true,
+                                            },
+                                        }),
+                                        ...currentMonthDays.reduce(
+                                            (acc, day) => ({ ...acc, [day]: { disabled: true } }),
+                                            {}
+                                        ),
+                                    }}
+                                    pastScrollRange={0}
+                                    futureScrollRange={1}
+                                    scrollEnabled={true}
+                                    horizontal={true}
+                                    pagingEnabled={true}
+                                    calendarWidth={290}
+                                    theme={{
+                                        selectedDayBackgroundColor: colors.blue800,
+                                        selectedDayTextColor: colors.white,
+                                        todayTextColor: colors.blue700,
+                                        textDisabledColor: colors.blue100,
+                                        arrowColor: colors.shadowGray,
+                                        todayButtonFontWeight: "bold",
+                                    }}
+                                />
+                            </View>
+                            <View style={styles.selectedDateContent}>
+                                <View>
+                                    <Text style={styles.selectedDateText}>
+                                        Selected date:
+                                    </Text>
 
-    return (
-        <ScrollView>
-            <View style={styles.mainContainer}>
-                    <View style={styles.leftcontainer}>
-                        <View style={styles.calendarcontainer}>
-                            <CalendarList
-                                onDayPress={handleDayPress}
-                                minDate={today}
-                                markedDates={{
-                                    ...(selectedDate && {
-                                        [selectedDate]: {
-                                            selected: true,
-                                        },
-                                    }),
-                                    ...currentMonthDays.reduce(
-                                        (acc, day) => ({ ...acc, [day]: { disabled: true } }),
-                                        {}
-                                    ),
-                                }}
-                                pastScrollRange={0}
-                                futureScrollRange={1}
-                                scrollEnabled={true}
-                                horizontal={true}
-                                pagingEnabled={true}
-                                calendarWidth={290}
-                                theme={{
-                                    selectedDayBackgroundColor: colors.blue800,
-                                    selectedDayTextColor: colors.white,
-                                    todayTextColor: colors.blue700,
-                                    textDisabledColor: colors.blue100,
-                                    arrowColor: colors.shadowGray,
-                                    todayButtonFontWeight: "bold",
-                                }}
+                                </View>
+
+                                {selectedDate && (
+                                    <View style={styles.dateContent}>
+                                        <Text style={styles.dateText}>
+                                            {selectedDate}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                            {selectedDate && (
+                                    <View>
+                                        <TouchableOpacity
+                                            style={styles.viewTimingsButton}
+                                            onPress={() => setIsModalOpen(true)}
+                                        >
+                                            <Text style={styles.viewTimingsButtonText}>View timings</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                        </View>
+                        <View style={styles.detailContainer}>
+                            {selectedTimesList.length > 0 && (
+                                <View style={styles.selectedTimesContainer}>
+                                    <Text style={styles.selectedTimesTitle}>Selected Pick Up Times</Text>
+                                    <ScrollView style={styles.selectedTimesList}>
+                                        {selectedTimesList.map((item) => (
+                                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                                                <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
+                                                <Text style={styles.cardText}>
+                                                    <b>Time: </b>{item.time}
+                                                </Text>
+                                                <Text style={styles.pickupText}>Pick up scheduled for this timeslot</Text>
+                                                <Text style={styles.pickupText}>Pick up Cost: ${deliveryFees.toFixed(1)}0</Text>
+                                                <TouchableOpacity
+                                                    style={styles.removeButton}
+                                                    onPress={() => handleDelete(item)}
+                                                >
+                                                    <Text style={styles.removeButtonText}> Remove</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        ))}
+
+                                    </ScrollView>
+                                </View>
+
+                            )}
+                            <AvailableTimingsModal
+                                date={selectedDate}
+                                onClose={() => setIsModalOpen(false)}
+                                isModalOpen={isModalOpen}
+                            />
+                            <DuplicateAlert
+                                message={duplicateMessage}
+                                isOpen={isDuplicateOpen}
+                                onClose={() => setIsDuplicateOpen(false)}
                             />
                         </View>
-                        <View style={styles.selectedDateContent}>
-                            <View>
-                                <Text style={styles.selectedDateText}>
-                                    Selected date:
-                                </Text>
-
-                            </View>
-
-                            {selectedDate && (
-                                <View style={styles.dateContent}>
-                                    <Text style={styles.dateText}>
-                                        {selectedDate}
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-                        {selectedDate && (
-                                <View>
-                                    <TouchableOpacity
-                                        style={styles.viewTimingsButton}
-                                        onPress={() => setIsModalOpen(true)}
-                                    >
-                                        <Text style={styles.viewTimingsButtonText}>View timings</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
                     </View>
-                    <View style={styles.detailContainer}>
-                        {selectedTimesList.length > 0 && (
-                            <View style={styles.selectedTimesContainer}>
-                                <Text style={styles.selectedTimesTitle}>Selected Pick Up Times</Text>
-                                <ScrollView style={styles.selectedTimesList}>
-                                    {selectedTimesList.map((item) => (
-                                        <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
-                                            <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
-                                            <Text style={styles.cardText}>
-                                                <b>Time: </b>{item.time}
-                                            </Text>
-                                            <Text style={styles.pickupText}>Pick up scheduled for this timeslot</Text>
-                                            <TouchableOpacity
-                                                style={styles.removeButton}
-                                                onPress={() => handleDelete(item)}
-                                            >
-                                                <Text style={styles.removeButtonText}> Remove</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    ))}
-
-                                </ScrollView>
-                            </View>
-
-                        )}
-                        <AvailableTimingsModal
-                            date={selectedDate}
-                            onClose={() => setIsModalOpen(false)}
-                            isModalOpen={isModalOpen}
-                        />
-                        <DuplicateAlert
-                            message={duplicateMessage}
-                            isOpen={isDuplicateOpen}
-                            onClose={() => setIsDuplicateOpen(false)}
-                        />
-                    </View>
-                </View>
-        </ScrollView>
-    )
+            </ScrollView>
+        )
+    }
 }
 
 const styles = StyleSheet.create({
