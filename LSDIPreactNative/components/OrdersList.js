@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     textAlign: "left"
   },
   cardBody: {
-    backgroundColor: colors.blue50,
+    backgroundColor: colors.violet50,
     padding: 16,
   },
   cardButtons: {

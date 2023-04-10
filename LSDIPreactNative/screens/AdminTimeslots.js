@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
   },
   blockTypeUnselectedButton: {
-    backgroundColor: colors.gray,
+    backgroundColor: colors.violet400,
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   saveButton: {
-    backgroundColor: colors.darkBlue,
+    backgroundColor: colors.blue700,
     padding: 10,
     borderRadius: 25,
     width: '40%',

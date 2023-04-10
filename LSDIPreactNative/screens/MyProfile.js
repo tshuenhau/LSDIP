@@ -165,9 +165,18 @@ export default function MyProfile() {
         <View style={styles.container}>
             <View style={styles.itemContainer}>
                 <View style={styles.leftProfileContainer}>
-                    <Image style={styles.image}
+                    {userDetails.role === 'Admin' && (<Image style={styles.image}
                         source={require('../assets/profile.png')}
-                    />
+                    />)}
+                    {userDetails.role === 'Staff' && (<Image style={styles.image}
+                        source={require('../assets/staffprofile.png')}
+                    />)}
+                    {userDetails.role === 'Customer' && (<Image style={styles.image}
+                        source={require('../assets/customerprofile.png')}
+                    />)}
+                    {userDetails.role === 'Driver' && (<Image style={styles.image}
+                        source={require('../assets/washin.jpg')}
+                    />)}
                     <View style={{ alignItems: 'center' }}>
                         <Text style={styles.mainNameText}>{userDetails.name}</Text>
                         <Text style={styles.mainRoleText}>{userDetails.role}</Text>
@@ -299,9 +308,9 @@ const styles = StyleSheet.create({
         //marginLeft: 40,
         marginRight: 20,
         borderRadius: 6,
-        //borderColor: '#818cf8',
-        borderColor: '#e0e7ff',
-        borderWidth: 2
+        borderColor: '#c4b5fd',
+        //borderColor: '#e0e7ff',
+        borderWidth: 3
     },
     leftCardDetailsContainer: {
         width: "100%",
@@ -322,7 +331,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         //marginRight: 40,
         borderRadius: 6,
-        borderColor: '#e0e7ff',
+        borderColor: '#c4b5fd',
         borderWidth: 2
     },
     itemLabel: {
