@@ -202,10 +202,10 @@ export default function CustomerHome({ user, navigation }) {
                                         });
                                 }
                             })
-                            
+
                             setTimeout(() => {
                                 window.location.href = window.location.origin;
-                              }, 1000);
+                            }, 1000);
 
                         })
                     }
@@ -361,7 +361,7 @@ export default function CustomerHome({ user, navigation }) {
             <View style={styles.customerPointContainer}>
                 <View>
                     <Text style={styles.customerPointDisplay}>
-                        {user.points} (${user.points * pointCash})
+                        {user.points} (${(user.points * pointCash).toFixed(2)})
                     </Text>
                     <Text style={styles.customerPointLabel}>Point balance</Text>
                 </View>
@@ -371,11 +371,11 @@ export default function CustomerHome({ user, navigation }) {
                 <ProgressBar
                     percentage={customerMilestone}
                     color={'#65a30d'}
-                    style={{backgroundColor: '#EDE5BB'}}
+                    style={{ backgroundColor: '#EDE5BB' }}
                     transitionSpeed={1000}
                     Milestone={() => <AntDesign name="star" size={26} color={'#FADA39'} />}
                     CurrentMilestone={() => <AntDesign name="star" size={26} color={'#a3e635'} />}
-                    CompletedMilestone={() => <AntDesign name="star" size={26} color={'#65a30d'}/>}
+                    CompletedMilestone={() => <AntDesign name="star" size={26} color={'#65a30d'} />}
                     milestoneCount={membershipTiers.length} />
 
             </View>
