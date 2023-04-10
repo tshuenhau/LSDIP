@@ -482,7 +482,7 @@ export default function DeliveryTemp({ navigation, route }) {
     //         console.error(error);
     //     });
     // }
-  }
+  } 
 
   const AvailableTimingsModal = ({ date, onClose }) => {
 
