@@ -90,44 +90,6 @@ export default class Paypal extends Component {
             })
     }
 
-    _onNavigationStateChange = (webViewState) => {
-        console.log("webViewstate", webViewState);
-        if (webViewState.url.includes('http://localhost:19006/')) {
-            this.setState({
-                approvalUrl: null
-            })
-
-            const { PayerId, paymentId } = webViewState.url
-
-            fetch(`https://api.sandbox.paypal.com/v1/payments/payment/${paymentId}/execute`, {
-                method: 'POST',
-                body: { payer_id: PayerId },
-
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.state.accessToken}`
-                }
-            })
-                .then(res => res.json())
-                .then(response => {
-                    console.log("res", response);
-                    if (response.name == "INVALID_RESOURCE_ID") {
-                        alert('Payment Failed. Please Try Again!')
-                        this.setState({
-                            approvalUrl: null
-                        })
-                        this.props.navigation.pop();
-                    }
-                    if (response.state === "approved") {
-                        console.log("create delivery");
-                        this.updateDatabase();
-                    }
-                }).catch(err => {
-                    console.log(...err)
-                })
-        }
-    }
-
     updateDatabase() {
         firebase.firestore().collection("orders")
             .where("customerNumber", "==", this.state.user.number)
@@ -233,10 +195,46 @@ export default class Paypal extends Component {
                             }
                         })
                     })
-
                 }
-
             })
+    }
+
+    _onNavigationStateChange = (webViewState) => {
+        console.log("webViewstate", webViewState);
+        if (webViewState.url.includes('http://localhost:19006/')) {
+            this.setState({
+                approvalUrl: null
+            })
+
+            const { PayerId, paymentId } = webViewState.url
+
+            fetch(`https://api.sandbox.paypal.com/v1/payments/payment/${paymentId}/execute`, {
+                method: 'POST',
+                body: { payer_id: PayerId },
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.state.accessToken}`
+                }
+            })
+                .then(res => res.json())
+                .then(response => {
+                    console.log("res", response);
+                    if (response.name == "INVALID_RESOURCE_ID") {
+                        alert('Payment Failed. Please Try Again!')
+                        this.setState({
+                            approvalUrl: null
+                        })
+                        this.props.navigation.pop();
+                    }
+                    if (response.state === "approved") {
+                        console.log("create delivery");
+                        this.updateDatabase();
+                    }
+                }).catch(err => {
+                    console.log(...err)
+                })
+        }
     }
 
     render() {
