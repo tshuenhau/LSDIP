@@ -205,7 +205,7 @@ export default function CustomerHome({ user, navigation }) {
                             
                             setTimeout(() => {
                                 window.location.href = window.location.origin;
-                              }, 2000);
+                              }, 1000);
 
                         })
                     }
@@ -352,7 +352,7 @@ export default function CustomerHome({ user, navigation }) {
             navigation.navigate('Home');
             setTimeout(() => {
                 window.location.reload();
-            }, 2000);
+            }, 1000);
         }
     }
 
