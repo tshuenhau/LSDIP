@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     itemContainer: {
-        backgroundColor: colors.violet50,
+        backgroundColor: colors.lightGray,
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',

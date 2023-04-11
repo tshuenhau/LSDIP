@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         borderRadius: 20,
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
         width: "13%"
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
         flex: 3,
     },
     checkoutButton: {
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         padding: 10,
         borderRadius: 25,
         width: "96%",

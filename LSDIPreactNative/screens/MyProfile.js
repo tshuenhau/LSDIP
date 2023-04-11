@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         borderColor: '#c4b5fd',
         //borderColor: '#e0e7ff',
-        borderWidth: 3
+        borderWidth: 2
     },
     leftCardDetailsContainer: {
         width: "100%",

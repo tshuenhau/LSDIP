@@ -536,12 +536,14 @@ const styles = StyleSheet.create({
     },
     allocateAllButton: {
         width: "15%",
-        backgroundColor: "#344869",
+        //backgroundColor: "#344869",
+        backgroundColor: colors.blue700,
         margin: 10,
     },
     topBackButton: {
         width: "15%",
-        backgroundColor: "#344869",
+        //backgroundColor: "#344869",
+        backgroundColor: colors.blue700,
         margin: 10,
     },
     topAllocateButton: {

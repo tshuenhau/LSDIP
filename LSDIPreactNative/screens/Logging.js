@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         borderRadius: 20,
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
         width: "20%",
