@@ -24,16 +24,20 @@ const CrmSettingsScreen = () => {
   const handleSubmit = () => {
     const crmRef = firebase.firestore().collection('crm');
     if (cashToPoint.trim() !== '') {
-      crmRef.doc('cash_point').update({ value: Number(cashToPoint) });
-      Toast.show({
-        type: 'success',
-        text1: 'Settings Updated',
+      crmRef.doc('cash_point').update({ value: Number(cashToPoint) }).then(() => {
+        setCurrentCashToPoint(cashToPoint);
+        Toast.show({
+          type: 'success',
+          text1: 'Settings Updated',
+        });
       });
     } else if (pointToCash.trim() !== '') {
-      crmRef.doc('point_cash').update({ value: Number(pointToCash) });
-      Toast.show({
-        type: 'success',
-        text1: 'Settings Updated',
+      crmRef.doc('point_cash').update({ value: Number(pointToCash) }).then(() => {
+        setCurrentPointToCash(pointToCash);
+        Toast.show({
+          type: 'success',
+          text1: 'Settings Updated',
+        });
       });
     } else {
       return;

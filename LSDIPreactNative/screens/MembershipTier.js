@@ -59,12 +59,12 @@ export default function MembershipTier() {
         console.log("create");
         if (newTierValues.name && newTierValues.expenditure && newTierValues.discount) {
             membershipTier.add(newTierValues)
-                .then(() => {
+                .then((docRef) => {
                     Toast.show({
                         type: 'success',
                         text1: 'Membership tier created',
                     });
-                    existingTiers.push(newTierValues);
+                    existingTiers.push({ ...newTierValues, id: docRef.id });
                     const sortedTiers = existingTiers.sort((a, b) => a.expenditure - b.expenditure);
                     setExistingTiers(sortedTiers);
                     setNewTierValues(initialValues);
@@ -352,8 +352,8 @@ const styles = StyleSheet.create({
         // margin: 10,
         alignItems: 'center',
         alignSelf: 'center',
-        marginBottom:20,
-        marginTop:10
+        marginBottom: 20,
+        marginTop: 10
     },
     buttonText: {
         color: '#fff',
