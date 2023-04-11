@@ -72,7 +72,7 @@ export default function Report() {
             })
 
         users
-            .where("role", "==", "Staff")
+            .where("role", "in", ["Staff", "Driver"])
             .get()
             .then(querySnapshot => {
                 const staff = []
@@ -146,7 +146,7 @@ export default function Report() {
                 .where("outletID", "==", selectedOutlet)
                 .where("completed", "==", true)
                 .where("date", ">=", fromDate)
-                .where("date", "<", toDate)
+                .where("date", "<=", toDate)
                 .get()
                 .then(querySnapshot => {
                     const payrollResult = [];
@@ -186,7 +186,7 @@ export default function Report() {
                 }
             };
             createPDF();
-        }, 2000);
+        }, 4000);
     }
 
     const renderRevenueItem = ({ item: order }) => {

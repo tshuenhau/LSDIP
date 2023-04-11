@@ -20,7 +20,7 @@ import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-
+import alert from '../components/Alert';
 
 if (
     Platform.OS === 'android' &&
@@ -31,26 +31,6 @@ if (
 
 export default function VehicleModule() {
 
-    const [modalVisible, setModalVisible] = useState(false);
-    const [values, setValues] = useState(initialValues);
-    const vehicle = firebase.firestore().collection('vehicles');
-    const [numberPlate, setNumberPlate] = useState("");
-    const [vehicleStatus, setVehicleStatus] = useState("");
-    const [vehicles, setVehicles] = useState([])
-    const db = firebase.firestore()
-    const [expandedVehicle, setExpandedVehicle] = useState(null);
-    const [updateModalVisible, setUpdateModalVisible] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [upvalues, setUpValues] = useState('');
-    const [user, setUser] = useState(false);
-
-    const vehicleStatuses = [
-        { key: 1, value: "Operating" },
-        { key: 2, value: "Servicing" },
-        { key: 3, value: "Broke Down" },
-        { key: 4, value: "Inactive" },
-    ];
-
     //initial vehicle values
     const initialValues = {
         driver: "",
@@ -60,89 +40,24 @@ export default function VehicleModule() {
         vehicleStatus: "",
     };
 
-    //console.log(values)
-    //Create data method 1
-    function createVehicle() {
-        if (numberPlate, vehicleStatus) {
-            addDoc(collection(db, "vehicles"), {
-                driver: "",
-                location: new firebase.firestore.GeoPoint(0, 0),
-                mileage: 0,
-                numberPlate: numberPlate,
-                vehicleStatus: vehicleStatus,
+    const [modalVisible, setModalVisible] = useState(false);
+    const [newValues, setNewValues] = useState(initialValues);
+    const [vehicles, setVehicles] = useState([])
+    const [expandedVehicle, setExpandedVehicle] = useState(null);
+    const [updateModalVisible, setUpdateModalVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [upvalues, setUpValues] = useState('');
+    const [user, setUser] = useState(false);
+    const db = firebase.firestore();
+    const vehicle = firebase.firestore().collection('vehicles');
 
-            }).then(() => {
-                Toast.show({
-                    type: 'success',
-                    text1: 'Account created',
-                });
-                setErrorMessage("");
-            }).catch((error) => {
-                console.log(error);
-            })
-            clearState();
-            setModalVisible(!modalVisible);
-        } else {
-            setErrorMessage("Please fill up all fields");
-        }
-    }
+    const vehicleStatuses = [
+        { key: 1, value: "Operating" },
+        { key: 2, value: "Servicing" },
+        { key: 3, value: "Broke Down" },
+        { key: 4, value: "Inactive" },
+    ];
 
-    //create data method 2
-    /*function createVehicle() {
-        console.log(values)
-        vehicle.add(values)
-            .then(() => {
-                setModalVisible(!modalVisible);
-                clearState;
-                console.log("Creation Success");
-            }).catch((err) => {
-                console.log(err);
-            })
-    }*/
-
-    //delete
-    function deleteVehicle(id) {
-        deleteDoc(doc(db, 'vehicles', id))
-    }
-
-    //clear state method 1
-    function clearState() {
-        setNumberPlate("")
-        setVehicleStatus("")
-    }
-
-    //clear state method 2
-    /*const clearState = () => {
-        setValues({ ...initialValues });
-    }*/
-
-    const openModel = (vehicle) => {
-        setUpValues(vehicle)
-        setUpdateModalVisible(!updateModalVisible)
-
-    }
-
-    const toggleExpand = (id) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        if (expandedVehicle === id) {
-            setExpandedVehicle(null);
-        } else {
-            setExpandedVehicle(id);
-        }
-    };
-
-    //read all vehicle data
-    // function getAllVehicle() {
-    //   getDocs(collection(db,"vehicles")).then(docSnap => {
-    //     const vehicles = [];
-    //     docSnap.forEach((doc) => {
-    //       vehicles.push({ ...doc.data(), id:doc.id})
-    //     })
-    //     console.log(vehicles)
-    //   })
-    // }
-
-    //read all vehicle data method 2
     useEffect(() => {
         db.collection('vehicles')
             .onSnapshot(
@@ -183,31 +98,80 @@ export default function VehicleModule() {
                     console.log(e);
                 }
             }
-
             getUserId();
         } catch (e) {
             console.log("User Id does not exist in DB")
         }
     }, [])
 
-    //alt user function 2
-    {/*async function setUserDetails(){
-        try {
-            const user = await getUserId();
-            getDoc(doc(db, "users", user)).then(docData => {
-                if(docData.exists()) {
-                    //console.log(docData.data())
-                    setUser(docData.data())
-                }
+    const createVehicle = () => {
+        if (newValues.numberPlate && newValues.vehicleStatus) {
+            addDoc(collection(db, "vehicles"), {
+                driver: "",
+                location: new firebase.firestore.GeoPoint(0, 0),
+                mileage: 0,
+                numberPlate: newValues.numberPlate,
+                vehicleStatus: newValues.vehicleStatus,
+
+            }).then(() => {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Vehicle created',
+                });
+                setNewValues(initialValues);
+                setErrorMessage("");
+            }).catch((error) => {
+                console.log(error);
             })
-        } catch (e) {
-            console.log("User Id does not exist in DB")
+            setModalVisible(!modalVisible);
+        } else {
+            setErrorMessage("Please fill up all fields");
         }
-		
-	}*/}
+    }
+
+    //delete
+    const deleteVehicle = (id) => {
+        return alert(
+            "Confirmation",
+            "Are you sure you want to delete this Vehicle?",
+            [
+                {
+                    text: "Yes",
+                    onPress: () => {
+                        deleteDoc(doc(db, 'vehicles', id))
+                            .then(() => {
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Vehicle deleted',
+                                });
+                            })
+                    }
+                },
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancelled`"),
+                    style: "cancel"
+                }
+            ]
+        );
+    }
+
+    const openModel = (vehicle) => {
+        setUpValues(vehicle)
+        setUpdateModalVisible(true)
+    }
+
+    const toggleExpand = (id) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (expandedVehicle === id) {
+            setExpandedVehicle(null);
+        } else {
+            setExpandedVehicle(id);
+        }
+    };
 
     //update values in vehicle modal
-    function handleUpdate(text, eventName) {
+    const handleUpdate = (text, eventName) => {
         setUpValues(prev => {
             return {
                 ...prev,
@@ -216,18 +180,14 @@ export default function VehicleModule() {
         })
     }
 
-    //Create data
-    /*function createVehicle() {
-        addDoc(collection(db, "vehicles"), {
-            numberPlate: numberPlate,
-            vehicleStatus: vehicleStatus,
-
-        }).then(() => {
-            console.log("veh created");
-        }).catch((error) => {
-            console.log(error);
+    const handleNewVechicleChange = (text, eventName) => {
+        setNewValues(prev => {
+            return {
+                ...prev,
+                [eventName]: text,
+            }
         })
-    }*/
+    }
 
     function updateVehicle(id) {
         if (id != "") {
@@ -240,24 +200,17 @@ export default function VehicleModule() {
                 vehicleStatus: upvalues.vehicleStatus,
             })
                 .then(() => {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Vehicle updated',
+                    });
                     console.log("Update Success")
-                    setUpdateModalVisible(!updateModalVisible);
+                    setUpdateModalVisible(false);
                 }).catch((err) => {
                     console.log(err)
                 })
         }
     }
-
-    {/*const getUserId = async () => {
-        try {
-            const id = await AsyncStorage.getItem('userId');
-            if (id !== null) {
-                return id;
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };*/}
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -301,29 +254,25 @@ export default function VehicleModule() {
 
     return (
 
-        //Create Vehicle Modal
         <View>
-            {/*for create vehicleitem*/}
+            {/* Create Vehicle Modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setModalVisible(!modalVisible);
-                }}>
+            >
                 <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.view}>
 
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Create New Vehicle</Text>
-                                <TextBox value={numberPlate} onChangeText={(numberPlate) => { setNumberPlate(numberPlate) }} placeholder="Number Plate"></TextBox>
+                                <TextBox value={newValues.numberPlate} onChangeText={(numberPlate) => handleNewVechicleChange(numberPlate, "numberPlate")} placeholder="Number Plate"></TextBox>
                                 <View style={styles.statusSelectList}>
                                     <SelectList
                                         data={vehicleStatuses}
-                                        setSelected={(vehicleStatus) => { setVehicleStatus(vehicleStatus) }}
-                                        save="key"
+                                        setSelected={(vehicleStatus) => handleNewVechicleChange(vehicleStatus, "vehicleStatus")}
+                                        save="value"
                                         search={false}
                                     />
                                 </View>
@@ -386,13 +335,12 @@ export default function VehicleModule() {
                             <View style={styles.view}>
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Vehicle</Text>
                                 <TextBox placeholder={upvalues.numberPlate} onChangeText={text => handleUpdate(text, "numberPlate")} />
-                                {/* <TextBox placeholder={upvalues.vehicleStatus} onChangeText={text => handleUpdate(text, "vehicleStatus")} /> */}
                                 <View style={styles.statusSelectList}>
                                     <SelectList
                                         placeholder={upvalues.vehicleStatus}
                                         data={vehicleStatuses}
-                                        setSelected={(vehicleStatus) => { setVehicleStatus(vehicleStatus) }}
-                                        save="key"
+                                        setSelected={(vehicleStatus) => handleUpdate(vehicleStatus, "vehicleStatus")}
+                                        save="value"
                                         search={false}
                                     />
                                 </View>
