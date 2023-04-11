@@ -248,10 +248,10 @@ export default function AccountManagement({ navigation }) {
 
     const Admin = () => (
         <View >
-            <View style={styles.searchView}>
+           {/* <View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
-                        /*autoFocus="autoFocus"*/
+                        /*autoFocus="autoFocus"
                         style={styles.searchInputWithBtn}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -263,7 +263,7 @@ export default function AccountManagement({ navigation }) {
                     style={styles.btn}>
                     <Text style={styles.text}>Create User</Text>
                 </TouchableOpacity>
-            </View>
+            </View>*/}
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Admin")}
                 keyExtractor={item => item.id}
@@ -277,7 +277,7 @@ export default function AccountManagement({ navigation }) {
 
     const Staff = () => (
         <View>
-            <View style={styles.searchView}>
+            {/*<View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
                         style={styles.searchInputWithBtn}
@@ -291,7 +291,7 @@ export default function AccountManagement({ navigation }) {
                     style={styles.btn}>
                     <Text style={styles.text}>Create User</Text>
                 </TouchableOpacity>
-            </View>
+    </View>*/}
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Staff")}
                 keyExtractor={item => item.id}
@@ -305,7 +305,7 @@ export default function AccountManagement({ navigation }) {
 
     const Driver = () => (
         <View >
-            <View style={styles.searchView}>
+            {/*<View style={styles.searchView}>
                 <View style={styles.searchContainerWithBtn}>
                     <TextInput
                         style={styles.searchInputWithBtn}
@@ -319,7 +319,7 @@ export default function AccountManagement({ navigation }) {
                     style={styles.btn}>
                     <Text style={styles.text}>Create User</Text>
                 </TouchableOpacity>
-            </View>
+    </View>*/}
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Driver")}
                 keyExtractor={item => item.id}
@@ -333,14 +333,14 @@ export default function AccountManagement({ navigation }) {
 
     const Customer = () => (
         <View >
-            <View style={styles.searchContainer}>
+            {/*<View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by user's name"
                 />
-            </View>
+    </View>*/}
             <FlatList
                 data={filteredUserList.filter(user => user.role === "Customer")}
                 keyExtractor={item => item.id}
@@ -354,14 +354,14 @@ export default function AccountManagement({ navigation }) {
 
     const Disabled = () => (
         <View >
-            <View style={styles.searchContainer}>
+            {/*<View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by user's name"
                 />
-            </View>
+    </View>*/}
             <FlatList
                 data={users.filter(l => l.role === "Disabled")}
                 keyExtractor={item => item.id}
@@ -453,9 +453,26 @@ export default function AccountManagement({ navigation }) {
                 </TouchableOpacity>
             </View> */}
 
-            <View>
+            <View style={styles.container}>
+                <Text style={styles.searchText}>Account Management</Text>
+                <View style={styles.searchView}>
+                    <View style={styles.searchContainerWithBtn}>
+                        <TextInput
+                            style={styles.searchInputWithBtn}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search by user's name"
+                        />
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => setCreateModalVisible(!createModalVisible)}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Create User</Text>
+                    </TouchableOpacity>
+                </View>
+
                 <TabView
-                    style={styles.container}
+                    //style={styles.container}
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
@@ -600,17 +617,17 @@ const styles = StyleSheet.create({
     searchContainerWithBtn: {
         justifyContent: "center",
         alignContent: "center",
-        width: "70%",
+        width: "75%",
         marginLeft: 15
     },
     searchInputWithBtn: {
         height: 40,
         borderWidth: 1,
         borderRadius: 5,
-        borderColor: colors.gray,
+        borderColor: '#f5f5f5',
         paddingHorizontal: 10,
         fontSize: 18,
-        backgroundColor: colors.white,
+        backgroundColor: colors.themelight,
         marginVertical: 10,
     },
     noDataText: {
@@ -720,7 +737,7 @@ const styles = StyleSheet.create({
         padding: 10
     },
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.lightGray,
         borderRadius: 5,
         alignSelf: 'center',
         marginTop: '2%',
@@ -735,5 +752,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 30,
         flexDirection: 'row',
+    },
+    searchText: {
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left",
     },
 });
