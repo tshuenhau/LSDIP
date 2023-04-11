@@ -91,7 +91,7 @@ export default function OrderPage(props) {
 
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [laundryItemsData, setLaundryItemsData] = useState([]);
-  
+
   useEffect(() => {
     if (order) {
       const orderItem = firebase.firestore().collection('orderItem');
@@ -140,7 +140,7 @@ export default function OrderPage(props) {
       //const pm =[...new Set(pricingMs)];
       const pricingMethods = [];
       pricingMs.forEach((element) => {
-        if(!pricingMethods.includes(element.pricingMethod)) {
+        if (!pricingMethods.includes(element.pricingMethod)) {
           pricingMethods.push(element.pricingMethod);
         }
       });
@@ -275,7 +275,7 @@ export default function OrderPage(props) {
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     //console.log(orderRef);
     let cn = "";
-    if (refundAmount && refundMethod) {
+    if (refundAmount && refundMethod && details) {
       orderRef.get().then(doc => {
         if (!doc.exists) {
           console.log('No such User document!');
@@ -298,11 +298,14 @@ export default function OrderPage(props) {
             refundAmount: refundAmount,
             refundMethod: refundMethod,
             refundDetails: details,
-          });
-          Toast.show({
-            type: 'success',
-            text1: 'Refund added',
-          });
+          }).then(() => {
+            Toast.show({
+              type: 'success',
+              text1: 'Refund added',
+            })
+          }).catch(err => {
+            console.log(err);
+          })
           setErrorMessage("");
         }
       }).catch(err => {
@@ -451,7 +454,7 @@ export default function OrderPage(props) {
           <Text style={styles.sectionText}>Order Details</Text>
           <Text style={styles.orderNumber}>Order #{orderId}</Text>
           <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxLabel}>Laundry Pick Up ($10)</Text>
+            <Text style={styles.checkboxLabel}>Laundry Pick Up</Text>
             <Checkbox
               style={{ marginLeft: 20, marginBottom: 2 }}
               disabled={false}
@@ -460,7 +463,7 @@ export default function OrderPage(props) {
             />
           </View >
           <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxLabel}>Laundry Delivery ($10)</Text>
+            <Text style={styles.checkboxLabel}>Laundry Delivery</Text>
             <Checkbox
               style={{ marginLeft: 20, marginBottom: 2 }}
               disabled={false}
@@ -579,7 +582,7 @@ export default function OrderPage(props) {
                       marginTop: 20,
                       backgroundColor: 'white',
                     }}>
-                    <SelectList 
+                    <SelectList
                       data={pricingMethods}
                       placeholder="Pricing Method"
                       setSelected={(val) => handleChange(val, 'pricingMethod')}
@@ -646,6 +649,11 @@ export default function OrderPage(props) {
                     placeholder="Refund Details"
                     onChangeText={(text) => handleChange(text, 'refundDetails')}
                   />
+                  {errorMessage &&
+                    <View style={styles.errorMessageContainer}>
+                      <Text style={styles.errorMessage}>{errorMessage}</Text>
+                    </View>
+                  }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <Btn
                       onClick={() => refund1()}
