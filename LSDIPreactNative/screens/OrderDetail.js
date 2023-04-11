@@ -43,9 +43,7 @@ export default function OrderPage(props) {
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [orderItemsList, setOrderItemsList] = useState([]);
   const [laundryItemsData, setLaundryItemsData] = useState([]);
-  const [service, setService] = useState([]);
   const [modalData, setModalData] = useState({ description: '', price: '' });
-  const services = firebase.firestore().collection('laundryCategory');
   const refunds = firebase.firestore().collection('refunds');
 
   useEffect(() => {
@@ -65,52 +63,33 @@ export default function OrderPage(props) {
     });
     return () => unsubscribe();
   }, [orderId]);
-  // useEffect(() => {
-  //   if (order) {
-  //     console.log(order);
-  //   }
-  // }, [order]);
-  //import service. 
-  useEffect(() => {
-    services.onSnapshot(querySnapshot => {
-      const service = [];
-      querySnapshot.forEach(doc => {
-        const { serviceName } = doc.data();
-        data.push({
-          key: doc.id,
-          value: serviceName,
-        });
-      });
-      setService(service);
-    });
-  }, []);
 
   useEffect(() => {
     if (order) {
       const orderItem = firebase.firestore().collection('orderItem');
-      console.log('order: ', order);
-      const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
-        const orderItemsList = [];
-        querySnapshot.forEach((doc) => {
-          const { laundryItemName, price, typeOfServices, quantity, pricingMethod, weight } = doc.data();
-          //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
-          orderItemsList.push({
-            id: doc.id,
-            laundryItemName,
-            price,
-            orderId,
-            typeOfServices,
-            quantity,
-            pricingMethod,
-            weight
-          });
-        });
-        setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
-      });
-      return () => unsubscribe();
+
+      orderItem
+        .where(firebase.firestore.FieldPath.documentId(), 'in', order.orderItemIds)
+        .get()
+        .then(querySnapshot => {
+          const orderItemsList = [];
+          querySnapshot.forEach(doc => {
+            const { laundryItemName, price, typeOfServices, quantity, pricingMethod, weight } = doc.data();
+            orderItemsList.push({
+              id: doc.id,
+              laundryItemName,
+              price,
+              orderId,
+              typeOfServices,
+              quantity,
+              pricingMethod,
+              weight
+            });
+          })
+          setOrderItemsList(orderItemsList);
+        })
     }
   }, [order]);
-  //console.log('order 1', order);
 
   useEffect(() => {
     const laundryItems = firebase.firestore().collection('laundryItem');
@@ -142,21 +121,6 @@ export default function OrderPage(props) {
     });
     return () => unsubscribe();
   }, []);
-
-  const data = orderItemsList.filter((item) => order.orderItemIds.includes(item.id));
-
-  const deleteOrder = () => {
-    const orderRef = firebase.firestore().collection('orders').doc(orderId);
-    orderRef
-      .delete()
-      .then(() => {
-        console.log('Order successfully deleted!');
-        props.navigation.goBack();
-      })
-      .catch((error) => {
-        console.error('Error deleting order: ', error);
-      });
-  };
 
   function handleChange(text, eventName) {
     console.log("handle chage");
@@ -233,19 +197,6 @@ export default function OrderPage(props) {
     }
   }
 
-  const renderSeparator = () => {
-    return (
-      <View
-        style={{
-          height: 1,
-          width: '100%',
-          backgroundColor: '#CED0CE',
-          alignItems: "center"
-        }}
-      />
-    )
-  }
-
   const refund = () => {
     const details = modalData.refundDetails;
     const refundAmount = modalData.refundAmount;
@@ -297,6 +248,26 @@ export default function OrderPage(props) {
       setErrorMessage("Please fill up all fields")
     }
   }
+
+  const deleteOrder = () => {
+    const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
+    orderRef.update({
+      items: firebase.firestore.FieldValue.arrayRemove(item.id),
+    });
+    const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
+    orderItemRef.delete();
+
+    // const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    // orderRef
+    //   .delete()
+    //   .then(() => {
+    //     console.log('Order successfully deleted!');
+    //     props.navigation.goBack();
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error deleting order: ', error);
+    //   });
+  };
 
   const updateDescription = () => {
     console.log("here");
@@ -370,6 +341,19 @@ export default function OrderPage(props) {
     setPickUp(!requireDelivery);
   }
 
+  const renderSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 1,
+          width: '100%',
+          backgroundColor: '#CED0CE',
+          alignItems: "center"
+        }}
+      />
+    )
+  }
+
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
@@ -382,14 +366,7 @@ export default function OrderPage(props) {
           style={styles.outletIcon}
           name="trash-o"
           color='red'
-          onPress={() => {
-            const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
-            orderRef.update({
-              items: firebase.firestore.FieldValue.arrayRemove(item.id),
-            });
-            const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
-            orderItemRef.delete();
-          }}
+          onPress={() => deleteOrder()}
         />
         <TouchableOpacity
           onPress={() => {
@@ -450,7 +427,7 @@ export default function OrderPage(props) {
           </View>
           <FlatList
             style={styles.cardBody}
-            data={data}
+            data={orderItemsList}
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={renderSeparator}
             renderItem={renderItem}
