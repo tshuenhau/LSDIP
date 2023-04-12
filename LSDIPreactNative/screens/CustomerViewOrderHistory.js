@@ -164,7 +164,8 @@ export default function CustomerViewOrderHistory({ navigation }) {
     <View>
       <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
+        //onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
+        onPress={() => toggleExpand(order.id)}
         activeOpacity={0.8}>
         <View style={styles.cardHeader}>
           <View>
@@ -198,6 +199,9 @@ export default function CustomerViewOrderHistory({ navigation }) {
                   }} />
               </TouchableOpacity>
             </View>
+            <TouchableOpacity>
+              <Text style={styles.navigatebutton} onPress={() => navigation.navigate('Invoice', { orderId: order.id })}><b>View Invoice</b></Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
@@ -473,5 +477,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  navigatebutton: {
+    color: colors.blue700,
+    fontSize: 16,
+    fontWeight: 'bold'
   }
 });
