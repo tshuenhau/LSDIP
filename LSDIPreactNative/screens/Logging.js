@@ -215,7 +215,7 @@ export default function OrderSummary({ navigation }) {
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6', zIndex: 'auto', }} />}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.theme, zIndex: 'auto', }} />}
                 />
             </View>
         </ScrollView>

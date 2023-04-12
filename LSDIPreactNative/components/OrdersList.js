@@ -341,6 +341,7 @@ export default function OrdersList({ navigation }) {
           {order.receiveFromWasherDate !== null && (<Text style={styles.orderDetails}><b>Receive from Washer Date: </b>{formatOrderDate(order.receiveFromWasherDate)}</Text>)}
           {order.deliveryDate !== "" && (<Text style={styles.orderDetails}><b>Delivery Date: </b>{order.deliveryDate}</Text>)}
           {order.endDate !== null && (<Text style={styles.orderDetails}><b>End Date: </b>{formatOrderDate(order.endDate)}</Text>)}
+          {order.feedback !== "" && (<Text style={styles.orderDetails}><b>Customer Feedback: </b>{order.feedback}</Text>)}
           {/*<Text style={styles.orderDetails}><b>Delivery Fee: </b>when to add</Text>*/}
           {order.orderStatus === "Refunded" && (
             <TouchableOpacity
@@ -491,7 +492,7 @@ export default function OrdersList({ navigation }) {
                       <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
                       <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
                       <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
-                      <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Amount: </b>${item.refundAmount}</Text>
                       <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
                       <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
                     </View>

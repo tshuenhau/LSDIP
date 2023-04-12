@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     container: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
         borderRadius: 25,
         alignSelf: 'center',
         marginTop: '2%',
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
       },
     itemContainer: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.themelight,
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -515,13 +515,15 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         marginHorizontal: 16,
         borderRadius: 10,
-        shadowColor: '#000',
+        /*shadowColor: '#000',
         shadowOpacity: 0.2,
         shadowOffset: {
             width: 0,
             height: 3,
-        },
+        },*/
         elevation: 3,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     outletName: {
         fontSize: 20,

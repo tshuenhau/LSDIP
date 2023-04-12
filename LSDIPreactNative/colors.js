@@ -49,4 +49,5 @@ export default {
     themelight: '#F2F3FF',
     theme: '#4B54F5',
     chart: '#222942',
+    borderColor: '#c4b5fd'
 };

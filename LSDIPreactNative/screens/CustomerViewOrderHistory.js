@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation, } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text, Image, StyleSheet, Button, ScrollView, FlatList, LayoutAnimation,
+  Modal,
+  TextBox,
+}
+  from "react-native";
 import { firebase } from "../config/firebase";
 import colors from '../colors';
+import { MaterialIcons } from '@expo/vector-icons';
+import Btn from "../components/Button";
+import { TextInput } from "react-native-gesture-handler";
+import Toast from 'react-native-toast-message';
 
 export default function CustomerViewOrderHistory({ navigation }) {
 
@@ -9,9 +20,16 @@ export default function CustomerViewOrderHistory({ navigation }) {
 
   const [user, setUser] = useState(null) // This user
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [orderId, setOrderId] = useState('');
+  const [cfeedback, setCfeedback] = useState('');
   const [orderList, setOrderList] = useState([]);
   const users = firebase.firestore().collection('users');
   const orders = firebase.firestore().collection('orders');
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [updateModal1Visible, setUpdateModal1Visible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+
 
   useEffect(() => {
     users.doc(auth1().currentUser.uid)
@@ -46,7 +64,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
           const orderList = [];
           console.log(user);
           querySnapshot.forEach((doc) => {
-            const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+            const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice, feedback } = doc.data();
             orderList.push({
               id: doc.id,
               customerName,
@@ -56,6 +74,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
               outletId,
               orderStatus,
               totalPrice,
+              feedback
             });
           });
           setOrderList(orderList);
@@ -87,10 +106,65 @@ export default function CustomerViewOrderHistory({ navigation }) {
     }
   };
 
+  function feedback(id) {
+    console.log('feedback', id);
+    //console.log(orderList.length);
+    setOrderId(id);
+    console.log('oder', orderId);
+    let order = orderList.find(o => o.id === id);
+    //console.log(order.feedback);
+    setCfeedback(order.feedback);
+  }
+
+  const rate = (id) => {
+    console.log('rate');
+  }
+
+  const updateFeedback = () => {
+    console.log("here");
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    const feedback = cfeedback;
+    //console.log(orderRef);
+
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log('No such User document!');
+        throw new Error('No such User document!'); //should not occur normally as the notification is a "child" of the user
+      } else {
+        //console.log('Document data:', doc.data());
+        console.log("feedback now", feedback);
+        orderRef.update({
+          feedback: feedback
+        }).then(() => {
+          Toast.show({
+            type: 'success',
+            text1: 'Feedback updated, click the order again to see the change',
+          })
+        });
+        orderList.find(o => o.id === orderId).feedback = feedback;
+      }
+    })
+      .catch(err => {
+        console.log('Error getting document', err);
+        return false;
+      });
+    setUpdateModal1Visible(false);
+  }
+
+  function handleChange(text, eventName) {
+    setUpdateModalData(prev => {
+      return {
+        ...prev,
+        [eventName]: text
+      }
+    })
+  }
+
   const renderItem = ({ item: order }) => (
     <View>
       <TouchableOpacity
         style={styles.card}
+        //onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
         onPress={() => toggleExpand(order.id)}
         activeOpacity={0.8}>
         <View style={styles.cardHeader}>
@@ -100,10 +174,34 @@ export default function CustomerViewOrderHistory({ navigation }) {
           </View>
           <Text style={styles.orderStatus}>{order.orderStatus}</Text>
         </View>
+
         {expandedOrder === order.id && (
           <View style={styles.cardBody}>
-            <Text style={styles.orderBody}><b>OutletId: </b>{formatOutletNumber(order.outletId)}</Text>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={styles.orderBody}><b>OutletId: </b>{formatOutletNumber(order.outletId)}</Text>
+              <TouchableOpacity style={{ marginRight: 10, marginLeft: 'auto' }}>
+                <Text style={styles.rate} onPress={() => rate(order.outletId)} >
+                  {/** <MaterialIcons name="star-rate" size={20} color="white" />*/}
+                  <MaterialIcons name="star-rate" size={14} color="white" />
+                  Rate
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <Text style={styles.orderBody}><b>Total Price: </b>{order.totalPrice}</Text>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={styles.orderBody}><b>Feedback: </b>{order.feedback}</Text>
+              <TouchableOpacity style={{ marginRight: 10, marginLeft: 'auto' }}>
+                <MaterialIcons name="rate-review" size={24} color={colors.green500}
+                  onPress={() => {
+                    feedback(order.id);
+                    setUpdateModal1Visible(true)
+                  }} />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity>
+              <Text style={styles.navigatebutton} onPress={() => navigation.navigate('Invoice', { orderId: order.id })}><b>View Invoice</b></Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
@@ -123,6 +221,66 @@ export default function CustomerViewOrderHistory({ navigation }) {
           }
         />
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={updateModalVisible}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Rate the outlet</Text>
+                {/** <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={''} />*/}
+
+                {errorMessage &&
+                  <View style={styles.errorMessageContainer}>
+                    <Text style={styles.errorMessage}>{errorMessage}</Text>
+                  </View>
+                }
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                  <Btn onClick={() => updateDetails()} title="Update" style={{ width: "48%" }} />
+                  <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={updateModal1Visible}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Feedback</Text>
+                {/** <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={''} />*/}
+                <TextInput
+                  editable
+                  multiline
+                  placeholder="feedback"
+                  style={{ height: 40, width: '100%'}}
+                  onChangeText={text => setCfeedback(text)} value={cfeedback} />
+                {errorMessage &&
+                  <View style={styles.errorMessageContainer}>
+                    <Text style={styles.errorMessage}>{errorMessage}</Text>
+                  </View>
+                }
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                  <Btn onClick={() => updateFeedback()} title="Update" style={{ width: "48%" }} />
+                  <Btn onClick={() => setUpdateModal1Visible(!updateModal1Visible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   )
 };
@@ -131,7 +289,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.themelight,
-    marginTop:"5%"
+    marginTop: "5%"
   },
   ordersListContainer: {
     flex: 1,
@@ -171,13 +329,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 16,
     borderRadius: 10,
-    shadowColor: '#000',
+    /*shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowOffset: {
       width: 0,
       height: 3,
-    },
+    },*/
     elevation: 3,
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   orderNumber: {
     fontSize: 20,
@@ -281,11 +441,48 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginLeft: 10
   },
-  orderStatus:{
+  orderStatus: {
     fontSize: 20,
     fontWeight: 700,
-    alignContent:'center',
-    alignSelf:'center',
-    alignItems:'center'
+    alignContent:  'center',
+    alignSelf:  'center',
+    alignItems:  'center'
+  },
+  rate: {
+    fontSize: 14,
+    backgroundColor: '#f59e0b',
+    padding: 5,
+    borderRadius: 15,
+    color: "#fff",
+    flexDirection: 'row',
+    textAlign: 'center',
+    marginHorizontal: 'auto'
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    width: '90%',
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: colors.shadowGray,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  navigatebutton: {
+    color: colors.blue700,
+    fontSize: 16,
+    fontWeight: 'bold'
   }
 });

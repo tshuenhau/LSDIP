@@ -226,13 +226,13 @@ export default function CustomersScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     borderRadius: 25,
     alignSelf: 'center',
     marginTop: '4%',
     width: '95%',
     marginBottom: 20,
-    flex:1
+    flex: 1
   },
   list: {
     alignItems: 'center',
@@ -244,15 +244,17 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 16,
     borderRadius: 10,
-    shadowColor: '#000',
+    /*shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowOffset: {
       width: 0,
       height: 3,
-    },
+    },*/
     elevation: 3,
     alignContent: "center",
-    width: "96%"
+    width: "96%",
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   cardHeader: {
     flexDirection: 'row',
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   itemContainer: {
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.themelight,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -396,7 +398,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 25,
     alignSelf: 'center',
     marginTop: '2%',

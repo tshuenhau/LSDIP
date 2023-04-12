@@ -302,11 +302,11 @@ export default function CustomerProfile() {
                     <ProgressBar
                         style={{ margin: 30 }}
                         percentage={100 * ((userDetails.expenditure - currentTier.expenditure) / (nextTier.expenditure - currentTier.expenditure))}
-                        color={colors.blue600}
+                        color='#EDE5BB'
                         transitionSpeed={1000}
-                        Milestone={() => <AntDesign name="star" size={26} color={colors.blue300} />}
-                        CurrentMilestone={() => <AntDesign name="star" size={26} color={colors.blue600} />}
-                        CompletedMilestone={() => <AntDesign name="star" size={26} color={colors.blue900} />}
+                        Milestone={() => <AntDesign name="star" size={26} color={'#FADA39'} />}
+                        CurrentMilestone={() => <AntDesign name="star" size={26} color={'#a3e635'} />}
+                        CompletedMilestone={() => <AntDesign name="star" size={26} color={'#65a30d'} />}
                         milestoneCount={2}
                     />
 

@@ -105,7 +105,7 @@ export default function AdminOrderManagement({ navigation, route }) {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.white,
         borderRadius: 25,
         alignSelf: 'center',
         marginTop: '2%',
@@ -113,17 +113,19 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.white,
         marginVertical: 10,
         marginHorizontal: 16,
         borderRadius: 10,
-        shadowColor: '#000',
+        /*shadowColor: '#000',
         shadowOpacity: 0.2,
         shadowOffset: {
             width: 0,
             height: 3,
-        },
+        },*/
         elevation: 3,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     cardHeader: {
         flexDirection: 'row',
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
         fontWeight:600
     },
     cardBody: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.themelight,
         padding: 16,
     },
     list: {
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         borderRadius: 20,
-        backgroundColor: colors.darkBlue,
+        backgroundColor: colors.blue700,
         justifyContent: "center",
         alignItems: "center",
         width: "20%",

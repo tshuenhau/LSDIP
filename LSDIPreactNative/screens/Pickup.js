@@ -703,7 +703,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginTop: 10,
-        marginLeft: 5
+        marginLeft: 5,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     selectedTimeText: {
         flex: 1,
