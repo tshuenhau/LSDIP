@@ -491,7 +491,7 @@ export default function OrdersList({ navigation }) {
                       <Text style={styles.refunddetails}><b>Refund Item:</b> {item.orderItemName}</Text>
                       <Text style={styles.refunddetails}><b>Type of Services:</b> {item.typeOfServices}</Text>
                       <Text style={styles.refunddetails}><b>Orignial Price:</b> {item.price}</Text>
-                      <Text style={styles.refunddetails}><b>Refund Amount: </b>{item.refundAmount}</Text>
+                      <Text style={styles.refunddetails}><b>Refund Amount: </b>${item.refundAmount}</Text>
                       <Text style={styles.refunddetails}><b>Refund Method: </b>{item.refundMethod}</Text>
                       <Text style={styles.refunddetails}><b>Refund Details:</b> {item.refundDetails}</Text>
                     </View>
