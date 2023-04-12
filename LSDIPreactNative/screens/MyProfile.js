@@ -175,7 +175,7 @@ export default function MyProfile() {
                         source={require('../assets/customerprofile.png')}
                     />)}
                     {userDetails.role === 'Driver' && (<Image style={styles.image}
-                        source={require('../assets/washin.jpg')}
+                        source={require('../assets/washing-machine.png')}
                     />)}
                     <View style={{ alignItems: 'center' }}>
                         <Text style={styles.mainNameText}>{userDetails.name}</Text>

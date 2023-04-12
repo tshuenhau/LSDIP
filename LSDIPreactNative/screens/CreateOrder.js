@@ -38,8 +38,7 @@ export default function CreateOrder({ navigation }) {
     useEffect(() => {
         const laundryItem = firebase.firestore().collection('laundryItem');
         laundryItem
-            .get()
-            .then(querySnapshot => {
+            .onSnapshot(querySnapshot => {
                 const laundryItems = [];
                 querySnapshot.forEach(doc => {
                     const { typeOfServices, laundryItemName, pricingMethod, price, fromPrice, toPrice, url } = doc.data();
@@ -69,8 +68,7 @@ export default function CreateOrder({ navigation }) {
 
         const laundryCategory = firebase.firestore().collection('laundryCategory');
         laundryCategory
-            .get()
-            .then(querySnapshot => {
+            .onSnapshot(querySnapshot => {
                 const laundryCategories = [];
                 querySnapshot.forEach(doc => {
                     const { serviceName } = doc.data();

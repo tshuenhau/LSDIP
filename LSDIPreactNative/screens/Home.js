@@ -42,7 +42,7 @@ export default function Home({ navigation }) {
     navigation.setOptions({
       headerRight: () => (
         <Image
-          source={require('../assets/washin.jpg')}
+          source={require('../assets/washing-machine.png')}
           style={{
             width: 40,
             height: 40,

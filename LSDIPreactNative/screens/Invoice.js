@@ -86,7 +86,6 @@ export default function Invoice(props) {
     const unsubscribe = orderRef.onSnapshot((doc) => {
       if (doc.exists) {
         setOrder({ id: doc.id, ...doc.data() });
-        console.log('order', order);
       } else {
         console.log('No such order document!');
       }
@@ -200,6 +199,12 @@ export default function Invoice(props) {
     await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
   };
 
+  const formatOrderDate = (date) => {
+    //return date.toDate().toLocaleString();
+      var convertedDate = new Date();
+      return convertedDate.getFullYear() + "-" + (1 + convertedDate.getMonth()) + "-" + convertedDate.getDate();
+  };
+
   const selectPrinter = async () => {
     const printer = await Print.selectPrinterAsync(); // iOS only
     setSelectedPrinter(printer);
@@ -214,6 +219,8 @@ export default function Invoice(props) {
             <Text style={styles.outletDetailsText}>{outletDetails.outletAddress}</Text><br></br>
             <Text style={styles.outletDetailsText}><b>TEL: </b>(+65){outletDetails.outletNumber}</Text><br></br>
             <Text style={styles.outletDetailsText}><b>Served by: </b>{staffDetails.name}</Text><br></br>
+            <Text style={styles.outletDetailsText}><b>Date: </b>{formatOrderDate(order?.orderDate)}</Text><br></br>
+            <Text style={styles.outletDetailsText}><b>Invoice Number: </b>{order?.invoiceNumber}</Text>
             {/*<QR orderID={order?.id}></QR>*/}
           </div>
           <div style={styles.qrCodeContainer}>
@@ -224,7 +231,7 @@ export default function Invoice(props) {
         <View style={styles.cardHeader}>
           {/*<Text style={styles.orderNumber}>Order #{orderId}</Text>
            <Text style={styles.orderNumber}>Name: {order.customerName}</Text> */}
-          <View style={{ marginLeft: 7, flexDirection: 'row', alignContent: 'space-between' }}>
+          <View style={{ marginLeft: 7, flexDirection: 'row', alignContent: 'flex-end'}}>
             <Text style={styles.customerName}><b>Customer: </b>{order?.customerName}</Text>
             <Text style={styles.customerNumber}><b>TEL: </b>{order?.customerNumber}</Text>
           </View>
@@ -258,7 +265,16 @@ export default function Invoice(props) {
         />
         <div style={styles.bottomContainer}>
           <div style={styles.totalPrice}>
-            <Text style={styles.totalPrice}><b>Total Price: </b>S$ {order?.totalPrice}</Text>
+            <Text style={styles.totalPrice}><b>Total Price: </b>S$ {order?.totalPrice}</Text> <br></br>
+            <Text style={styles.additionalServicesHeader}><b>Additional Services</b></Text><br></br>
+            {order?.express ? <Text style={styles.additionalServices}><b>Require Express?: </b>Yes</Text>
+            : <Text style={styles.additionalServices}><b>Require Express: </b>No</Text>} <br></br>
+            {order?.pickup ? <Text style={styles.additionalServices}><b>Require Pick Up?: </b>Yes</Text>
+            : <Text style={styles.additionalServices}><b>Require Pick Up?: </b>No</Text>}<br></br>
+            {order?.requireDelivery ? <Text style={styles.additionalServices}><b>Require Delivery?: </b>Yes</Text>
+            : <Text style={styles.additionalServices}><b>Require Delivery?: </b>No</Text>}<br></br>
+            {order?.redeemPoints ? <Text style={styles.additionalServices}><b>Redeem Points?: </b>Yes</Text>
+            : <Text style={styles.additionalServices}><b>Redeem Points?: </b>No</Text>}<br></br>
           </div>
           <div style={styles.description}>
             <Text style={styles.itemDescription}><b>Description:</b> <br></br>{order?.description.replace(/\./g, "\n")}</Text>
@@ -288,9 +304,10 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    marginTop:20,
+    marginBottom:20
   },
   orderNumber: {
     fontSize: 20,
@@ -417,11 +434,12 @@ const styles = StyleSheet.create({
   },
   customerName: {
     fontSize: 20,
-    marginRight: 50
+    marginRight: 45,
+
   },
   customerNumber: {
     fontSize: 20,
-    marginRight: 50
+    marginRight: 35,
   },
   totalPrice: {
     alignItems: "right",
@@ -434,7 +452,29 @@ const styles = StyleSheet.create({
     marginTop: "1%",
     marginBottom: "3%",
   },
+  additionalServices: {
+    alignItems: "right",
+    alignContent: 'space-between',
+    flex: 'right',
+    float: "right",
+    marginRight: 50,
+    backgroundColor: colors.white,
+    fontSize: 15,
+    marginTop: "1%",
+    marginBottom: "3%",
+  },
+  additionalServicesHeader: {
+    alignItems: "right",
+    alignContent: 'space-between',
+    flex: 'right',
+    float: "right",
+    marginRight: 50,
+    backgroundColor: colors.white,
+    fontSize: 21,
+    marginTop: "2%",
+    marginBottom: "3%",
+  },
   bottomContainer: {
     backgroundColor: colors.white,
-  }
+  },
 });

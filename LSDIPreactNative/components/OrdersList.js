@@ -336,7 +336,7 @@ export default function OrdersList({ navigation }) {
           <Text style={styles.orderDetails}><b>OutletId: </b>{order.outletId}</Text>
           <Text style={styles.orderDetails}><b>Customer Number: </b>{order.customerNumber}</Text>
           {order.customerAddress !== "" && (<Text style={styles.orderDetails}><b>Customer Address: </b>{order.customerAddress}</Text>)}
-          {order.pickupDate !== "" && (<Text style={styles.orderDetails}><b>Pick Up Date: </b>{order.pickupDate}</Text>)}
+          {order.pickupDate !== "" && (<Text style={styles.orderDetails}><b>Pick Up Date: </b>{formatOrderDate(order.pickupDate)}</Text>)}
           {order.sendFromWasherDate !== null && (<Text style={styles.orderDetails}><b>Send to Washer Date: </b>{formatOrderDate(order.sendFromWasherDate)}</Text>)}
           {order.receiveFromWasherDate !== null && (<Text style={styles.orderDetails}><b>Receive from Washer Date: </b>{formatOrderDate(order.receiveFromWasherDate)}</Text>)}
           {order.deliveryDate !== "" && (<Text style={styles.orderDetails}><b>Delivery Date: </b>{order.deliveryDate}</Text>)}

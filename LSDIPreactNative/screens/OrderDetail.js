@@ -17,10 +17,8 @@ import { firebase } from '../config/firebase';
 import colors from '../colors';
 import Btn from "../components/Button";
 import { FontAwesome } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import Checkbox from "expo-checkbox";
-import { fonts } from 'react-native-elements/dist/config';
 
 if (
   Platform.OS === 'android' &&
@@ -30,20 +28,23 @@ if (
 }
 
 export default function OrderPage(props) {
+
   const [order, setOrder] = useState(null);
-  console.log(props);
   const { orderId } = props.route.params;
-  console.log(orderId);
   const [orderDescription, setOrderDescription] = useState("");
-  const refunds = firebase.firestore().collection('refunds');
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   const [pickup, setPickUp] = useState(Boolean);
   const [requireDelivery, setRequireDelivery] = useState(Boolean);
   const [totalPrice, setTotalPrice] = useState("");
   const [errorMessage, setErrorMessage] = useState('');
   const [pricingMethods, setPricingMethods] = useState([]);
-  //const [customerName, setCustomerName] = useState("");
-
+  const [addItemModalVisible, setAddItemModalVisible] = useState(false);
+  const [refundModalVisible, setRefundModalVisible] = useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [orderItemsList, setOrderItemsList] = useState([]);
+  const [laundryItemsData, setLaundryItemsData] = useState([]);
+  const [modalData, setModalData] = useState({ description: '', price: '' });
+  const refunds = firebase.firestore().collection('refunds');
 
   useEffect(() => {
     // Fetch the order document using the orderId prop
@@ -62,62 +63,33 @@ export default function OrderPage(props) {
     });
     return () => unsubscribe();
   }, [orderId]);
-  // useEffect(() => {
-  //   if (order) {
-  //     console.log(order);
-  //   }
-  // }, [order]);
-  //import service. 
-  const services = firebase.firestore().collection('laundryCategory');
-  const [service, setService] = useState([]);
-  const [modalData, setModalData] = useState({ description: '', price: '' });
-  useEffect(() => {
-    services.onSnapshot(querySnapshot => {
-      const service = [];
-      querySnapshot.forEach(doc => {
-        const { serviceName } = doc.data();
-        data.push({
-          key: doc.id,
-          value: serviceName,
-        });
-      });
-      setService(service);
-    });
-  }, []);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isModal1Visible, setIsModal1Visible] = useState(false);
-  const [isModal2Visible, setIsModal2Visible] = useState(false);
-
-  const [orderItemsList, setOrderItemsList] = useState([]);
-  const [laundryItemsData, setLaundryItemsData] = useState([]);
-  
   useEffect(() => {
     if (order) {
       const orderItem = firebase.firestore().collection('orderItem');
-      console.log('order: ', order);
-      const unsubscribe = orderItem.onSnapshot((querySnapshot) => {
-        const orderItemsList = [];
-        querySnapshot.forEach((doc) => {
-          const { laundryItemName, price, typeOfServices, quantity, pricingMethod, weight } = doc.data();
-          //const orderId = doc.ref.parent.parent.id; // Get the parent document ID (i.e., the order ID)
-          orderItemsList.push({
-            id: doc.id,
-            laundryItemName,
-            price,
-            orderId,
-            typeOfServices,
-            quantity,
-            pricingMethod,
-            weight
-          });
-        });
-        setOrderItemsList(orderItemsList.filter(item => order.orderItemIds.includes(item.id))); // Filter the order items based on the orderItemIds array
-      });
-      return () => unsubscribe();
+
+      orderItem
+        .where(firebase.firestore.FieldPath.documentId(), 'in', order.orderItemIds)
+        .get()
+        .then(querySnapshot => {
+          const orderItemsList = [];
+          querySnapshot.forEach(doc => {
+            const { laundryItemName, price, typeOfServices, quantity, pricingMethod, weight } = doc.data();
+            orderItemsList.push({
+              id: doc.id,
+              laundryItemName,
+              price,
+              orderId,
+              typeOfServices,
+              quantity,
+              pricingMethod,
+              weight
+            });
+          })
+          setOrderItemsList(orderItemsList);
+        })
     }
   }, [order]);
-  //console.log('order 1', order);
 
   useEffect(() => {
     const laundryItems = firebase.firestore().collection('laundryItem');
@@ -140,7 +112,7 @@ export default function OrderPage(props) {
       //const pm =[...new Set(pricingMs)];
       const pricingMethods = [];
       pricingMs.forEach((element) => {
-        if(!pricingMethods.includes(element.pricingMethod)) {
+        if (!pricingMethods.includes(element.pricingMethod)) {
           pricingMethods.push(element.pricingMethod);
         }
       });
@@ -149,31 +121,6 @@ export default function OrderPage(props) {
     });
     return () => unsubscribe();
   }, []);
-
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
-
-  const data = orderItemsList.filter((item) => order.orderItemIds.includes(item.id));
-
-
-  const deleteOrder = () => {
-    const orderRef = firebase.firestore().collection('orders').doc(orderId);
-    orderRef
-      .delete()
-      .then(() => {
-        console.log('Order successfully deleted!');
-        props.navigation.goBack();
-      })
-      .catch((error) => {
-        console.error('Error deleting order: ', error);
-      });
-  };
-
-  const addOrderItem = () => {
-    console.log("here to add item");
-    toggleModal();
-  };
 
   function handleChange(text, eventName) {
     console.log("handle chage");
@@ -184,7 +131,8 @@ export default function OrderPage(props) {
       }
     })
   }
-  const addOrderItem1 = () => {
+
+  const addOrderItem = () => {
     const selectedItem = modalData.typeOfServices;
     // Create a new order item document in the 'orderItem' collection
     // Get the values of description and price from the state modalData
@@ -243,31 +191,13 @@ export default function OrderPage(props) {
         });
       }
       setErrorMessage("");
-      toggleModal();
+      setAddItemModalVisible(false);
     } else {
       setErrorMessage("Please fill up all fields");
     }
   }
 
-  const renderSeparator = () => {
-    return (
-      <View
-        style={{
-          height: 1,
-          width: '100%',
-          backgroundColor: '#CED0CE',
-          alignItems: "center"
-        }}
-      />
-    )
-  }
-
   const refund = () => {
-    console.log("here to refund");
-    toggleModal1();
-  }
-
-  const refund1 = () => {
     const details = modalData.refundDetails;
     const refundAmount = modalData.refundAmount;
     const refundMethod = modalData.refundMethod;
@@ -275,7 +205,7 @@ export default function OrderPage(props) {
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     //console.log(orderRef);
     let cn = "";
-    if (refundAmount && refundMethod) {
+    if (refundAmount && refundMethod && details) {
       orderRef.get().then(doc => {
         if (!doc.exists) {
           console.log('No such User document!');
@@ -298,11 +228,14 @@ export default function OrderPage(props) {
             refundAmount: refundAmount,
             refundMethod: refundMethod,
             refundDetails: details,
-          });
-          Toast.show({
-            type: 'success',
-            text1: 'Refund added',
-          });
+          }).then(() => {
+            Toast.show({
+              type: 'success',
+              text1: 'Refund added',
+            })
+          }).catch(err => {
+            console.log(err);
+          })
           setErrorMessage("");
         }
       }).catch(err => {
@@ -310,22 +243,33 @@ export default function OrderPage(props) {
         return false;
       });
       console.log("cn now", cn);
-      toggleModal1();
+      setRefundModalVisible(false);
     } else {
       setErrorMessage("Please fill up all fields")
     }
   }
 
-  const toggleModal1 = () => {
-    setIsModal1Visible(!isModal1Visible);
-  }
+  const deleteOrder = () => {
+    const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
+    orderRef.update({
+      items: firebase.firestore.FieldValue.arrayRemove(item.id),
+    });
+    const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
+    orderItemRef.delete();
+
+    // const orderRef = firebase.firestore().collection('orders').doc(orderId);
+    // orderRef
+    //   .delete()
+    //   .then(() => {
+    //     console.log('Order successfully deleted!');
+    //     props.navigation.goBack();
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error deleting order: ', error);
+    //   });
+  };
 
   const updateDescription = () => {
-    //console.log("udate description");
-    setIsModal2Visible(true);
-  }
-
-  const updateDescription1 = () => {
     console.log("here");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     const odescription = modalData.orderDescription;
@@ -348,7 +292,7 @@ export default function OrderPage(props) {
         return false;
       });
 
-    setIsModal2Visible(false);
+    setUpdateModalVisible(false);
   }
 
   const handlePickUpChange = () => {
@@ -397,6 +341,19 @@ export default function OrderPage(props) {
     setPickUp(!requireDelivery);
   }
 
+  const renderSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 1,
+          width: '100%',
+          backgroundColor: '#CED0CE',
+          alignItems: "center"
+        }}
+      />
+    )
+  }
+
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemName}>{item.typeOfServices}</Text>
@@ -409,19 +366,12 @@ export default function OrderPage(props) {
           style={styles.outletIcon}
           name="trash-o"
           color='red'
-          onPress={() => {
-            const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
-            orderRef.update({
-              items: firebase.firestore.FieldValue.arrayRemove(item.id),
-            });
-            const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
-            orderItemRef.delete();
-          }}
+          onPress={() => deleteOrder()}
         />
         <TouchableOpacity
           onPress={() => {
             setSelectedOrderItem(item);
-            refund();
+            setRefundModalVisible(true);
           }}
         >
           {/*<MaterialCommunityIcons name="cash-refund" size={28} color="black" /> */}
@@ -441,7 +391,7 @@ export default function OrderPage(props) {
             <Text style={styles.text}>Back</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={addOrderItem}
+            onPress={() => setAddItemModalVisible(true)}
             style={styles.btn}>
             <Text style={styles.text}>Add Item</Text>
           </TouchableOpacity>
@@ -451,7 +401,7 @@ export default function OrderPage(props) {
           <Text style={styles.sectionText}>Order Details</Text>
           <Text style={styles.orderNumber}>Order #{orderId}</Text>
           <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxLabel}>Laundry Pick Up ($10)</Text>
+            <Text style={styles.checkboxLabel}>Laundry Pick Up</Text>
             <Checkbox
               style={{ marginLeft: 20, marginBottom: 2 }}
               disabled={false}
@@ -460,7 +410,7 @@ export default function OrderPage(props) {
             />
           </View >
           <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxLabel}>Laundry Delivery ($10)</Text>
+            <Text style={styles.checkboxLabel}>Laundry Delivery</Text>
             <Checkbox
               style={{ marginLeft: 20, marginBottom: 2 }}
               disabled={false}
@@ -477,7 +427,7 @@ export default function OrderPage(props) {
           </View>
           <FlatList
             style={styles.cardBody}
-            data={data}
+            data={orderItemsList}
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={renderSeparator}
             renderItem={renderItem}
@@ -491,12 +441,13 @@ export default function OrderPage(props) {
               style={styles.outletIcon}
               name="edit"
               color='green'
-              onPress={updateDescription}
+              onPress={() => setUpdateModalVisible(true)}
             />
           </View>
           <Text style={styles.orderDescription}>{orderDescription}</Text>
+
           <Modal
-            visible={isModal2Visible}
+            visible={updateModalVisible}
             animationType="fade"
             transparent={true}
           >
@@ -527,12 +478,12 @@ export default function OrderPage(props) {
                       }}
                     >
                       <Btn
-                        onClick={() => updateDescription1()}
+                        onClick={() => updateDescription()}
                         title="Update"
                         style={{ width: "48%" }}
                       />
                       <Btn
-                        onClick={() => setIsModal2Visible(false)}
+                        onClick={() => setUpdateModalVisible(false)}
                         title="Dismiss"
                         style={{ width: "48%", backgroundColor: "#344869" }}
                       />
@@ -545,7 +496,7 @@ export default function OrderPage(props) {
         </View>
 
         <Modal
-          visible={isModalVisible}
+          visible={addItemModalVisible}
           transparent={true}
           animationType="fade"
         >
@@ -579,7 +530,7 @@ export default function OrderPage(props) {
                       marginTop: 20,
                       backgroundColor: 'white',
                     }}>
-                    <SelectList 
+                    <SelectList
                       data={pricingMethods}
                       placeholder="Pricing Method"
                       setSelected={(val) => handleChange(val, 'pricingMethod')}
@@ -605,12 +556,12 @@ export default function OrderPage(props) {
                   }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <Btn
-                      onClick={() => addOrderItem1()}
+                      onClick={() => addOrderItem()}
                       title="Update"
                       style={{ width: "48%" }}
                     />
                     <Btn
-                      onClick={() => toggleModal()}
+                      onClick={() => setAddItemModalVisible(false)}
                       title="Close"
                       style={{ width: "48%", backgroundColor: "#344869" }}
                     />
@@ -620,8 +571,9 @@ export default function OrderPage(props) {
             </View>
           </View>
         </Modal>
+
         <Modal
-          visible={isModal1Visible}
+          visible={refundModalVisible}
           transparent={true}
           animationType="fade"
         >
@@ -646,14 +598,19 @@ export default function OrderPage(props) {
                     placeholder="Refund Details"
                     onChangeText={(text) => handleChange(text, 'refundDetails')}
                   />
+                  {errorMessage &&
+                    <View style={styles.errorMessageContainer}>
+                      <Text style={styles.errorMessage}>{errorMessage}</Text>
+                    </View>
+                  }
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <Btn
-                      onClick={() => refund1()}
+                      onClick={() => refund()}
                       title="Refund"
                       style={{ width: "48%" }}
                     />
                     <Btn
-                      onClick={() => toggleModal1()}
+                      onClick={() => setRefundModalVisible(false)}
                       title="Close"
                       style={{ width: "48%", backgroundColor: "#344869" }}
                     />
@@ -664,7 +621,7 @@ export default function OrderPage(props) {
           </View>
         </Modal>
       </View>
-    </ScrollView>
+    </ScrollView >
   );
 }
 
@@ -995,7 +952,7 @@ const styles = StyleSheet.create({
       </TouchableOpacity>
     </View>
     <Modal
-      visible={isModalVisible}
+      visible={addItemModalVisible}
       transparent={true}
       animationType="slide"
     >
