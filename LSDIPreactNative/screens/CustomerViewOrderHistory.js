@@ -91,7 +91,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
     <View>
       <TouchableOpacity
         style={styles.card}
-        onPress={() => toggleExpand(order.id)}
+        onPress={() => navigation.navigate('Invoice', { orderId: order.id })}
         activeOpacity={0.8}>
         <View style={styles.cardHeader}>
           <View>

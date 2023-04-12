@@ -764,6 +764,17 @@ function RootNavigator() {
                 <MaterialIcons name="list-alt" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+          <Drawer.Screen name='Invoice' component={Invoice}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerItemStyle: { display: "none" }
+            }}
+          />
           {/* <Drawer.Screen name='Setting' component={Setting}
             options={{
               headerStyle: {
