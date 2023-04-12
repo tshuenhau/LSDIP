@@ -126,8 +126,6 @@ export default function Pickup({ navigation }) {
     console.log('Delivery fees updated:', deliveryFees);
     }, [deliveryFees]);
 
-
-
     const handleMonthChange = useCallback(({ year, month }) => {
         setDisplayMonth(`${Number(year)}-${Number(month)}`);
     }, []);
@@ -135,83 +133,6 @@ export default function Pickup({ navigation }) {
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
     };
-
-    // const calculateDeliveryFee = () => {
-    //     return new Promise((resolve, reject) => {
-    //       let address = "";
-    //       const db = firebase.firestore();
-    //       const user = firebase.auth().currentUser;
-    //       db.collection('users')
-    //         .where('email', '==', user.email)
-    //         .get()
-    //         .then(querySnapshot => {
-    //           if (querySnapshot.empty) {
-    //             console.log('No matching documents.');
-    //             reject();
-    //           } else {
-    //             querySnapshot.forEach(doc => {
-    //               // Retrieve the user's address from the document
-    //               address = doc.data().address;
-    //               console.log(`User's address: ${address}`);
-    //               const location1 = address;
-    //               const location2 = '10 Paya Lebar Rd Singapore 409057';
-    //               const apiKey = 'AIzaSyDcYq8n3h92G2HV4IdjWG5es4ioIHvKZc0';
-    
-    //               // Make API request for location 1
-    //               const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
-    //               axios.get(apiUrl1)
-    //                 .then(response => {
-    //                   if (response.data.results.length === 0) {
-    //                     console.error('No results found for location:', location1);
-    //                     reject();
-    //                   }
-    //                   const result = response.data.results[0];
-    //                   const coords1 = {
-    //                     latitude: result.geometry.location.lat,
-    //                     longitude: result.geometry.location.lng
-    //                   };
-    
-    //                   // Make API request for location 2
-    //                   const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
-    //                   axios.get(apiUrl2)
-    //                     .then(response => {
-    //                       if (response.data.results.length === 0) {
-    //                         console.error('No results found for location:', location2);
-    //                         reject();
-    //                       }
-    //                       const result = response.data.results[0];
-    //                       const coords2 = {
-    //                         latitude: result.geometry.location.lat,
-    //                         longitude: result.geometry.location.lng
-    //                       };
-    
-    //                       // Calculate the distance between the two sets of coordinates
-    //                       const distanceInMeters = geolib.getDistance(coords1, coords2);
-    //                       console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
-    //                       const deliveryFee = distanceInMeters / 500
-    //                       console.log(deliveryFee);
-    //                       console.log("delivery fee is here!");
-    //                       resolve(deliveryFee);
-    //                     }).catch(error => {
-    //                       console.error(error);
-    //                       reject();
-    //                     });
-    //                 }).catch(error => {
-    //                   console.error(error);
-    //                   reject();
-    //                 });
-    //             })
-    //           }
-    //         }).catch(error => {
-    //           console.error(error);
-    //           reject();
-    //         });
-    //     });
-    //   }
-    
-    //   useEffect(() => {
-    //     console.log('Delivery fees updated:', deliveryFees);
-    //   }, [deliveryFees]);
 
     const AvailableTimingsModal = ({ date, onClose }) => {
         const [selectedTime, setSelectedTime] = useState(null);
@@ -243,14 +164,6 @@ export default function Pickup({ navigation }) {
         }, [selectedDate]);
 
         const timings = [
-            /*'12:00am - 1:00am',
-            '1:00am - 2:00am',
-            '2:00am - 3:00am',
-            '3:00am - 4:00am',
-            '4:00am - 5:00am',
-            '5:00am - 6:00am',
-            '6:00am - 7:00am',
-            '7:00am - 8:00am',*/
             '8:00am - 9:00am',
             '9:00am - 10:00am',
             '10:00am - 11:00am',
@@ -265,8 +178,6 @@ export default function Pickup({ navigation }) {
             '7:00pm - 8:00pm',
             '8:00pm - 9:00pm',
             '9:00pm - 10:00pm',
-            /*'10:00pm - 11:00pm',
-            '11:00pm - 12:00am',*/
         ];
 
         const filterAvailableTimings = (timings, blockedTimings) => {
@@ -284,16 +195,6 @@ export default function Pickup({ navigation }) {
                     );
                 });
             });
-        };
-
-        const handleTimeSelect = (timing) => {
-            setSelectedTime(timing);
-        };
-
-        const handleClose = () => {
-            setSelectedTime(null);
-            setSelectedDate(null);
-            onClose();
         };
 
         const handleConfirm = async () => {
@@ -386,6 +287,16 @@ export default function Pickup({ navigation }) {
                     }
                 }
             }
+        };
+
+        const handleTimeSelect = (timing) => {
+            setSelectedTime(timing);
+        };
+
+        const handleClose = () => {
+            setSelectedTime(null);
+            setSelectedDate(null);
+            onClose();
         };
 
         return (

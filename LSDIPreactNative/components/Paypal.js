@@ -4,7 +4,7 @@ import WebView from 'react-native-webview'
 import { firebase } from '../config/firebase';
 
 export default class Paypal extends Component {
-
+    
     constructor(props) {
         super(props);
         this.state = {
@@ -40,7 +40,7 @@ export default class Paypal extends Component {
                 }
             }],
             "redirect_urls": {
-                "return_url": "http://localhost:19006/success/" + selectedDate + "/" + selectedTime + "/",
+                "return_url": "http://localhost:19006/success/" + deliveryfee + "/" + selectedDate + "/" + selectedTime + "/",
                 "cancel_url": "http://localhost:19006/cancel"
             }
         }
@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAKZ7AgLveWmDBjSiaY5rj6ayXcPe8yv52PFRPW8ykvGfx-Qpli5eArL5HNNX4UmKkcslA1dEQTBZf7VSqfHviHifNqvtQ`
+                    'Authorization': `Bearer A21AAJY3-DriCVfYAJBAGT0_0Jow5aXnQLXQfRSbKhhWmMrYhVsH_IkvZQi4OUxLHaS1xNssAgtzWqSovT5Zqho4cUvQtkKoQ`
                 },
                 body: 'grant_type=client_credentials'
             }
@@ -127,6 +127,7 @@ export default class Paypal extends Component {
                             date: this.state.selectedDate,
                             time: this.state.selectedTime,
                             orders: selectedOrders,
+                            deliveryFee: this.state.deliveryfee,
                         });
                         console.log(selectedTimes);
                         db.collection('user_timings').doc(user.uid).set({
