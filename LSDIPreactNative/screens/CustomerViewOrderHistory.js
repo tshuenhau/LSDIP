@@ -169,8 +169,8 @@ export default function CustomerViewOrderHistory({ navigation }) {
         activeOpacity={0.8}>
         <View style={styles.cardHeader}>
           <View>
-            <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
-            <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
+          <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+          <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
           </View>
           <Text style={styles.orderStatus}>{order.orderStatus}</Text>
         </View>
@@ -329,13 +329,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 16,
     borderRadius: 10,
-    shadowColor: '#000',
+    /*shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowOffset: {
       width: 0,
       height: 3,
-    },
+    },*/
     elevation: 3,
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   orderNumber: {
     fontSize: 20,
@@ -442,9 +444,9 @@ const styles = StyleSheet.create({
   orderStatus: {
     fontSize: 20,
     fontWeight: 700,
-    alignContent: 'center',
-    alignSelf: 'center',
-    alignItems: 'center'
+    alignContent:  'center',
+    alignSelf:  'center',
+    alignItems:  'center'
   },
   rate: {
     fontSize: 14,

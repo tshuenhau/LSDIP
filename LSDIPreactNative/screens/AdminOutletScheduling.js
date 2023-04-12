@@ -391,7 +391,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
     );
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.container}>
             <ScrollView>
                 <View style={styles.topButtonContainer}>
                     <Btn onClick={() => navigation.goBack()} title="Back" style={styles.topBackButton} />
@@ -418,7 +418,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                     />
                 </View>
                 <View style={styles.timingsContainer}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 10 }}>
                         <Text style={styles.timingsTitle}>Indicated Timings</Text>
                         <Btn onClick={() => handleAllocateAll()} title="Allocate All" style={styles.allocateAllButton} />
                     </View>
@@ -524,6 +524,14 @@ export default function AdminOutletScheduling({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        //backgroundColor: colors.white,
+        borderRadius: 25,
+        alignSelf: 'center',
+        marginTop: '2%',
+        width: '95%',
+        marginBottom: 20,
+    },
     availabilityButton: {
         fontSize: 25,
         margin: 10,
@@ -554,11 +562,17 @@ const styles = StyleSheet.create({
     },
     calendarContainer: {
         marginBottom: 20,
+        marginTop:15,
+        borderRadius:25,
+        backgroundColor:colors.white
     },
     outletName: {
-        fontSize: 20,
-        alignSelf: 'center',
-        fontWeight: 'bold',
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.blue700,
+        padding: 10,
+        float: "left",
     },
     timingsContainer: {
         flex: 1,

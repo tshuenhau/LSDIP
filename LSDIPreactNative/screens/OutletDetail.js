@@ -202,7 +202,7 @@ export default function OutletDetail({ route, navigation }) {
       <View style={styles.cardHeader}>
         <Text style={styles.outletName}>{item.name} </Text>
       </View>
-      <View style={styles.itemContainer}>
+      <View style={styles.cardContainer}>
         <View style={styles.cardBody}>
           <Text style={styles.itemText}>Number: {item.number} </Text>
         </View>
@@ -228,15 +228,15 @@ export default function OutletDetail({ route, navigation }) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView>
-        <View style={styles.topButtons}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.btn}>
-            <Text style={styles.text}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
+    <ScrollView>
+      <View style={styles.topButtons}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.btn}>
+          <Text style={styles.text}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.container}>
         <View style={styles.itemContainer}>
           <View style={styles.outletSettings}>
             <Image source={require('../assets/outlet.png')} style={{ width: 250, height: 250 }} />
@@ -280,79 +280,88 @@ export default function OutletDetail({ route, navigation }) {
             }
           />
         </View>
+      </View>
 
-        {/* Update Modal */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={updateModalVisible}>
-          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Outlet</Text>
-                  <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} defaultValue={updateModalData.outletName} />
-                  <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
-                  <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
-                  <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
-                  {errorMessage &&
-                    <View style={styles.errorMessageContainer}>
-                      <Text style={styles.errorMessage}>{errorMessage}</Text>
-                    </View>
-                  }
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                    <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
-                    <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+      {/* Update Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={updateModalVisible}>
+        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Update Outlet</Text>
+                <TextBox placeholder="Outlet Name" onChangeText={text => handleChange(text, "outletName")} defaultValue={updateModalData.outletName} />
+                <TextBox placeholder="Outlet Address" onChangeText={text => handleChange(text, "outletAddress")} defaultValue={updateModalData.outletAddress} />
+                <TextBox placeholder="Outlet Number" onChangeText={text => handleChange(text, "outletNumber")} defaultValue={updateModalData.outletNumber} />
+                <TextBox placeholder="Outlet Email" onChangeText={text => handleChange(text, "outletEmail")} defaultValue={updateModalData.outletEmail} />
+                {errorMessage &&
+                  <View style={styles.errorMessageContainer}>
+                    <Text style={styles.errorMessage}>{errorMessage}</Text>
                   </View>
+                }
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                  <Btn onClick={() => updateOutlet()} title="Update" style={{ width: "48%" }} />
+                  <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                 </View>
               </View>
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        {/* Allocate Staff Modal */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={allocateModalVisible}>
-          <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.view}>
-                  <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
-                  <View style={{
-                    width: "92%",
-                    borderRadius: 25,
-                    marginTop: 20
-                  }}>
-                    <MultipleSelectList
-                      setSelected={(val) => setSelectedStaff(val)}
-                      data={staffList}
-                      save="key"
-                      label='Staff'
-                    />
+      {/* Allocate Staff Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={allocateModalVisible}>
+        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.view}>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Allocate Staff</Text>
+                <View style={{
+                  width: "92%",
+                  borderRadius: 25,
+                  marginTop: 20
+                }}>
+                  <MultipleSelectList
+                    setSelected={(val) => setSelectedStaff(val)}
+                    data={staffList}
+                    save="key"
+                    label='Staff'
+                  />
+                </View>
+                {errorMessage &&
+                  <View style={styles.errorMessageContainer}>
+                    <Text style={styles.errorMessage}>{errorMessage}</Text>
                   </View>
-                  {errorMessage &&
-                    <View style={styles.errorMessageContainer}>
-                      <Text style={styles.errorMessage}>{errorMessage}</Text>
-                    </View>
-                  }
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                    <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
-                    <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                  </View>
+                }
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
+                  <Btn onClick={() => allocateStaff()} title="Allocate" style={{ width: "48%" }} />
+                  <Btn onClick={() => setAllocateModalVisible(!allocateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                 </View>
               </View>
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-      </ScrollView>
-    </View >
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 25,
+    alignSelf: 'center',
+    marginTop: '2%',
+    width: '95%',
+    marginBottom: 20,
+    flex: 1
+  },
   errorMessageContainer: {
     padding: 10,
     marginBottom: 10,
@@ -372,6 +381,8 @@ const styles = StyleSheet.create({
     marginLeft: 40,
     marginRight: 40,
     borderRadius: 25,
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   outletDetails: {
     flex: 2,
@@ -379,12 +390,27 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     marginRight: 40,
     borderRadius: 25,
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   itemContainer: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: "flex-start",
+    marginVertical: 20,
+  },
+  cardBody: {
+    padding: 16,
+  },
+  cardContainer: {
+    backgroundColor: colors.themelight,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingRight: 20,
   },
   outletDetailContainer: {
     flex: 1,
@@ -410,13 +436,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 16,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    /* shadowColor: '#000',
+     shadowOpacity: 0.2,
+     shadowOffset: {
+       width: 0,
+       height: 3,
+     },*/
     elevation: 3,
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   outletName: {
     fontSize: 20,
@@ -432,11 +460,9 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   topButtons: {
-    width: "100%",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    marginVertical: 10,
+    justifyContent: 'space-between',
+    marginTop: 30,
+    flexDirection: 'row',
   },
   btmButtons: {
     width: "100%",
@@ -448,6 +474,11 @@ const styles = StyleSheet.create({
   noStaffText: {
     fontSize: 20,
     fontWeight: "600",
+    alignContent: 'center',
+    alignSelf: 'center',
+    padding: 10,
+    marginTop: 20,
+    zIndex: 'auto',
   },
   view: {
     width: "100%",
@@ -457,9 +488,10 @@ const styles = StyleSheet.create({
   btn: {
     padding: 10,
     margin: 10,
-    marginHorizontal: 20,
+    width: "20%",
+    marginHorizontal: "5%",
     borderRadius: 25,
-    backgroundColor: "#0B3270",
+    backgroundColor: colors.blue700,
     justifyContent: "center",
     alignItems: "center",
   },

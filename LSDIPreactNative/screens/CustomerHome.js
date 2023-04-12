@@ -472,7 +472,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginTop: 10,
-        marginLeft: 15
+        marginLeft: 15,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     cardText: {
         fontSize: 20,

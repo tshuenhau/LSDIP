@@ -476,7 +476,7 @@ export default function AccountManagement({ navigation }) {
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     onIndexChange={setIndex}
-                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: '#3746E6' }} />}
+                    renderTabBar={props => <TabBar {...props} style={{ backgroundColor: colors.theme, marginBottom:15, marginTop:15 }} />}
                 />
 
                 {/* Update Modal */}
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     itemContainer: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.themelight,
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -654,13 +654,15 @@ const styles = StyleSheet.create({
         marginRight: "auto",
         marginVertical: 10,
         borderRadius: 10,
-        shadowColor: colors.shadowGray,
+        /*shadowColor: colors.shadowGray,
         shadowOpacity: 0.2,
         shadowOffset: {
             width: 0,
             height: 3,
-        },
+        },*/
         elevation: 3,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     itemName: {
         fontSize: 25,
@@ -737,7 +739,7 @@ const styles = StyleSheet.create({
         padding: 10
     },
     container: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
         borderRadius: 5,
         alignSelf: 'center',
         marginTop: '2%',
