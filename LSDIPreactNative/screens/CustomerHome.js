@@ -12,6 +12,7 @@ export default function CustomerHome({ user, navigation }) {
     const [orderList, setOrderList] = useState([]);
     const [pointCash, setPointCash] = useState(0);
     const [selectedTimesList, setSelectedTimesList] = useState([]);
+    const [orderPickupDisplay, setOrderPickupDisplay] = useState([]);
     const [selectedPickupTimesList, setSelectedPickupTimesList] = useState([]);
     const [membershipTiers, setMembershipTiers] = useState([]);
     const [customerMilestone, setCustomerMilestone] = useState(0);
@@ -43,6 +44,26 @@ export default function CustomerHome({ user, navigation }) {
                             invoiceNumber,
                         });
                     });
+
+                    userTimings
+                        .doc(user.uid)
+                        .onSnapshot((doc) => {
+                            if (doc.exists) {
+                                const selectedTimes = doc.data().selected_times || [];
+                                const orderPickupDisplay = [];
+                                selectedTimes.forEach(x => {
+                                    x.orders.forEach(y => {
+                                        orderPickupDisplay.push(orderList.find(z => z.id == y));
+                                    })
+                                })
+                                // console.log(orderDisplay);
+                                setOrderPickupDisplay(orderPickupDisplay);
+                                setSelectedTimesList(selectedTimes);
+                            } else {
+                                setSelectedTimesList([]);
+                            }
+                        });
+
                     setOrderList(orderList);
                     // console.log(orderList);
                 }).then(console.log(orderList));
@@ -66,18 +87,6 @@ export default function CustomerHome({ user, navigation }) {
                     setCustomerMilestone((Number(userExpenditure) / Number(sortedTiers[sortedTiers.length - 1].expenditure)) * 100);
                     setMembershipTiers(sortedTiers);
                 })
-
-            userTimings
-                .doc(user.uid)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const selectedTimes = doc.data().selected_times || [];
-                        console.log(selectedTimes);
-                        setSelectedTimesList(selectedTimes);
-                    } else {
-                        setSelectedTimesList([]);
-                    }
-                });
 
             pickupTimings
                 .doc(user.uid)
@@ -393,10 +402,10 @@ export default function CustomerHome({ user, navigation }) {
                                 <Text style={styles.cardText}>
                                     <b>Time: </b>{item.time}
                                 </Text>
-                                {item.orders ? (
+                                {orderPickupDisplay ? (
                                     <View>
                                         {/*<Text style={styles.orderTitle}>Order IDs:</Text>*/}
-                                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.join(", ")}</Text>
+                                        <Text style={styles.orderText}><b>Invoice Numbers: </b>{orderPickupDisplay.map(order => order.invoiceNumber).join(", ")}</Text>
                                     </View>
                                 ) : (
                                     <Text style={styles.noOrdersText}>No orders for this timeslot</Text>

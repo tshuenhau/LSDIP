@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import TextBox from "../components/TextBox"
 import Btn from "../components/Button"
 import { firebase } from "../config/firebase"
+import Toast from 'react-native-toast-message';
 
 export default function ResetPassword({ navigation }) {
 
@@ -23,9 +24,18 @@ export default function ResetPassword({ navigation }) {
             .then(() => {
                 console.log("Reset password email sent");
                 navigation.replace("Login");
+                Toast.show({
+                    type: 'success',
+                    text1: 'Email sent',
+                });
             }).catch((err) => {
+                navigation.replace("Login");
                 console.log(err);
-            })
+                Toast.show({
+                    type: 'success',
+                    text1: 'Email sent',
+                });
+            });
     }
 
     return (

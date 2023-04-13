@@ -21,10 +21,11 @@ import { color } from 'react-native-reanimated'
 export default function MyProfile() {
 
     const initialValues = {
-        email: "",
+        // email: "",
         name: "",
         number: "",
-        role: "",
+        address: "",
+        // role: "",
     };
     const initialPassword = {
         currentPassword: "",
@@ -74,17 +75,17 @@ export default function MyProfile() {
     const updateDetails = () => {
         if (updateModalData.name &&
             updateModalData.number &&
-            updateModalData.email) {
+            updateModalData.address) {
             users.doc(updateModalData.uid)
                 .update({
-                    email: updateModalData.email,
+                    address: updateModalData.address,
                     name: updateModalData.name,
                     number: updateModalData.number,
                 }).then(() => {
                     console.log("Update Success")
                     setUserDetails({
-                        role: updateModalData.role,
-                        email: updateModalData.email,
+                        // role: updateModalData.role,
+                        address: updateModalData.address,
                         number: updateModalData.number,
                         name: updateModalData.name
                     })
@@ -230,7 +231,7 @@ export default function MyProfile() {
                             <View style={styles.view}>
                                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Edit Profile</Text>
                                 <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={userDetails.name} />
-                                <TextBox placeholder="laundry@email.com" onChangeText={text => handleChange(text, "email")} defaultValue={userDetails.email} />
+                                <TextBox placeholder="Address" onChangeText={text => handleChange(text, "address")} defaultValue={userDetails.address} />
                                 <TextBox placeholder="Phone Number" onChangeText={text => handleChange(text, "number")} defaultValue={userDetails.number} />
                                 {errorMessage &&
                                     <View style={styles.errorMessageContainer}>
@@ -435,7 +436,7 @@ const styles = StyleSheet.create({
         marginTop: '4%',
         width: '95%',
         marginBottom: '10%',
-        flex:1,
+        flex: 1,
         backgroundColor: colors.white
-      },
+    },
 });
