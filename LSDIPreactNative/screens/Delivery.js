@@ -755,7 +755,7 @@ export default function DeliveryTemp({ navigation, route }) {
           <ScrollView>
             {orders.map((order, index) => (
               <View key={index} style={styles.orderContainer}>
-                <Text style={styles.orderTitle}>Order {order.id}</Text>
+                <Text style={styles.orderTitle}>Order Invoice Number: {order.invoiceNumber}</Text>
                 {order.pickupCost !== null && order.pickupCost !== 0 ? (
                   <View style={styles.subRow}>
                     <Text style={styles.label1}>Laundry Pickup:</Text>

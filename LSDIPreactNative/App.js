@@ -279,7 +279,7 @@ function RootNavigator() {
               }} />
           }
           {moduleSettings.vehicle && <>
-            <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
+            <Drawer.Screen name='Block Out Operating Hours' component={AdminTimeslots}
               options={{
                 headerStyle: {
                   backgroundColor: colors.theme
@@ -568,7 +568,7 @@ function RootNavigator() {
                   <MaterialIcons name="emoji-transportation" size={24} color={focused ? colors.lightBlue : colors.gray} />
                 ),
               }} />
-            <Drawer.Screen name='Admin Timeslots' component={AdminTimeslots}
+            <Drawer.Screen name='Block Out Operating Hours' component={AdminTimeslots}
               options={{
                 headerStyle: {
                   backgroundColor: colors.theme
