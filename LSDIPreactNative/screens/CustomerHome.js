@@ -96,9 +96,10 @@ export default function CustomerHome({ user, navigation }) {
         if (window.location.href.includes("localhost:19006/success")) {
             console.log("called");
             const curLink = window.location.href.split("/");
-            // console.log(curLink);
-            const selectedDate = curLink[4];
-            const selectedTime = curLink[5];
+            console.log(curLink);
+            const deliveryFee = curLink[4];
+            const selectedDate = curLink[5];
+            const selectedTime = curLink[6];
             orders
                 .where("customerNumber", "==", user.number)
                 .where("orderStatus", "==", "Back from Wash")
@@ -135,6 +136,7 @@ export default function CustomerHome({ user, navigation }) {
                                 date: selectedDate,
                                 time: selectedTime,
                                 orders: selectedOrders,
+                                deliveryFee: deliveryFee,
                             });
                             console.log(selectedTimes);
                             db.collection('user_timings').doc(user.uid).set({
@@ -472,7 +474,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginTop: 10,
-        marginLeft: 15
+        marginLeft: 15,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     cardText: {
         fontSize: 20,

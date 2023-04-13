@@ -92,7 +92,7 @@ export default function Home({ navigation }) {
         {user?.role === "Customer" ?
           <View>
             <View style={{ marginLeft: 10 }}>
-              <Text style={styles.welcomeMessage}>{wish}{user.name}</Text>
+              <Text style={styles.cwelcomeMessage}>{wish}{user.name}</Text>
               <Text style={styles.dateText}>{date + time}</Text>
             </View>
             <CustomerHome user={user} navigation={navigation} />
@@ -132,6 +132,12 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     padding: 5,
     marginLeft: 10
+  },
+  cwelcomeMessage:{
+    fontSize: 25,
+    fontWeight: "800",
+    padding: 5,
+    marginLeft: 5
   },
   dateText:{
     paddingLeft: 5, 

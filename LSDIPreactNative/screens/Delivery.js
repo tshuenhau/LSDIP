@@ -486,7 +486,7 @@ export default function DeliveryTemp({ navigation, route }) {
     //         console.error(error);
     //     });
     // }
-  } 
+  }
 
   const AvailableTimingsModal = ({ date, onClose }) => {
 
@@ -573,7 +573,7 @@ export default function DeliveryTemp({ navigation, route }) {
             `The selected time ${selectedTime} is already added for ${selectedDate}`
           );
           setIsDuplicateOpen(true);
-        } else if (isSelected){
+        } else if (isSelected) {
           setSelectedTimesList([]);
           const newSelectedTimesList = [{ date: selectedDate, time: selectedTime, orders: matchingOrders, }];
           setSelectedTimesList(newSelectedTimesList);
@@ -601,18 +601,18 @@ export default function DeliveryTemp({ navigation, route }) {
     //     const existingTime = selectedTimesList.find(
     //       (item) => item.date === selectedDate && item.time === selectedTime
     //     );
-        
+
     //     if (existingTime) {
     //       // Check if the selected orders are the same as the existing time
     //       const sameOrders = existingTime.orders.every(
     //         (order) => matchingOrders.find((mOrder) => mOrder.id === order.id)
     //       );
-          
+
     //       if (sameOrders) {
     //         setSelectedTimesList((prevTimes) =>
     //           prevTimes.filter((time) => time.date !== selectedDate || time.time !== selectedTime)
     //         );
-            
+
     //         setIsModalOpen(false);
     //         return;
     //       } else {
@@ -644,7 +644,7 @@ export default function DeliveryTemp({ navigation, route }) {
     //     setIsModalOpen(false);
     //   }
     // };
-    
+
 
     //for modal
     return (
@@ -713,7 +713,7 @@ export default function DeliveryTemp({ navigation, route }) {
     );
   };
 
-  const showPaymentBreakdown = async() => {
+  const showPaymentBreakdown = async () => {
     console.log(matchingOrders);
     setIsModal1Open(true);
     setDeliveryFees(await calculateDeliveryFee());
@@ -736,7 +736,7 @@ export default function DeliveryTemp({ navigation, route }) {
         handlePayment();
       }
     }, [totalPayment1]);
-    
+
     const handleProceedToPayment = () => {
       setTotalPayment1(totalPayment);
     }
@@ -770,14 +770,14 @@ export default function DeliveryTemp({ navigation, route }) {
             ))}
           </ScrollView>
 
-  
+
           <View style={styles.row1}>
             <Text style={styles.label1}>Delivery fee:</Text>
             <Text style={styles.value1}>${deliveryFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
           </View>
-  
+
           <View style={styles.separator1} />
-  
+
           <View style={styles.row1}>
             <Text style={styles.totalLabel1}>Total Payment:</Text>
             <Text style={styles.totalValue1}>${totalPayment.toFixed(2)}</Text>
@@ -787,7 +787,7 @@ export default function DeliveryTemp({ navigation, route }) {
               <Text style={styles.buttonText1}>Cancel</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button1} onPress={() => {handleProceedToPayment()}}>
+            <TouchableOpacity style={styles.button1} onPress={() => { handleProceedToPayment() }}>
               <Text style={styles.buttonText1}>Proceed to Payment</Text>
             </TouchableOpacity>
           </View>
@@ -1119,8 +1119,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginTop: 10,
-    marginLeft: 5
-
+    marginLeft: 5,
+    borderColor: colors.borderColor,
+    borderWidth: 2
   },
   selectedTimeText: {
     flex: 1,

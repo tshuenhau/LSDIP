@@ -4,7 +4,7 @@ import WebView from 'react-native-webview'
 import { firebase } from '../config/firebase';
 
 export default class Paypal extends Component {
-
+    
     constructor(props) {
         super(props);
         this.state = {
@@ -40,7 +40,7 @@ export default class Paypal extends Component {
                 }
             }],
             "redirect_urls": {
-                "return_url": "http://localhost:19006/success/" + selectedDate + "/" + selectedTime + "/",
+                "return_url": "http://localhost:19006/success/" + deliveryfee + "/" + selectedDate + "/" + selectedTime + "/",
                 "cancel_url": "http://localhost:19006/cancel"
             }
         }
@@ -127,6 +127,7 @@ export default class Paypal extends Component {
                             date: this.state.selectedDate,
                             time: this.state.selectedTime,
                             orders: selectedOrders,
+                            deliveryFee: this.state.deliveryfee,
                         });
                         console.log(selectedTimes);
                         db.collection('user_timings').doc(user.uid).set({

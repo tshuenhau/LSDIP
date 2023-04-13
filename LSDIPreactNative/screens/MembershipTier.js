@@ -273,19 +273,21 @@ const styles = StyleSheet.create({
     tierContainer: {
         backgroundColor: colors.white,
         borderRadius: 10,
-        shadowColor: '#000',
+        /*shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 2,
         },
         shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        shadowRadius: 3.84,*/
         elevation: 5,
         padding: 20,
         marginBottom: 20,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     tierTitle: {
         fontWeight: 'bold',

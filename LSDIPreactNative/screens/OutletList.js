@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     itemContainer: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.themelight,
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -321,13 +321,15 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         marginHorizontal: 16,
         borderRadius: 10,
-        shadowColor: '#000',
+        /*shadowColor: '#000',
         shadowOpacity: 0.2,
         shadowOffset: {
             width: 0,
             height: 3,
-        },
+        },*/
         elevation: 3,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     outletName: {
         fontSize: 20,
@@ -426,9 +428,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         marginRight: 30,
-        marginTop: 13,
+        marginTop: 6,
         width: '23%',
-        height: '68%'
+        height: '74%'
     },
     listtext: {
         paddingLeft: 20,
@@ -437,7 +439,7 @@ const styles = StyleSheet.create({
         color: "black"
     },
     container: {
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
         borderRadius: 25,
         alignSelf: 'center',
         marginTop: '2%',
