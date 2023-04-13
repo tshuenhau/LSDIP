@@ -226,6 +226,9 @@ export default function DeliveryTemp({ navigation, route }) {
     const selectedOrders = matchingOrders.map((order) => order.id);
     console.log(selectedOrders);
     console.log(matchingOrders);
+    console.log(selectedTime);
+    console.log(selectedTime.split(" ")[1]);
+    console.log(selectedTime.split(" ")[2]);
     const totalPayment = totalPayment1;
     try {
       // const deliveryFee = await calculateDeliveryFee();
@@ -235,6 +238,7 @@ export default function DeliveryTemp({ navigation, route }) {
         {
           deliveryfee: totalPayment,
           selectedTime: selectedTime.split(" ")[0],
+          selectedEndTime: selectedTime.split(" ")[2],
           selectedDate: selectedDate,
           user: curuser,
         });

@@ -17,8 +17,8 @@ export default class Paypal extends Component {
     componentDidMount() {
 
         const { route } = this.props;
-        const { deliveryfee, selectedTime, selectedDate, user } = route.params;
-        this.setState({ ...this.state, deliveryfee, selectedTime, selectedDate, user })
+        const { deliveryfee, selectedTime, selectedEndTime, selectedDate, user } = route.params;
+        this.setState({ ...this.state, deliveryfee, selectedTime, selectedEndTime, selectedDate, user })
         console.log(deliveryfee);
         const dataDetail = {
             "intent": "sale",
@@ -40,7 +40,7 @@ export default class Paypal extends Component {
                 }
             }],
             "redirect_urls": {
-                "return_url": "http://localhost:19006/success/" + deliveryfee + "/" + selectedDate + "/" + selectedTime + "/",
+                "return_url": "http://localhost:19006/success/" + deliveryfee + "/" + selectedDate + "/" + selectedTime + "/" + selectedEndTime + "/",
                 "cancel_url": "http://localhost:19006/cancel"
             }
         }
@@ -50,7 +50,7 @@ export default class Paypal extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer A21AAJ-oEvquvJFa7IzrycKBtelJvBjp3pTjN3YWKomfV99zhpVVjBu7rpVPBnwsvV1tJLd-VSYSGSWYqvenQeGZhBxgfId5A`
+                    'Authorization': `Bearer A21AAImWfgiuDphHddRpJPev679i4hmh1MD1QGUVHYiCDm8vfyP9CxBRDqlILJHQiFv68QAuKyvHzZdPXaTyomuzJOofcCGHg`
                 },
                 body: 'grant_type=client_credentials'
             }
