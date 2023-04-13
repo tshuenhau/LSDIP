@@ -234,7 +234,9 @@ export default function Pickup({ navigation }) {
 
                                     const selectedTimeObj = {
                                         time: selectedTime,
-                                        address: user.address
+                                        address: user.address,
+                                        name: user.name,
+                                        number: user.number,
                                     };
 
                                     const selectedDateDocRef = db.collection('pickup_orders').doc(selectedDate);
