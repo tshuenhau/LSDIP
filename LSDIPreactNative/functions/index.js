@@ -84,6 +84,7 @@ exports.sendEmailOnUserTimingsUpdate = functions.firestore
         // Get the customerNumber from the user document
         const userDoc = await db.collection('users').doc(userId).get();
         const customerNumber = userDoc.data().number;
+        const customerEmail = userDoc.data().email;
         console.log(customerNumber);
         let deliveryFee = 0;
         // Send an email for each new selected time added
@@ -187,7 +188,7 @@ exports.sendEmailOnUserTimingsUpdate = functions.firestore
 
                 // Send an email to the customer with the matching orders
                 //const customerEmail = change.after.data().email;
-                const customerEmail = 'wongjunwei17@gmail.com';
+                //const customerEmail = 'wongjunwei17@gmail.com';
                 console.log('change checked12!');
                 const mailOptions = {
                     from: `lagoonlaundryplq@gmail.com`,
@@ -279,6 +280,7 @@ exports.sendEmailOnUserTimingsUpdate = functions.firestore
                                 </tr>
                             </tbody>
                         </table>
+                        <p>Thank you for shopping at Lagoon Laundry. We hope you had an enjoyable experience with us!</p>
                     </body>
                     </html>
 
