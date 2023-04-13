@@ -27,6 +27,7 @@ import * as Sharing from "expo-sharing";
 export default function Dashboard() {
     const date = new Date();
     const today = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    const now = date.getHours();
     const [orderList, setOrderList] = useState([]);
     const [rosterList, setRosterList] = useState([]);
     const [refundList, setRefundList] = useState([]);
@@ -41,6 +42,7 @@ export default function Dashboard() {
     const refunds = firebase.firestore().collection("refunds");
     const users = firebase.firestore().collection("users");
     const staff_schedule = firebase.firestore().collection("staff_schedule");
+    const shift_timings = firebase.firestore().collection("shift-timings");
     const [data, setData] = useState([]);
 
     const orderByMonth = [
@@ -117,9 +119,11 @@ export default function Dashboard() {
         staff_schedule.onSnapshot(querySnapshot => {
             let staff = 0;
             querySnapshot.forEach(doc => {
-                const { date, outletID, userID } = doc.data();
-                if (date === today && outletID === 'bTvPBNfMLkBmF9IKEQ3n') {
+                const { date, outletID, shiftID, userID } = doc.data();
+                if (date === today && outletID === '1RSi3QaKpvrHfh4ZVXNk') {
                     console.log('found');
+                    console.log(now);
+
                     staff++;
                 }
             });
