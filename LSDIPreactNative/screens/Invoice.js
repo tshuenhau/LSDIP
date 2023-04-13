@@ -296,12 +296,8 @@ export default function Invoice(props) {
 
           </View >
 
-          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", alignContent: 'center', marginBottom: 20 }}>
-            <Btn onClick={() => props.navigation.navigate('Order History')} title="Back" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
-          </View>
-
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "50%", alignContent: 'center', marginLeft: "25%", marginBottom: 20 }}>
-            <Btn onClick={() => print()} title="Print" style={{ width: "48%" }} />
+            <Btn onClick={() => print()} title="Print" style={{ width: "48%", backgroundColor: colors.blue700 }} />
             <Btn onClick={() => props.navigation.navigate('Home')} title="Back" style={{ width: "48%", backgroundColor: colors.dismissBlue }} />
           </View>
         </View>
