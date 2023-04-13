@@ -20,7 +20,7 @@ export default function Pickup({ navigation }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [duplicateMessage, setDuplicateMessage] = useState(null);
     const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
-    const [deliveryFees, setDeliveryFees] = useState(null);
+    const [pickupFees, setPickupFees] = useState(null);
 
     useEffect(() => {
         const db = firebase.firestore();
@@ -42,79 +42,79 @@ export default function Pickup({ navigation }) {
     useEffect(() => {
         const calculateDeliveryFee = () => {
             return new Promise((resolve, reject) => {
-            let address = "";
-            const db = firebase.firestore();
-            const user = firebase.auth().currentUser;
-            db.collection('users')
-                .where('email', '==', user.email)
-                .get()
-                .then(querySnapshot => {
-                if (querySnapshot.empty) {
-                    console.log('No matching documents.');
-                    reject();
-                } else {
-                    querySnapshot.forEach(doc => {
-                    // Retrieve the user's address from the document
-                    address = doc.data().address;
-                    console.log(`User's address: ${address}`);
-                    const location1 = address;
-                    const location2 = '10 Paya Lebar Rd Singapore 409057';
-                    const apiKey = 'AIzaSyDpuo4PKoIf6vYm6BbCa77-kQN_zq7pDoA';
-
-                    // Make API request for location 1
-                    const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
-                    axios.get(apiUrl1)
-                        .then(response => {
-                        if (response.data.results.length === 0) {
-                            console.error('No results found for location:', location1);
+                let address = "";
+                const db = firebase.firestore();
+                const user = firebase.auth().currentUser;
+                db.collection('users')
+                    .where('email', '==', user.email)
+                    .get()
+                    .then(querySnapshot => {
+                        if (querySnapshot.empty) {
+                            console.log('No matching documents.');
                             reject();
+                        } else {
+                            querySnapshot.forEach(doc => {
+                                // Retrieve the user's address from the document
+                                address = doc.data().address;
+                                console.log(`User's address: ${address}`);
+                                const location1 = address;
+                                const location2 = '10 Paya Lebar Rd Singapore 409057';
+                                const apiKey = 'AIzaSyDpuo4PKoIf6vYm6BbCa77-kQN_zq7pDoA';
+
+                                // Make API request for location 1
+                                const apiUrl1 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location1}&key=${apiKey}`;
+                                axios.get(apiUrl1)
+                                    .then(response => {
+                                        if (response.data.results.length === 0) {
+                                            console.error('No results found for location:', location1);
+                                            reject();
+                                        }
+                                        const result = response.data.results[0];
+                                        const coords1 = {
+                                            latitude: result.geometry.location.lat,
+                                            longitude: result.geometry.location.lng
+                                        };
+
+                                        // Make API request for location 2
+                                        const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
+                                        axios.get(apiUrl2)
+                                            .then(response => {
+                                                if (response.data.results.length === 0) {
+                                                    console.error('No results found for location:', location2);
+                                                    reject();
+                                                }
+                                                const result = response.data.results[0];
+                                                const coords2 = {
+                                                    latitude: result.geometry.location.lat,
+                                                    longitude: result.geometry.location.lng
+                                                };
+
+                                                // Calculate the distance between the two sets of coordinates
+                                                const distanceInMeters = geolib.getDistance(coords1, coords2);
+                                                console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
+                                                const deliveryFee = distanceInMeters / 500;
+                                                console.log(deliveryFee);
+                                                console.log("delivery fee is here!");
+                                                resolve(deliveryFee);
+                                            }).catch(error => {
+                                                console.error(error);
+                                                reject();
+                                            });
+                                    }).catch(error => {
+                                        console.error(error);
+                                        reject();
+                                    });
+                            })
                         }
-                        const result = response.data.results[0];
-                        const coords1 = {
-                            latitude: result.geometry.location.lat,
-                            longitude: result.geometry.location.lng
-                        };
-
-                        // Make API request for location 2
-                        const apiUrl2 = `https://maps.googleapis.com/maps/api/geocode/json?address=${location2}&key=${apiKey}`;
-                        axios.get(apiUrl2)
-                            .then(response => {
-                            if (response.data.results.length === 0) {
-                                console.error('No results found for location:', location2);
-                                reject();
-                            }
-                            const result = response.data.results[0];
-                            const coords2 = {
-                                latitude: result.geometry.location.lat,
-                                longitude: result.geometry.location.lng
-                            };
-
-                            // Calculate the distance between the two sets of coordinates
-                            const distanceInMeters = geolib.getDistance(coords1, coords2);
-                            console.log(`Distance between ${location1} and ${location2}: ${distanceInMeters} meters`);
-                            const deliveryFee = distanceInMeters / 500;
-                            console.log(deliveryFee);
-                            console.log("delivery fee is here!");
-                            resolve(deliveryFee);
-                            }).catch(error => {
-                            console.error(error);
-                            reject();
-                            });
-                        }).catch(error => {
+                    }).catch(error => {
                         console.error(error);
                         reject();
-                        });
-                    })
-                }
-                }).catch(error => {
-                console.error(error);
-                reject();
-                });
+                    });
             });
         }
 
         calculateDeliveryFee().then(deliveryFee => {
-            setDeliveryFees(deliveryFee);
+            setPickupFees(deliveryFee);
             setLoading(false);
         }).catch(error => {
             console.error(error);
@@ -123,8 +123,8 @@ export default function Pickup({ navigation }) {
     }, []);
 
     useEffect(() => {
-    console.log('Delivery fees updated:', deliveryFees);
-    }, [deliveryFees]);
+        console.log('Delivery fees updated:', pickupFees);
+    }, [pickupFees]);
 
     const handleMonthChange = useCallback(({ year, month }) => {
         setDisplayMonth(`${Number(year)}-${Number(month)}`);
@@ -140,7 +140,6 @@ export default function Pickup({ navigation }) {
         const [availableTimings, setAvailableTimings] = useState([]);
 
         useEffect(() => {
-            // console.log(firebase.auth().currentUser.uid);
             if (selectedDate) {
                 const db = firebase.firestore();
                 db.collection('blocked_timings')
@@ -184,7 +183,7 @@ export default function Pickup({ navigation }) {
             return timings.filter((timing) => {
                 const startTime = moment(`${selectedDate} ${timing.split(' - ')[0]}`, 'YYYY-MM-DD hh:mmA');
                 const endTime = moment(`${selectedDate} ${timing.split(' - ')[1]}`, 'YYYY-MM-DD hh:mmA');
-                console.log("options " + startTime + " and " + endTime);
+                // console.log("options " + startTime + " and " + endTime);
                 return !blockedTimings.some((blockedTiming) => {
                     const blockedStartTime = moment(new Date(blockedTiming.startTime['seconds'] * 1000)).add(8, 'hours');
                     const blockedEndTime = moment(new Date(blockedTiming.endTime['seconds'] * 1000)).add(8, 'hours');
@@ -211,80 +210,86 @@ export default function Pickup({ navigation }) {
                     setIsModalOpen(false);
                 } else {
                     const db = firebase.firestore();
-                    const user = firebase.auth().currentUser;
+                    db.collection('users').doc(firebase.auth().currentUser.uid)
+                        .get()
+                        .then(doc => {
+                            const user = { ...doc.data(), id: doc.id }
 
-                    if (user) {
-                        // const deliveryFee = await calculateDeliveryFee();
-                        // setDeliveryFees(deliveryFee);
-                        // console.log("completed calculation of delivery fee!");
-                        console.log(selectedTime.split(' - ')[0]);
-                        const selectedHour = selectedTime.split(' - ')[0];
-                        const shiftTime = selectedHour.split('00')[1];
-                        console.log(shiftTime);
-                        const docRef = db.collection('pickup_orders').doc(selectedDate);
-
-                        docRef.get()
-                            .then((doc) => {
-                                let shiftData;
-                                if (doc.exists) {
-                                    shiftData = doc.data();
-                                } else {
-                                    shiftData = {
-                                        am_shift: [],
-                                        pm_shift: []
+                            const docRef = db.collection('pickup_timings').doc(user.id);
+                            docRef
+                                .get()
+                                .then((doc) => {
+                                    let selectedTimes = [];
+                                    if (doc.exists) {
+                                        selectedTimes = doc.data().selected_times;
+                                    } else {
+                                        db.collection('pickup_timings').doc(user.id).set({
+                                            selected_times: selectedTimes
+                                        }).then(() => {
+                                            console.log('Selected times update successfully');
+                                        }).catch((error) => {
+                                            console.log('Error updating selected times: ', error);
+                                        });
                                     }
-                                }
 
-                                const usersToAdd = shiftTime === 'am' ? shiftData.am_shift.concat(user.uid) : shiftData.pm_shift.concat(user.uid);
-                                console.log(shiftData);
-                                console.log(usersToAdd);
-                                console.log(shiftTime);
-                                if (shiftTime === 'am') {
-                                    shiftData.am_shift = usersToAdd;
-                                } else if (shiftTime === 'pm') {
-                                    shiftData.pm_shift = usersToAdd;
-                                }
-                                console.log(shiftData);
-                                console.log(shiftData.am_shift);
-                                console.log(shiftData.pm_shift);
-                                return docRef.set(shiftData);
-                            })
-                            .then(() => {
-                                console.log('pickup orders updated successfully');
-                                const docRef = db.collection('pickup_timings').doc(user.uid);
-                                docRef.get()
-                                    .then((doc) => {
-                                        let selectedTimes = [];
+                                    const selectedTimeObj = {
+                                        time: selectedTime,
+                                        address: user.address
+                                    };
 
+                                    const selectedDateDocRef = db.collection('pickup_orders').doc(selectedDate);
+                                    selectedDateDocRef.get().then((doc) => {
                                         if (doc.exists) {
-                                            selectedTimes = doc.data().selected_times;
+                                            const updatedSelectedTimes = [...doc.data().selected_times, selectedTimeObj];
+                                            selectedDateDocRef.update({ selected_times: updatedSelectedTimes })
+                                                .then(() => {
+                                                    console.log(`Selected times updated for ${selectedDate}`);
+                                                }).catch((error) => {
+                                                    console.error(`Error updating selected times for ${selectedDate}:`, error);
+                                                });
+                                        } else {
+                                            selectedDateDocRef.set({
+                                                date: selectedDate,
+                                                selected_times: [selectedTimeObj],
+                                            }).then(() => {
+                                                console.log(`New document created for ${selectedDate}`);
+                                            }).catch((error) => {
+                                                console.error(`Error creating new document for ${selectedDate}:`, error);
+                                            });
                                         }
-
-                                        selectedTimes.push({
-                                            date: selectedDate,
-                                            time: selectedTime,
-                                            // orders: matchingOrders,
-                                        });
-
-                                        return docRef.set({
-                                            selected_times: selectedTimes,
-                                        });
                                     })
-                                    .then(() => {
-                                        console.log('Selected time added for user with UID: ', user.uid);
-                                        const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime },];
-                                        setSelectedTimesList(newSelectedTimesList);
-                                        setSelectedTime(null);
-                                        setIsModalOpen(false);
-                                    })
-                                    .catch((error) => {
-                                        console.error(error);
+                                })
+
+                            db.collection('pickup_timings').doc(user.uid)
+                                .get()
+                                .then((doc) => {
+                                    let selectedTimes = [];
+
+                                    if (doc.exists) {
+                                        selectedTimes = doc.data().selected_times;
+                                    }
+
+                                    selectedTimes.push({
+                                        date: selectedDate,
+                                        time: selectedTime,
+                                        pickupFee: pickupFees,
                                     });
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                            });
-                    }
+
+                                    return docRef.set({
+                                        selected_times: selectedTimes,
+                                    });
+                                })
+                                .then(() => {
+                                    console.log('Selected time added for user with UID: ', user.uid);
+                                    const newSelectedTimesList = [...selectedTimesList, { date: selectedDate, time: selectedTime },];
+                                    setSelectedTimesList(newSelectedTimesList);
+                                    setSelectedTime(null);
+                                    setIsModalOpen(false);
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                });
+                        })
                 }
             }
         };
@@ -400,9 +405,9 @@ export default function Pickup({ navigation }) {
                             }
                             return docRef.set(shiftData);
                         },
-                        // setTimeout(() => {
-                        //     window.location.reload();
-                        // }, 2000)
+                            // setTimeout(() => {
+                            //     window.location.reload();
+                            // }, 2000)
                         ).catch((error) => {
                             console.error(error);
                         });
@@ -419,103 +424,103 @@ export default function Pickup({ navigation }) {
         return (
             <ScrollView>
                 <View style={styles.mainContainer}>
-                        <View style={styles.leftcontainer}>
-                            <View style={styles.calendarcontainer}>
-                                <CalendarList
-                                    onDayPress={handleDayPress}
-                                    minDate={today}
-                                    markedDates={{
-                                        ...(selectedDate && {
-                                            [selectedDate]: {
-                                                selected: true,
-                                            },
-                                        }),
-                                        ...currentMonthDays.reduce(
-                                            (acc, day) => ({ ...acc, [day]: { disabled: true } }),
-                                            {}
-                                        ),
-                                    }}
-                                    pastScrollRange={0}
-                                    futureScrollRange={1}
-                                    scrollEnabled={true}
-                                    horizontal={true}
-                                    pagingEnabled={true}
-                                    calendarWidth={290}
-                                    theme={{
-                                        selectedDayBackgroundColor: colors.blue800,
-                                        selectedDayTextColor: colors.white,
-                                        todayTextColor: colors.blue700,
-                                        textDisabledColor: colors.blue100,
-                                        arrowColor: colors.shadowGray,
-                                        todayButtonFontWeight: "bold",
-                                    }}
-                                />
-                            </View>
-                            <View style={styles.selectedDateContent}>
-                                <View>
-                                    <Text style={styles.selectedDateText}>
-                                        Selected date:
-                                    </Text>
+                    <View style={styles.leftcontainer}>
+                        <View style={styles.calendarcontainer}>
+                            <CalendarList
+                                onDayPress={handleDayPress}
+                                minDate={today}
+                                markedDates={{
+                                    ...(selectedDate && {
+                                        [selectedDate]: {
+                                            selected: true,
+                                        },
+                                    }),
+                                    ...currentMonthDays.reduce(
+                                        (acc, day) => ({ ...acc, [day]: { disabled: true } }),
+                                        {}
+                                    ),
+                                }}
+                                pastScrollRange={0}
+                                futureScrollRange={1}
+                                scrollEnabled={true}
+                                horizontal={true}
+                                pagingEnabled={true}
+                                calendarWidth={290}
+                                theme={{
+                                    selectedDayBackgroundColor: colors.blue800,
+                                    selectedDayTextColor: colors.white,
+                                    todayTextColor: colors.blue700,
+                                    textDisabledColor: colors.blue100,
+                                    arrowColor: colors.shadowGray,
+                                    todayButtonFontWeight: "bold",
+                                }}
+                            />
+                        </View>
+                        <View style={styles.selectedDateContent}>
+                            <View>
+                                <Text style={styles.selectedDateText}>
+                                    Selected date:
+                                </Text>
 
-                                </View>
-
-                                {selectedDate && (
-                                    <View style={styles.dateContent}>
-                                        <Text style={styles.dateText}>
-                                            {selectedDate}
-                                        </Text>
-                                    </View>
-                                )}
                             </View>
+
                             {selectedDate && (
-                                    <View>
-                                        <TouchableOpacity
-                                            style={styles.viewTimingsButton}
-                                            onPress={() => setIsModalOpen(true)}
-                                        >
-                                            <Text style={styles.viewTimingsButtonText}>View timings</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                        </View>
-                        <View style={styles.detailContainer}>
-                            {selectedTimesList.length > 0 && (
-                                <View style={styles.selectedTimesContainer}>
-                                    <Text style={styles.selectedTimesTitle}>Selected Pick Up Times</Text>
-                                    <ScrollView style={styles.selectedTimesList}>
-                                        {selectedTimesList.map((item) => (
-                                            <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
-                                                <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
-                                                <Text style={styles.cardText}>
-                                                    <b>Time: </b>{item.time}
-                                                </Text>
-                                                <Text style={styles.pickupText}>Pick up scheduled for this timeslot</Text>
-                                                <Text style={styles.pickupText}>Pick up Cost: ${deliveryFees.toFixed(1)}0</Text>
-                                                <TouchableOpacity
-                                                    style={styles.removeButton}
-                                                    onPress={() => handleDelete(item)}
-                                                >
-                                                    <Text style={styles.removeButtonText}> Remove</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        ))}
-
-                                    </ScrollView>
+                                <View style={styles.dateContent}>
+                                    <Text style={styles.dateText}>
+                                        {selectedDate}
+                                    </Text>
                                 </View>
-
                             )}
-                            <AvailableTimingsModal
-                                date={selectedDate}
-                                onClose={() => setIsModalOpen(false)}
-                                isModalOpen={isModalOpen}
-                            />
-                            <DuplicateAlert
-                                message={duplicateMessage}
-                                isOpen={isDuplicateOpen}
-                                onClose={() => setIsDuplicateOpen(false)}
-                            />
                         </View>
+                        {selectedDate && (
+                            <View>
+                                <TouchableOpacity
+                                    style={styles.viewTimingsButton}
+                                    onPress={() => setIsModalOpen(true)}
+                                >
+                                    <Text style={styles.viewTimingsButtonText}>View timings</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
+                    <View style={styles.detailContainer}>
+                        {selectedTimesList.length > 0 && (
+                            <View style={styles.selectedTimesContainer}>
+                                <Text style={styles.selectedTimesTitle}>Selected Pick Up Times</Text>
+                                <ScrollView style={styles.selectedTimesList}>
+                                    {selectedTimesList.map((item) => (
+                                        <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
+                                            <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
+                                            <Text style={styles.cardText}>
+                                                <b>Time: </b>{item.time}
+                                            </Text>
+                                            <Text style={styles.pickupText}>Pick up scheduled for this timeslot</Text>
+                                            <Text style={styles.pickupText}>Pick up Cost: ${pickupFees.toFixed(1)}0</Text>
+                                            <TouchableOpacity
+                                                style={styles.removeButton}
+                                                onPress={() => handleDelete(item)}
+                                            >
+                                                <Text style={styles.removeButtonText}> Remove</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+
+                                </ScrollView>
+                            </View>
+
+                        )}
+                        <AvailableTimingsModal
+                            date={selectedDate}
+                            onClose={() => setIsModalOpen(false)}
+                            isModalOpen={isModalOpen}
+                        />
+                        <DuplicateAlert
+                            message={duplicateMessage}
+                            isOpen={isDuplicateOpen}
+                            onClose={() => setIsDuplicateOpen(false)}
+                        />
+                    </View>
+                </View>
             </ScrollView>
         )
     }
