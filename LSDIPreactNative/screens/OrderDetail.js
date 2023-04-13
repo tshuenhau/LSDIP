@@ -48,6 +48,12 @@ export default function OrderPage(props) {
   const refunds = firebase.firestore().collection('refunds');
   const [orderRefunds, setOrderRefunds] = useState([]);
 
+  const refundMethods = [
+    { key: '1', value: 'PayNow' },
+    { key: '2', value: 'PayLah' },
+    { key: '3', value: 'Others' },
+]
+
   useEffect(() => {
     // Fetch the order document using the orderId prop
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
@@ -226,7 +232,10 @@ export default function OrderPage(props) {
   const refund = () => {
     const details = modalData.refundDetails;
     const refundAmount = modalData.refundAmount;
-    const refundMethod = modalData.refundMethod;
+    let refundMethod = modalData.refundMethod;
+    if (modalData.refundMethod === 'Others') {
+      refundMethod = modalData.refundMethod + '-' + modalData.otherRefundMethod;
+    }
     console.log("refund 1");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     //console.log(orderRef);
@@ -637,11 +646,26 @@ export default function OrderPage(props) {
                     placeholder="Refund Amount"
                     onChangeText={(text) => handleChange(text, 'refundAmount')}
                   />
-                  <TextBox
+                  <View style={styles.selectList}>
+                      <SelectList
+                          data={refundMethods}
+                          placeholder={"Refund Method"}
+                          setSelected={(text) => handleChange(text, 'refundMethod')}
+                          save="value"
+                      />
+                  </View>
+                  {modalData.refundMethod === 'Others' ? 
+                    <TextBox
+                      style={styles.textBox}
+                      placeholder="Enter other refund method"
+                      onChangeText={(text) => handleChange(text, 'otherRefundMethod')}
+                    /> : null
+                  }
+                  {/*<TextBox
                     style={styles.textBox}
                     placeholder="Refund Method"
                     onChangeText={(text) => handleChange(text, 'refundMethod')}
-                  />
+                />*/}
                   <TextBox
                     style={styles.textBox}
                     placeholder="Refund Details"
@@ -675,6 +699,10 @@ export default function OrderPage(props) {
 }
 
 const styles = StyleSheet.create({
+  selectList: {
+    marginTop: 20,
+    width: "92%",
+  },
   errorMessageContainer: {
     padding: 10,
     marginBottom: 10,
