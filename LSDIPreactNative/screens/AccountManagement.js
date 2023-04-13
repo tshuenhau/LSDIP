@@ -363,7 +363,7 @@ export default function AccountManagement({ navigation }) {
                 />
     </View>*/}
             <FlatList
-                data={users.filter(l => l.role === "Disabled")}
+                data={filteredUserList.filter(l => l.role === "Disabled")}
                 keyExtractor={item => item.id}
                 renderItem={renderItem}
                 ListEmptyComponent={
