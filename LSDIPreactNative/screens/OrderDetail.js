@@ -279,6 +279,7 @@ export default function OrderPage(props) {
       });
       console.log("cn now", cn);
       setRefundModalVisible(false);
+      handleChange('', 'refundMethod');
     } else {
       setErrorMessage("Please fill up all fields")
     }
