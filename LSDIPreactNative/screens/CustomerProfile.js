@@ -52,6 +52,7 @@ export default function CustomerProfile() {
     const users = firebase.firestore().collection('users');
     const membership_tier = firebase.firestore().collection('membership_tier');
     const auth = firebase.auth;
+    const currUser = auth().currentUser.uid;
 
     useEffect(() => {
         users.doc(auth().currentUser.uid)
