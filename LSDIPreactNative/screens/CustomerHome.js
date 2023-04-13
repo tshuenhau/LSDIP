@@ -30,7 +30,7 @@ export default function CustomerHome({ user, navigation }) {
                     const orderList = [];
                     console.log(user);
                     querySnapshot.forEach((doc) => {
-                        const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+                        const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice, invoiceNumber } = doc.data();
                         orderList.push({
                             id: doc.id,
                             customerName,
@@ -40,6 +40,7 @@ export default function CustomerHome({ user, navigation }) {
                             outletId,
                             orderStatus,
                             totalPrice,
+                            invoiceNumber,
                         });
                     });
                     setOrderList(orderList);
@@ -99,10 +100,7 @@ export default function CustomerHome({ user, navigation }) {
             console.log(curLink);
             const deliveryFee = curLink[4];
             const selectedDate = curLink[5];
-            const selectedStartTime = curLink[6];
-            const selectedEndTime = curLink[7];
-            const selectedTime = selectedStartTime + " - " + selectedEndTime;
-            console.log(selectedTime);
+            const selectedTime = curLink[6];
             orders
                 .where("customerNumber", "==", user.number)
                 .where("orderStatus", "==", "Back from Wash")
@@ -133,8 +131,7 @@ export default function CustomerHome({ user, navigation }) {
                                 db.collection('user_timings').doc(user.uid).set({
                                     selected_times: []
                                 });
-                                //selectedTimes = doc.data().selected_times;
-                                selectedTimes = [];
+                                selectedTimes = doc.data().selected_times;
                             }
                             selectedTimes.push({
                                 date: selectedDate,

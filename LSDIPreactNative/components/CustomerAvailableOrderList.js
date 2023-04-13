@@ -13,6 +13,7 @@ import OrderDetails from "./OrderDetails";
 
 export default function CustomerOrderList({ orderList, navigation, curUser }) {
     console.log(curUser);
+    console.log(orderList);
 
     const [expandedOrder, setExpandedOrder] = useState(null);
 
@@ -35,13 +36,13 @@ export default function CustomerOrderList({ orderList, navigation, curUser }) {
     };
 
     const renderItem = ({ item: order }) => (
-        <View>
+        <View style>
             <TouchableOpacity
                 style={styles.card}
                 onPress={() => toggleExpand(order.id)}
                 activeOpacity={0.8}>
                 <View style={styles.cardHeader}>
-                    <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
+                    <Text style={styles.orderNumber}>Invoice Number: {order.invoiceNumber}</Text>
                     <Text style={styles.orderDate}>{formatOrderDate(order.date)}</Text>
                     <Text style={styles.orderNumber}>{order.orderStatus}</Text>
                 </View>
@@ -87,17 +88,26 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     card: {
-        backgroundColor: '#fff',
-        marginVertical: 10,
-        marginHorizontal: 16,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        elevation: 3,
+        // backgroundColor: '#fff',
+        // marginVertical: 10,
+        // marginHorizontal: 16,
+        // borderRadius: 10,
+        // shadowColor: '#000',
+        // shadowOpacity: 0.2,
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 3,
+        // },
+        // elevation: 3,
+        width: "92%",
+        alignItems: 'left',
+        backgroundColor: colors.white,
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 10,
+        marginLeft: 15,
+        borderColor: colors.borderColor,
+        borderWidth: 2
     },
     cardHeader: {
         flexDirection: 'row',

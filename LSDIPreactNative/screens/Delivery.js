@@ -840,7 +840,7 @@ export default function DeliveryTemp({ navigation, route }) {
                     </Text>
                     {item.orders ? (
                       <View>
-                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.map((order) => order.id).join(", ")}</Text>
+                        <Text style={styles.orderText}><b>Invoice Numbers: </b>{item.orders.map((order) => order.invoiceNumber).join(", ")}</Text>
                       </View>
                     ) : (
                       <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
