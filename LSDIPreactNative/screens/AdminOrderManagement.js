@@ -34,7 +34,7 @@ export default function AdminOrderManagement({ navigation, route }) {
             .onSnapshot(querySnapshot => {
                 const orderList = [];
                 querySnapshot.forEach((doc) => {
-                    const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice } = doc.data();
+                    const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice, invoiceNumber } = doc.data();
                     orderList.push({
                         id: doc.id,
                         customerName,
@@ -44,6 +44,7 @@ export default function AdminOrderManagement({ navigation, route }) {
                         outletId,
                         orderStatus,
                         totalPrice,
+                        invoiceNumber,
                     });
                 });
                 setOrderList(orderList);
@@ -68,8 +69,8 @@ export default function AdminOrderManagement({ navigation, route }) {
             activeOpacity={0.8}>
             <View style={styles.cardHeader}>
                 <View>
-                <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
-                <Text style={styles.orderStatus}>{order.orderStatus}</Text>
+                    <Text style={styles.orderNumber}>Invoice Number: {order.invoiceNumber}</Text>
+                    <Text style={styles.orderStatus}>{order.orderStatus}</Text>
                 </View>
                 <Text style={styles.orderDate}>{formatTime(order.orderDate)}</Text>
                 <Text style={styles.orderAmt}>S${order.totalPrice}</Text>
@@ -142,17 +143,17 @@ const styles = StyleSheet.create({
     orderDate: {
         fontSize: 14,
         color: colors.gray,
-        alignContent:'center',
-        alignSelf:'center',
-        alignItems:'center',
+        alignContent: 'center',
+        alignSelf: 'center',
+        alignItems: 'center',
     },
     orderAmt: {
         fontSize: 20,
-        alignContent:'center',
-        alignSelf:'center',
-        alignItems:'center',
-        marginRight:30,
-        fontWeight:600
+        alignContent: 'center',
+        alignSelf: 'center',
+        alignItems: 'center',
+        marginRight: 30,
+        fontWeight: 600
     },
     cardBody: {
         backgroundColor: colors.themelight,
