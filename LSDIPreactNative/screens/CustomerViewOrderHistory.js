@@ -64,7 +64,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
           const orderList = [];
           console.log(user);
           querySnapshot.forEach((doc) => {
-            const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice, feedback } = doc.data();
+            const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice, feedback, invoiceNumber } = doc.data();
             orderList.push({
               id: doc.id,
               customerName,
@@ -74,7 +74,8 @@ export default function CustomerViewOrderHistory({ navigation }) {
               outletId,
               orderStatus,
               totalPrice,
-              feedback
+              feedback,
+              invoiceNumber
             });
           });
           setOrderList(orderList);
@@ -169,8 +170,8 @@ export default function CustomerViewOrderHistory({ navigation }) {
         activeOpacity={0.8}>
         <View style={styles.cardHeader}>
           <View>
-          <Text style={styles.orderNumber}>{formatOrderNumber(order.id)}</Text>
-          <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
+            <Text style={styles.orderNumber}>Invoice Number: {order.invoiceNumber}</Text>
+            <Text style={styles.orderDate}>{formatOrderDate(order.orderDate)}</Text>
           </View>
           <Text style={styles.orderStatus}>{order.orderStatus}</Text>
         </View>
@@ -264,7 +265,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
                   editable
                   multiline
                   placeholder="feedback"
-                  style={{ height: 40, width: '100%'}}
+                  style={{ height: 40, width: '100%' }}
                   onChangeText={text => setCfeedback(text)} value={cfeedback} />
                 {errorMessage &&
                   <View style={styles.errorMessageContainer}>
@@ -444,9 +445,9 @@ const styles = StyleSheet.create({
   orderStatus: {
     fontSize: 20,
     fontWeight: 700,
-    alignContent:  'center',
-    alignSelf:  'center',
-    alignItems:  'center'
+    alignContent: 'center',
+    alignSelf: 'center',
+    alignItems: 'center'
   },
   rate: {
     fontSize: 14,

@@ -42,17 +42,10 @@ const BlockTimePage = () => {
     });
   }, []);
 
-  const handleDateTimeConfirm = useCallback((date) => {
+  const handleDateConfirm = useCallback((date) => {
     console.log(date);
-    if (isDateTimePickerVisible === 'date') {
-      setSelectedDate(date);
-    } else if (isDateTimePickerVisible === 'start') {
-      setStartTime(date);
-    } else {
-      setEndTime(date);
-    }
-    setDateTimePickerVisible(false);
-  }, [isDateTimePickerVisible]);
+    setSelectedDate(date);
+  }, []);
 
   const handleStartTimeConfirm = useCallback((time) => {
     setTempStartTime(time);
@@ -275,7 +268,8 @@ const BlockTimePage = () => {
           <View style={styles.dateTimePicker}>
             <DateTimePicker
               value={selectedDate}
-              onChange={handleDateTimeConfirm}
+              minDate={new Date()}
+              onChange={handleDateConfirm}
               format="yyyy-MM-dd"
             />
           </View>
