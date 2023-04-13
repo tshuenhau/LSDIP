@@ -283,7 +283,7 @@ exports.sendEmailOnUserTimingsUpdate = functions.firestore
                 const orderRows = matchingOrders.map((order, index) => {
                     return `
                         <tr>
-                            <td>${order.id}</td>
+                            <td>${order.invoiceNumber}</td>
                             <td>$${order.totalPrice.toFixed(2)}</td>
                             <td>${order.pickup ? `Selected Laundry Pickup: $${order.pickupCost.toFixed(2)}` :  'No Laundry Pickup'}</td>
                             <td>${orderItemDetails[index]}</td>
@@ -376,7 +376,7 @@ exports.sendEmailOnUserTimingsUpdate = functions.firestore
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Order ID</th>
+                                    <th>Order Invoice Number</th>
                                     <th>Amount Due</th>
                                     <th>Laundry Pickup</th>
                                     <th>Order Items</th>
