@@ -32,6 +32,7 @@ export default function OrderPage(props) {
   const [order, setOrder] = useState(null);
   const { orderId } = props.route.params;
   const [orderDescription, setOrderDescription] = useState("");
+  const [orderStatus, setOrderStatus] = useState("");
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   const [pickup, setPickUp] = useState(Boolean);
   const [requireDelivery, setRequireDelivery] = useState(Boolean);
@@ -45,6 +46,7 @@ export default function OrderPage(props) {
   const [laundryItemsData, setLaundryItemsData] = useState([]);
   const [modalData, setModalData] = useState({ description: '', price: '' });
   const refunds = firebase.firestore().collection('refunds');
+  const [orderRefunds, setOrderRefunds] = useState([]);
 
   useEffect(() => {
     // Fetch the order document using the orderId prop
@@ -56,6 +58,7 @@ export default function OrderPage(props) {
         setPickUp(doc.data().pickup);
         setRequireDelivery(doc.data().requireDelivery);
         setTotalPrice(doc.data().totalPrice);
+        setOrderStatus(doc.data().orderStatus);
         //console.log('order', order);
       } else {
         console.log('No such order document!');
@@ -89,6 +92,29 @@ export default function OrderPage(props) {
           setOrderItemsList(orderItemsList);
         })
     }
+  }, [order]);
+
+  useEffect(() => {
+    console.log('here');
+    refunds
+      .get()
+      .then(querySnapshot => {
+        const orderRefunds = [];
+        const oid = orderId;
+        querySnapshot.forEach(doc => {
+          const { orderId, orderItemName, refundAmount, refundMethod } = doc.data();
+          if (orderId === oid)
+            orderRefunds.push({
+              id: doc.id,
+              orderId,
+              orderItemName,
+              refundAmount,
+              refundMethod
+            });
+        })
+        setOrderRefunds(orderRefunds);
+        console.log('refunds', orderRefunds);
+      })
   }, [order]);
 
   useEffect(() => {
@@ -381,6 +407,14 @@ export default function OrderPage(props) {
     </View>
   );
 
+  const renderItemr = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Text style={styles.itemName}>{item.orderItemName}</Text>
+      <Text style={styles.itemName}>$ {item.refundAmount}</Text>
+      <Text style={styles.itemName}>{item.refundMethod}</Text>
+    </View>
+  )
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -445,6 +479,21 @@ export default function OrderPage(props) {
             />
           </View>
           <Text style={styles.orderDescription}>{orderDescription}</Text>
+          <View>
+            {orderStatus === 'Refunded' && (<Text style={styles.orderStatus}>Refunded</Text>)}
+            {orderStatus === 'Refunded' && (<View style={styles.tableHeader}>
+              <Text style={styles.tableHeaderText}>Item Name</Text>
+              <Text style={styles.tableHeaderText}>Refund Amount</Text>
+              <Text style={styles.tableHeaderText}>Refund Method</Text>
+            </View>)}
+            <FlatList
+              style={styles.cardBody}
+              data={orderRefunds}
+              keyExtractor={(item) => item.id}
+              ItemSeparatorComponent={renderSeparator}
+              renderItem={renderItemr}
+            />
+          </View>
 
           <Modal
             visible={updateModalVisible}
@@ -671,6 +720,14 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     marginBottom: 10,
     marginTop: 20
+  },
+  orderStatus: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    paddingLeft: 15,
+    marginBottom: 10,
+    marginTop: 20,
+    color: colors.warning500
   },
   tableHeader: {
     flexDirection: "row",
