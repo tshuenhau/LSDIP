@@ -425,9 +425,7 @@ export default function CustomerHome({ user, navigation }) {
                         {selectedPickupTimesList.map((item) => (
                             <View key={`${item.date}-${item.time}`} style={styles.selectedTimeCard}>
                                 <Text style={styles.cardTitle}><b>Date: </b>{item.date}</Text>
-                                <Text style={styles.cardText}>
-                                    <b>Time: </b>{item.time}
-                                </Text>
+                                <Text style={styles.cardText}><b>Time: </b>{item.time}</Text>
                                 <TouchableOpacity
                                     style={styles.removeButton}
                                     onPress={() => handlePickupDelete(item)}
