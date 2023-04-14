@@ -279,14 +279,14 @@ export default function Invoice(props) {
               <div style={styles.totalPrice}>
                 <Text style={styles.totalPrice}><b>Total Price: </b>S$ {order?.totalPrice}</Text> <br></br>
                 <Text style={styles.additionalServicesHeader}><b>Additional Services</b></Text><br></br>
-                {order?.express ? <Text style={styles.additionalServices}><b>Require Express?: </b>Yes</Text>
+                {order?.express ? <Text style={styles.additionalServices}><b>Require Express: </b>Yes</Text>
                   : <Text style={styles.additionalServices}><b>Require Express: </b>No</Text>} <br></br>
-                {order?.pickup ? <Text style={styles.additionalServices}><b>Require Pick Up?: </b>Yes</Text>
-                  : <Text style={styles.additionalServices}><b>Require Pick Up?: </b>No</Text>}<br></br>
-                {order?.requireDelivery ? <Text style={styles.additionalServices}><b>Require Delivery?: </b>Yes</Text>
-                  : <Text style={styles.additionalServices}><b>Require Delivery?: </b>No</Text>}<br></br>
-                {order?.redeemPoints ? <Text style={styles.additionalServices}><b>Redeem Points?: </b>Yes</Text>
-                  : <Text style={styles.additionalServices}><b>Redeem Points?: </b>No</Text>}<br></br>
+                {order?.pickup ? <Text style={styles.additionalServices}><b>Require Pick Up: </b>Yes</Text>
+                  : <Text style={styles.additionalServices}><b>Require Pick Up: </b>No</Text>}<br></br>
+                {order?.requireDelivery ? <Text style={styles.additionalServices}><b>Require Delivery: </b>Yes</Text>
+                  : <Text style={styles.additionalServices}><b>Require Delivery: </b>No</Text>}<br></br>
+                {order?.redeemPoints ? <Text style={styles.additionalServices}><b>Redeem Points: </b>Yes</Text>
+                  : <Text style={styles.additionalServices}><b>Redeem Points: </b>No</Text>}<br></br>
               </div>
               <div style={styles.description}>
                 <Text style={styles.itemDescription}><b>Description:</b> <br></br>{order?.description.replace(/\./g, "\n")}</Text>
