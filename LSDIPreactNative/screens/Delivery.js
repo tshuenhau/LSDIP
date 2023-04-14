@@ -18,6 +18,7 @@ export default function DeliveryTemp({ navigation, route }) {
   const [duplicateMessage, setDuplicateMessage] = useState(null);
   const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
   const [matchingOrders, setMatchingOrders] = useState([]);
+  const [orderList, setOrderList] = useState([]);
   const [selectedTimesList, setSelectedTimesList] = useState([]);
   const [scheduledDeliveries, setScheduledDeliveries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,16 +33,53 @@ export default function DeliveryTemp({ navigation, route }) {
   // retrieving User's selected delivery
   useEffect(() => {
     if (curuser) {
-      const docRef = db.collection('user_timings').doc(curuser.uid);
-      docRef.onSnapshot((doc) => {
-        if (doc.exists) {
-          const scheduledDeliveries = doc.data().selected_times || [];
-          console.log(scheduledDeliveries);
-          setScheduledDeliveries(scheduledDeliveries);
-        } else {
-          setScheduledDeliveries([]);
-        }
-      });
+
+      orders
+        .where("customerNumber", "==", curuser.number)
+        .get()
+        .then(querySnapshot => {
+          const orderList = [];
+          console.log(curuser);
+          querySnapshot.forEach((doc) => {
+            const { customerName, customerNumber, date, orderItems, outletId, orderStatus, totalPrice, invoiceNumber } = doc.data();
+            orderList.push({
+              id: doc.id,
+              customerName,
+              customerNumber,
+              date,
+              orderItems,
+              outletId,
+              orderStatus,
+              totalPrice,
+              invoiceNumber,
+            });
+          });
+
+          const docRef = db.collection('user_timings').doc(curuser.uid);
+          docRef.doc(curuser.uid)
+            .onSnapshot((doc) => {
+              if (doc.exists) {
+                const scheduledDeliveries = doc.data().selected_times || [];
+                console.log(scheduledDeliveries);
+                scheduledDeliveries.forEach((ST => {
+                  const orderInvoices = [];
+                  ST.orders.forEach(order => {
+                    orderInvoices.push(orderList.find(OL => OL.id === order).invoiceNumber)
+                  })
+                  ST.orderInvoices = orderInvoices;
+                }))
+
+                console.log(scheduledDeliveries);
+                // console.log(orderInvoices);
+                setScheduledDeliveries(scheduledDeliveries);
+              } else {
+                setScheduledDeliveries([]);
+              }
+            });
+
+          setOrderList(orderList);
+          // console.log(orderList);
+        }).then(console.log(orderList));
     }
   }, [curuser]);
 
@@ -57,6 +95,7 @@ export default function DeliveryTemp({ navigation, route }) {
           querySnapshot.forEach((doc) => {
             orders.push({ id: doc.id, ...doc.data() });
           });
+
           setMatchingOrders(orders);
           //console.log(orders)
         })
@@ -875,7 +914,7 @@ export default function DeliveryTemp({ navigation, route }) {
                     </Text>
                     {item.orders ? (
                       <View>
-                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orders.join(", ")}</Text>
+                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orderInvoices.join(", ")}</Text>
                       </View>
                     ) : (
                       <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
