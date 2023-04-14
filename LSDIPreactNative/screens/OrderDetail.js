@@ -32,6 +32,7 @@ export default function OrderPage(props) {
   const [order, setOrder] = useState(null);
   const { orderId } = props.route.params;
   const [orderDescription, setOrderDescription] = useState("");
+  const [orderInvoiceNumber, setOrderInvoiceNumber] = useState("");
   const [orderStatus, setOrderStatus] = useState("");
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   const [pickup, setPickUp] = useState(Boolean);
@@ -65,6 +66,7 @@ export default function OrderPage(props) {
         setRequireDelivery(doc.data().requireDelivery);
         setTotalPrice(doc.data().totalPrice);
         setOrderStatus(doc.data().orderStatus);
+        setOrderInvoiceNumber(doc.data().invoiceNumber);
         //console.log('order', order);
       } else {
         console.log('No such order document!');
@@ -443,7 +445,7 @@ export default function OrderPage(props) {
 
         <View style={styles.checkoutCard}>
           <Text style={styles.sectionText}>Order Details</Text>
-          <Text style={styles.orderNumber}>Order #{orderId}</Text>
+          <Text style={styles.orderNumber}>Order #{orderInvoiceNumber}</Text>
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxLabel}>Laundry Pick Up</Text>
             <Checkbox
