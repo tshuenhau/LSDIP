@@ -109,7 +109,10 @@ export default function CustomerHome({ user, navigation }) {
             console.log(curLink);
             const deliveryFee = curLink[4];
             const selectedDate = curLink[5];
-            const selectedTime = curLink[6];
+            const selectedStartTime = curLink[6];
+            const selectedEndTime = curLink[7];
+            const selectedTime = selectedStartTime + " - " + selectedEndTime;
+            console.log(selectedTime);
             orders
                 .where("customerNumber", "==", user.number)
                 .where("orderStatus", "==", "Back from Wash")
@@ -140,7 +143,8 @@ export default function CustomerHome({ user, navigation }) {
                                 db.collection('user_timings').doc(user.uid).set({
                                     selected_times: []
                                 });
-                                selectedTimes = doc.data().selected_times;
+                                //selectedTimes = doc.data().selected_times;
+                                selectedTimes = [];
                             }
                             selectedTimes.push({
                                 date: selectedDate,
