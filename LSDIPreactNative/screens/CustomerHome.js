@@ -50,14 +50,17 @@ export default function CustomerHome({ user, navigation }) {
                         .onSnapshot((doc) => {
                             if (doc.exists) {
                                 const selectedTimes = doc.data().selected_times || [];
-                                const orderPickupDisplay = [];
-                                selectedTimes.forEach(x => {
-                                    x.orders.forEach(y => {
-                                        orderPickupDisplay.push(orderList.find(z => z.id == y));
+                                console.log(selectedTimes);
+                                selectedTimes.forEach((ST => {
+                                    const orderInvoices = [];
+                                    ST.orders.forEach(order => {
+                                        orderInvoices.push(orderList.find(OL => OL.id === order).invoiceNumber)
                                     })
-                                })
-                                // console.log(orderDisplay);
-                                setOrderPickupDisplay(orderPickupDisplay);
+                                    ST.orderInvoices = orderInvoices;
+                                }))
+
+                                console.log(selectedTimes);
+                                // console.log(orderInvoices);
                                 setSelectedTimesList(selectedTimes);
                             } else {
                                 setSelectedTimesList([]);
@@ -406,10 +409,10 @@ export default function CustomerHome({ user, navigation }) {
                                 <Text style={styles.cardText}>
                                     <b>Time: </b>{item.time}
                                 </Text>
-                                {orderPickupDisplay ? (
+                                {item.orderInvoices ? (
                                     <View>
                                         {/*<Text style={styles.orderTitle}>Order IDs:</Text>*/}
-                                        <Text style={styles.orderText}><b>Invoice Numbers: </b>{orderPickupDisplay.map(order => order.invoiceNumber).join(", ")}</Text>
+                                        <Text style={styles.orderText}><b>Order IDs: </b>{item.orderInvoices.join(", ")}</Text>
                                     </View>
                                 ) : (
                                     <Text style={styles.noOrdersText}>No orders for this timeslot</Text>
