@@ -265,7 +265,14 @@ export default function OrdersList({ navigation }) {
       const documents = querySnapshot.docs.map(doc => ({ id: doc.id, isSelected: false, ...doc.data() }));
       setOrderList([...orderList, ...documents]);
       setLastDocument(querySnapshot.docs[querySnapshot.docs.length - 1]);
+      if (querySnapshot.docs.length === 0) {
+        Toast.show({
+          type: 'info',
+          text1: 'No More Data!',
+        });
+      }
     });
+
   }
 
   const sendMessage = (order) => {
