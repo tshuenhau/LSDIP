@@ -32,6 +32,7 @@ export default function OrderPage(props) {
   const [order, setOrder] = useState(null);
   const { orderId } = props.route.params;
   const [orderDescription, setOrderDescription] = useState("");
+  const [orderInvoiceNumber, setOrderInvoiceNumber] = useState("");
   const [orderStatus, setOrderStatus] = useState("");
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   const [pickup, setPickUp] = useState(Boolean);
@@ -48,6 +49,12 @@ export default function OrderPage(props) {
   const refunds = firebase.firestore().collection('refunds');
   const [orderRefunds, setOrderRefunds] = useState([]);
 
+  const refundMethods = [
+    { key: '1', value: 'PayNow' },
+    { key: '2', value: 'PayLah' },
+    { key: '3', value: 'Others' },
+]
+
   useEffect(() => {
     // Fetch the order document using the orderId prop
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
@@ -59,6 +66,7 @@ export default function OrderPage(props) {
         setRequireDelivery(doc.data().requireDelivery);
         setTotalPrice(doc.data().totalPrice);
         setOrderStatus(doc.data().orderStatus);
+        setOrderInvoiceNumber(doc.data().invoiceNumber);
         //console.log('order', order);
       } else {
         console.log('No such order document!');
@@ -226,7 +234,10 @@ export default function OrderPage(props) {
   const refund = () => {
     const details = modalData.refundDetails;
     const refundAmount = modalData.refundAmount;
-    const refundMethod = modalData.refundMethod;
+    let refundMethod = modalData.refundMethod;
+    if (modalData.refundMethod === 'Others') {
+      refundMethod = modalData.refundMethod + '-' + modalData.otherRefundMethod;
+    }
     console.log("refund 1");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     //console.log(orderRef);
@@ -270,6 +281,7 @@ export default function OrderPage(props) {
       });
       console.log("cn now", cn);
       setRefundModalVisible(false);
+      handleChange('', 'refundMethod');
     } else {
       setErrorMessage("Please fill up all fields")
     }
@@ -433,7 +445,7 @@ export default function OrderPage(props) {
 
         <View style={styles.checkoutCard}>
           <Text style={styles.sectionText}>Order Details</Text>
-          <Text style={styles.orderNumber}>Order #{orderId}</Text>
+          <Text style={styles.orderNumber}>Order #{orderInvoiceNumber}</Text>
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxLabel}>Laundry Pick Up</Text>
             <Checkbox
@@ -637,11 +649,26 @@ export default function OrderPage(props) {
                     placeholder="Refund Amount"
                     onChangeText={(text) => handleChange(text, 'refundAmount')}
                   />
-                  <TextBox
+                  <View style={styles.selectList}>
+                      <SelectList
+                          data={refundMethods}
+                          placeholder={"Refund Method"}
+                          setSelected={(text) => handleChange(text, 'refundMethod')}
+                          save="value"
+                      />
+                  </View>
+                  {modalData.refundMethod === 'Others' ? 
+                    <TextBox
+                      style={styles.textBox}
+                      placeholder="Enter other refund method"
+                      onChangeText={(text) => handleChange(text, 'otherRefundMethod')}
+                    /> : null
+                  }
+                  {/*<TextBox
                     style={styles.textBox}
                     placeholder="Refund Method"
                     onChangeText={(text) => handleChange(text, 'refundMethod')}
-                  />
+                />*/}
                   <TextBox
                     style={styles.textBox}
                     placeholder="Refund Details"
@@ -675,6 +702,10 @@ export default function OrderPage(props) {
 }
 
 const styles = StyleSheet.create({
+  selectList: {
+    marginTop: 20,
+    width: "92%",
+  },
   errorMessageContainer: {
     padding: 10,
     marginBottom: 10,

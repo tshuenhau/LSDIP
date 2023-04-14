@@ -94,7 +94,10 @@ export default function CreateOrder({ navigation }) {
         if (pricingMethod === "Weight") {
             const displayQuantity = weight + "kg";
             const displayPrice = price * weight;
-            setSubTotal(subTotal + (price * weight));
+            console.log(subTotal);
+            //setSubTotal(subTotal + (price * weight));
+            setSubTotal(prevSubTotal => prevSubTotal + (price * weight));
+            console.log(subTotal);
             setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, ["price"]: displayPrice, ["quantity"]: displayQuantity, weight }]);
         } else {
             let found = false;
@@ -109,7 +112,10 @@ export default function CreateOrder({ navigation }) {
             if (!found) {
                 setCart(prevCart => [...prevCart, { laundryItemName, typeOfServices, pricingMethod, price, quantity }]);
             }
-            setSubTotal(subTotal + (price * quantity));
+            //setSubTotal(subTotal + (price * quantity));
+            console.log(subTotal);
+            setSubTotal(prevSubTotal => prevSubTotal + (price * quantity));
+            console.log(subTotal);
         }
 
         setCreateModalVisible(false);
@@ -189,6 +195,7 @@ export default function CreateOrder({ navigation }) {
             ]);
         } else {
             setCheckoutModalVisible(false);
+            console.log(subTotal);
             navigation.navigate('Order Summary', { cart: cart, subTotal: subTotal, customerNumber: customerNumber })
         }
     }

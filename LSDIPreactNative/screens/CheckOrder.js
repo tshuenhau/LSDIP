@@ -12,6 +12,7 @@ import colors from '../colors';
 
 export default function SearchOrder({ navigation }) {
   const [orderNumber, setOrderNumber] = useState('');
+  const [orderNumber1, setOrderNumber1] = useState('');
   const [orderStatus, setOrderStatus] = useState(null);
   const [orderCost, setOrderCost] = useState(null);
   const orders = firebase.firestore().collection('orders');
@@ -25,7 +26,8 @@ export default function SearchOrder({ navigation }) {
       } else {
         const orderData = querySnapshot.docs[0].data();
         setOrderStatus(`Order status: ${orderData.orderStatus}`);
-        setOrderCost(`Order cost: ${orderData.orderCost}`);
+        setOrderCost(`Order cost: $${orderData.totalPrice}`);
+        setOrderNumber1(orderNumber);
       }
     } catch (error) {
       console.error(error);
@@ -57,7 +59,7 @@ export default function SearchOrder({ navigation }) {
       {orderStatus ? (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Order Status</Text>
-          <Text style={styles.cardText}>Order number: {orderNumber}</Text>
+          <Text style={styles.cardText}>Order Invoice Number: {orderNumber1}</Text>
           <Text style={styles.cardText}>{orderStatus}</Text>
           <Text style={styles.cardText}>{orderCost}</Text>
         </View>

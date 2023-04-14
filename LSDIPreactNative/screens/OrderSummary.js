@@ -16,9 +16,13 @@ import colors from '../colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import InvoiceLine from '../components/InvoiceLine';
+import InvoiceLinePoints from '../components/InvoiceLinePoints';
 import { SelectList } from 'react-native-dropdown-select-list';
 import axios from 'axios';
 import * as geolib from 'geolib';
+import { useFocusEffect } from '@react-navigation/native';
+
+
 
 if (
     Platform.OS === 'android' &&
@@ -28,8 +32,9 @@ if (
 }
 
 export default function OrderSummary(props) {
-
+      
     const { cart, subTotal, customerNumber } = props.route.params;
+    console.log(subTotal);
 
     const initialOrderValues = {
         orderDate: firebase.firestore.FieldValue.serverTimestamp(),
@@ -47,9 +52,11 @@ export default function OrderSummary(props) {
         pickupCost: 0,
     }
 
-    const [totalPrice, setTotalPrice] = useState(subTotal);
+    const [totalPrice, setTotalPrice] = useState(0);
     const [CRMValues, setCRMValues] = useState({});
     const [transportationFee, setTransportationFee] = useState(0);
+    const [redeemPoints, setRedeemPoints] = useState(0);
+    const [newPoints, setNewPoints] = useState(0);
     const [orderValues, setOrderValues] = useState(initialOrderValues);
     // const [selectedPrinter, setSelectedPrinter] = React.useState();
     const [selectedOutlet, setSelectedOutlet] = useState("");
@@ -66,13 +73,30 @@ export default function OrderSummary(props) {
     const logData = firebase.firestore().collection('log');
     const [log, setLog] = useState({});
 
+    // const resetState = () => {
+    //     console.log(subTotal);
+    //     setTotalPrice(subTotal);
+    //     console.log(totalPrice);
+    //   };
+
+    //   useFocusEffect(
+    //     React.useCallback(() => {
+    //       resetState();
+    //       return () => {}; // Clean up function (optional)
+    //     }, [])
+    //   );
+    // useEffect(() => {
+    //     setTotalPrice(subTotal);
+    //   }, [subTotal]);   
+
     useEffect(() => {
+        console.log(totalPrice);
         firebase.firestore().collection("outlet").get()
             .then((querySnapshot) => {
                 const data = querySnapshot.docs.map((doc) => doc.data().outletName + ' (' + doc.id + ')');
                 setOutletList(data);
             });
-    }, []);
+    }, [totalPrice]);
 
     useEffect(() => {
         crm.doc('point_cash')
@@ -88,6 +112,9 @@ export default function OrderSummary(props) {
     }, [])
 
     useEffect(() => {
+        console.log(subTotal);
+        setTotalPrice(subTotal);
+        console.log(totalPrice);
         users
             .where("number", "==", customerNumber)
             .limit(1)
@@ -115,7 +142,8 @@ export default function OrderSummary(props) {
                             if (customerTier) {
                                 const membershipDiscount = (Number(customerTier.discount) / 100) * subTotal;
                                 setMembershipDiscountPercent(customerTier.discount);
-                                setTotalPrice(totalPrice - membershipDiscount);
+                                //setTotalPrice(totalPrice - membershipDiscount);
+                                setTotalPrice(subTotal - membershipDiscount);
                                 setMembershipDiscount(membershipDiscount);
                             }
                         })
@@ -185,7 +213,7 @@ export default function OrderSummary(props) {
                     }
                 }
             })
-    }, [customerNumber])
+    }, [customerNumber, subTotal])
 
     // const html = () => OrderPage(props);
 
@@ -197,320 +225,368 @@ export default function OrderSummary(props) {
     //         printerUrl: selectedPrinter?.url, // iOS only
     //     });
     // };
-
-    const getUserId = async () => {
-        try {
-            const id = await AsyncStorage.getItem('userId');
-            if (id !== null) {
-                return id;
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const handleExpressCheck = () => {
-        if (orderValues.express) {
-            setTotalPrice(totalPrice - subTotal);
-        } else {
-            setTotalPrice(totalPrice + subTotal);
-        }
-        setOrderValues({ ...orderValues, express: !orderValues.express })
-    }
-
-    const handleRedeemPoints = () => {
-        const discountValue = CRMValues.pointCash * orderValues.points;
-        if (orderValues.redeemPoints) {
-            setTotalPrice(totalPrice + discountValue);
-        } else {
-            setTotalPrice(totalPrice - discountValue);
-        }
-        setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints })
-    }
-
-    const handlePickUpChange = () => {
-        if (orderValues.pickup) {
-            setTotalPrice(totalPrice - transportationFee);
-            setOrderValues({
-                ...orderValues,
-                pickup: !orderValues.pickup,
-                pickupCost: 0,
-                pickupDate: "",
-            })
-        } else {
-            setTotalPrice(totalPrice + transportationFee);
-            setOrderValues({
-                ...orderValues,
-                pickup: !orderValues.pickup,
-                pickupCost: transportationFee,
-                pickupDate: firebase.firestore.Timestamp.fromDate(new Date()),
-            })
-        }
-    }
-
-    const handleDeliveryChange = () => {
-        if (orderValues.requireDelivery) {
-            setTotalPrice(totalPrice - transportationFee);
-            setOrderValues({ ...orderValues, requireDelivery: !orderValues.requireDelivery, deliveryCost: 0 })
-        } else {
-            setTotalPrice(totalPrice + transportationFee);
-            setOrderValues({ ...orderValues, requireDelivery: !orderValues.requireDelivery, deliveryCost: transportationFee })
-        }
-    }
-
-    const createOrder = async () => {
-        /*if (!selectedOutlet) {
-            Toast.show({
-                type: "error",
-                text1: "Please select an outlet",
-            });
-            return;
-        }*/
-
-        console.log(cart);
-        const batch = firebase.firestore().batch();
-        const orderItemIds = [];
-
-        // Creating orderItem Ids
-        cart.forEach((item) => {
-            if (item.pricingMethod !== "Weight") {
-                const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = item;
-                /*
-                for (let i = 0; i < item.quantity; i++) {
-                    const docRef = orderItem.doc();
-                    batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price });
-                    orderItemIds.push(docRef.id);
-                */
-                const docRef = orderItem.doc();
-                batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, quantity });
-                orderItemIds.push(docRef.id);
-            } else {
-                const docRef = orderItem.doc();
-                const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
-                batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, weight });
-                orderItemIds.push(docRef.id);
-            }
-        })
-        batch.commit()
-            .then(async () => {
-
-                // Create order
-                const orderRef = await orders.add({
-                    ...orderValues,
-                    customerName: orderValues.customerName,
-                    // customerNumber: orderValues.customerNumber,
-                    invoiceNumber: invoiceNumber,
-                    description: orderValues.description,
-                    endDate: null,
-                    totalPrice: subTotal,
-                    orderStatus: "Pending Wash",
-                    receiveFromWasherDate: null,
-                    sendFromWasherDate: null,
-                    staffID: await getUserId(),
-                    outletId: "1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
-                    //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
-                    orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
-                    orderItemIds: orderItemIds, // Add order item IDs to order
-                });
-
-                invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
-
-                if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0 && orderValues.redeemPoints) { // member redeemed points
-                    users
-                        .where("number", "==", customerNumber)
-                        .get()
-                        .then(querySnapshot => {
-                            querySnapshot.forEach((doc) => {
-                                users.doc(doc.id)
-                                    .update({
-                                        points: 0,
-                                    })
-                            })
-                        })
+    // if(totalPrice == 0){
+    //     setTotalPrice(subTotal);
+    //     console.log(subTotal);
+    // } else {
+        const getUserId = async () => {
+            try {
+                const id = await AsyncStorage.getItem('userId');
+                if (id !== null) {
+                    return id;
                 }
+            } catch (e) {
+                console.log(e);
+            }
+        };
 
-                //for log
-                await logData.add({
-                    ...log,
-                    date: firebase.firestore.Timestamp.fromDate(new Date()),
-                    staffID: await getUserId(),
-                    outletId: "1RSi3QaKpvrHfh4ZVXNk",
-                    outletName: "Lagoon Laundry",
-                    logType: "Order",
-                    logDetail: "Create Order"
-                });
+        const handleExpressCheck = () => {
+            if (orderValues.express) {
+                setTotalPrice(totalPrice - subTotal);
+            } else {
+                setTotalPrice(totalPrice + subTotal);
+            }
+            setOrderValues({ ...orderValues, express: !orderValues.express })
+        }
 
-                setOrderValues(initialOrderValues);
-                navigation.navigate('Home');
+        const handleRedeemPoints = () => {
+            const discountValue = CRMValues.pointCash * orderValues.points;
+            console.log('totalprice ' + totalPrice);
+            console.log(discountValue);
+            console.log(orderValues.redeemPoints);
+            if (orderValues.redeemPoints) {
+                console.log('here1');
+                setTotalPrice(subTotal - membershipDiscount);
+                setNewPoints(orderValues.points);
+            } else {
+                console.log('here2');
+                if(discountValue > totalPrice){
+                    console.log('here3');
+                    const points1 = Math.ceil(totalPrice/CRMValues.pointCash);
+                    console.log(points1);
+                    console.log('new points '+ (orderValues.points - points1));
+                    setTotalPrice(0);
+                    setRedeemPoints(points1);
+                    setNewPoints(orderValues.points - points1);
+                } else {
+                    console.log('here4');
+                    setTotalPrice(totalPrice - discountValue);
+                    setRedeemPoints(orderValues.points);
+                    setNewPoints(0);
+                }
+            }
+            setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints })
+        }
+
+        // const handleRedeemPoints = () => {
+        //     const pointsForTotalPrice = Math.floor(totalPrice / CRMValues.pointCash);
+        //     const pointsToRedeem = Math.min(orderValues.points, pointsForTotalPrice);
+        //     const discountValue = CRMValues.pointCash * pointsToRedeem;
+        
+        //     let newTotalPrice;
+        //     let newPoints;
+        
+        //     if (orderValues.redeemPoints) {
+        //       newTotalPrice = totalPrice + discountValue;
+        //       newPoints = orderValues.points + pointsToRedeem;
+        //     } else {
+        //       newTotalPrice = totalPrice - discountValue;
+        //       newPoints = orderValues.points - pointsToRedeem;
+        //     }
+        
+        //     setTotalPrice(newTotalPrice);
+        //     setOrderValues({ ...orderValues, redeemPoints: !orderValues.redeemPoints, points: newPoints });
+        //   };
+        
+
+        const handlePickUpChange = () => {
+            if (orderValues.pickup) {
+                setTotalPrice(totalPrice - transportationFee);
+                setOrderValues({
+                    ...orderValues,
+                    pickup: !orderValues.pickup,
+                    pickupCost: 0,
+                    pickupDate: "",
+                })
+            } else {
+                setTotalPrice(totalPrice + transportationFee);
+                setOrderValues({
+                    ...orderValues,
+                    pickup: !orderValues.pickup,
+                    pickupCost: transportationFee,
+                    pickupDate: firebase.firestore.Timestamp.fromDate(new Date()),
+                })
+            }
+        }
+
+        const handleDeliveryChange = () => {
+            if (orderValues.requireDelivery) {
+                setTotalPrice(totalPrice - transportationFee);
+                setOrderValues({ ...orderValues, requireDelivery: !orderValues.requireDelivery, deliveryCost: 0 })
+            } else {
+                setTotalPrice(totalPrice + transportationFee);
+                setOrderValues({ ...orderValues, requireDelivery: !orderValues.requireDelivery, deliveryCost: transportationFee })
+            }
+        }
+
+        const createOrder = async () => {
+            /*if (!selectedOutlet) {
                 Toast.show({
-                    type: 'success',
-                    text1: 'Order Created',
+                    type: "error",
+                    text1: "Please select an outlet",
                 });
-            }).catch((err) => {
-                console.error(err);
-                Toast.show({
-                    type: 'error',
-                    text1: 'an error occurred',
-                });
+                return;
+            }*/
+
+            console.log(cart);
+            const batch = firebase.firestore().batch();
+            const orderItemIds = [];
+
+            // Creating orderItem Ids
+            cart.forEach((item) => {
+                if (item.pricingMethod !== "Weight") {
+                    const { laundryItemName, typeOfServices, pricingMethod, price, quantity } = item;
+                    /*
+                    for (let i = 0; i < item.quantity; i++) {
+                        const docRef = orderItem.doc();
+                        batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price });
+                        orderItemIds.push(docRef.id);
+                    */
+                    const docRef = orderItem.doc();
+                    batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, quantity });
+                    orderItemIds.push(docRef.id);
+                } else {
+                    const docRef = orderItem.doc();
+                    const { laundryItemName, typeOfServices, pricingMethod, price, weight } = item;
+                    batch.set(docRef, { laundryItemName, typeOfServices, pricingMethod, price, weight });
+                    orderItemIds.push(docRef.id);
+                }
             })
-    };
+            batch.commit()
+                .then(async () => {
 
-    const renderItem = ({ item }) => (
-        <View style={styles.cardHeader}>
-            <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
-            <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
-            <Text style={styles.orderNumber}>{item.price}</Text>
-            <Text style={styles.orderNumber}>{item.quantity}</Text>
-        </View>
-    );
+                    // Create order
+                    const orderRef = await orders.add({
+                        ...orderValues,
+                        customerName: orderValues.customerName,
+                        // customerNumber: orderValues.customerNumber,
+                        invoiceNumber: invoiceNumber,
+                        description: orderValues.description,
+                        endDate: null,
+                        totalPrice: subTotal,
+                        orderStatus: "Pending Wash",
+                        receiveFromWasherDate: null,
+                        sendFromWasherDate: null,
+                        staffID: await getUserId(),
+                        outletId: "1RSi3QaKpvrHfh4ZVXNk", //hardcorded outlet id - lagoon 
+                        //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
+                        orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
+                        orderItemIds: orderItemIds, // Add order item IDs to order
+                    });
 
-    return (
-        <ScrollView>
-            <View style={styles.container}>
-                <TouchableOpacity
-                    onPress={() => props.navigation.navigate('Create Order')}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Back to Cart</Text>
-                </TouchableOpacity>
+                    invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
 
-                <View style={styles.checkoutCard}>
-                    <Text style={styles.sectionText}>Checkout</Text>
-                    <View style={styles.tableHeader}>
-                        <Text style={styles.tableHeaderText}>Service</Text>
-                        <Text style={styles.tableHeaderText}>Item Name</Text>
-                        <Text style={styles.tableHeaderText}>Price</Text>
-                        <Text style={styles.tableHeaderText}>Qty</Text>
+                    if (orderValues.customerAddress != undefined && orderValues.customerAddress.length > 0 && orderValues.redeemPoints) { // member redeemed points
+                        users
+                            .where("number", "==", customerNumber)
+                            .get()
+                            .then(querySnapshot => {
+                                querySnapshot.forEach((doc) => {
+                                    users.doc(doc.id)
+                                        .update({
+                                            points: newPoints,
+                                        })
+                                })
+                            })
+                    }
+
+                    //for log
+                    await logData.add({
+                        ...log,
+                        date: firebase.firestore.Timestamp.fromDate(new Date()),
+                        staffID: await getUserId(),
+                        outletId: "1RSi3QaKpvrHfh4ZVXNk",
+                        outletName: "Lagoon Laundry",
+                        logType: "Order",
+                        logDetail: "Create Order"
+                    });
+
+                    setOrderValues(initialOrderValues);
+                    navigation.navigate('Home');
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Order Created',
+                    });
+                }).catch((err) => {
+                    console.error(err);
+                    Toast.show({
+                        type: 'error',
+                        text1: 'an error occurred',
+                    });
+                })
+        };
+
+        const renderItem = ({ item }) => (
+            <View style={styles.cardHeader}>
+                <Text style={styles.orderNumber}>{item.typeOfServices}</Text>
+                <Text style={styles.orderNumber}>{item.laundryItemName}</Text>
+                <Text style={styles.orderNumber}>{item.price}</Text>
+                <Text style={styles.orderNumber}>{item.quantity}</Text>
+            </View>
+        );
+
+        return (
+            <ScrollView>
+                <View style={styles.container}>
+                    <TouchableOpacity
+                        onPress={() => props.navigation.navigate('Create Order')}
+                        style={styles.btn}>
+                        <Text style={styles.text}>Back to Cart</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.checkoutCard}>
+                        <Text style={styles.sectionText}>Checkout</Text>
+                        <View style={styles.tableHeader}>
+                            <Text style={styles.tableHeaderText}>Service</Text>
+                            <Text style={styles.tableHeaderText}>Item Name</Text>
+                            <Text style={styles.tableHeaderText}>Price</Text>
+                            <Text style={styles.tableHeaderText}>Qty</Text>
+                        </View>
+                        <FlatList
+                            style={styles.list}
+                            data={cart}
+                            keyExtractor={(item, index) => index.toString()}
+                            renderItem={renderItem}
+                            ListEmptyComponent={
+                                <Text style={styles.noDataText}>No Data Found!</Text>
+                            }
+                        />
+
                     </View>
-                    <FlatList
-                        style={styles.list}
-                        data={cart}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={renderItem}
-                        ListEmptyComponent={
-                            <Text style={styles.noDataText}>No Data Found!</Text>
-                        }
-                    />
 
-                </View>
-
-                <View style={styles.checkoutCard}>
-                    <View style={{ flexDirection: 'row' }}>
-                        <View style={styles.checkoutDetailsContainer}>
-                            {/*<View style={styles.checkoutDetailsContainer}>
-                                <Text style={styles.checkoutDetails}>Outlet</Text>
-                                <SelectList
-                                    data={outletList}
-                                    placeholder="Select Outlet"
-                                    //setSelected={(val) => handleChange(val, "typeOfServices")}
-                                    setSelected={(selectedOutlet) => {
-                                        const id = selectedOutlet.split(' ')[1].slice(1, -1);
-                                        setOrderValues({ ...orderValues, outletId: id });
-                                        setSelectedOutlet(selectedOutlet)
-                                    }}
-                                />
-
-                                </View>*/}
-                            <Text style={styles.checkoutDetails}>Customer Name</Text>
-                            <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
-                            <Text style={styles.checkoutDetails}>Customer Number</Text>
-                            <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
-                            <Text style={styles.checkoutDetails}>Order Description</Text>
-                            <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
-                            {orderValues.customerAddress.length > 0 && <>
-                                <View style={styles.checkboxContainer}>
-                                    <Text style={styles.checkboxLabel}>Laundry Pickup (${transportationFee})</Text>
-                                    <Checkbox
-                                        style={{ marginLeft: 20, marginBottom: 2 }}
-                                        disabled={false}
-                                        value={orderValues.pickup}
-                                        onValueChange={() => handlePickUpChange()}
+                    <View style={styles.checkoutCard}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View style={styles.checkoutDetailsContainer}>
+                                {/*<View style={styles.checkoutDetailsContainer}>
+                                    <Text style={styles.checkoutDetails}>Outlet</Text>
+                                    <SelectList
+                                        data={outletList}
+                                        placeholder="Select Outlet"
+                                        //setSelected={(val) => handleChange(val, "typeOfServices")}
+                                        setSelected={(selectedOutlet) => {
+                                            const id = selectedOutlet.split(' ')[1].slice(1, -1);
+                                            setOrderValues({ ...orderValues, outletId: id });
+                                            setSelectedOutlet(selectedOutlet)
+                                        }}
                                     />
-                                </View >
+
+                                    </View>*/}
+                                <Text style={styles.checkoutDetails}>Customer Name</Text>
+                                <TextBox style={styles.textBox} onChangeText={name => setOrderValues({ ...orderValues, customerName: name })} defaultValue={orderValues.customerName} />
+                                <Text style={styles.checkoutDetails}>Customer Number</Text>
+                                <TextBox style={styles.textBox} defaultValue={orderValues.customerNumber} editable={false} selectTextOnFocus={false} />
+                                <Text style={styles.checkoutDetails}>Order Description</Text>
+                                <TextBox style={styles.textBox} onChangeText={newDescription => setOrderValues({ ...orderValues, description: newDescription })} />
+                                {orderValues.customerAddress.length > 0 && <>
+                                    <View style={styles.checkboxContainer}>
+                                        <Text style={styles.checkboxLabel}>Laundry Pickup (${transportationFee})</Text>
+                                        <Checkbox
+                                            style={{ marginLeft: 20, marginBottom: 2 }}
+                                            disabled={false}
+                                            value={orderValues.pickup}
+                                            onValueChange={() => handlePickUpChange()}
+                                        />
+                                    </View >
+
+                                    <View style={styles.checkboxContainer}>
+                                        <Text style={styles.checkboxLabel}>Laundry Delivery (${transportationFee})</Text>
+                                        <Checkbox
+                                            style={{ marginLeft: 20, marginBottom: 2 }}
+                                            disabled={false}
+                                            value={orderValues.requireDelivery}
+                                            onValueChange={() => handleDeliveryChange()}
+                                        />
+                                    </View >
+
+                                    <View style={styles.checkboxContainer}>
+                                        {/* <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text> */}
+                                        <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
+                                        <Checkbox
+                                            disabled={false}
+                                            style={{ marginLeft: 20, marginBottom: 2 }}
+                                            value={orderValues.redeemPoints}
+                                            onValueChange={() => handleRedeemPoints()}
+                                        />
+                                    </View>
+                                </>
+                                }
 
                                 <View style={styles.checkboxContainer}>
-                                    <Text style={styles.checkboxLabel}>Laundry Delivery (${transportationFee})</Text>
-                                    <Checkbox
-                                        style={{ marginLeft: 20, marginBottom: 2 }}
-                                        disabled={false}
-                                        value={orderValues.requireDelivery}
-                                        onValueChange={() => handleDeliveryChange()}
-                                    />
-                                </View >
-
-                                <View style={styles.checkboxContainer}>
-                                    <Text style={styles.checkboxLabel}>Redeem Points: {orderValues.points}</Text>
+                                    <Text style={styles.checkboxLabel}>Express</Text>
                                     <Checkbox
                                         disabled={false}
                                         style={{ marginLeft: 20, marginBottom: 2 }}
-                                        value={orderValues.redeemPoints}
-                                        onValueChange={() => handleRedeemPoints()}
+                                        value={orderValues.express}
+                                        onValueChange={() => handleExpressCheck()}
                                     />
                                 </View>
-                            </>
-                            }
-
-                            <View style={styles.checkboxContainer}>
-                                <Text style={styles.checkboxLabel}>Express</Text>
-                                <Checkbox
-                                    disabled={false}
-                                    style={{ marginLeft: 20, marginBottom: 2 }}
-                                    value={orderValues.express}
-                                    onValueChange={() => handleExpressCheck()}
-                                />
                             </View>
-                        </View>
-                        <View style={styles.orderDetails}>
-                            <Text style={styles.subTotal}>Order Details</Text>
-                            <View style={styles.orderDetailsBreakdown}>
-                                <InvoiceLine label={"Subtotal"} value={subTotal} />
-                                {orderValues.express &&
-                                    <InvoiceLine label={"Express"} value={subTotal} />
-                                }
-                                {/* flat $10 charge for now */}
-                                {orderValues.pickup &&
-                                    <InvoiceLine label={"Pick up Fee"} value={transportationFee} />
-                                }
-                                {/* flat $10 charge for now */}
-                                {orderValues.requireDelivery &&
-                                    <InvoiceLine label={"Delivery Fee"} value={10} />
-                                }
-                            </View>
-                            <View>
-                                {orderValues.customerAddress &&
-                                    <InvoiceLine label={"Membership Discount " + "(" + membershipDiscountPercent + "%)"} value={membershipDiscount} discount={true} />
-                                }
-                                {orderValues.redeemPoints &&
-                                    <InvoiceLine label={"Redeem Points"} value={CRMValues.pointCash * orderValues.points} discount={true} />
-                                }
-                            </View>
-                            <View >
-                                <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
-                                <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
-                                    <Text style={styles.checkoutButtonText}>Create Order</Text>
-                                </TouchableOpacity>
-                                {/*<TouchableOpacity style={styles.checkoutButton} onPress={props.navigation.navigate('Customer Invoice', { customerNumber: customerNumber, 
-                                    customerName: orderValues.customerName, cart: cart, })}>
-                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
-                                </TouchableOpacity>*/}
-                                <TouchableOpacity style={styles.checkoutButton} onPress={() => {
-                                    props.navigation.navigate('Customer Invoice', {
-                                        customerNumber: customerNumber,
-                                        customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
-                                        delivery: orderValues.requireDelivery, redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet,
-                                        pickUpFee: transportationFee, expressAmt: subTotal, points: (CRMValues.pointCash * orderValues.points).toFixed(2), invoiceNumber: invoiceNumber
-                                    })
-                                }}
-                                >
-                                    <Text style={styles.checkoutButtonText}>Print Invoice</Text>
-                                </TouchableOpacity>
+                            <View style={styles.orderDetails}>
+                                <Text style={styles.subTotal}>Order Details</Text>
+                                <View style={styles.orderDetailsBreakdown}>
+                                    <InvoiceLine label={"Subtotal"} value={subTotal} />
+                                    {orderValues.express &&
+                                        <InvoiceLine label={"Express"} value={subTotal} />
+                                    }
+                                    {/* flat $10 charge for now */}
+                                    {orderValues.pickup &&
+                                        <InvoiceLine label={"Pick up Fee"} value={transportationFee} />
+                                    }
+                                    {/* flat $10 charge for now */}
+                                    {orderValues.requireDelivery &&
+                                        <InvoiceLine label={"Delivery Fee"} value={10} />
+                                    }
+                                </View>
+                                <View>
+                                    {orderValues.customerAddress &&
+                                        <InvoiceLine label={"Membership Discount " + "(" + membershipDiscountPercent + "%)"} value={membershipDiscount} discount={true} />
+                                    }
+                                    {orderValues.redeemPoints &&
+                                        <InvoiceLinePoints label={"Redeem Points"} value={redeemPoints} discount={true} />
+                                    }
+                                    {orderValues.redeemPoints &&
+                                        <InvoiceLine label={"Redeem Points Value"} value={redeemPoints * CRMValues.pointCash} discount={true} />
+                                    }
+                                </View>
+                                <View >
+                                    <InvoiceLine label={"Amount Due"} value={totalPrice} total={true} />
+                                    <TouchableOpacity style={styles.checkoutButton} onPress={createOrder}>
+                                        <Text style={styles.checkoutButtonText}>Create Order</Text>
+                                    </TouchableOpacity>
+                                    {/*<TouchableOpacity style={styles.checkoutButton} onPress={props.navigation.navigate('Customer Invoice', { customerNumber: customerNumber, 
+                                        customerName: orderValues.customerName, cart: cart, })}>
+                                        <Text style={styles.checkoutButtonText}>Print Invoice</Text>
+                                    </TouchableOpacity>*/}
+                                    <TouchableOpacity style={styles.checkoutButton} onPress={() => {
+                                        props.navigation.navigate('Customer Invoice', {
+                                            customerNumber: customerNumber,
+                                            customerName: orderValues.customerName, cart: cart, subTotal: subTotal, express: orderValues.express, pickup: orderValues.pickup,
+                                            delivery: orderValues.requireDelivery, redeempt: orderValues.redeemPoints, totalPrice: totalPrice, selectedOutlet: selectedOutlet,
+                                            pickUpFee: transportationFee, expressAmt: subTotal, points: (CRMValues.pointCash * orderValues.points).toFixed(2), invoiceNumber: invoiceNumber
+                                        })
+                                    }}
+                                    >
+                                        <Text style={styles.checkoutButtonText}>Print Invoice</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
                 </View>
-            </View>
-        </ScrollView >
-    )
-}
+            </ScrollView >
+        )
+    }
+// }
 
 const styles = StyleSheet.create({
     checkboxContainer: {

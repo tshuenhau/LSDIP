@@ -89,15 +89,6 @@ export default function AdminSetting({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            <View>
-                {/* <Text style={styles.settingsText}>Settings</Text> */}
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('Logging')}
-                    style={styles.contentBtn}>
-                    <Text style={styles.contentText2}>Activity Log</Text>
-                </TouchableOpacity>
-            </View>
-
         </ScrollView>
     );
 };

@@ -410,6 +410,18 @@ function RootNavigator() {
                 <MaterialIcons name="payment" size={24} color={focused ? colors.lightBlue : colors.gray} />
               ),
             }} />
+            <Drawer.Screen name='Activity Log' component={Logging}
+              options={{
+                headerStyle: {
+                  backgroundColor: colors.theme
+                },
+                headerTitleStyle: {
+                  color: '#fff',
+                },
+                drawerIcon: ({ focused }) => (
+                  <MaterialIcons name="book" size={24} color={focused ? colors.lightBlue : colors.gray} />
+                ),
+            }} />
           <Drawer.Screen name='Setting' component={Setting}
             options={{
               headerStyle: {
