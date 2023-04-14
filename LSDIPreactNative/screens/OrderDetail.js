@@ -48,6 +48,7 @@ export default function OrderPage(props) {
   const [modalData, setModalData] = useState({ description: '', price: '' });
   const refunds = firebase.firestore().collection('refunds');
   const [orderRefunds, setOrderRefunds] = useState([]);
+  const [orderItemPrice, setOrderItemPrice] = useState('');
 
   const refundMethods = [
     { key: '1', value: 'PayNow' },
@@ -187,6 +188,7 @@ export default function OrderPage(props) {
           console.log('Order item created with ID: ', docRef.id);
           // Add the new order item ID to the 'items' array in the order document
           const orderRef = firebase.firestore().collection('orders').doc(orderId);
+          setOrderItemPrice(price);
           orderRef.update({
             orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
             totalPrice: order.totalPrice + parseInt(price)
@@ -212,6 +214,7 @@ export default function OrderPage(props) {
           console.log('Order item created with ID: ', docRef.id);
           // Add the new order item ID to the 'items' array in the order document
           const orderRef = firebase.firestore().collection('orders').doc(orderId);
+          setOrderItemPrice(price * quantity);
           orderRef.update({
             orderItemIds: firebase.firestore.FieldValue.arrayUnion(docRef.id),
             totalPrice: order.totalPrice + price * quantity
@@ -287,13 +290,16 @@ export default function OrderPage(props) {
     }
   }
 
-  const deleteOrder = () => {
-    const orderRef = firebase.firestore().collection('orders').doc(item.orderId);
+  const deleteOrder = (item) => {
+    const orderRef = firebase.firestore().collection('orders').doc(orderId);
     orderRef.update({
       items: firebase.firestore.FieldValue.arrayRemove(item.id),
     });
     const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
     orderItemRef.delete();
+    orderRef.update({
+      totalPrice: order.totalPrice - parseInt(orderItemPrice)
+    })
 
     // const orderRef = firebase.firestore().collection('orders').doc(orderId);
     // orderRef
@@ -404,7 +410,7 @@ export default function OrderPage(props) {
           style={styles.outletIcon}
           name="trash-o"
           color='red'
-          onPress={() => deleteOrder()}
+          onPress={() => deleteOrder(item)}
         />
         <TouchableOpacity
           onPress={() => {

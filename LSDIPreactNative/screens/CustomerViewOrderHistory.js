@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Btn from "../components/Button";
 import { TextInput } from "react-native-gesture-handler";
 import Toast from 'react-native-toast-message';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 
 export default function CustomerViewOrderHistory({ navigation }) {
 
@@ -21,12 +22,14 @@ export default function CustomerViewOrderHistory({ navigation }) {
   const [user, setUser] = useState(null) // This user
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [orderId, setOrderId] = useState('');
+  const [outletId, setOutletId] = useState('');
   const [cfeedback, setCfeedback] = useState('');
+  const [initialRating, setInitialRating] = useState('');
+  const [heart, setHeart] = useState('');
   const [orderList, setOrderList] = useState([]);
   const users = firebase.firestore().collection('users');
   const orders = firebase.firestore().collection('orders');
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  const [updateModal1Visible, setUpdateModal1Visible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
 
@@ -64,7 +67,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
           const orderList = [];
           console.log(user);
           querySnapshot.forEach((doc) => {
-            const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice, feedback, invoiceNumber } = doc.data();
+            const { customerName, customerNumber, orderDate, orderItems, outletId, orderStatus, totalPrice, feedback, invoiceNumber, rating } = doc.data();
             orderList.push({
               id: doc.id,
               customerName,
@@ -75,7 +78,8 @@ export default function CustomerViewOrderHistory({ navigation }) {
               orderStatus,
               totalPrice,
               feedback,
-              invoiceNumber
+              invoiceNumber,
+              rating
             });
           });
           setOrderList(orderList);
@@ -107,6 +111,14 @@ export default function CustomerViewOrderHistory({ navigation }) {
     }
   };
 
+  const ratingCompleted = (rating) => {
+    console.log("Rating is: " + rating);
+    let heart = rating;
+    console.log(heart);
+    setHeart(heart);
+    console.log('heart', heart);
+  }
+
   function feedback(id) {
     console.log('feedback', id);
     //console.log(orderList.length);
@@ -115,16 +127,19 @@ export default function CustomerViewOrderHistory({ navigation }) {
     let order = orderList.find(o => o.id === id);
     //console.log(order.feedback);
     setCfeedback(order.feedback);
+    setInitialRating(order.rating);
   }
 
   const rate = (id) => {
-    console.log('rate');
+    console.log('rate', id);
+    setOutletId(id);
   }
 
   const updateFeedback = () => {
-    console.log("here");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     const feedback = cfeedback;
+    const rating = heart;
+    console.log("here now", rating);
     //console.log(orderRef);
 
     orderRef.get().then(doc => {
@@ -135,7 +150,8 @@ export default function CustomerViewOrderHistory({ navigation }) {
         //console.log('Document data:', doc.data());
         console.log("feedback now", feedback);
         orderRef.update({
-          feedback: feedback
+          feedback: feedback,
+          rating: rating
         }).then(() => {
           Toast.show({
             type: 'success',
@@ -143,13 +159,14 @@ export default function CustomerViewOrderHistory({ navigation }) {
           })
         });
         orderList.find(o => o.id === orderId).feedback = feedback;
+        orderList.find(o => o.id === orderId).rating = rating;
       }
     })
       .catch(err => {
         console.log('Error getting document', err);
         return false;
       });
-    setUpdateModal1Visible(false);
+    setUpdateModalVisible(false);
   }
 
   function handleChange(text, eventName) {
@@ -180,23 +197,26 @@ export default function CustomerViewOrderHistory({ navigation }) {
           <View style={styles.cardBody}>
             <View style={{ flexDirection: 'row' }}>
               <Text style={styles.orderBody}><b>OutletId: </b>{formatOutletNumber(order.outletId)}</Text>
-              <TouchableOpacity style={{ marginRight: 10, marginLeft: 'auto' }}>
-                <Text style={styles.rate} onPress={() => rate(order.outletId)} >
-                  {/** <MaterialIcons name="star-rate" size={20} color="white" />*/}
+              {/** <TouchableOpacity style={{ marginRight: 10, marginLeft: 'auto' }}>
+                <Text style={styles.rate} onPress={() => {
+                  rate(order.outletId);
+                  setUpdateModalVisible(true)
+                }}>
                   <MaterialIcons name="star-rate" size={14} color="white" />
                   Rate
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity>*/}
             </View>
 
             <Text style={styles.orderBody}><b>Total Price: </b>{order.totalPrice}</Text>
+            <Text style={styles.orderBody}><b>Rate: </b>{order.rating} / 5</Text>
             <View style={{ flexDirection: 'row' }}>
               <Text style={styles.orderBody}><b>Feedback: </b>{order.feedback}</Text>
               <TouchableOpacity style={{ marginRight: 10, marginLeft: 'auto' }}>
                 <MaterialIcons name="rate-review" size={24} color={colors.green500}
                   onPress={() => {
                     feedback(order.id);
-                    setUpdateModal1Visible(true)
+                    setUpdateModalVisible(true)
                   }} />
               </TouchableOpacity>
             </View>
@@ -232,35 +252,17 @@ export default function CustomerViewOrderHistory({ navigation }) {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <View style={styles.view}>
-                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Rate the outlet</Text>
-                {/** <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={''} />*/}
-
-                {errorMessage &&
-                  <View style={styles.errorMessageContainer}>
-                    <Text style={styles.errorMessage}>{errorMessage}</Text>
-                  </View>
-                }
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                  <Btn onClick={() => updateDetails()} title="Update" style={{ width: "48%" }} />
-                  <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={updateModal1Visible}
-      >
-        <View style={{ flex: 1, backgroundColor: colors.modalBackground }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.view}>
                 <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Feedback</Text>
                 {/** <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={''} />*/}
+                <Rating
+                  type='heart'
+                  ratingCount={5}
+                  imageSize={40}
+                  startingValue={initialRating}
+                  showRating
+                  onFinishRating={ratingCompleted}
+                  style={styles.rating}
+                />
                 <TextInput
                   editable
                   multiline
@@ -274,7 +276,7 @@ export default function CustomerViewOrderHistory({ navigation }) {
                 }
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
                   <Btn onClick={() => updateFeedback()} title="Update" style={{ width: "48%" }} />
-                  <Btn onClick={() => setUpdateModal1Visible(!updateModal1Visible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
+                  <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                 </View>
               </View>
             </View>
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
     borderWidth: 2
   },
   orderNumber: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   orderBody: {
@@ -443,11 +445,14 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   orderStatus: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 700,
     alignContent: 'center',
     alignSelf: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: 2,
+    marginLeft: 'auto',
+    color: colors.blue600
   },
   rate: {
     fontSize: 14,
@@ -485,5 +490,8 @@ const styles = StyleSheet.create({
     color: colors.blue700,
     fontSize: 16,
     fontWeight: 'bold'
+  },
+  rating: {
+    marginBottom: 10,
   }
 });
