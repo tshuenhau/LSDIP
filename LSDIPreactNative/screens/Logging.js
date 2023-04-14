@@ -174,13 +174,6 @@ export default function OrderSummary({ navigation }) {
 
     return (
         <ScrollView>
-            <View style={styles.buttonView}>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('Setting')}
-                    style={styles.btn}>
-                    <Text style={styles.text}>Back</Text>
-                </TouchableOpacity>
-            </View>
             <View style={styles.container}>
                 {/*<FlatList
                     data={filteredLog}
