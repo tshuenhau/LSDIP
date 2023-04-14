@@ -154,6 +154,7 @@ export default function OutletDetail({ route, navigation }) {
                 text1: 'Staff Allocated',
               });
               setErrorMessage("");
+              setSelectedStaff([]);
               setAllocateStaffList(allocatedStaffList);
             })
         }).catch((err) => {
