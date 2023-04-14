@@ -54,7 +54,7 @@ export default function OrderPage(props) {
     { key: '1', value: 'PayNow' },
     { key: '2', value: 'PayLah' },
     { key: '3', value: 'Others' },
-]
+  ]
 
   useEffect(() => {
     // Fetch the order document using the orderId prop
@@ -293,13 +293,20 @@ export default function OrderPage(props) {
   const deleteOrder = (item) => {
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     orderRef.update({
-      items: firebase.firestore.FieldValue.arrayRemove(item.id),
+      orderItemIds: firebase.firestore.FieldValue.arrayRemove(item.id),
+      //['orderItemIds.' + item.id]: firebase.firestore.FieldValue.delete(),
     });
     const orderItemRef = firebase.firestore().collection('orderItem').doc(item.id);
     orderItemRef.delete();
-    orderRef.update({
-      totalPrice: order.totalPrice - parseInt(orderItemPrice)
-    })
+    if (item.quantity === 1) {
+      orderRef.update({
+        totalPrice: order.totalPrice - parseInt(item.price) || 0
+      })
+    } else {
+      orderRef.update({
+        totalPrice: order.totalPrice - parseInt(item.price * item.quantity) || 0
+      })
+    }
 
     // const orderRef = firebase.firestore().collection('orders').doc(orderId);
     // orderRef
@@ -656,14 +663,14 @@ export default function OrderPage(props) {
                     onChangeText={(text) => handleChange(text, 'refundAmount')}
                   />
                   <View style={styles.selectList}>
-                      <SelectList
-                          data={refundMethods}
-                          placeholder={"Refund Method"}
-                          setSelected={(text) => handleChange(text, 'refundMethod')}
-                          save="value"
-                      />
+                    <SelectList
+                      data={refundMethods}
+                      placeholder={"Refund Method"}
+                      setSelected={(text) => handleChange(text, 'refundMethod')}
+                      save="value"
+                    />
                   </View>
-                  {modalData.refundMethod === 'Others' ? 
+                  {modalData.refundMethod === 'Others' ?
                     <TextBox
                       style={styles.textBox}
                       placeholder="Enter other refund method"
