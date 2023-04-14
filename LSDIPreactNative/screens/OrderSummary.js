@@ -382,6 +382,8 @@ export default function OrderSummary(props) {
                         //outletId: selectedOutlet.split('(')[1].split(')')[0], //this is default, assuming one outlet
                         orderDate: firebase.firestore.Timestamp.fromDate(new Date()),
                         orderItemIds: orderItemIds, // Add order item IDs to order
+                        rating: 5,
+                        feedback: '',
                     });
 
                     invoice_number.doc("invoiceNumber").update({ invoiceNumber: String(Number(invoiceNumber) + 1) });
