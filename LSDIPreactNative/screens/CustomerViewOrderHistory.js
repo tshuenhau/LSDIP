@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Btn from "../components/Button";
 import { TextInput } from "react-native-gesture-handler";
 import Toast from 'react-native-toast-message';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 
 export default function CustomerViewOrderHistory({ navigation }) {
 
@@ -21,10 +22,13 @@ export default function CustomerViewOrderHistory({ navigation }) {
   const [user, setUser] = useState(null) // This user
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [orderId, setOrderId] = useState('');
+  const [outletId, setOutletId] = useState('');
   const [cfeedback, setCfeedback] = useState('');
+  const [rating, setRating] = useState('');
   const [orderList, setOrderList] = useState([]);
   const users = firebase.firestore().collection('users');
   const orders = firebase.firestore().collection('orders');
+  const ratings = firebase.firestore().collection('orderRating');
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [updateModal1Visible, setUpdateModal1Visible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -107,6 +111,11 @@ export default function CustomerViewOrderHistory({ navigation }) {
     }
   };
 
+  const ratingCompleted = (rating) => {
+    console.log("Rating is: " + rating);
+    setRating(rating);
+  }
+
   function feedback(id) {
     console.log('feedback', id);
     //console.log(orderList.length);
@@ -118,13 +127,44 @@ export default function CustomerViewOrderHistory({ navigation }) {
   }
 
   const rate = (id) => {
-    console.log('rate');
+    console.log('rate', id);
+    setOutletId(id);
   }
 
   const updateFeedback = () => {
     console.log("here");
     const orderRef = firebase.firestore().collection('orders').doc(orderId);
     const feedback = cfeedback;
+    //console.log(orderRef);
+
+    orderRef.get().then(doc => {
+      if (!doc.exists) {
+        console.log('No such User document!');
+        throw new Error('No such User document!'); //should not occur normally as the notification is a "child" of the user
+      } else {
+        //console.log('Document data:', doc.data());
+        console.log("feedback now", feedback);
+        orderRef.update({
+          feedback: feedback
+        }).then(() => {
+          Toast.show({
+            type: 'success',
+            text1: 'Feedback updated, click the order again to see the change',
+          })
+        });
+        orderList.find(o => o.id === orderId).feedback = feedback;
+      }
+    })
+      .catch(err => {
+        console.log('Error getting document', err);
+        return false;
+      });
+    setUpdateModal1Visible(false);
+  }
+
+  const rateOutlet = () => {
+    console.log("here");
+    console.log(rating);
     //console.log(orderRef);
 
     orderRef.get().then(doc => {
@@ -181,7 +221,10 @@ export default function CustomerViewOrderHistory({ navigation }) {
             <View style={{ flexDirection: 'row' }}>
               <Text style={styles.orderBody}><b>OutletId: </b>{formatOutletNumber(order.outletId)}</Text>
               <TouchableOpacity style={{ marginRight: 10, marginLeft: 'auto' }}>
-                <Text style={styles.rate} onPress={() => rate(order.outletId)} >
+                <Text style={styles.rate} onPress={() => {
+                  rate(order.outletId);
+                  setUpdateModalVisible(true)
+                }}>
                   {/** <MaterialIcons name="star-rate" size={20} color="white" />*/}
                   <MaterialIcons name="star-rate" size={14} color="white" />
                   Rate
@@ -232,16 +275,22 @@ export default function CustomerViewOrderHistory({ navigation }) {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <View style={styles.view}>
-                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Rate the outlet</Text>
+                <Text style={{ fontSize: 34, fontWeight: "800", marginBottom: 20 }}>Rate the Outlet</Text>
                 {/** <TextBox placeholder="John Doe" onChangeText={text => handleChange(text, "name")} defaultValue={''} />*/}
-
+                <Rating
+                  type='heart'
+                  ratingCount={5}
+                  imageSize={40}
+                  showRating
+                  onFinishRating={ratingCompleted}
+                />
                 {errorMessage &&
                   <View style={styles.errorMessageContainer}>
                     <Text style={styles.errorMessage}>{errorMessage}</Text>
                   </View>
                 }
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "92%" }}>
-                  <Btn onClick={() => updateDetails()} title="Update" style={{ width: "48%" }} />
+                  <Btn onClick={() => rateOutlet()} title="Rate" style={{ width: "48%" }} />
                   <Btn onClick={() => setUpdateModalVisible(!updateModalVisible)} title="Dismiss" style={{ width: "48%", backgroundColor: "#344869" }} />
                 </View>
               </View>
@@ -341,7 +390,7 @@ const styles = StyleSheet.create({
     borderWidth: 2
   },
   orderNumber: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   orderBody: {
@@ -443,11 +492,14 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   orderStatus: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 700,
     alignContent: 'center',
     alignSelf: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: 2,
+    marginLeft: 'auto',
+    color: colors.blue600
   },
   rate: {
     fontSize: 14,
