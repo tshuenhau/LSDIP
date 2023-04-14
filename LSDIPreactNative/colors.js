@@ -45,6 +45,7 @@ export default {
     orange400: '#fb923c',
     green400: '#34d399',
     green500: '#22c55e',
+    green600: '#16a34a',
     red500: '#ef4444',
     themelight: '#F2F3FF',
     theme: '#4B54F5',

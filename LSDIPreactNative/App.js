@@ -52,6 +52,7 @@ import Setting from './screens/AdminSetting';
 import MembershipTier from './screens/MembershipTier';
 import CustomerOrder from './screens/AdminOrderManagement';
 import Report from './screens/Report';
+import Feedback from './screens/Feedback';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -485,6 +486,17 @@ function RootNavigator() {
             }}
           />
           <Drawer.Screen name='Logging' component={Logging}
+            options={{
+              headerStyle: {
+                backgroundColor: colors.theme
+              },
+              headerTitleStyle: {
+                color: '#fff',
+              },
+              drawerItemStyle: { display: "none" }
+            }}
+          />
+          <Drawer.Screen name='Feedback' component={Feedback}
             options={{
               headerStyle: {
                 backgroundColor: colors.theme

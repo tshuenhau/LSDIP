@@ -369,8 +369,13 @@ export default function OrdersList({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setUpdateModalVisible(true)}
-              style={styles.btn}>
+              style={styles.btn1}>
               <Text style={styles.text}>Update Order Status</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Feedback")}
+              style={styles.btn}>
+              <Text style={styles.text}>View Feedback</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -768,6 +773,13 @@ const styles = StyleSheet.create({
   btn: {
     borderRadius: 15,
     backgroundColor: colors.blue600,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 50
+  },
+  btn1: {
+    borderRadius: 15,
+    backgroundColor: colors.blue500,
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 50
