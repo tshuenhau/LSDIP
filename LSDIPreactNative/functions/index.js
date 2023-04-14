@@ -143,8 +143,8 @@ exports.sendEmail = functions.firestore
                             <p>Order Number: ${order.invoiceNumber}</p>
                             <p>Order Status: ${order.orderStatus}</p>
                             <p>${pickupDetails}</p>
-                            <p>Order Amount Due: ${order.totalPrice}</p>
-                            <p>Total Amount Due: ${order.totalPrice + order.pickupCost} (Payment will only be upon collection)</p>
+                            <p>Order Amount Due: $${order.totalPrice}</p>
+                            <p>Total Amount Due: $${order.totalPrice + order.pickupCost} (Payment will only be upon collection)</p>
                             <table>
                                 <thead>
                                     <tr>
