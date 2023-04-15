@@ -42,7 +42,7 @@ export default function Driver() {
         { key: 4, value: "Pending Delivery" },
         { key: 5, value: "Out for Delivery" },
         { key: 6, value: "Closed" },
-      ];
+    ];
 
     //read all order data method
     useEffect(() => {
@@ -59,8 +59,8 @@ export default function Driver() {
                             outletId,
                             orderStatus,
                             totalPrice,
-                            } = doc.data();
-                            orders.push({
+                        } = doc.data();
+                        orders.push({
                             id: doc.id,
                             customerName,
                             customerNumber,
@@ -69,7 +69,7 @@ export default function Driver() {
                             outletId,
                             orderStatus,
                             totalPrice,
-                            });
+                        });
                     })
                     setOrders(orders)
                     //console.log(vehicles)
@@ -119,13 +119,13 @@ export default function Driver() {
                         text: "Yes",
                         onPress: () => {
                             const order = doc(db, "orders", id);
-                            const newStatus = {orderStatus : "Out for Delivery"}
+                            const newStatus = { orderStatus: "Out for Delivery" }
                             updateDoc(order, newStatus)
-                            .then(() => {
-                                console.log("Update Success")
-                            }).catch((err) => {
-                                console.log(err)
-                            })
+                                .then(() => {
+                                    console.log("Update Success")
+                                }).catch((err) => {
+                                    console.log(err)
+                                })
 
                         }
                     },
@@ -137,7 +137,7 @@ export default function Driver() {
 
                 ]
             )
-            
+
         }
     }
 
@@ -152,13 +152,13 @@ export default function Driver() {
                         text: "Yes",
                         onPress: () => {
                             const order = doc(db, "orders", id);
-                            const newStatus = {orderStatus : "Pending Delivery"}
+                            const newStatus = { orderStatus: "Pending Delivery" }
                             updateDoc(order, newStatus)
-                            .then(() => {
-                                console.log("Update Success")
-                            }).catch((err) => {
-                                console.log(err)
-                            })
+                                .then(() => {
+                                    console.log("Update Success")
+                                }).catch((err) => {
+                                    console.log(err)
+                                })
 
                         }
                     },
@@ -170,7 +170,7 @@ export default function Driver() {
 
                 ]
             )
-            
+
         }
     }
 
@@ -185,13 +185,13 @@ export default function Driver() {
                         text: "Yes",
                         onPress: () => {
                             const order = doc(db, "orders", id);
-                            const newStatus = {orderStatus : "Closed"}
+                            const newStatus = { orderStatus: "Closed" }
                             updateDoc(order, newStatus)
-                            .then(() => {
-                                console.log("Update Success")
-                            }).catch((err) => {
-                                console.log(err)
-                            })
+                                .then(() => {
+                                    console.log("Update Success")
+                                }).catch((err) => {
+                                    console.log(err)
+                                })
 
                         }
                     },
@@ -203,20 +203,20 @@ export default function Driver() {
 
                 ]
             )
-            
+
         }
     }
 
     const PendingDelivery = () => (
         <View>
-            <View style={styles.searchContainer}>
+            {/* <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by order number (First 4 char)"
                 />
-            </View>
+            </View> */}
             <FlatList
                 data={filteredOrderList.filter(item => item.orderStatus === "Pending Delivery")}
                 keyExtractor={item => item.id}
@@ -230,14 +230,15 @@ export default function Driver() {
 
     const OutForDelivery = () => (
         <View>
-            <View style={styles.searchContainer}>
+            {/* <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
                     value={searchQuery}
+                    autoFocus={true}
                     onChangeText={setSearchQuery}
                     placeholder="Search by order number (First 4 char)"
                 />
-            </View>
+            </View> */}
             <FlatList
                 data={filteredOrderList.filter(item => item.orderStatus === "Out for Delivery")}
                 keyExtractor={item => item.id}
@@ -251,14 +252,14 @@ export default function Driver() {
 
     const Closed = () => (
         <View>
-            <View style={styles.searchContainer}>
+            {/* <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder="Search by order number (First 4 char)"
                 />
-            </View>
+            </View> */}
             <FlatList
                 data={filteredOrderList.filter(item => item.orderStatus === "Closed")}
                 keyExtractor={item => item.id}
@@ -293,7 +294,7 @@ export default function Driver() {
 
     const formatOrderNumber = (id) => {
         return "#" + id.slice(0, 4).toUpperCase();
-      };
+    };
 
     const renderPendingItem = ({ item }) => (
         <TouchableOpacity
@@ -307,11 +308,11 @@ export default function Driver() {
                     <Text style={styles.orderNumber}>{item.orderStatus}</Text>
                 </View>
                 <View style={styles.cardHeaderIcon}>
-                    <MaterialCommunityIcons 
-                    style={styles.outletIcon} 
-                    name="truck-delivery" size={24} 
-                    color="black"
-                    onPress={() => startDelivery(item.id)} 
+                    <MaterialCommunityIcons
+                        style={styles.outletIcon}
+                        name="truck-delivery" size={24}
+                        color="black"
+                        onPress={() => startDelivery(item.id)}
                     />
                 </View>
             </View>
@@ -338,19 +339,19 @@ export default function Driver() {
                     <Text style={styles.orderNumber}>{item.orderStatus}</Text>
                 </View>
                 <View style={styles.cardHeaderIcon}>
-                    <EvilIcons 
-                    style={styles.outletIcon}
-                    name="undo" 
-                    size={24} 
-                    color="black"
-                    onPress={() => undoDelivery(item.id)} 
+                    <EvilIcons
+                        style={styles.outletIcon}
+                        name="undo"
+                        size={24}
+                        color="black"
+                        onPress={() => undoDelivery(item.id)}
                     />
-                    <Ionicons 
-                    style={styles.outletIcon} 
-                    name="checkmark-done-sharp" 
-                    size={24} 
-                    color="black" 
-                    onPress={() => markDelivered(item.id)} 
+                    <Ionicons
+                        style={styles.outletIcon}
+                        name="checkmark-done-sharp"
+                        size={24}
+                        color="black"
+                        onPress={() => markDelivered(item.id)}
                     />
                 </View>
             </View>
@@ -394,9 +395,17 @@ export default function Driver() {
 
 
     return (
-        
+
         <View style={styles.container}>
-                <TabView
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Search by order number (First 4 char)"
+                />
+            </View>
+            <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
                 onIndexChange={setIndex}
