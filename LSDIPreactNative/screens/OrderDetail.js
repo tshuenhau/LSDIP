@@ -302,6 +302,10 @@ export default function OrderPage(props) {
       orderRef.update({
         totalPrice: order.totalPrice - parseInt(item.price) || 0
       })
+    } else if (item.pricingMethod === "Weight") {
+      orderRef.update({
+        totalPrice: order.totalPrice - parseInt(item.price) || 0
+      })
     } else {
       orderRef.update({
         totalPrice: order.totalPrice - parseInt(item.price * item.quantity) || 0
