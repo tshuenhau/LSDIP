@@ -60,6 +60,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                         querySnapshot.forEach(doc => {
                             staffDetails.push(allStaff.find(s => s.key === doc.data().staffID));
                         });
+                        console.log(staffDetails);
                         setStaffDetails(staffDetails);
 
                         shift_timings
@@ -88,6 +89,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
                                         const markedDates = {};
                                         querySnapshot.forEach(doc => {
                                             const { date, completed, confirmed, shiftID, userID, outletID } = doc.data();
+                                            console.log(doc.id);
                                             outletSchedule.push({
                                                 id: doc.id,
                                                 date: date,
@@ -525,6 +527,7 @@ export default function AdminOutletScheduling({ route, navigation }) {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         //backgroundColor: colors.white,
         borderRadius: 25,
         alignSelf: 'center',
@@ -562,9 +565,9 @@ const styles = StyleSheet.create({
     },
     calendarContainer: {
         marginBottom: 20,
-        marginTop:15,
-        borderRadius:25,
-        backgroundColor:colors.white
+        marginTop: 15,
+        borderRadius: 25,
+        backgroundColor: colors.white
     },
     outletName: {
         textAlign: 'center',
