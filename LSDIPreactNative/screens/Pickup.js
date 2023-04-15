@@ -20,7 +20,7 @@ export default function Pickup({ navigation }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [duplicateMessage, setDuplicateMessage] = useState(null);
     const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
-    const [pickupFees, setPickupFees] = useState(null);
+    const [pickupFees, setPickupFees] = useState(0);
 
     useEffect(() => {
         const db = firebase.firestore();
