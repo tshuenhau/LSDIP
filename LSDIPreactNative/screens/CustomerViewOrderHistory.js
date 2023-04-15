@@ -167,6 +167,9 @@ export default function CustomerViewOrderHistory({ navigation }) {
         return false;
       });
     setUpdateModalVisible(false);
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   }
 
   function handleChange(text, eventName) {
