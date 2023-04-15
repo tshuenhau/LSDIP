@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     },
     container: {
         backgroundColor: colors.white,
-        borderRadius: 5,
+        borderRadius: 25,
         alignSelf: 'center',
         marginTop: '2%',
         width: '95%',
