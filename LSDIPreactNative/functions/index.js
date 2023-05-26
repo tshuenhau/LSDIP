@@ -9,8 +9,7 @@ var transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'lagoonlaundryplq@gmail.com',
-        pass: 'tshojlqajxaqidqz'
+        
     }
 });
 
